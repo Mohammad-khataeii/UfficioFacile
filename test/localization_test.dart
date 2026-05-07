@@ -6,17 +6,16 @@ import 'package:ufficiofacile/features/italy_admin_copilot/data/life_admin_phase
 
 void main() {
   group('localization support', () {
-    test('supported locales include en, it, fa, fr', () {
+    test('supported locales include en, it, fr, es, fa, ar', () {
       final codes = AppLocalizations.supportedLocales
           .map((locale) => locale.languageCode)
           .toSet();
-      expect(codes, containsAll(<String>{'en', 'it', 'fa', 'fr'}));
-      expect(codes, isNot(contains('es')));
-      expect(codes, isNot(contains('ar')));
+      expect(codes, containsAll(<String>{'en', 'it', 'fr', 'es', 'fa', 'ar'}));
     });
 
-    test('Persian is RTL and French is LTR', () {
+    test('Persian and Arabic are RTL while French is LTR', () {
       expect(AppLocalizations('fa').isRtl, isTrue);
+      expect(AppLocalizations('ar').isRtl, isTrue);
       expect(AppLocalizations('fr').isRtl, isFalse);
     });
 
