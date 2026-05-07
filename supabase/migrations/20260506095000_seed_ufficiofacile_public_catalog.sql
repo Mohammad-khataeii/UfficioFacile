@@ -17,13 +17,90 @@ insert into public.ufficio_catalog_sources (
   verification_status, last_verified_at, warning
 )
 values
-  ('agenzia-entrate-home', 'Agenzia Entrate', 'officialWebsite', 'https://www.agenziaentrate.gov.it/portale/', 'Agenzia Entrate', 'Agenzia Entrate', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('inps-disoccupazione', 'INPS - Disoccupazione', 'officialWebsite', 'https://www.inps.it/it/it/lavoro/disoccupazione.html', 'INPS', 'INPS', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('agcom-cittadino', 'AGCOM - Servizi per il cittadino', 'officialWebsite', 'https://www.agcom.it/servizi/cittadino', 'AGCOM', 'AGCOM', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('portale-offerte-home', 'Portale Offerte luce e gas', 'officialWebsite', 'https://www.ilportaleofferte.it/', 'Portale Offerte', 'Portale Offerte', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('poste-raccomandata', 'Poste Italiane - Posta Raccomandata', 'officialWebsite', 'https://www.poste.it/posta-raccomandata', 'Poste Italiane', 'Poste Italiane', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('spid-what-is', 'SPID - Cos''è SPID', 'officialWebsite', 'https://www.spid.gov.it/cos-e-spid/', 'SPID.gov.it', 'SPID', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('cie-digital-id', 'CIE - Identificazione digitale', 'officialWebsite', 'https://www.cartaidentita.interno.gov.it/info-utili/identificazione-digitale/', 'Carta d''Identità Elettronica', 'CIE', 'national', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb)
+  (
+    '11111111-1111-1111-1111-111111111111',
+    'Agenzia Entrate',
+    'officialWebsite',
+    'https://www.agenziaentrate.gov.it/portale/',
+    'Agenzia Entrate',
+    'Agenzia Entrate',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    '22222222-2222-2222-2222-222222222222',
+    'INPS - Disoccupazione',
+    'officialWebsite',
+    'https://www.inps.it/it/it/lavoro/disoccupazione.html',
+    'INPS',
+    'INPS',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    '33333333-3333-3333-3333-333333333333',
+    'AGCOM - Servizi per il cittadino',
+    'officialWebsite',
+    'https://www.agcom.it/servizi/cittadino',
+    'AGCOM',
+    'AGCOM',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    '44444444-4444-4444-4444-444444444444',
+    'Portale Offerte luce e gas',
+    'officialWebsite',
+    'https://www.ilportaleofferte.it/',
+    'Portale Offerte',
+    'Portale Offerte',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    '55555555-5555-5555-5555-555555555555',
+    'Poste Italiane - Posta Raccomandata',
+    'officialWebsite',
+    'https://www.poste.it/posta-raccomandata',
+    'Poste Italiane',
+    'Poste Italiane',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    '66666666-6666-6666-6666-666666666666',
+    'SPID - Cos''è SPID',
+    'officialWebsite',
+    'https://www.spid.gov.it/cos-e-spid/',
+    'SPID.gov.it',
+    'SPID',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    '77777777-7777-7777-7777-777777777777',
+    'CIE - Identificazione digitale',
+    'officialWebsite',
+    'https://www.cartaidentita.interno.gov.it/info-utili/identificazione-digitale/',
+    'Carta d''Identità Elettronica',
+    'CIE',
+    'national',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  )
 on conflict (id) do nothing;
 
 insert into public.ufficio_official_links (
@@ -31,13 +108,104 @@ insert into public.ufficio_official_links (
   source_url, source_label, verification_status, last_verified_at, warning
 )
 values
-  ('Agenzia Entrate', 'https://www.agenziaentrate.gov.it/portale/', 'authority', '{"en":"Official tax authority website and reference point for Canone RAI and rental contract tax procedures.","it":"Sito ufficiale dell’autorità fiscale e riferimento per Canone RAI e procedure fiscali sui contratti di affitto."}'::jsonb, '{"CANONE_RAI_NO_TV_DECLARATION_CHECKLIST","CANONE_RAI_EXEMPTION_OVER_75_CHECKLIST","CANONE_RAI_REFUND_OR_WRONG_CHARGE","RENTAL_CONTRACT_CHANGE"}', 'national', null, 'https://www.agenziaentrate.gov.it/portale/', 'Agenzia Entrate', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('INPS - Disoccupazione', 'https://www.inps.it/it/it/lavoro/disoccupazione.html', 'authority', '{"en":"Official INPS area for unemployment and NASpI services.","it":"Area ufficiale INPS per disoccupazione e servizi NASpI."}'::jsonb, '{"NASPI_PREPARATION"}', 'national', null, 'https://www.inps.it/it/it/lavoro/disoccupazione.html', 'INPS', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('Portale Offerte luce e gas', 'https://www.ilportaleofferte.it/', 'utilities', '{"en":"Official public comparison portal for electricity and gas offers.","it":"Portale pubblico ufficiale per confrontare offerte luce e gas."}'::jsonb, '{"ENERGY_SUPPLIER_COMPARISON","HIGH_BILL_COMPLAINT"}', 'national', null, 'https://www.ilportaleofferte.it/', 'Portale Offerte', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('AGCOM - Servizi per il cittadino', 'https://www.agcom.it/servizi/cittadino', 'telecom', '{"en":"Official AGCOM citizen services area, including ConciliaWeb access.","it":"Area ufficiale AGCOM per i servizi al cittadino, incluso l’accesso a ConciliaWeb."}'::jsonb, '{"INTERNET_PHONE_CANCELLATION","TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT","MODEM_RETURN_OR_CHARGE_DISPUTE"}', 'national', null, 'https://www.agcom.it/servizi/cittadino', 'AGCOM', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('ConciliaWeb', 'https://conciliaweb.agcom.it/conciliaweb/login.htm?lang=en', 'telecom', '{"en":"Official AGCOM dispute platform for telecom and pay-TV disputes.","it":"Piattaforma ufficiale AGCOM per controversie telecom e pay TV."}'::jsonb, '{"TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT"}', 'national', null, 'https://conciliaweb.agcom.it/conciliaweb/login.htm?lang=en', 'AGCOM - ConciliaWeb', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('Poste Italiane - Posta Raccomandata', 'https://www.poste.it/posta-raccomandata', 'postal', '{"en":"Official Poste Italiane page for Raccomandata and Avviso di Ricevimento guidance.","it":"Pagina ufficiale Poste Italiane per Raccomandata e Avviso di Ricevimento."}'::jsonb, '{"LANDLORD_MAINTENANCE_OR_CONTRACT","DEPOSIT_RETURN_REQUEST","RENT_CONTRACT_TERMINATION_NOTICE","INTERNET_PHONE_CANCELLATION"}', 'national', null, 'https://www.poste.it/posta-raccomandata', 'Poste Italiane', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb),
-  ('Salute Piemonte', 'https://www.salutepiemonte.it/', 'health', '{"en":"Regional health portal for Piemonte. Verify local ASL contacts before sending.","it":"Portale sanitario regionale del Piemonte. Verifica i contatti ASL locali prima dell’invio."}'::jsonb, '{"TESSERA_SANITARIA_RENEWAL","CHANGE_DOCTOR","ASL_APPOINTMENT_REQUEST"}', 'regional', 'Piemonte', 'https://www.salutepiemonte.it/', 'Salute Piemonte', 'verified', '2026-05-06T00:00:00Z', '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb)
+  (
+    'Agenzia Entrate',
+    'https://www.agenziaentrate.gov.it/portale/',
+    'authority',
+    '{"en":"Official tax authority website and reference point for Canone RAI and rental contract tax procedures.","it":"Sito ufficiale dell’autorità fiscale e riferimento per Canone RAI e procedure fiscali sui contratti di affitto."}'::jsonb,
+    '{"CANONE_RAI_NO_TV_DECLARATION_CHECKLIST","CANONE_RAI_EXEMPTION_OVER_75_CHECKLIST","CANONE_RAI_REFUND_OR_WRONG_CHARGE"}',
+    'national',
+    null,
+    'https://www.agenziaentrate.gov.it/portale/',
+    'Agenzia Entrate',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    'INPS - Disoccupazione',
+    'https://www.inps.it/it/it/lavoro/disoccupazione.html',
+    'authority',
+    '{"en":"Official INPS area for unemployment and NASpI services.","it":"Area ufficiale INPS per disoccupazione e servizi NASpI."}'::jsonb,
+    '{"NASPI_PREPARATION"}',
+    'national',
+    null,
+    'https://www.inps.it/it/it/lavoro/disoccupazione.html',
+    'INPS',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    'Portale Offerte luce e gas',
+    'https://www.ilportaleofferte.it/',
+    'utilities',
+    '{"en":"Official public comparison portal for electricity and gas offers.","it":"Portale pubblico ufficiale per confrontare offerte luce e gas."}'::jsonb,
+    '{"ENERGY_SUPPLIER_COMPARISON","HIGH_BILL_COMPLAINT"}',
+    'national',
+    null,
+    'https://www.ilportaleofferte.it/',
+    'Portale Offerte',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    'AGCOM - Servizi per il cittadino',
+    'https://www.agcom.it/servizi/cittadino',
+    'telecom',
+    '{"en":"Official AGCOM citizen services area, including ConciliaWeb access.","it":"Area ufficiale AGCOM per i servizi al cittadino, incluso l’accesso a ConciliaWeb."}'::jsonb,
+    '{"INTERNET_PHONE_CANCELLATION","TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT","MODEM_RETURN_OR_CHARGE_DISPUTE"}',
+    'national',
+    null,
+    'https://www.agcom.it/servizi/cittadino',
+    'AGCOM',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    'ConciliaWeb',
+    'https://conciliaweb.agcom.it/conciliaweb/login.htm?lang=en',
+    'telecom',
+    '{"en":"Official AGCOM dispute platform for telecom and pay-TV disputes.","it":"Piattaforma ufficiale AGCOM per controversie telecom e pay TV."}'::jsonb,
+    '{"TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT"}',
+    'national',
+    null,
+    'https://conciliaweb.agcom.it/conciliaweb/login.htm?lang=en',
+    'AGCOM - ConciliaWeb',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    'Poste Italiane - Posta Raccomandata',
+    'https://www.poste.it/posta-raccomandata',
+    'postal',
+    '{"en":"Official Poste Italiane page for Raccomandata and Avviso di Ricevimento guidance.","it":"Pagina ufficiale Poste Italiane per Raccomandata e Avviso di Ricevimento."}'::jsonb,
+    '{"LANDLORD_MAINTENANCE_OR_CONTRACT","DEPOSIT_RETURN_REQUEST","RENT_CONTRACT_TERMINATION_NOTICE","INTERNET_PHONE_CANCELLATION"}',
+    'national',
+    null,
+    'https://www.poste.it/posta-raccomandata',
+    'Poste Italiane',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  ),
+  (
+    'Salute Piemonte',
+    'https://www.salutepiemonte.it/',
+    'health',
+    '{"en":"Regional health portal for Piemonte. Verify local ASL contacts before sending.","it":"Portale sanitario regionale del Piemonte. Verifica i contatti ASL locali prima dell’invio."}'::jsonb,
+    '{"TESSERA_SANITARIA_RENEWAL","CHANGE_DOCTOR","ASL_APPOINTMENT_REQUEST"}',
+    'regional',
+    'Piemonte',
+    'https://www.salutepiemonte.it/',
+    'Salute Piemonte',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"Contacts and links may change. Verify on the official website before sending.","it":"Contatti e link possono cambiare. Verifica sul sito ufficiale prima dell''invio."}'::jsonb
+  )
 on conflict do nothing;
 
 insert into public.ufficio_service_providers (
@@ -78,8 +246,26 @@ insert into public.ufficio_official_contacts (
   verification_status, warning
 )
 values
-  ('Local ASL contact finder', 'officeFinder', 'Verify the correct ASL office through your region or city health portal.', 'health', '{"TESSERA_SANITARIA_RENEWAL","CHANGE_DOCTOR","ASL_REJECTED_REQUEST_REPLY","ASL_APPOINTMENT_REQUEST"}', 'regional', 'needsReview', '{"en":"This information still needs review before use.","it":"Questa informazione richiede ancora verifica prima dell’uso."}'::jsonb),
-  ('Provider official customer area or complaints channel', 'customerArea', 'Check the official provider website, contract, or customer area for the correct cancellation or complaint channel.', 'provider', '{"INTERNET_PHONE_CANCELLATION","TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT","MODEM_RETURN_OR_CHARGE_DISPUTE","HIGH_BILL_COMPLAINT","METER_READING_CORRECTION","PAYMENT_PLAN_REQUEST"}', 'provider', 'needsReview', '{"en":"This information still needs review before use.","it":"Questa informazione richiede ancora verifica prima dell’uso."}'::jsonb)
+  (
+    'Local ASL contact finder',
+    'officeFinder',
+    'Verify the correct ASL office through your region or city health portal.',
+    'health',
+    '{"TESSERA_SANITARIA_RENEWAL","CHANGE_DOCTOR","ASL_REJECTED_REQUEST_REPLY","ASL_APPOINTMENT_REQUEST"}',
+    'regional',
+    'needsReview',
+    '{"en":"This information still needs review before use.","it":"Questa informazione richiede ancora verifica prima dell’uso."}'::jsonb
+  ),
+  (
+    'Provider official customer area or complaints channel',
+    'customerArea',
+    'Check the official provider website, contract, or customer area for the correct cancellation or complaint channel.',
+    'provider',
+    '{"INTERNET_PHONE_CANCELLATION","TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT","MODEM_RETURN_OR_CHARGE_DISPUTE","HIGH_BILL_COMPLAINT","METER_READING_CORRECTION","PAYMENT_PLAN_REQUEST"}',
+    'provider',
+    'needsReview',
+    '{"en":"This information still needs review before use.","it":"Questa informazione richiede ancora verifica prima dell’uso."}'::jsonb
+  )
 on conflict do nothing;
 
 insert into public.ufficio_source_references (
@@ -87,7 +273,43 @@ insert into public.ufficio_source_references (
   verification_status, last_verified_at, warning
 )
 values
-  ('agentrate-canone-rai', 'Agenzia Entrate - Canone RAI guidance', 'taxAuthorityGuidance', 'Agenzia Entrate', 'https://www.agenziaentrate.gov.it/portale/', '{"en":"Use Agenzia Entrate as the first official reference for Canone RAI declaration, exemption, and refund topics.","it":"Usa Agenzia Entrate come primo riferimento ufficiale per dichiarazione, esenzione e rimborso Canone RAI."}'::jsonb, '{"en":"Relevant for official submission paths and truthful declaration warnings.","it":"Rilevante per percorsi di invio ufficiali e avvisi sulla dichiarazione veritiera."}'::jsonb, '{"CANONE_RAI_NO_TV_DECLARATION_CHECKLIST","CANONE_RAI_EXEMPTION_OVER_75_CHECKLIST","CANONE_RAI_REFUND_OR_WRONG_CHARGE"}', 'verified', '2026-05-06T00:00:00Z', '{"en":"This is practical guidance only and not legal advice.","it":"Questa è solo guida pratica e non consulenza legale."}'::jsonb),
-  ('arera-portale-offerte', 'ARERA / Portale Offerte', 'energyAuthorityGuidance', 'ARERA / Portale Offerte', 'https://www.ilportaleofferte.it/', '{"en":"Use the public comparison portal and ARERA-linked consumer guidance for energy offer comparisons and complaint context.","it":"Usa il portale pubblico di confronto e la guida collegata ad ARERA per confronti offerte e contesto reclami energia."}'::jsonb, '{"en":"Relevant for high bill checks, offer comparison, and consumer orientation.","it":"Rilevante per controlli su bollette alte, confronto offerte e orientamento consumatori."}'::jsonb, '{"ENERGY_SUPPLIER_COMPARISON","HIGH_BILL_COMPLAINT","METER_READING_CORRECTION","PAYMENT_PLAN_REQUEST","WRONG_CHARGE_REFUND_REQUEST"}', 'verified', '2026-05-06T00:00:00Z', '{"en":"This is practical guidance only and not legal advice.","it":"Questa è solo guida pratica e non consulenza legale."}'::jsonb),
-  ('agcom-conciliaweb', 'AGCOM / ConciliaWeb', 'telecomAuthorityGuidance', 'AGCOM', 'https://www.agcom.it/servizi/cittadino', '{"en":"AGCOM and ConciliaWeb are relevant official references for telecom disputes and complaint escalation.","it":"AGCOM e ConciliaWeb sono riferimenti ufficiali rilevanti per controversie telecom ed escalation reclami."}'::jsonb, '{"en":"Useful for internet cancellation disputes, wrong bills, and service problems.","it":"Utile per controversie su disdetta internet, bollette errate e problemi di servizio."}'::jsonb, '{"INTERNET_PHONE_CANCELLATION","TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT","MODEM_RETURN_OR_CHARGE_DISPUTE"}', 'verified', '2026-05-06T00:00:00Z', '{"en":"This is practical guidance only and not legal advice.","it":"Questa è solo guida pratica e non consulenza legale."}'::jsonb)
+  (
+    'agentrate-canone-rai',
+    'Agenzia Entrate - Canone RAI guidance',
+    'taxAuthorityGuidance',
+    'Agenzia Entrate',
+    'https://www.agenziaentrate.gov.it/portale/',
+    '{"en":"Use Agenzia Entrate as the first official reference for Canone RAI declaration, exemption, and refund topics.","it":"Usa Agenzia Entrate come primo riferimento ufficiale per dichiarazione, esenzione e rimborso Canone RAI."}'::jsonb,
+    '{"en":"Relevant for official submission paths and truthful declaration warnings.","it":"Rilevante per percorsi di invio ufficiali e avvisi sulla dichiarazione veritiera."}'::jsonb,
+    '{"CANONE_RAI_NO_TV_DECLARATION_CHECKLIST","CANONE_RAI_EXEMPTION_OVER_75_CHECKLIST","CANONE_RAI_REFUND_OR_WRONG_CHARGE"}',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"This is practical guidance only and not legal advice.","it":"Questa è solo guida pratica e non consulenza legale."}'::jsonb
+  ),
+  (
+    'arera-portale-offerte',
+    'ARERA / Portale Offerte',
+    'energyAuthorityGuidance',
+    'ARERA / Portale Offerte',
+    'https://www.ilportaleofferte.it/',
+    '{"en":"Use the public comparison portal and ARERA-linked consumer guidance for energy offer comparisons and complaint context.","it":"Usa il portale pubblico di confronto e la guida collegata ad ARERA per confronti offerte e contesto reclami energia."}'::jsonb,
+    '{"en":"Relevant for high bill checks, offer comparison, and consumer orientation.","it":"Rilevante per controlli su bollette alte, confronto offerte e orientamento consumatori."}'::jsonb,
+    '{"ENERGY_SUPPLIER_COMPARISON","HIGH_BILL_COMPLAINT","METER_READING_CORRECTION","PAYMENT_PLAN_REQUEST","WRONG_CHARGE_REFUND_REQUEST"}',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"This is practical guidance only and not legal advice.","it":"Questa è solo guida pratica e non consulenza legale."}'::jsonb
+  ),
+  (
+    'agcom-conciliaweb',
+    'AGCOM / ConciliaWeb',
+    'telecomAuthorityGuidance',
+    'AGCOM',
+    'https://www.agcom.it/servizi/cittadino',
+    '{"en":"AGCOM and ConciliaWeb are relevant official references for telecom disputes and complaint escalation.","it":"AGCOM e ConciliaWeb sono riferimenti ufficiali rilevanti per controversie telecom ed escalation reclami."}'::jsonb,
+    '{"en":"Useful for internet cancellation disputes, wrong bills, and service problems.","it":"Utile per controversie su disdetta internet, bollette errate e problemi di servizio."}'::jsonb,
+    '{"INTERNET_PHONE_CANCELLATION","TELECOM_WRONG_BILL_COMPLAINT","SERVICE_NOT_WORKING_COMPLAINT","MODEM_RETURN_OR_CHARGE_DISPUTE"}',
+    'verified',
+    '2026-05-06T00:00:00Z',
+    '{"en":"This is practical guidance only and not legal advice.","it":"Questa è solo guida pratica e non consulenza legale."}'::jsonb
+  )
 on conflict (id) do nothing;
