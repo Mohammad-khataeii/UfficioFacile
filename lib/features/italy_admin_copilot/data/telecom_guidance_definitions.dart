@@ -12,9 +12,9 @@ telecomInternetMobileTorino = RichCategoryGuidance.fromMap({
   'mainUserQuestion':
       'What telecom problem do I have, and should I contact the operator, send PEC/formal complaint, return the modem, request compensation, or escalate through AGCOM/Corecom/ConciliaWeb?',
   'routingLogicSummary':
-      'For telecom billing, cancellation, service, modem, refund, activation, portability, and contract-not-requested problems, the user should normally contact the operator first and keep written proof. If unresolved, route to ConciliaWeb/Corecom/AGCOM. For urgent service failures, first open a technical ticket with the operator, then send a written complaint if not resolved.',
+      'For billing, cancellation, service problems, modem charges, refunds, activation delays, portability, and contracts you did not request, contact the operator first and keep written proof. If the issue stays unresolved, move to ConciliaWeb, Corecom, or AGCOM. For urgent service failures, open a technical ticket first and then send a written complaint if needed.',
   'topWarning':
-      'Do not show all telecom templates, all contacts, and all escalation instructions on one page. First ask what the user’s problem is, then show only the relevant flow.',
+      'Start with the exact telecom problem so you can open the right flow, collect the right documents, and use the right complaint or escalation channel.',
   'officialReferences': {
     'agcomContactCenter': {
       'label': 'AGCOM Contact Center',
@@ -456,7 +456,7 @@ telecomInternetMobileTorino = RichCategoryGuidance.fromMap({
       ],
       'warnings': [
         'If the user wants to keep the line/number and move to another provider, they usually need migration code, not simple cancellation.',
-        'If the user cancels directly, they may lose the number and cause line disconnection.',
+        'If you cancel directly, you may lose the number and disconnect the line.',
         'Use the operator’s official cancellation form/PEC/address.',
       ],
       'outputs': [
@@ -1442,8 +1442,8 @@ telecomInternetMobileTorino = RichCategoryGuidance.fromMap({
     'The first screen must ask the user\'s telecom problem using firstScreenQuestions.',
     'Use routingRules to show only the relevant subcategory after selection.',
     'Show contacts only when referenced by recommendedContacts.',
-    'Do not show all AGCOM/Corecom/ConciliaWeb details globally.',
-    'Do not show all output templates by default.',
+    'Show AGCOM, Corecom, and ConciliaWeb details only when they match the selected problem.',
+    'Open output templates only after the related generator button is selected.',
     'Show output generator buttons and reveal only the selected template/checklist.',
     'If user wants to keep number, warn against direct cancellation and route to switching/portability.',
     'If user already complained and operator did not solve, route to ConciliaWeb escalation.',

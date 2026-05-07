@@ -21,6 +21,7 @@ class AppRoutes {
   static const calendar = '/life-admin/calendar';
   static const procedures = '/life-admin/procedures';
   static const procedureDetail = '/life-admin/procedure-detail';
+  static const cmsProcedureDetail = '/life-admin/cms-procedure-detail';
   static const procedureStart = '/life-admin/procedure-start';
   static const generated = '/life-admin/generated';
   static const requests = '/life-admin/requests';
@@ -41,6 +42,8 @@ class AppRoutes {
   static const workInpsPatronato = '/life-admin/work-inps-patronato';
   static const universityStudent = '/life-admin/university-student';
   static const general = '/life-admin/general';
+  static const auth = '/life-admin/auth';
+  static const account = '/life-admin/account';
   static const admin = '/life-admin/admin';
   static const adminPremium = '/life-admin/admin/premium';
   static const adminScanner = '/life-admin/admin/scanner';

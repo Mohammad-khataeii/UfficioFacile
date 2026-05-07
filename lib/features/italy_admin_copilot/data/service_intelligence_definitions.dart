@@ -716,7 +716,7 @@ class ServiceIntelligenceDefinitions {
         'Verify the recipient email, PEC, portal, or office on an official source.',
         'Check personal data, protocol numbers, and references.',
         'Attach the relevant documents.',
-        'Remove placeholders and review the final text.',
+        'Replace sample details with your real information and review the final text.',
         'Submit only truthful statements.',
         'Save proof of sending.',
       ],

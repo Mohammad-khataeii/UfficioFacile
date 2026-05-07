@@ -947,27 +947,34 @@ class SupabaseUfficcioEntitlementRepository
   @override
   Future<UfficcioEntitlement> getEntitlement() async {
     final row = await _client
-        .from('ufficcio_entitlements')
+        .from('ufficio_user_entitlements')
         .select()
         .eq('user_id', _userId)
         .maybeSingle();
+    final isAdmin = await _client.rpc('is_ufficio_admin') == true;
     if (row == null) {
-      final entitlement = const UfficcioEntitlement();
-      return saveEntitlement(entitlement);
+      return UfficcioEntitlement(
+        userId: _userId,
+        plan: isAdmin ? UfficioPlan.pro : UfficioPlan.free,
+        premiumAccess: isAdmin,
+      );
     }
+    final planName = row['plan'] as String? ?? 'free';
     return UfficcioEntitlement.fromJson({
       'id': row['id'],
       'userId': row['user_id'],
-      'plan': row['plan'],
+      'plan': planName == 'premium' ? 'pro' : planName,
       'status': row['status'],
-      'freePackLimit': row['free_pack_limit'],
-      'freePacksUsed': row['free_packs_used'],
-      'premiumAccess': row['premium_access'],
-      'currentPeriodStart': row['current_period_start'],
+      'premiumAccess':
+          row['status'] == 'active' &&
+          (planName == 'premium' ||
+              planName == 'pro' ||
+              planName == 'admin_grant' ||
+              isAdmin),
       'currentPeriodEnd': row['current_period_end'],
-      'provider': row['provider'],
-      'providerCustomerId': row['provider_customer_id'],
-      'providerSubscriptionId': row['provider_subscription_id'],
+      'provider': row['source'],
+      'providerCustomerId': row['stripe_customer_id'],
+      'providerSubscriptionId': row['stripe_subscription_id'],
       'createdAt': row['created_at'],
       'updatedAt': row['updated_at'],
     });
@@ -977,40 +984,40 @@ class SupabaseUfficcioEntitlementRepository
   Future<UfficcioEntitlement> saveEntitlement(
     UfficcioEntitlement entitlement,
   ) async {
-    final row = await _client
-        .from('ufficcio_entitlements')
-        .upsert({
-          'user_id': _userId,
-          'plan': entitlement.plan.name,
-          'status': entitlement.status.name,
-          'free_pack_limit': entitlement.freePackLimit,
-          'free_packs_used': entitlement.freePacksUsed,
-          'premium_access': entitlement.premiumAccess,
-          'current_period_start': entitlement.currentPeriodStart
-              ?.toIso8601String(),
-          'current_period_end': entitlement.currentPeriodEnd?.toIso8601String(),
-          'provider': entitlement.provider,
-          'provider_customer_id': entitlement.providerCustomerId,
-          'provider_subscription_id': entitlement.providerSubscriptionId,
-        })
-        .select()
-        .single();
-    return UfficcioEntitlement.fromJson({
-      'id': row['id'],
-      'userId': row['user_id'],
-      'plan': row['plan'],
-      'status': row['status'],
-      'freePackLimit': row['free_pack_limit'],
-      'freePacksUsed': row['free_packs_used'],
-      'premiumAccess': row['premium_access'],
-      'currentPeriodStart': row['current_period_start'],
-      'currentPeriodEnd': row['current_period_end'],
-      'provider': row['provider'],
-      'providerCustomerId': row['provider_customer_id'],
-      'providerSubscriptionId': row['provider_subscription_id'],
-      'createdAt': row['created_at'],
-      'updatedAt': row['updated_at'],
-    });
+    try {
+      final plan = entitlement.plan == UfficioPlan.pro
+          ? 'premium'
+          : entitlement.plan.name;
+      final row = await _client
+          .from('ufficio_user_entitlements')
+          .upsert({
+            'user_id': _userId,
+            'plan': plan,
+            'status': entitlement.status.name,
+            'source': entitlement.provider ?? 'client_cache',
+            'current_period_end': entitlement.currentPeriodEnd
+                ?.toIso8601String(),
+            'premium_since': entitlement.currentPeriodStart?.toIso8601String(),
+            'metadata': {
+              'generatedPacksUsedThisMonth': entitlement.generatedPacksUsedThisMonth,
+            },
+          })
+          .select()
+          .single();
+      return UfficcioEntitlement.fromJson({
+        'id': row['id'],
+        'userId': row['user_id'],
+        'plan': plan,
+        'status': row['status'],
+        'premiumAccess': row['status'] == 'active' && plan != 'free',
+        'currentPeriodEnd': row['current_period_end'],
+        'provider': row['source'],
+        'createdAt': row['created_at'],
+        'updatedAt': row['updated_at'],
+      });
+    } catch (_) {
+      return entitlement;
+    }
   }
 }
 

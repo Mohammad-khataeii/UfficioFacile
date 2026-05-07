@@ -90,13 +90,13 @@ void main() {
   });
 
   group('localization and profile', () {
-    test('localization supports it/en/es/fa/ar and rtl languages', () {
+    test('localization supports it/en/fa/fr and RTL for Persian', () {
       expect(
         AppLocalizations.supportedLocales.map((item) => item.languageCode),
-        containsAll(['it', 'en', 'es', 'fa', 'ar']),
+        containsAll(['it', 'en', 'fa', 'fr']),
       );
       expect(AppLocalizations.rtlLanguages.contains('fa'), isTrue);
-      expect(AppLocalizations.rtlLanguages.contains('ar'), isTrue);
+      expect(AppLocalizations.rtlLanguages.contains('fr'), isFalse);
     });
 
     test('selected language persists', () async {

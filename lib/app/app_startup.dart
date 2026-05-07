@@ -183,6 +183,12 @@ class AppStartupService {
     } catch (error) {
       _log('Language fallback: $error');
     }
+    final deviceLanguage = PlatformDispatcher.instance.locale.languageCode;
+    if (AppLocalizations.supportedLocales.any(
+      (locale) => locale.languageCode == deviceLanguage,
+    )) {
+      return deviceLanguage;
+    }
     return 'en';
   }
 

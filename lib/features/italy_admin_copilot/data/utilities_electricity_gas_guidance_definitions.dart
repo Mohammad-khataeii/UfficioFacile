@@ -382,7 +382,7 @@ utilitiesElectricityGasTorino = RichCategoryGuidance.fromMap({
       ],
       'warnings': [
         'Do not generate a complaint before understanding whether the bill is based on real or estimated consumption.',
-        'If the user smells gas or reports danger, route to emergency_fault immediately.',
+        'If you smell gas or there is an immediate danger, move straight to the emergency fault flow.',
       ],
       'outputs': [
         'bill_explanation_summary',
@@ -614,7 +614,7 @@ utilitiesElectricityGasTorino = RichCategoryGuidance.fromMap({
       ],
       'warnings': [
         'If another person will continue using the supply, cancellation may be wrong. They may need voltura.',
-        'If the user cancels, the supply may be disconnected and the next person may need subentro.',
+        'If you cancel, the supply may be disconnected and the next person may need a subentro.',
       ],
       'outputs': [
         'utility_cancellation_request',
@@ -802,7 +802,7 @@ utilitiesElectricityGasTorino = RichCategoryGuidance.fromMap({
       ],
       'warnings': [
         'Do not wait until disconnection procedure starts.',
-        'If the user already received a morosita or distacco warning, mark the flow urgent.',
+        'If you already received a morosita or distacco warning, treat the case as urgent.',
       ],
       'outputs': [
         'payment_plan_request_email',
@@ -843,8 +843,8 @@ utilitiesElectricityGasTorino = RichCategoryGuidance.fromMap({
         'New conditions',
       ],
       'warnings': [
-        'Check whether the user received the notice and when.',
-        'If the user wants to leave, route to switching checklist.',
+        'Check whether you received the notice and when.',
+        'If you want to leave, use the switching checklist.',
       ],
       'outputs': [
         'unilateral_change_explanation',
@@ -998,7 +998,7 @@ utilitiesElectricityGasTorino = RichCategoryGuidance.fromMap({
       'titleIt': 'Confrontare offerte luce e gas in sicurezza',
       'priority': 'medium',
       'whatIsIt':
-          'This page helps users compare electricity and gas offers without being misled by sales calls or fake discounts.',
+          'Use this page to compare electricity and gas offers without being misled by aggressive sales calls or misleading discounts.',
       'whyDoYouNeedIt': [
         'User wants a cheaper offer',
         'User received a sales call',
@@ -1261,11 +1261,11 @@ utilitiesElectricityGasTorino = RichCategoryGuidance.fromMap({
     'The first screen should ask the user what problem they have using firstScreenQuestions.',
     'Only show the relevant subcategory after routing.',
     'Contacts must be shown only when referenced by recommendedContacts.',
-    'Do not show all output templates by default. Show generator buttons and reveal only the selected template.',
+    'Show templates behind buttons so each page stays focused on the selected action.',
     'Emergency flows must be visibly urgent.',
-    'If the user selects danger/gas smell/technical emergency, route immediately to distributor/pronto intervento instructions.',
+    'If the selected problem is danger, gas smell, or a technical emergency, move straight to the distributor or pronto intervento instructions.',
     'Do not hardcode Iren as supplier or distributor for Torino.',
-    'Ask the user to read supplier and distributor from the bill.',
+    'Ask the person to read the supplier and distributor names directly from the bill.',
     'For billing/contract/refund/payment issues, route first to the supplier.',
     'For unresolved disputes, route to ARERA/Sportello and conciliation.',
     'Keep Dart typing strict and extend generic rich category types only where needed.',

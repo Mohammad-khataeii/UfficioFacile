@@ -13,7 +13,7 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
   'routingLogicSummary':
       'Canone RAI flows are handled through Agenzia delle Entrate. The app should first identify the user’s situation: no TV, over 75, wrong charge, duplicate charge, someone in the same family household already pays, diplomatic/military exemption, new home/electricity contract change, or general form help. Then show only the relevant flow, deadlines, documents, submission channels, and generator buttons.',
   'topWarning':
-      'Do not show all forms, all deadlines, and all contacts together. First ask the user’s situation, then show only the relevant Canone RAI flow.',
+      'Start from your exact situation so you can see the right Canone RAI form, deadline, and contact channel.',
   'officialReferences': {
     'mainPage': {
       'label': 'Agenzia Entrate - Canone TV',
@@ -155,7 +155,7 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
         'user has digital signature',
       ],
       'warning':
-          'Do not suggest PEC if the user cannot digitally sign the form, unless the official instructions for that exact model allow it.',
+          'Avoid PEC if you cannot digitally sign the form, unless the official instructions for that exact model clearly allow it.',
     },
     {
       'id': 'electricity_supplier_clarification',
@@ -330,7 +330,7 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
       ],
       'warnings': [
         'Do not route everyone directly to no-TV declaration.',
-        'If the user has a TV, no-TV declaration is not the correct flow.',
+        'If you have a TV, the no-TV declaration is not the correct flow.',
         'If already charged, refund may be needed in addition to exemption/declaration.',
       ],
       'outputs': [
@@ -554,7 +554,7 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
       ],
       'warnings': [
         'The electricity supplier can explain the bill line, but refund/exemption is handled through Agenzia Entrate.',
-        'If the user was already charged, exemption alone may not be enough; route to refund.',
+        'If you were already charged, the exemption alone may not be enough. You may also need the refund flow.',
       ],
       'outputs': [
         'refund_eligibility_checklist',
@@ -666,8 +666,8 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
         'Did you move residence or only domicile?',
       ],
       'warnings': [
-        'If the user has no TV in the new home and electricity is in their name, route to no-TV declaration.',
-        'If the user was already charged wrongly, route to refund/wrong charge.',
+        'If you have no TV in the new home and the electricity contract is in your name, use the no-TV declaration flow.',
+        'If you were already charged by mistake, use the refund or wrong-charge flow.',
       ],
       'outputs': [
         'move_home_canone_checklist',
@@ -723,8 +723,8 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
         'Do you want online, registered mail, PEC, or CAF?',
       ],
       'warnings': [
-        'PEC should not be recommended unless the user can digitally sign the form or the official instructions allow PEC for the exact model.',
-        'If the user is unsure, CAF/intermediary is safer than choosing the wrong form.',
+        'Use PEC only if you can digitally sign the form or the official instructions clearly allow PEC for that exact model.',
+        'If you are unsure, a CAF or intermediary is safer than choosing the wrong form.',
       ],
       'outputs': [
         'form_selection_wizard',
@@ -948,9 +948,9 @@ final RichCategoryGuidance canoneRaiTorino = RichCategoryGuidance.fromMap({
     'The first screen must ask the user’s situation using firstScreenQuestions.',
     'Use routingRules to show only the relevant subcategory after selection.',
     'Show forms, deadlines, channels, contacts, and templates only for the selected flow.',
-    'Do not show all deadlines together.',
-    'Do not show all contacts together.',
-    'Do not show all output templates by default.',
+    'Keep deadlines grouped by the selected situation.',
+    'Show only the contacts that matter for the selected flow.',
+    'Open templates only after the related generator button is selected.',
     'Show output generator buttons and reveal only the selected template/checklist.',
     'PEC should show a warning about digital signature.',
     'Registered mail should show the postal address only inside the selected flow or submission details section.',

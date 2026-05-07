@@ -129,7 +129,7 @@ const housingRentTorino = HousingRentGuidance(
         'asking for deposit update',
       ],
       warning:
-          'Friendly messages are useful, but for serious disputes the user should also send PEC or raccomandata.',
+          'A friendly message can be useful at the start, but serious disputes should also be sent by PEC or raccomandata.',
     ),
     HousingRentChannelRule(
       id: 'landlord_formal_pec_or_raccomandata',
@@ -494,7 +494,7 @@ const housingRentTorino = HousingRentGuidance(
         'Previous repair requests',
       ],
       emergencyWarning:
-          'If there is gas smell, electrical danger, flooding, no heating in winter with health risk, or structural risk, the user should contact emergency/technical services immediately, not only send a landlord email.',
+          'If there is a gas smell, electrical danger, flooding, no heating in winter with a health risk, or a structural danger, contact emergency or technical services immediately instead of sending only a landlord email.',
       outputs: [
         'repair_request_message',
         'formal_repair_request_pec',

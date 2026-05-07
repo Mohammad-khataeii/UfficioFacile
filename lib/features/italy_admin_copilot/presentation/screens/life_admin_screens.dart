@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
+import '../../../admin_cms/domain/cms_models.dart';
 import '../../data/demo_data_service.dart';
 import '../../data/catalog_repository.dart';
 import '../../data/canone_rai_guidance_definitions.dart';
@@ -78,6 +79,11 @@ class TermRouteArgs {
   final String termId;
 }
 
+class CmsProcedureRouteArgs {
+  const CmsProcedureRouteArgs(this.procedureSlug);
+  final String procedureSlug;
+}
+
 String _localizedCatalogText(
   BuildContext context,
   Map<String, String> values, {
@@ -87,6 +93,12 @@ String _localizedCatalogText(
   context.l10n.languageCode,
   fallback: fallback,
 );
+
+String _localizedCmsText(
+  BuildContext context,
+  Map<String, dynamic> values, {
+  String fallback = '',
+}) => context.l10n.localizedMap(values, fallback: fallback);
 
 String? _providerCategoryForProcedure(AdminProcedure procedure) {
   if (procedure.category == ProcedureCategory.telecom) {
@@ -351,18 +363,14 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                 _CategoryTile(
                   'Work / INPS',
                   Icons.work_outline,
-                  () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.workInpsPatronato,
-                  ),
+                  () =>
+                      Navigator.pushNamed(context, AppRoutes.workInpsPatronato),
                 ),
                 _CategoryTile(
                   'University',
                   Icons.school_outlined,
-                  () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.universityStudent,
-                  ),
+                  () =>
+                      Navigator.pushNamed(context, AppRoutes.universityStudent),
                 ),
                 _CategoryTile(
                   'General',
@@ -787,8 +795,9 @@ class ProcedureDetailScreen extends StatelessWidget {
     );
     final publicOfficeGuidance =
         PublicOfficeComuneGuidanceDefinitions.forProcedureId(procedure.id);
-    final workGuidance =
-        WorkInpsPatronatoGuidanceDefinitions.forProcedureId(procedure.id);
+    final workGuidance = WorkInpsPatronatoGuidanceDefinitions.forProcedureId(
+      procedure.id,
+    );
     final universityGuidance =
         UniversityStudentGuidanceDefinitions.forProcedureId(procedure.id);
     final generalGuidance = GeneralGuidanceDefinitions.forProcedureId(
@@ -985,21 +994,24 @@ class ProcedureDetailScreen extends StatelessWidget {
                 if (publicOfficeGuidance != null) ...[
                   const SizedBox(height: 16),
                   _RichCategoryPracticalGuidanceCard(
-                    categoryGuidance: PublicOfficeComuneGuidanceDefinitions.category,
+                    categoryGuidance:
+                        PublicOfficeComuneGuidanceDefinitions.category,
                     subcategoryGuidance: publicOfficeGuidance,
                   ),
                 ],
                 if (workGuidance != null) ...[
                   const SizedBox(height: 16),
                   _RichCategoryPracticalGuidanceCard(
-                    categoryGuidance: WorkInpsPatronatoGuidanceDefinitions.category,
+                    categoryGuidance:
+                        WorkInpsPatronatoGuidanceDefinitions.category,
                     subcategoryGuidance: workGuidance,
                   ),
                 ],
                 if (universityGuidance != null) ...[
                   const SizedBox(height: 16),
                   _RichCategoryPracticalGuidanceCard(
-                    categoryGuidance: UniversityStudentGuidanceDefinitions.category,
+                    categoryGuidance:
+                        UniversityStudentGuidanceDefinitions.category,
                     subcategoryGuidance: universityGuidance,
                   ),
                 ],
@@ -1294,6 +1306,149 @@ class ProcedureDetailScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CmsProcedureDetailScreen extends StatelessWidget {
+  const CmsProcedureDetailScreen({super.key, required this.procedureSlug});
+
+  final String procedureSlug;
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = AppScope.of(context);
+    return Scaffold(
+      appBar: AppBar(title: const Text('CMS')),
+      body: SafeArea(
+        child: FutureBuilder(
+          future: Future.wait([
+            scope.cmsRepository.listProcedures(),
+            scope.cmsRepository.listBlocks(procedureSlug),
+          ]),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final procedures = snapshot.data![0] as List<CmsProcedure>;
+            final blocks = snapshot.data![1] as List<CmsContentBlock>;
+            CmsProcedure? procedure;
+            for (final item in procedures) {
+              if (item.slug == procedureSlug) {
+                procedure = item;
+                break;
+              }
+            }
+            if (procedure == null) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('This CMS procedure is not available right now.'),
+                ),
+              );
+            }
+
+            final sections = <Widget>[
+              _SectionCard(
+                title: _localizedCmsText(
+                  context,
+                  procedure.title,
+                  fallback: procedure.slug,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_localizedCmsText(
+                      context,
+                      procedure.subtitle,
+                    ).isNotEmpty)
+                      Text(
+                        _localizedCmsText(context, procedure.subtitle),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    if (_localizedCmsText(
+                      context,
+                      procedure.summary,
+                    ).isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          _localizedCmsText(context, procedure.summary),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ];
+
+            void addSection(String title, Map<String, dynamic> body) {
+              final text = _localizedCmsText(context, body).trim();
+              if (text.isEmpty) return;
+              sections.add(const SizedBox(height: 16));
+              sections.add(_SectionCard(title: title, child: Text(text)));
+            }
+
+            addSection('What is it?', procedure.whatIsIt);
+            addSection('Why you might need it', procedure.whyYouNeedIt);
+            addSection('How to do it', procedure.howToDoIt);
+            addSection('Documents usually needed', procedure.documentsNeeded);
+            addSection('Costs and timing', procedure.costsAndTiming);
+            addSection('Common mistakes', procedure.commonMistakes);
+            addSection('Warnings', procedure.warnings);
+
+            for (final block in blocks.where((item) => item.isActive)) {
+              final title = _localizedCmsText(context, block.title).trim();
+              final body = _localizedCmsText(context, block.body).trim();
+              final items = block.items
+                  .map((item) => item.toString())
+                  .where((item) => item.trim().isNotEmpty)
+                  .toList();
+              if (title.isEmpty && body.isEmpty && items.isEmpty) continue;
+              sections.add(const SizedBox(height: 16));
+              sections.add(
+                _SectionCard(
+                  title: title.isEmpty ? block.blockType : title,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (body.isNotEmpty) Text(body),
+                      if (items.isNotEmpty) ...[
+                        if (body.isNotEmpty) const SizedBox(height: 8),
+                        ...items.map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Text('• $item'),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            sections.addAll([
+              const SizedBox(height: 16),
+              GlobalProblemRequestCard(
+                categoryId: procedure.categorySlug,
+                subcategoryId: procedure.subcategorySlug,
+                sourcePage: procedure.slug,
+              ),
+              const SizedBox(height: 12),
+              PrivateConsultancyCard(
+                categoryId: procedure.categorySlug,
+                subcategoryId: procedure.subcategorySlug,
+                sourcePage: procedure.slug,
+              ),
+            ]);
+
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: sections,
+            );
+          },
         ),
       ),
     );
@@ -2158,7 +2313,9 @@ class _RichCategoryPracticalGuidanceCard extends StatelessWidget {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Estimated cost added to Cost Dashboard.'),
+                        content: Text(
+                          'Estimated cost added to Cost Dashboard.',
+                        ),
                       ),
                     );
                   },
@@ -2176,10 +2333,8 @@ class _RichCategoryPracticalGuidanceCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  onPressed: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.contacts,
-                  ),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.contacts),
                   icon: const Icon(Icons.contacts_outlined),
                   label: const Text('View all contacts'),
                 ),
@@ -2320,8 +2475,7 @@ class _RichContactCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, crossLinkRoute),
+                  onPressed: () => Navigator.pushNamed(context, crossLinkRoute),
                   icon: const Icon(Icons.open_in_new_outlined),
                   label: const Text('Open related category'),
                 ),
@@ -3996,8 +4150,7 @@ const Map<String, String> _publicOfficeProcedureMap = {
   'book_anagrafe_appointment': 'BOOK_ANAGRAFE_APPOINTMENT',
   'pec_formal_request_comune': 'PEC_FORMAL_REQUEST_COMUNE',
   'online_comune_service_problem': 'ONLINE_COMUNE_SERVICE_PROBLEM',
-  'general_comune_information_request':
-      'GENERAL_COMUNE_INFORMATION_REQUEST',
+  'general_comune_information_request': 'GENERAL_COMUNE_INFORMATION_REQUEST',
 };
 
 const Map<String, String> _workInpsProcedureMap = {
@@ -4012,8 +4165,7 @@ const Map<String, String> _workInpsProcedureMap = {
   'missing_documents_integration': 'MISSING_DOCUMENTS_INTEGRATION',
   'employer_termination_contract_end_documents':
       'EMPLOYER_TERMINATION_CONTRACT_END_DOCUMENTS',
-  'payslip_tfr_final_payment_problem':
-      'PAYSLIP_TFR_FINAL_PAYMENT_PROBLEM',
+  'payslip_tfr_final_payment_problem': 'PAYSLIP_TFR_FINAL_PAYMENT_PROBLEM',
   'sick_leave_malattia_inps_basics': 'SICK_LEAVE_MALATTIA_INPS_BASICS',
   'maternity_family_benefit_help': 'MATERNITY_FAMILY_BENEFIT_HELP',
   'isee_caf_connection': 'ISEE_CAF_CONNECTION',
@@ -4058,8 +4210,7 @@ const Map<String, String> _generalProcedureMap = {
   'write_short_polite_email': 'WRITE_SHORT_POLITE_EMAIL',
   'write_strong_formal_complaint': 'WRITE_STRONG_FORMAL_COMPLAINT',
   'prepare_documents_before_office': 'PREPARE_DOCUMENTS_BEFORE_OFFICE',
-  'convert_informal_to_formal_italian':
-      'CONVERT_INFORMAL_TO_FORMAL_ITALIAN',
+  'convert_informal_to_formal_italian': 'CONVERT_INFORMAL_TO_FORMAL_ITALIAN',
 };
 
 class UtilityHubScreen extends StatelessWidget {
@@ -4473,6 +4624,7 @@ class _RichCategoryHubScreenState extends State<_RichCategoryHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scope = AppScope.of(context);
     final match = _resolveRichRoute(widget.categoryGuidance, _answers);
     RichCategorySubcategory? routedSubcategory;
     if (match != null) {
@@ -4486,6 +4638,25 @@ class _RichCategoryHubScreenState extends State<_RichCategoryHubScreen> {
     final visibleSubcategories = routedSubcategory != null
         ? [routedSubcategory]
         : widget.categoryGuidance.subcategories;
+    CmsCategory? cmsCategory;
+    for (final item in scope.cmsContentController.categories) {
+      if (item.slug == widget.categoryGuidance.id) {
+        cmsCategory = item;
+        break;
+      }
+    }
+    final cmsProcedures = scope.cmsContentController.procedures
+        .where(
+          (item) =>
+              item.categorySlug == widget.categoryGuidance.id && item.isActive,
+        )
+        .toList();
+    final bundledSlugs = widget.categoryGuidance.subcategories
+        .map((item) => item.id)
+        .toSet();
+    final cmsOnlyProcedures = cmsProcedures
+        .where((item) => !bundledSlugs.contains(item.slug))
+        .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.appBarTitle)),
@@ -4494,11 +4665,25 @@ class _RichCategoryHubScreenState extends State<_RichCategoryHubScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             _SectionCard(
-              title: widget.categoryGuidance.title,
+              title: cmsCategory == null
+                  ? widget.categoryGuidance.title
+                  : _localizedCmsText(
+                      context,
+                      cmsCategory.title,
+                      fallback: widget.categoryGuidance.title,
+                    ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.categoryGuidance.shortDescription),
+                  Text(
+                    cmsCategory == null
+                        ? widget.categoryGuidance.shortDescription
+                        : _localizedCmsText(
+                            context,
+                            cmsCategory.shortDescription,
+                            fallback: widget.categoryGuidance.shortDescription,
+                          ),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     widget.categoryGuidance.mainUserQuestion,
@@ -4509,7 +4694,7 @@ class _RichCategoryHubScreenState extends State<_RichCategoryHubScreen> {
             ),
             const SizedBox(height: 16),
             _SectionCard(
-              title: 'Guided selector',
+              title: context.l10n.t('guided_selector'),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -4529,10 +4714,10 @@ class _RichCategoryHubScreenState extends State<_RichCategoryHubScreen> {
                           ),
                         ),
                       ),
-                if (match != null && match.priority == 'urgent')
+                  if (match != null && match.priority == 'urgent')
                     Card(
                       color: Colors.red.withValues(alpha: 0.08),
-                      child: const ListTile(
+                      child: ListTile(
                         leading: Icon(Icons.warning_amber_outlined),
                         title: Text(
                           'For danger, gas smell, suspected leak, sparks, burning smell, or technical emergency, call the distributor/pronto intervento number printed on the bill. Do not wait for email.',
@@ -4554,6 +4739,12 @@ class _RichCategoryHubScreenState extends State<_RichCategoryHubScreen> {
                   subcategory: subcategory,
                   procedureId: widget.procedureMap[subcategory.id],
                 ),
+              ),
+            ),
+            ...cmsOnlyProcedures.map(
+              (procedure) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _CmsProcedureCard(procedure: procedure),
               ),
             ),
             const SizedBox(height: 8),
@@ -4688,7 +4879,51 @@ class _RichSubcategoryCard extends StatelessWidget {
                         AppRoutes.procedureDetail,
                         arguments: ProcedureRouteArgs(procedure),
                       ),
-                child: const Text('Open'),
+                child: Text(context.l10n.t('open')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CmsProcedureCard extends StatelessWidget {
+  const _CmsProcedureCard({required this.procedure});
+
+  final CmsProcedure procedure;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _localizedCmsText(
+                context,
+                procedure.title,
+                fallback: procedure.slug,
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (_localizedCmsText(context, procedure.summary).isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(_localizedCmsText(context, procedure.summary)),
+            ],
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.cmsProcedureDetail,
+                  arguments: CmsProcedureRouteArgs(procedure.slug),
+                ),
+                child: Text(context.l10n.t('open')),
               ),
             ),
           ],
@@ -4718,15 +4953,11 @@ class GlobalProblemRequestCard extends StatelessWidget {
       builder: (context, snapshot) {
         final entitlements = snapshot.data;
         return _SectionCard(
-          title: 'Can’t find your problem?',
+          title: context.l10n.t('cta_problem_title'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Non trovi il tuo problema?'),
-              const SizedBox(height: 8),
-              const Text(
-                'Ask us and we’ll add your problem as fast as possible.\n\nScrivici e aggiungeremo il tuo problema il prima possibile.',
-              ),
+              Text(context.l10n.t('cta_problem_body')),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: entitlements == null
@@ -4741,21 +4972,22 @@ class GlobalProblemRequestCard extends StatelessWidget {
                             isPremiumUser: entitlements.isPremium,
                           );
                           if (request == null) return;
-                          await scope.problemRequestsService.submitProblemRequest(
-                            request,
-                          );
+                          await scope.problemRequestsService
+                              .submitProblemRequest(request);
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                'Thanks. We received your request and will review it as soon as possible.\nGrazie. Abbiamo ricevuto la tua richiesta e la controlleremo il prima possibile.',
+                                context.l10n.t('cta_problem_thanks'),
                               ),
                             ),
                           );
                           return;
                         }
                         final result = await scope.productEntitlementsService
-                            .requirePremiumOrPayment(purpose: 'problem_request');
+                            .requirePremiumOrPayment(
+                              purpose: 'problem_request',
+                            );
                         if (!context.mounted) return;
                         if (result.decision != null) {
                           await showPremiumPaywallSheet(
@@ -4770,7 +5002,7 @@ class GlobalProblemRequestCard extends StatelessWidget {
                           );
                         }
                       },
-                child: const Text('Request a new problem'),
+                child: Text(context.l10n.t('cta_problem_button')),
               ),
             ],
           ),
@@ -4800,18 +5032,14 @@ class PrivateConsultancyCard extends StatelessWidget {
       builder: (context, snapshot) {
         final entitlements = snapshot.data;
         return _SectionCard(
-          title: 'Need private help with your case?',
+          title: context.l10n.t('cta_consultancy_title'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Hai bisogno di aiuto privato per il tuo caso?'),
-              const SizedBox(height: 8),
-              const Text(
-                'Send us your case by email and we’ll help you understand what to do, which documents you need, and which office/contact to use.\n\nMandaci il tuo caso via email e ti aiutiamo a capire cosa fare, quali documenti servono e quale ufficio/contatto usare.',
-              ),
+              Text(context.l10n.t('cta_consultancy_body')),
               const SizedBox(height: 12),
               Text(
-                'We help you understand procedures, documents, offices, and possible next steps. We do not replace a lawyer, accountant, CAF, patronato, public office, or emergency service.\n\nTi aiutiamo a capire procedure, documenti, uffici e possibili prossimi passi. Non sostituiamo avvocato, commercialista, CAF, patronato, ufficio pubblico o servizio di emergenza.',
+                context.l10n.t('cta_consultancy_disclaimer'),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
@@ -4824,15 +5052,16 @@ class PrivateConsultancyCard extends StatelessWidget {
                         ? null
                         : () async {
                             if (entitlements.canUsePrivateConsultancyForFree) {
-                              final request = await _showConsultancyRequestSheet(
-                                context,
-                                categoryId: categoryId,
-                                subcategoryId: subcategoryId,
-                                sourcePage: sourcePage,
-                                userPlan: entitlements.isPremium
-                                    ? UfficioPlan.pro.name
-                                    : UfficioPlan.free.name,
-                              );
+                              final request =
+                                  await _showConsultancyRequestSheet(
+                                    context,
+                                    categoryId: categoryId,
+                                    subcategoryId: subcategoryId,
+                                    sourcePage: sourcePage,
+                                    userPlan: entitlements.isPremium
+                                        ? UfficioPlan.pro.name
+                                        : UfficioPlan.free.name,
+                                  );
                               if (request == null) return;
                               await scope.consultancyService
                                   .submitConsultancyRequest(request);
@@ -4846,7 +5075,8 @@ class PrivateConsultancyCard extends StatelessWidget {
                               );
                               return;
                             }
-                            final result = await scope.productEntitlementsService
+                            final result = await scope
+                                .productEntitlementsService
                                 .requirePremiumOrPayment(
                                   purpose: 'consultancy',
                                 );
@@ -4855,8 +5085,9 @@ class PrivateConsultancyCard extends StatelessWidget {
                               await showPremiumPaywallSheet(
                                 context,
                                 decision: result.decision!,
-                                featureLabel:
-                                    'Private consultancy is free for Premium users. Free users need an extra payment or upgrade.\n\nLa consulenza privata è gratuita per gli utenti Premium. Gli utenti free devono pagare o passare a Premium.',
+                                featureLabel: context.l10n.t(
+                                  'cta_consultancy_body',
+                                ),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -4866,23 +5097,24 @@ class PrivateConsultancyCard extends StatelessWidget {
                           },
                     child: Text(
                       entitlements?.canUsePrivateConsultancyForFree == true
-                          ? 'Request private consultancy'
-                          : 'Unlock private consultancy',
+                          ? context.l10n.t('cta_consultancy_request')
+                          : context.l10n.t('cta_consultancy_unlock'),
                     ),
                   ),
                   OutlinedButton(
-                    onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
+                    onPressed: () =>
+                        Navigator.pushNamed(context, AppRoutes.plan),
                     child: Text(
                       entitlements?.canUsePrivateConsultancyForFree == true
-                          ? 'Send case by email'
-                          : 'Upgrade to Premium',
+                          ? context.l10n.t('cta_consultancy_email')
+                          : context.l10n.t('cta_consultancy_upgrade'),
                     ),
                   ),
                 ],
               ),
               if (entitlements?.canUsePrivateConsultancyForFree != true) ...[
                 const SizedBox(height: 8),
-                const Text('Payment is not configured yet.'),
+                Text(context.l10n.t('cta_payment_unavailable')),
               ],
             ],
           ),
@@ -4896,10 +5128,7 @@ String _resolveLocalUserKey(BuildContext context) {
   final scope = AppScope.of(context);
   final auth = scope.authFacade.state;
   final profile = scope.profileController.profile;
-  return auth.userId ??
-      profile.email ??
-      profile.codiceFiscale ??
-      'local-user';
+  return auth.userId ?? profile.email ?? profile.codiceFiscale ?? 'local-user';
 }
 
 UfficioCostItem? _buildEstimatedCostItemForRichSubcategory(
@@ -5039,7 +5268,9 @@ Future<ProblemRequestRecord?> _showProblemRequestSheet(
                 const SizedBox(height: 12),
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Optional email'),
+                  decoration: const InputDecoration(
+                    labelText: 'Optional email',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -5250,8 +5481,7 @@ Future<ConsultancyRequestRecord?> _showConsultancyRequestSheet(
                             : regionController.text.trim(),
                         documentsAvailable: documentsController.text.trim(),
                         userPlan: userPlan,
-                        paymentStatus:
-                            ConsultancyPaymentStatus.freeForPremium,
+                        paymentStatus: ConsultancyPaymentStatus.freeForPremium,
                         status: ConsultancyRequestStatus.newRequest,
                         sourcePage: sourcePage,
                         createdAt: DateTime.now(),

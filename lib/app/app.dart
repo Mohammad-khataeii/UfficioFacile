@@ -9,6 +9,10 @@ import 'app_scope.dart';
 import 'app_startup.dart';
 import 'app_startup_widgets.dart';
 import 'app_theme.dart';
+import '../features/admin/presentation/admin_shell_screen.dart';
+import '../features/auth/presentation/account_screen.dart';
+import '../features/auth/presentation/auth_gate.dart';
+import '../features/auth/presentation/auth_screen.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 import '../features/italy_admin_copilot/domain/life_admin_mode.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart';
@@ -49,6 +53,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
     _runDeferredLoad('profile', scope.profileController.load);
     _runDeferredLoad('requests', scope.requestController.load);
     _runDeferredLoad('admin', scope.adminController.load);
+    _runDeferredLoad('cms', scope.cmsContentController.load);
   }
 
   void _runDeferredLoad(String label, Future<void> Function() action) {
@@ -162,7 +167,10 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.costs:
                     return MaterialPageRoute(
-                      builder: (_) => const CostSavingDashboardScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'the cost dashboard',
+                        child: CostSavingDashboardScreen(),
+                      ),
                     );
                   case AppRoutes.officialLinks:
                     return MaterialPageRoute(
@@ -170,15 +178,24 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.documentVault:
                     return MaterialPageRoute(
-                      builder: (_) => const DocumentVaultScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'the document vault',
+                        child: DocumentVaultScreen(),
+                      ),
                     );
                   case AppRoutes.contacts:
                     return MaterialPageRoute(
-                      builder: (_) => const ContactsDirectoryScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'the contacts directory',
+                        child: ContactsDirectoryScreen(),
+                      ),
                     );
                   case AppRoutes.calendar:
                     return MaterialPageRoute(
-                      builder: (_) => const LifeAdminCalendarScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'the calendar',
+                        child: LifeAdminCalendarScreen(),
+                      ),
                     );
                   case AppRoutes.procedures:
                     return MaterialPageRoute(
@@ -189,6 +206,13 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) =>
                           ProcedureDetailScreen(procedure: args.procedure),
+                    );
+                  case AppRoutes.cmsProcedureDetail:
+                    final args = settings.arguments! as CmsProcedureRouteArgs;
+                    return MaterialPageRoute(
+                      builder: (_) => CmsProcedureDetailScreen(
+                        procedureSlug: args.procedureSlug,
+                      ),
                     );
                   case AppRoutes.procedureStart:
                     final args = settings.arguments! as ProcedureRouteArgs;
@@ -207,7 +231,10 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.requests:
                     return MaterialPageRoute(
-                      builder: (_) => const SavedRequestsScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'saved requests',
+                        child: SavedRequestsScreen(),
+                      ),
                     );
                   case AppRoutes.requestDetail:
                     final args = settings.arguments! as RequestRouteArgs;
@@ -227,15 +254,32 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.profile:
                     return MaterialPageRoute(
-                      builder: (_) => const ProfileScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'your profile',
+                        child: ProfileScreen(),
+                      ),
+                    );
+                  case AppRoutes.auth:
+                    return MaterialPageRoute(
+                      builder: (_) => const AuthScreen(),
+                    );
+                  case AppRoutes.account:
+                    return MaterialPageRoute(
+                      builder: (_) => const AccountScreen(),
                     );
                   case AppRoutes.privacy:
                     return MaterialPageRoute(
-                      builder: (_) => const PrivacyCenterScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'the privacy center',
+                        child: PrivacyCenterScreen(),
+                      ),
                     );
                   case AppRoutes.sync:
                     return MaterialPageRoute(
-                      builder: (_) => const SyncSettingsScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'sync settings',
+                        child: SyncSettingsScreen(),
+                      ),
                     );
                   case AppRoutes.help:
                     return MaterialPageRoute(
@@ -283,11 +327,11 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.admin:
                     return MaterialPageRoute(
-                      builder: (_) => const AdminPanelScreen(),
+                      builder: (_) => const AdminShellScreen(),
                     );
                   case AppRoutes.adminPremium:
                     return MaterialPageRoute(
-                      builder: (_) => const AdminPremiumScreen(),
+                      builder: (_) => const AdminShellScreen(),
                     );
                   default:
                     return MaterialPageRoute(

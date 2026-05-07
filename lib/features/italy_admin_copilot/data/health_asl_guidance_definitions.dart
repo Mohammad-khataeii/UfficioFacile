@@ -708,7 +708,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
           'This is a separate later page for users who already have an SSN/codice fiscale position and only need a duplicate, renewal, or replacement card.',
       recommendedChannel: 'online_or_in_person',
       channelExplanation:
-          'Use national online services first when possible. If the user cannot complete it online or has a local issue, go to the ASL administrative office.',
+          'Use the national online services first when possible. If you cannot complete it online or there is a local issue, go to the ASL administrative office.',
       whereToGo:
           'ASL administrative office of the user’s Torino district if online duplicate/renewal is not enough.',
       documents: [

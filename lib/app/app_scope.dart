@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_config.dart';
+import '../features/admin/application/admin_panel_controller.dart';
+import '../features/admin/data/admin_repository.dart';
+import '../features/admin/data/local_admin_repository.dart';
+import '../features/admin/data/supabase_admin_repository.dart';
+import '../features/admin_cms/application/cms_content_controller.dart';
+import '../features/admin_cms/data/cms_repository.dart';
+import '../features/admin_cms/data/local_cms_repository.dart';
+import '../features/admin_cms/data/supabase_cms_repository.dart';
+import '../features/auth/application/auth_controller.dart';
+import '../features/auth/data/auth_repository.dart';
+import '../features/auth/data/supabase_auth_repository.dart';
 import '../features/italy_admin_copilot/application/admin_controller.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 import '../features/italy_admin_copilot/application/procedure_controller.dart';
@@ -33,6 +44,11 @@ class AppScope extends InheritedWidget {
     required this.supabaseBootstrapResult,
     required super.child,
   }) : _prefs = prefs {
+    authRepository =
+        config.isSupabaseEnabled && SupabaseBootstrap.client != null
+        ? SupabaseAuthRepository(SupabaseBootstrap.client!)
+        : LocalAuthRepository(prefs);
+    authController = AuthController(authRepository);
     final analytics = LocalAnalyticsService(prefs);
     appController = ItalyAdminCopilotController(
       appConfig: config,
@@ -68,9 +84,8 @@ class AppScope extends InheritedWidget {
     proofFolderRepository = LocalProofFolderRepository.fromPrefs(prefs);
     beforeSendingRepository = LocalBeforeSendingRepository.fromPrefs(prefs);
     problemRequestsRepository = LocalProblemRequestsRepository.fromPrefs(prefs);
-    consultancyRequestsRepository = LocalConsultancyRequestsRepository.fromPrefs(
-      prefs,
-    );
+    consultancyRequestsRepository =
+        LocalConsultancyRequestsRepository.fromPrefs(prefs);
     costItemsRepository = LocalCostItemsRepository.fromPrefs(prefs);
     directoryContactsRepository = LocalDirectoryContactsRepository.fromPrefs(
       prefs,
@@ -95,6 +110,15 @@ class AppScope extends InheritedWidget {
     officialLinksDirectoryService = OfficialLinksDirectoryService();
     localizationInspectorService = LocalizationInspectorService();
     authFacade = UfficcioAuthFacade(config);
+    adminRepository =
+        config.isSupabaseEnabled && SupabaseBootstrap.client != null
+        ? SupabaseAdminRepository(SupabaseBootstrap.client!)
+        : const LocalAdminRepository();
+    adminPanelController = AdminPanelController(adminRepository);
+    cmsRepository = config.isSupabaseEnabled && SupabaseBootstrap.client != null
+        ? SupabaseCmsRepository(SupabaseBootstrap.client!)
+        : const LocalCmsRepository();
+    cmsContentController = CmsContentController(cmsRepository);
     bundledCatalogRepository = const BundledCatalogRepository();
     catalogRepository = HybridCatalogRepository(
       bundled: bundledCatalogRepository,
@@ -141,6 +165,8 @@ class AppScope extends InheritedWidget {
   final UfficcioFacileConfig config;
   final SupabaseBootstrapResult supabaseBootstrapResult;
 
+  late final AuthRepository authRepository;
+  late final AuthController authController;
   late final ItalyAdminCopilotController appController;
   late final ProcedureController procedureController;
   late final ProfileController profileController;
@@ -180,6 +206,10 @@ class AppScope extends InheritedWidget {
   late final BundledCatalogRepository bundledCatalogRepository;
   late final HybridCatalogRepository catalogRepository;
   late final UfficcioAuthFacade authFacade;
+  late final AdminRepository adminRepository;
+  late final AdminPanelController adminPanelController;
+  late final CmsRepository cmsRepository;
+  late final CmsContentController cmsContentController;
   late final LocalUfficcioUserSettingsRepository userSettingsRepository;
   late final LocalUfficcioEntitlementRepository entitlementRepository;
   late final LocalPremiumConfigRepository premiumConfigRepository;
