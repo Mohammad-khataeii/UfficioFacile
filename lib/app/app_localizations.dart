@@ -28,7 +28,7 @@ class AppLocalizations {
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'app_title': 'Italy Life Admin Copilot',
+      'app_title': 'UfficioFacile',
       'hero_title': 'Handle Italian admin without starting from zero.',
       'hero_subtitle':
           'Choose a problem, answer guided questions, and generate a formal Italian message, PEC-style version, checklist, and follow-up.',
@@ -86,9 +86,16 @@ class AppLocalizations {
       'document_vault': 'Document vault',
       'contacts_directory': 'Contacts directory',
       'calendar': 'Calendar',
+      'plan': 'Plan',
+      'free_plan': 'Free',
+      'pro_plan': 'Pro',
+      'consultant_plan': 'Consultant',
+      'beta_access_active': 'Beta access active',
+      'upgrade_to_pro': 'Upgrade to Pro',
+      'premium_feature': 'Pro feature',
     },
     'it': {
-      'app_title': 'Italy Life Admin Copilot',
+      'app_title': 'UfficioFacile',
       'hero_title': 'Gestisci la burocrazia italiana senza partire da zero.',
       'hero_subtitle':
           'Scegli un problema, rispondi a domande guidate e genera email formali, versione PEC, checklist e follow-up.',
@@ -146,9 +153,16 @@ class AppLocalizations {
       'document_vault': 'Archivio documenti',
       'contacts_directory': 'Rubrica contatti',
       'calendar': 'Calendario',
+      'plan': 'Piano',
+      'free_plan': 'Free',
+      'pro_plan': 'Pro',
+      'consultant_plan': 'Consulente',
+      'beta_access_active': 'Accesso beta attivo',
+      'upgrade_to_pro': 'Passa a Pro',
+      'premium_feature': 'Funzione Pro',
     },
     'es': {
-      'app_title': 'Italy Life Admin Copilot',
+      'app_title': 'UfficioFacile',
       'hero_title':
           'Gestiona la administración italiana sin empezar desde cero.',
       'hero_subtitle':
@@ -172,9 +186,16 @@ class AppLocalizations {
       'document_vault': 'Bóveda de documentos',
       'contacts_directory': 'Directorio de contactos',
       'calendar': 'Calendario',
+      'plan': 'Plan',
+      'free_plan': 'Gratis',
+      'pro_plan': 'Pro',
+      'consultant_plan': 'Consultor',
+      'beta_access_active': 'Acceso beta activo',
+      'upgrade_to_pro': 'Pasar a Pro',
+      'premium_feature': 'Función Pro',
     },
     'fa': {
-      'app_title': 'Italy Life Admin Copilot',
+      'app_title': 'UfficioFacile',
       'hero_title': 'کارهای اداری ایتالیا را بدون شروع از صفر مدیریت کنید.',
       'hero_subtitle':
           'مشکل را انتخاب کنید، به سوالات مرحله‌ای پاسخ دهید و متن رسمی ایتالیایی، نسخه PEC، چک‌لیست و پیگیری بسازید.',
@@ -197,9 +218,16 @@ class AppLocalizations {
       'document_vault': 'آرشیو اسناد',
       'contacts_directory': 'دفترچه مخاطبان',
       'calendar': 'تقویم',
+      'plan': 'پلن',
+      'free_plan': 'رایگان',
+      'pro_plan': 'پرو',
+      'consultant_plan': 'مشاور',
+      'beta_access_active': 'دسترسی بتا فعال است',
+      'upgrade_to_pro': 'ارتقا به پرو',
+      'premium_feature': 'ویژگی پرو',
     },
     'ar': {
-      'app_title': 'Italy Life Admin Copilot',
+      'app_title': 'UfficioFacile',
       'hero_title': 'أنجز الشؤون الإدارية في إيطاليا خطوة بخطوة.',
       'hero_subtitle':
           'اختر المشكلة، أجب عن أسئلة موجهة، وأنشئ رسالة إيطالية رسمية ونسخة PEC وقائمة تحقق ومتابعة.',
@@ -222,6 +250,13 @@ class AppLocalizations {
       'document_vault': 'خزنة المستندات',
       'contacts_directory': 'دليل الجهات',
       'calendar': 'التقويم',
+      'plan': 'الخطة',
+      'free_plan': 'مجاني',
+      'pro_plan': 'برو',
+      'consultant_plan': 'استشاري',
+      'beta_access_active': 'وصول بيتا نشط',
+      'upgrade_to_pro': 'الترقية إلى Pro',
+      'premium_feature': 'ميزة Pro',
     },
   };
 }

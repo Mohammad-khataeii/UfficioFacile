@@ -15,18 +15,20 @@ class ItalyAdminProcedureDefinitions {
 
   static final List<AdminProcedure> _procedures = [
     _health(
+      'TESSERA_SANITARIA_RENEWAL',
+      'Get Tessera Sanitaria / Register with SSN',
+      'Get Tessera Sanitaria / Register with SSN',
+      _tesseraFields(),
+      _tesseraAttachments(),
+      shortDescription:
+          'Understand the Torino SSN registration path, recommended channel, documents, and when to go in person instead of relying only on email or PEC.',
+    ),
+    _health(
       'CHANGE_DOCTOR',
       'Change Doctor / Medico di Base Request',
       'Change doctor',
       _changeDoctorFields(),
       _healthAttachments(),
-    ),
-    _health(
-      'TESSERA_SANITARIA_RENEWAL',
-      'Tessera Sanitaria Renewal / Health Card Problem',
-      'Health card',
-      _tesseraFields(),
-      _tesseraAttachments(),
     ),
     _health(
       'ASL_REJECTED_REQUEST_REPLY',
@@ -43,18 +45,40 @@ class ItalyAdminProcedureDefinitions {
       _genericAttachments(),
     ),
     _housing(
-      'RENTAL_CONTRACT_CHANGE',
-      'Rental Contract Add Tenant / Subentro / Cessione / Integrazione',
-      'Contract change',
+      'REGISTER_OR_CHECK_RENTAL_CONTRACT',
+      'Register or Check Rental Contract',
+      'Register or check rental contract',
       _rentalFields(),
       _rentalAttachments(),
+      shortDescription:
+          'Check whether the contract is registered, ask for proof, and understand when Agenzia Entrate is the correct next step.',
+    ),
+    _housing(
+      'RENTAL_CONTRACT_CHANGE',
+      'Rental Contract Change',
+      'Rental contract change',
+      _rentalFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Handle official contract changes such as subentro, cessione, proroga, rent changes, or early termination registration.',
+    ),
+    _housing(
+      'ADD_OR_REMOVE_TENANT',
+      'Add or Remove Tenant from Contract',
+      'Add or remove tenant',
+      _rentalFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Update who is on the contract and understand when landlord approval and Agenzia Entrate registration are needed.',
     ),
     _housing(
       'LANDLORD_MAINTENANCE_OR_CONTRACT',
-      'Landlord Maintenance / Contract Problem Letter',
-      'Maintenance & contract',
+      'Landlord Maintenance / Repair Request',
+      'Landlord repair request',
       _landlordFields(),
       _landlordAttachments(),
+      shortDescription:
+          'Ask for repairs with proof, understand when a friendly message is enough, and when to escalate to formal written notice.',
     ),
     _housing(
       'DEPOSIT_RETURN_REQUEST',
@@ -62,13 +86,89 @@ class ItalyAdminProcedureDefinitions {
       'Deposit return',
       _depositFields(),
       _depositAttachments(),
+      shortDescription:
+          'Request the return of your rental deposit and prepare proof before escalating to a tenant union.',
     ),
     _housing(
       'RENT_CONTRACT_TERMINATION_NOTICE',
       'Rent Contract Termination Notice',
-      'Contract termination',
+      'Rent contract termination notice',
       _terminationFields(),
       _rentalAttachments(),
+      shortDescription:
+          'Prepare a formal termination notice, check the notice period in the contract, and keep proof of sending.',
+    ),
+    _housing(
+      'RENT_PAYMENT_DELAY_PAYMENT_PLAN',
+      'Rent Payment Delay / Payment Plan',
+      'Rent payment delay',
+      _landlordFields(),
+      _landlordAttachments(),
+      shortDescription:
+          'Communicate rent delay clearly, propose a payment plan, and reduce escalation risk before eviction becomes urgent.',
+    ),
+    _housing(
+      'WRONG_EXPENSES_SPESE_CONDOMINIALI',
+      'Wrong Expenses / Spese Condominiali Dispute',
+      'Spese condominiali dispute',
+      _landlordFields(),
+      _landlordAttachments(),
+      shortDescription:
+          'Ask for a detailed breakdown of expenses and contest unclear or tenant-inappropriate charges.',
+    ),
+    _housing(
+      'UNREGISTERED_IRREGULAR_RENTAL_CONTRACT',
+      'Unregistered or Irregular Rental Contract',
+      'Irregular rental contract',
+      _rentalFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Collect proof, ask for registration evidence, and understand when tenant-union support is safer than informal messaging.',
+    ),
+    _housing(
+      'EVICTION_SFRATTO_SUPPORT',
+      'Eviction / Sfratto Support',
+      'Eviction support',
+      _terminationFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Time-sensitive support for eviction notices, court documents, and urgent referral to Comune housing support and tenant unions.',
+    ),
+    _housing(
+      'EMERGENCY_HOUSING_COMUNE_SUPPORT',
+      'Emergency Housing / Comune Support',
+      'Emergency housing',
+      _genericHousingSupportFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Ask Comune di Torino for urgent housing support when eviction, homelessness risk, or serious housing instability is involved.',
+    ),
+    _housing(
+      'STUDENT_RENT_HELP',
+      'Student Rent Help',
+      'Student rent help',
+      _rentalFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Handle student-specific rent problems such as registration proof, deposit disputes, roommate changes, and irregular contracts.',
+    ),
+    _housing(
+      'FORMAL_COMPLAINT_TO_LANDLORD',
+      'Formal Complaint to Landlord',
+      'Formal complaint to landlord',
+      _landlordFields(),
+      _landlordAttachments(),
+      shortDescription:
+          'Create a stronger written complaint for landlord disputes when simple messages are no longer enough.',
+    ),
+    _housing(
+      'TENANT_UNION_APPOINTMENT',
+      'Tenant Union Appointment',
+      'Tenant union appointment',
+      _genericHousingSupportFields(),
+      _rentalAttachments(),
+      shortDescription:
+          'Prepare a SUNIA or SICET appointment and gather the documents needed for housing support.',
     ),
     _utility(
       'ENERGY_BILL_ANALYZER_CHECKLIST',
@@ -76,6 +176,8 @@ class ItalyAdminProcedureDefinitions {
       'Bill understanding',
       _energyBillFields(),
       _billAttachments(),
+      shortDescription:
+          'Read the bill first, extract supplier and distributor details, and identify suspicious charges before filing a complaint.',
     ),
     _utility(
       'ENERGY_SUPPLIER_COMPARISON',
@@ -83,6 +185,8 @@ class ItalyAdminProcedureDefinitions {
       'Offer comparison',
       _energyComparisonFields(),
       _billAttachments(),
+      shortDescription:
+          'Compare offers safely without relying only on monthly estimates or sales-call promises.',
     ),
     _utility(
       'ELECTRICITY_GAS_SWITCH_REQUEST',
@@ -90,6 +194,8 @@ class ItalyAdminProcedureDefinitions {
       'Provider switching',
       _utilitySwitchFields(),
       _utilityAttachments(),
+      shortDescription:
+          'Switch supplier while the supply remains active and prepare the information needed before confirming the new offer.',
     ),
     _utility(
       'VOLTURA_REQUEST',
@@ -97,6 +203,8 @@ class ItalyAdminProcedureDefinitions {
       'Voltura',
       _utilitySwitchFields(),
       _utilityAttachments(),
+      shortDescription:
+          'Transfer an active utility contract into your name and avoid confusion with subentro or provider switching.',
     ),
     _utility(
       'SUBENTRO_REQUEST',
@@ -104,6 +212,8 @@ class ItalyAdminProcedureDefinitions {
       'Subentro',
       _utilitySwitchFields(),
       _utilityAttachments(),
+      shortDescription:
+          'Reactivate an inactive supply with an existing meter and understand what the supplier will usually ask for.',
     ),
     _utility(
       'UTILITY_CANCELLATION_DISDETTA',
@@ -111,6 +221,8 @@ class ItalyAdminProcedureDefinitions {
       'Disdetta',
       _utilityCancellationFields(),
       _utilityAttachments(),
+      shortDescription:
+          'Close the contract correctly, capture the final meter reading, and avoid leaving the next user with the wrong flow.',
     ),
     _utility(
       'HIGH_BILL_COMPLAINT',
@@ -118,6 +230,8 @@ class ItalyAdminProcedureDefinitions {
       'High bill complaint',
       _highBillFields(),
       _billAttachments(),
+      shortDescription:
+          'Compare bills, verify readings, and prepare the written complaint path before escalating to ARERA.',
     ),
     _utility(
       'METER_READING_CORRECTION',
@@ -125,6 +239,8 @@ class ItalyAdminProcedureDefinitions {
       'Reading correction',
       _meterCorrectionFields(),
       _billAttachments(),
+      shortDescription:
+          'Correct an estimated or wrong reading with evidence and keep the supplier/distributor distinction clear.',
     ),
     _utility(
       'PAYMENT_PLAN_REQUEST',
@@ -132,6 +248,8 @@ class ItalyAdminProcedureDefinitions {
       'Payment plan',
       _paymentPlanFields(),
       _billAttachments(),
+      shortDescription:
+          'Ask for installments before disconnection risk becomes urgent and keep the request focused on the supplier.',
     ),
     _utility(
       'WRONG_CHARGE_REFUND_REQUEST',
@@ -139,6 +257,8 @@ class ItalyAdminProcedureDefinitions {
       'Wrong charge refund',
       _wrongChargeFields(),
       _billAttachments(),
+      shortDescription:
+          'Request a refund for an incorrect utility charge and keep the written trail needed for escalation if refused.',
     ),
     _utility(
       'UNILATERAL_CONTRACT_CHANGE_COMPLAINT',
@@ -146,6 +266,53 @@ class ItalyAdminProcedureDefinitions {
       'Contract change complaint',
       _contractChangeComplaintFields(),
       _billAttachments(),
+      shortDescription:
+          'Contest a unilateral supplier change or use the flow to decide whether switching is the safer next step.',
+    ),
+    _utility(
+      'CHECK_SUPPLIER_VS_DISTRIBUTOR',
+      'Check Supplier vs Distributor',
+      'Supplier vs distributor',
+      _energyBillFields(),
+      _billAttachments(),
+      shortDescription:
+          'Understand who handles bills and contracts versus faults and emergencies before contacting the wrong company.',
+    ),
+    _utility(
+      'NEW_ACTIVATION_PRIMA_ATTIVAZIONE',
+      'New Activation / Prima Attivazione',
+      'New activation',
+      _utilitySwitchFields(),
+      _utilityAttachments(),
+      shortDescription:
+          'Start a new supply correctly and distinguish prima attivazione from voltura or subentro.',
+    ),
+    _utility(
+      'CONTRACT_NOT_REQUESTED_SCAM_ACTIVATION',
+      'Contract Not Requested / Scam Activation',
+      'Contract not requested',
+      _highBillFields(),
+      _billAttachments(),
+      shortDescription:
+          'Challenge an unsolicited activation, ask for proof of consent, and prepare escalation if the supplier does not fix it.',
+    ),
+    _utility(
+      'GAS_OR_ELECTRICITY_EMERGENCY_FAULT',
+      'Gas or Electricity Emergency / Fault',
+      'Emergency fault',
+      _meterCorrectionFields(),
+      _utilityAttachments(),
+      shortDescription:
+          'Urgent technical flow for gas smell, dangerous faults, or network issues that should go to the distributor immediately.',
+    ),
+    _utility(
+      'ARERA_COMPLAINT_AND_CONCILIATION',
+      'ARERA Complaint and Conciliation',
+      'ARERA escalation',
+      _highBillFields(),
+      _billAttachments(),
+      shortDescription:
+          'Escalate unresolved utility disputes after the supplier complaint step using Sportello Consumatore and conciliation guidance.',
     ),
     _canone(
       'CANONE_RAI_NO_TV_DECLARATION_CHECKLIST',
@@ -153,6 +320,8 @@ class ItalyAdminProcedureDefinitions {
       'No-TV declaration',
       _canoneFields(),
       _canoneAttachments(),
+      shortDescription:
+          'Prepare the no-TV declaration with the right channel, documents, and annual deadline logic.',
     ),
     _canone(
       'CANONE_RAI_EXEMPTION_OVER_75_CHECKLIST',
@@ -160,6 +329,8 @@ class ItalyAdminProcedureDefinitions {
       'Over-75 exemption',
       _canoneFields(),
       _canoneAttachments(),
+      shortDescription:
+          'Check the over-75 exemption path carefully, including household and current official threshold requirements.',
     ),
     _canone(
       'CANONE_RAI_REFUND_OR_WRONG_CHARGE',
@@ -167,6 +338,53 @@ class ItalyAdminProcedureDefinitions {
       'Refund / wrong charge',
       _canoneRefundFields(),
       _canoneAttachments(),
+      shortDescription:
+          'Handle a wrong Canone charge or refund request through Agenzia Entrate instead of relying on the electricity supplier.',
+    ),
+    _canone(
+      'UNDERSTAND_IF_MUST_PAY_CANONE_RAI',
+      'Understand if You Must Pay Canone RAI',
+      'Understand if you must pay',
+      _canoneFields(),
+      _canoneAttachments(),
+      shortDescription:
+          'Work out whether the right path is payment, exemption, no-TV declaration, or refund based on the household situation.',
+    ),
+    _canone(
+      'DIPLOMATIC_MILITARY_EXEMPTION',
+      'Diplomatic / Military Exemption',
+      'Diplomatic or military exemption',
+      _canoneFields(),
+      _canoneAttachments(),
+      shortDescription:
+          'Route special-status users toward the official exemption form or intermediary instead of guessing eligibility in-app.',
+    ),
+    _canone(
+      'WRONG_ELECTRICITY_BILL_CHARGE',
+      'Wrong Electricity Bill Charge',
+      'Wrong bill charge',
+      _canoneRefundFields(),
+      _canoneAttachments(),
+      shortDescription:
+          'Resolve duplicate or wrong household Canone charges and decide when refund is needed.',
+    ),
+    _canone(
+      'NEW_HOME_CHANGED_ELECTRICITY_CONTRACT',
+      'New Home / Changed Electricity Contract',
+      'New home or changed contract',
+      _canoneFields(),
+      _canoneAttachments(),
+      shortDescription:
+          'Understand how moving home, voltura, or a new residential contract changes the Canone RAI path.',
+    ),
+    _canone(
+      'HELP_FILLING_AGENZIA_ENTRATE_FORM',
+      'Help Filling Agenzia Entrate Form',
+      'Form help',
+      _canoneFields(),
+      _canoneAttachments(),
+      shortDescription:
+          'Choose the correct Canone form and submission channel without exposing every deadline and address at once.',
     ),
     _telecom(
       'INTERNET_PHONE_CANCELLATION',
@@ -174,6 +392,8 @@ class ItalyAdminProcedureDefinitions {
       'Cancellation',
       _telecomCancellationFields(),
       _telecomAttachments(),
+      shortDescription:
+          'Cancel a fixed-line contract carefully and avoid losing the number when portability is actually needed.',
     ),
     _telecom(
       'TELECOM_WRONG_BILL_COMPLAINT',
@@ -181,6 +401,8 @@ class ItalyAdminProcedureDefinitions {
       'Wrong bill',
       _telecomComplaintFields(),
       _telecomAttachments(),
+      shortDescription:
+          'Challenge a telecom bill with written proof first, then prepare for escalation if the operator does not fix it.',
     ),
     _telecom(
       'SERVICE_NOT_WORKING_COMPLAINT',
@@ -188,6 +410,8 @@ class ItalyAdminProcedureDefinitions {
       'Service issue',
       _telecomComplaintFields(),
       _telecomAttachments(),
+      shortDescription:
+          'Document outages or failures, open a ticket first, and move to a formal complaint only when needed.',
     ),
     _telecom(
       'MODEM_RETURN_OR_CHARGE_DISPUTE',
@@ -195,6 +419,161 @@ class ItalyAdminProcedureDefinitions {
       'Modem dispute',
       _telecomComplaintFields(),
       _telecomAttachments(),
+      shortDescription:
+          'Handle modem return instructions and contest modem charges without promising more than the contract supports.',
+    ),
+    _telecom(
+      'UNDERSTAND_TELECOM_PROBLEM',
+      'Understand Telecom Problem',
+      'Understand telecom problem',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Classify the issue before sending the wrong complaint and gather the right proof for the correct flow.',
+    ),
+    _telecom(
+      'MOBILE_SIM_CANCELLATION',
+      'Mobile SIM Cancellation',
+      'Mobile SIM cancellation',
+      _telecomCancellationFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Deactivate a mobile SIM while checking whether number portability or residual credit handling matters first.',
+    ),
+    _telecom(
+      'PROVIDER_SWITCHING_NUMBER_PORTABILITY',
+      'Provider Switching / Number Portability',
+      'Switching or portability',
+      _telecomCancellationFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Keep the number while switching operator and avoid direct cancellation when portability is the safer path.',
+    ),
+    _telecom(
+      'INTERNET_SPEED_TOO_LOW',
+      'Internet Speed Too Low',
+      'Internet too slow',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Collect speed evidence, compare it with the contract, and prepare the complaint path if performance stays below expectations.',
+    ),
+    _telecom(
+      'ACTIVATION_DELAY_NO_LINE',
+      'No Line Activation / Activation Delay',
+      'Activation delay',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Track delayed activation, missed appointments, and any charges that arrived before the service actually started.',
+    ),
+    _telecom(
+      'CONTRACT_NOT_REQUESTED_PHONE_SCAM',
+      'Contract Not Requested / Phone Scam',
+      'Contract not requested',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Contest a phone scam or unauthorized activation immediately and ask for proof of consent.',
+    ),
+    _telecom(
+      'REFUND_OR_COMPENSATION_REQUEST',
+      'Refund or Compensation Request',
+      'Refund or compensation',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Ask clearly for refund or indennizzo and preserve the evidence needed for ConciliaWeb if refused.',
+    ),
+    _telecom(
+      'PAYMENT_PLAN_UNPAID_BILLS',
+      'Payment Plan / Unpaid Bills',
+      'Payment plan',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Request installments or clarify debt before suspension risk grows, while separating disputes from payment plans.',
+    ),
+    _telecom(
+      'ROAMING_INTERNATIONAL_CHARGE_DISPUTE',
+      'Roaming or International Charge Dispute',
+      'Roaming dispute',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Contest roaming or international charges with travel evidence, warnings, and usage details.',
+    ),
+    _telecom(
+      'PEC_FORMAL_COMPLAINT_OPERATOR',
+      'PEC / Formal Complaint to Operator',
+      'Formal complaint',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Generate a stronger operator complaint without guessing the operator’s PEC or postal address.',
+    ),
+    _telecom(
+      'AGCOM_CORECOM_CONCILIAWEB_ESCALATION',
+      'AGCOM / Corecom / ConciliaWeb Escalation',
+      'Escalation',
+      _telecomComplaintFields(),
+      _telecomAttachments(),
+      shortDescription:
+          'Escalate unresolved telecom disputes after the written complaint step with ConciliaWeb and local Corecom guidance.',
+    ),
+    _publicOffice(
+      'UNDERSTAND_RESIDENZA_DOMICILIO_TEMPORARY',
+      'Understand Residenza / Domicilio / Temporary Residence',
+      'Comune / orientation',
+      _comuneFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Clarify whether the user needs residenza, address change, temporary residence, certificate, or autocertificazione before choosing a channel.',
+    ),
+    _publicOffice(
+      'CHANGE_RESIDENCE_FROM_ANOTHER_COMUNE_OR_ABROAD',
+      'Change Residence from Another Comune or Abroad',
+      'Residence change',
+      _comuneFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Guide a Torino residence transfer from another Italian comune or from abroad, including documents and channel choice.',
+    ),
+    _publicOffice(
+      'CHANGE_ADDRESS_INSIDE_TORINO',
+      'Change Address Inside Torino',
+      'Address change',
+      _comuneFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Handle an address change for someone already resident in Torino without mixing it with inter-comune residence transfer.',
+    ),
+    _publicOffice(
+      'TEMPORARY_RESIDENCE_POPOLAZIONE_TEMPORANEA',
+      'Temporary Residence / Popolazione Temporanea',
+      'Temporary residence',
+      _comuneFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Route users who are temporarily living in Torino without full habitual residence transfer.',
+    ),
+    _publicOffice(
+      'DOORBELL_MAILBOX_ADDRESS_PROOF',
+      'Doorbell / Mailbox / Address Proof Help',
+      'Address proof',
+      _comuneFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Prepare address proof and residence-check readiness before a Comune verification fails.',
+    ),
+    _publicOffice(
+      'REJECTED_RESIDENZA_REQUEST_REPLY',
+      'Reply to Rejected Residenza Request',
+      'Rejected residence request',
+      _rejectedFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Reply to suspended or rejected residence/address practices with missing documents or clarification.',
     ),
     _publicOffice(
       'COMUNE_RESIDENCE_REQUEST',
@@ -202,6 +581,8 @@ class ItalyAdminProcedureDefinitions {
       'Residence',
       _comuneFields(),
       _comuneAttachments(),
+      shortDescription:
+          'Legacy Comune residence entrypoint kept for compatibility with the richer Torino guidance.',
     ),
     _publicOffice(
       'ANAGRAFE_CERTIFICATE_REQUEST',
@@ -209,6 +590,78 @@ class ItalyAdminProcedureDefinitions {
       'Certificate request',
       _anagrafeFields(),
       _comuneAttachments(),
+    ),
+    _publicOffice(
+      'FAMILY_STATUS_CERTIFICATE',
+      'Family Status Certificate',
+      'Stato di famiglia',
+      _anagrafeFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Explain when stato di famiglia is needed and when autocertificazione may be enough.',
+    ),
+    _publicOffice(
+      'RESIDENCE_CERTIFICATE',
+      'Residence Certificate',
+      'Residence certificate',
+      _anagrafeFields(),
+      _comuneAttachments(),
+      shortDescription:
+          'Request or evaluate a certificato di residenza with ANPR-first guidance.',
+    ),
+    _publicOffice(
+      'SELF_CERTIFICATION_AUTOCERTIFICAZIONE',
+      'Self-Certification / Autocertificazione',
+      'Autocertificazione',
+      _anagrafeFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Show when self-certification is a valid alternative to an official anagrafe certificate.',
+    ),
+    _publicOffice(
+      'BOOK_ANAGRAFE_APPOINTMENT',
+      'Book Anagrafe Appointment',
+      'Appointment',
+      _appointmentFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Prepare the right appointment request and the right document bundle for Anagrafe support.',
+    ),
+    _publicOffice(
+      'PEC_FORMAL_REQUEST_COMUNE',
+      'PEC / Formal Request to Comune',
+      'Formal PEC',
+      _rejectedFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Draft a formal Comune or Anagrafe follow-up, integration, or protocol-level request.',
+    ),
+    _publicOffice(
+      'ONLINE_COMUNE_SERVICE_PROBLEM',
+      'Online Comune Service Problem',
+      'Online issue',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Report Comune or Anagrafe portal problems with screenshots and a clear technical description.',
+    ),
+    _publicOffice(
+      'GENERAL_COMUNE_INFORMATION_REQUEST',
+      'General Comune Information Request',
+      'General information',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Ask Comune or Anagrafe for the correct procedure and document list when the case is still unclear.',
+    ),
+    _work(
+      'UNDERSTAND_JOB_LOSS_BENEFIT_SITUATION',
+      'Understand Job-Loss / Benefit Situation',
+      'Job-loss orientation',
+      _naspiFields(),
+      _naspiAttachments(),
+      shortDescription:
+          'Clarify whether the right path is NASpI, DID/CPI, employer document recovery, union support, or CAF.',
     ),
     _work(
       'NASPI_PREPARATION',
@@ -224,6 +677,114 @@ class ItalyAdminProcedureDefinitions {
       _appointmentFields(),
       _genericAttachments(),
     ),
+    _work(
+      'NASPI_APPLICATION_FOLLOWUP',
+      'NASpI Application Follow-up',
+      'NASpI follow-up',
+      _naspiFields(),
+      _naspiAttachments(),
+      shortDescription:
+          'Check pending NASpI practices, missing documents, payment delays, and patronato follow-up.',
+    ),
+    _work(
+      'DID_AND_CENTRO_IMPIEGO',
+      'DID / Centro per l’Impiego',
+      'DID and CPI',
+      _appointmentFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Handle DID, patto di servizio, CPI competence, and employment-service obligations linked to unemployment.',
+    ),
+    _work(
+      'INPS_APPOINTMENT_CONTACT_REQUEST',
+      'INPS Appointment / Contact Request',
+      'INPS contact',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Prepare an INPS contact or appointment request without skipping protocol details and supporting evidence.',
+    ),
+    _work(
+      'REPLY_REJECTED_INPS_REQUEST',
+      'Reply to Rejected INPS Request',
+      'Rejected INPS request',
+      _rejectedFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Respond to rejected or suspended INPS practices with the right escalation and document integration path.',
+    ),
+    _work(
+      'MISSING_DOCUMENTS_INTEGRATION',
+      'Missing Documents Integration',
+      'INPS integration',
+      _rejectedFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Send the missing documents requested by INPS or by the patronato handling the practice.',
+    ),
+    _work(
+      'EMPLOYER_TERMINATION_CONTRACT_END_DOCUMENTS',
+      'Employer Contract-End Documents',
+      'Employer documents',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Ask the employer for end-of-contract documents needed for checks, patronato, or INPS.',
+    ),
+    _work(
+      'PAYSLIP_TFR_FINAL_PAYMENT_PROBLEM',
+      'Payslip / TFR / Final Payment Problem',
+      'Salary and TFR dispute',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Organize evidence and first requests when salary, TFR, ferie, or final settlement are missing or wrong.',
+    ),
+    _work(
+      'SICK_LEAVE_MALATTIA_INPS_BASICS',
+      'Sick Leave / Malattia INPS Basics',
+      'Sick leave',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Explain the core sick-leave steps, certificate protocol handling, and employer communication.',
+    ),
+    _work(
+      'MATERNITY_FAMILY_BENEFIT_HELP',
+      'Maternity / Family Benefit Help',
+      'Family benefits',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Route users to patronato, INPS, or CAF for maternity, child, and family-related benefit support.',
+    ),
+    _work(
+      'ISEE_CAF_CONNECTION',
+      'ISEE / CAF Connection',
+      'ISEE / CAF',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Clarify when the user needs CAF for ISEE rather than patronato for INPS applications.',
+    ),
+    _work(
+      'UNION_LEGAL_WORK_DISPUTE_SUPPORT',
+      'Union / Work Dispute Support',
+      'Work dispute',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Route unpaid salary, dismissal, TFR, and contract-abuse cases toward union or vertenza support.',
+    ),
+    _work(
+      'GENERAL_INPS_FORMAL_REQUEST_PEC',
+      'General INPS Formal Request / PEC',
+      'Formal INPS PEC',
+      _rejectedFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Draft a formal INPS follow-up, clarification request, or payment delay communication with protocol evidence.',
+    ),
     _university(
       'UNIVERSITY_OFFICE_REQUEST',
       'University Office Request',
@@ -238,12 +799,147 @@ class ItalyAdminProcedureDefinitions {
       _permessoFields(),
       _permessoAttachments(),
     ),
+    _university(
+      'UNDERSTAND_STUDENT_ADMINISTRATIVE_PROBLEM',
+      'Understand Student Administrative Problem',
+      'Student office routing',
+      _universityFields(),
+      _universityAttachments(),
+      shortDescription:
+          'Classify whether the student case belongs to university, EDISU, Questura, CAF, ASL, Comune, or Housing before drafting anything.',
+    ),
+    _university(
+      'EDISU_SCHOLARSHIP_APPLICATION',
+      'EDISU Scholarship Application',
+      'EDISU scholarship',
+      _universityFields(),
+      _universityAttachments(),
+      shortDescription:
+          'Prepare the scholarship or student-benefit application with the right economic, student, and immigration documents.',
+    ),
+    _university(
+      'EDISU_REJECTED_MISSING_DOCUMENTS',
+      'EDISU Rejected Request / Missing Documents',
+      'EDISU rejected or missing docs',
+      _rejectedFields(),
+      _universityAttachments(),
+      shortDescription:
+          'Reply when EDISU asks for integration, blocks a benefit, or rejects scholarship or housing documents.',
+    ),
+    _university(
+      'STUDENT_HOUSING_EDISU_RESIDENCE',
+      'Student Housing / EDISU Residence',
+      'Student housing',
+      _universityFields(),
+      _universityAttachments(),
+      shortDescription:
+          'Handle EDISU housing and residence support without mixing it up with private rent or Comune procedures.',
+    ),
+    _university(
+      'ISEE_ISEE_PARIFICATO_STUDENTS',
+      'ISEE / ISEE Parificato for Students',
+      'Student ISEE',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Work out whether the student needs ISEE Universitario or ISEE Parificato and when CAF support is the right first step.',
+    ),
+    _university(
+      'TUITION_FEES_FEE_REDUCTION_DOCUMENTS',
+      'Tuition Fees / Fee Reduction Documents',
+      'Tuition fees',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Prepare or correct fee-reduction documents and separate university fee issues from EDISU and CAF issues.',
+    ),
+    _university(
+      'PERMESSO_FIRST_REQUEST',
+      'Permesso di Soggiorno First Request',
+      'First permesso',
+      _permessoFields(),
+      _permessoAttachments(),
+      shortDescription:
+          'Use official Questura and university guidance to prepare the first student permesso without inventing document rules.',
+    ),
+    _university(
+      'PERMESSO_RENEWAL',
+      'Permesso di Soggiorno Renewal',
+      'Permesso renewal',
+      _permessoFields(),
+      _permessoAttachments(),
+      shortDescription:
+          'Prepare a student permit renewal with timing, enrollment, accommodation, health, and financial proof checks.',
+    ),
+    _university(
+      'PERMESSO_QUESTURA_FOLLOWUP',
+      'Permesso Appointment / Questura Follow-up',
+      'Questura follow-up',
+      _permessoFields(),
+      _permessoAttachments(),
+      shortDescription:
+          'Follow up on a stuck postal-kit or Questura appointment situation using receipt and status evidence.',
+    ),
+    _university(
+      'STUDENT_HEALTHCARE_TESSERA_DOCTOR',
+      'Student Healthcare / Tessera Sanitaria / Doctor',
+      'Student healthcare',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Route student healthcare cases into the dedicated Health / ASL flow instead of treating them as generic university issues.',
+    ),
+    _university(
+      'RESIDENZA_DOMICILE_STUDENTS',
+      'Residenza or Domicile for Students',
+      'Student residenza',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Separate student residenza and domicilio issues from housing proof, healthcare, and scholarship questions.',
+    ),
+    _university(
+      'RENTAL_CONTRACT_PROOF_STUDENTS',
+      'Rental Contract Proof for Students',
+      'Student rental proof',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Handle accommodation-proof requests for EDISU, ASL, permesso, or Comune without guessing landlord documents.',
+    ),
+    _university(
+      'UNIVERSITY_CERTIFICATE_REQUEST',
+      'University Certificate Request',
+      'University certificate',
+      _universityFields(),
+      _universityAttachments(),
+      shortDescription:
+          'Request the correct university certificate for enrollment, exams, scholarships, foreign authorities, or permit needs.',
+    ),
+    _university(
+      'FORMAL_EMAIL_UNIVERSITY_EDISU_OFFICE',
+      'Formal Email to University / EDISU / Office',
+      'Formal student email',
+      _universityFields(),
+      _universityAttachments(),
+      shortDescription:
+          'Generate a structured formal student message for university, EDISU, Questura-support, or CAF follow-up contexts.',
+    ),
     _general(
       'REJECTED_REQUEST_REPLY',
       'Reply to Rejected Public Office Request',
       'Rejected request',
       _rejectedFields(),
       _rejectedAttachments(),
+    ),
+    _general(
+      'REPLY_REJECTED_PUBLIC_OFFICE_REQUEST',
+      'Reply to Rejected Public Office Request',
+      'Rejected request',
+      _rejectedFields(),
+      _rejectedAttachments(),
+      shortDescription:
+          'Reply to a blocked or rejected office practice with a clearer formal review or integration request.',
     ),
     _general(
       'REFUND_OR_COMPLAINT_REQUEST',
@@ -260,14 +956,167 @@ class ItalyAdminProcedureDefinitions {
       _genericAttachments(),
     ),
     _general(
+      'FORMAL_APPOINTMENT_REQUEST',
+      'Formal Appointment Request',
+      'Appointment',
+      _appointmentFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Request an appointment with a clearer written explanation of the case and documents already available.',
+    ),
+    _general(
       'GENERIC_FORMAL_REQUEST',
       'Generic Formal Request',
       'Generic formal',
       _genericFields(),
       _genericAttachments(),
     ),
+    _general(
+      'UNDERSTAND_WHICH_OFFICE_TO_CONTACT',
+      'Understand Which Office to Contact',
+      'Which office?',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Route the user to the right office or specialized category before writing the wrong message.',
+    ),
+    _general(
+      'MISSING_DOCUMENTS_INTEGRATION_GENERAL',
+      'Missing Documents Integration',
+      'Missing documents',
+      _rejectedFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Prepare a clean integration email or PEC after a request was already submitted.',
+    ),
+    _general(
+      'REFUND_REQUEST',
+      'Refund Request',
+      'Refund',
+      _refundFields(),
+      _refundAttachments(),
+      shortDescription:
+          'Request money back with payment proof, reason, and the right written follow-up path.',
+    ),
+    _general(
+      'COMPLAINT_REQUEST',
+      'Complaint Request',
+      'Complaint',
+      _refundFields(),
+      _refundAttachments(),
+      shortDescription:
+          'Write a complaint with timeline, evidence, and a clear requested solution.',
+    ),
+    _general(
+      'FOLLOWUP_UNANSWERED_REQUEST',
+      'Follow-up on Unanswered Request',
+      'Follow-up',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Send a reminder when the office or provider has not answered the original request.',
+    ),
+    _general(
+      'STATUS_UPDATE_WITH_PROTOCOL',
+      'Status Update with Protocol Number',
+      'Status update',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Ask for an update on a pending practice when you already have a protocol or ticket number.',
+    ),
+    _general(
+      'ASK_DOCUMENT_CLARIFICATION',
+      'Ask Document Clarification',
+      'Document clarification',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Clarify which documents are required before submitting a request or booking an office visit.',
+    ),
+    _general(
+      'SEND_PEC_WITH_ATTACHMENTS',
+      'Send PEC with Attachments',
+      'PEC with attachments',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Prepare a PEC with the correct subject, attachments, and proof-of-sending checklist.',
+    ),
+    _general(
+      'WRITE_SHORT_POLITE_EMAIL',
+      'Write Short Polite Email',
+      'Short polite email',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Generate a short, polite, human email when a stronger formal request is not needed.',
+    ),
+    _general(
+      'WRITE_STRONG_FORMAL_COMPLAINT',
+      'Write Strong Formal Complaint',
+      'Strong formal complaint',
+      _refundFields(),
+      _refundAttachments(),
+      shortDescription:
+          'Turn an unresolved problem into a stronger documented complaint without becoming aggressive.',
+    ),
+    _general(
+      'PREPARE_DOCUMENTS_BEFORE_OFFICE',
+      'Prepare Documents Before Office Visit',
+      'Office visit preparation',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Prepare originals, copies, questions, and proof before going to a desk or appointment.',
+    ),
+    _general(
+      'CONVERT_INFORMAL_TO_FORMAL_ITALIAN',
+      'Convert Informal Message to Formal Italian',
+      'Formal Italian rewrite',
+      _genericFields(),
+      _genericAttachments(),
+      shortDescription:
+          'Rewrite rough notes, English, or WhatsApp-style text into clear formal Italian.',
+    ),
   ];
 }
+
+const Set<String> kPremiumProcedureIds = {
+  'ENERGY_SUPPLIER_COMPARISON',
+  'HIGH_BILL_COMPLAINT',
+  'CHECK_SUPPLIER_VS_DISTRIBUTOR',
+  'NEW_ACTIVATION_PRIMA_ATTIVAZIONE',
+  'CONTRACT_NOT_REQUESTED_SCAM_ACTIVATION',
+  'GAS_OR_ELECTRICITY_EMERGENCY_FAULT',
+  'ARERA_COMPLAINT_AND_CONCILIATION',
+  'CANONE_RAI_NO_TV_DECLARATION_CHECKLIST',
+  'CANONE_RAI_EXEMPTION_OVER_75_CHECKLIST',
+  'CANONE_RAI_REFUND_OR_WRONG_CHARGE',
+  'UNDERSTAND_IF_MUST_PAY_CANONE_RAI',
+  'DIPLOMATIC_MILITARY_EXEMPTION',
+  'WRONG_ELECTRICITY_BILL_CHARGE',
+  'NEW_HOME_CHANGED_ELECTRICITY_CONTRACT',
+  'HELP_FILLING_AGENZIA_ENTRATE_FORM',
+  'INTERNET_PHONE_CANCELLATION',
+  'TELECOM_WRONG_BILL_COMPLAINT',
+  'SERVICE_NOT_WORKING_COMPLAINT',
+  'MODEM_RETURN_OR_CHARGE_DISPUTE',
+  'UNDERSTAND_TELECOM_PROBLEM',
+  'MOBILE_SIM_CANCELLATION',
+  'PROVIDER_SWITCHING_NUMBER_PORTABILITY',
+  'INTERNET_SPEED_TOO_LOW',
+  'ACTIVATION_DELAY_NO_LINE',
+  'CONTRACT_NOT_REQUESTED_PHONE_SCAM',
+  'REFUND_OR_COMPENSATION_REQUEST',
+  'PAYMENT_PLAN_UNPAID_BILLS',
+  'ROAMING_INTERNATIONAL_CHARGE_DISPUTE',
+  'PEC_FORMAL_COMPLAINT_OPERATOR',
+  'AGCOM_CORECOM_CONCILIAWEB_ESCALATION',
+};
+
+bool isPremiumProcedureId(String procedureId) =>
+    kPremiumProcedureIds.contains(procedureId);
 
 AdminProcedure _build({
   required String id,
@@ -294,7 +1143,7 @@ AdminProcedure _build({
     fields: fields,
     attachmentSuggestions: attachments,
     tags: tags,
-    isPremium: false,
+    isPremium: isPremiumProcedureId(id),
     disclaimer: '$kItalianDisclaimer\n\n$kEnglishDisclaimer',
   );
 }
@@ -304,8 +1153,9 @@ AdminProcedure _health(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Health and ASL support workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.health,
@@ -313,7 +1163,7 @@ AdminProcedure _health(
   fields: fields,
   attachments: attachments,
   tags: const ['medico', 'ASL', 'tessera sanitaria', 'health'],
-  shortDescription: 'Health and ASL support workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _housing(
@@ -321,8 +1171,9 @@ AdminProcedure _housing(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Housing and rent administration workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.housing,
@@ -330,7 +1181,7 @@ AdminProcedure _housing(
   fields: fields,
   attachments: attachments,
   tags: const ['affitto', 'landlord', 'subentro', 'deposit', 'housing'],
-  shortDescription: 'Housing and rent administration workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _utility(
@@ -338,8 +1189,9 @@ AdminProcedure _utility(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Electricity and gas workflow or checklist.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.utilities,
@@ -347,7 +1199,7 @@ AdminProcedure _utility(
   fields: fields,
   attachments: attachments,
   tags: const ['bolletta', 'luce', 'gas', 'fornitore', 'voltura', 'disdetta'],
-  shortDescription: 'Electricity and gas workflow or checklist.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _canone(
@@ -355,8 +1207,9 @@ AdminProcedure _canone(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Canone RAI checklist and support workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.canoneRai,
@@ -364,7 +1217,7 @@ AdminProcedure _canone(
   fields: fields,
   attachments: attachments,
   tags: const ['canone rai', 'tv', 'refund', 'exemption'],
-  shortDescription: 'Canone RAI checklist and support workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _telecom(
@@ -372,8 +1225,9 @@ AdminProcedure _telecom(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Internet and phone complaint workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.telecom,
@@ -381,7 +1235,7 @@ AdminProcedure _telecom(
   fields: fields,
   attachments: attachments,
   tags: const ['internet', 'telefono', 'modem', 'disdetta', 'telecom'],
-  shortDescription: 'Internet and phone complaint workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _publicOffice(
@@ -390,6 +1244,7 @@ AdminProcedure _publicOffice(
   String subcategory,
   List<ProcedureField> fields,
   List<AttachmentSuggestion> attachments,
+  {String shortDescription = 'Comune and document support workflow.'}
 ) => _build(
   id: id,
   title: title,
@@ -398,7 +1253,7 @@ AdminProcedure _publicOffice(
   fields: fields,
   attachments: attachments,
   tags: const ['residenza', 'comune', 'anagrafe', 'documents'],
-  shortDescription: 'Comune and document support workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _work(
@@ -407,6 +1262,7 @@ AdminProcedure _work(
   String subcategory,
   List<ProcedureField> fields,
   List<AttachmentSuggestion> attachments,
+  {String shortDescription = 'Work and patronato support workflow.'}
 ) => _build(
   id: id,
   title: title,
@@ -415,7 +1271,7 @@ AdminProcedure _work(
   fields: fields,
   attachments: attachments,
   tags: const ['NASpI', 'patronato', 'INPS', 'lavoro'],
-  shortDescription: 'Work and patronato support workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _university(
@@ -424,6 +1280,7 @@ AdminProcedure _university(
   String subcategory,
   List<ProcedureField> fields,
   List<AttachmentSuggestion> attachments,
+  {String shortDescription = 'University administration support workflow.'}
 ) => _build(
   id: id,
   title: title,
@@ -432,7 +1289,7 @@ AdminProcedure _university(
   fields: fields,
   attachments: attachments,
   tags: const ['università', 'ISEE', 'borsa', 'tuition'],
-  shortDescription: 'University administration support workflow.',
+  shortDescription: shortDescription,
 );
 
 AdminProcedure _general(
@@ -441,6 +1298,7 @@ AdminProcedure _general(
   String subcategory,
   List<ProcedureField> fields,
   List<AttachmentSuggestion> attachments,
+  {String shortDescription = 'General formal support workflow.'}
 ) => _build(
   id: id,
   title: title,
@@ -449,7 +1307,7 @@ AdminProcedure _general(
   fields: fields,
   attachments: attachments,
   tags: const ['generic', 'formal', 'appointment', 'refund', 'complaint'],
-  shortDescription: 'General formal support workflow.',
+  shortDescription: shortDescription,
 );
 
 ProcedureDifficulty _difficultyFor(ProcedureCategory category) {
@@ -843,6 +1701,24 @@ List<ProcedureField> _terminationFields() => [
     'Notice reason',
     ProcedureFieldType.textarea,
     required: false,
+    section: 'Case',
+  ),
+];
+
+List<ProcedureField> _genericHousingSupportFields() => [
+  _field('fullName', 'Full name', ProcedureFieldType.text, section: 'Personal'),
+  _field(
+    'propertyAddress',
+    'Property address',
+    ProcedureFieldType.text,
+    required: false,
+    section: 'Case',
+  ),
+  _field('issueType', 'Issue type', ProcedureFieldType.text, section: 'Case'),
+  _field(
+    'description',
+    'Description',
+    ProcedureFieldType.textarea,
     section: 'Case',
   ),
 ];

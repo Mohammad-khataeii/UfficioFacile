@@ -28,6 +28,14 @@ class GeneratedPack {
     required this.warnings,
     required this.deadlineSuggestions,
     required this.fullText,
+    this.destinationGuidance = '',
+    this.recipientVerificationChecklist = const [],
+    this.submissionMethod = 'unknown',
+    this.inPersonChecklist = const [],
+    this.onlinePortalChecklist = const [],
+    this.officialLinksToCheck = const [],
+    this.selectedContactSnapshot = const {},
+    this.serviceIntelligenceWarnings = const [],
     required this.createdAt,
     required this.updatedAt,
   });
@@ -57,6 +65,14 @@ class GeneratedPack {
   final List<String> warnings;
   final List<String> deadlineSuggestions;
   final String fullText;
+  final String destinationGuidance;
+  final List<String> recipientVerificationChecklist;
+  final String submissionMethod;
+  final List<String> inPersonChecklist;
+  final List<String> onlinePortalChecklist;
+  final List<String> officialLinksToCheck;
+  final Map<String, dynamic> selectedContactSnapshot;
+  final List<String> serviceIntelligenceWarnings;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -65,6 +81,14 @@ class GeneratedPack {
     RequestPriority? priority,
     List<AttachmentItem>? attachmentChecklist,
     String? fullText,
+    String? destinationGuidance,
+    List<String>? recipientVerificationChecklist,
+    String? submissionMethod,
+    List<String>? inPersonChecklist,
+    List<String>? onlinePortalChecklist,
+    List<String>? officialLinksToCheck,
+    Map<String, dynamic>? selectedContactSnapshot,
+    List<String>? serviceIntelligenceWarnings,
     DateTime? updatedAt,
     String? shortMessageItalian,
     String? whatsappMessageItalian,
@@ -104,6 +128,18 @@ class GeneratedPack {
       warnings: warnings,
       deadlineSuggestions: deadlineSuggestions,
       fullText: fullText ?? this.fullText,
+      destinationGuidance: destinationGuidance ?? this.destinationGuidance,
+      recipientVerificationChecklist:
+          recipientVerificationChecklist ?? this.recipientVerificationChecklist,
+      submissionMethod: submissionMethod ?? this.submissionMethod,
+      inPersonChecklist: inPersonChecklist ?? this.inPersonChecklist,
+      onlinePortalChecklist:
+          onlinePortalChecklist ?? this.onlinePortalChecklist,
+      officialLinksToCheck: officialLinksToCheck ?? this.officialLinksToCheck,
+      selectedContactSnapshot:
+          selectedContactSnapshot ?? this.selectedContactSnapshot,
+      serviceIntelligenceWarnings:
+          serviceIntelligenceWarnings ?? this.serviceIntelligenceWarnings,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -137,6 +173,14 @@ class GeneratedPack {
     'warnings': warnings,
     'deadlineSuggestions': deadlineSuggestions,
     'fullText': fullText,
+    'destinationGuidance': destinationGuidance,
+    'recipientVerificationChecklist': recipientVerificationChecklist,
+    'submissionMethod': submissionMethod,
+    'inPersonChecklist': inPersonChecklist,
+    'onlinePortalChecklist': onlinePortalChecklist,
+    'officialLinksToCheck': officialLinksToCheck,
+    'selectedContactSnapshot': selectedContactSnapshot,
+    'serviceIntelligenceWarnings': serviceIntelligenceWarnings,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -176,6 +220,22 @@ class GeneratedPack {
     deadlineSuggestions: ((json['deadlineSuggestions'] as List?) ?? [])
         .cast<String>(),
     fullText: json['fullText'] as String? ?? '',
+    destinationGuidance: json['destinationGuidance'] as String? ?? '',
+    recipientVerificationChecklist:
+        ((json['recipientVerificationChecklist'] as List?) ?? [])
+            .cast<String>(),
+    submissionMethod: json['submissionMethod'] as String? ?? 'unknown',
+    inPersonChecklist: ((json['inPersonChecklist'] as List?) ?? [])
+        .cast<String>(),
+    onlinePortalChecklist: ((json['onlinePortalChecklist'] as List?) ?? [])
+        .cast<String>(),
+    officialLinksToCheck: ((json['officialLinksToCheck'] as List?) ?? [])
+        .cast<String>(),
+    selectedContactSnapshot: Map<String, dynamic>.from(
+      (json['selectedContactSnapshot'] as Map?) ?? <String, dynamic>{},
+    ),
+    serviceIntelligenceWarnings:
+        ((json['serviceIntelligenceWarnings'] as List?) ?? []).cast<String>(),
     createdAt:
         DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
     updatedAt:

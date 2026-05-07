@@ -1,4 +1,4 @@
--- Phase 5 local/backend readiness schema notes for Italy Life Admin Copilot.
+-- Phase 5 local/backend readiness schema notes for UfficcioFacile.
 -- This file is documentation-only in the current workspace.
 
 create table if not exists life_admin_household_members (

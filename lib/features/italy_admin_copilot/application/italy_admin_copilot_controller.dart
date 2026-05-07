@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../app/app_config.dart';
+import '../../../app/app_startup.dart';
 import '../data/admin_config_repository.dart';
 import '../data/local_analytics_service.dart';
 import '../data/life_admin_phase5_services.dart';
@@ -9,6 +11,7 @@ import '../domain/onboarding_state.dart';
 
 class ItalyAdminCopilotController extends ChangeNotifier {
   ItalyAdminCopilotController({
+    required UfficcioFacileConfig appConfig,
     required OnboardingRepository onboardingRepository,
     required AdminConfigRepository adminConfigRepository,
     required LocalAnalyticsService analyticsService,
@@ -16,25 +19,75 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   }) : _onboardingRepository = onboardingRepository,
        _adminConfigRepository = adminConfigRepository,
        _analyticsService = analyticsService,
-       _languageRepository = languageRepository;
+       _languageRepository = languageRepository,
+       _appConfig = appConfig;
 
   final OnboardingRepository _onboardingRepository;
   final AdminConfigRepository _adminConfigRepository;
   final LocalAnalyticsService _analyticsService;
   final LocalAppLanguageRepository _languageRepository;
+  final UfficcioFacileConfig _appConfig;
 
   OnboardingState onboardingState = const OnboardingState(completed: false);
   AdminConfig config = const AdminConfig();
   String languageCode = 'en';
   bool initialized = false;
+  bool _initializing = false;
+  AppStartupState startupState = const AppStartupState.initial();
 
   Future<void> initialize() async {
-    onboardingState = await _onboardingRepository.getState();
-    config = await _adminConfigRepository.getConfig();
-    languageCode = _languageRepository.read();
-    await _analyticsService.trackCopilotOpened();
-    initialized = true;
+    if (_initializing) return;
+    _initializing = true;
+    initialized = false;
+    startupState = startupState.copyWith(
+      isLoading: true,
+      isReady: false,
+      backendMode: _appConfig.backendLabel,
+      errorMessage: null,
+      debugDetails: null,
+      usedFallbackLocalMode:
+          _appConfig.backendMode == AppBackendMode.supabase &&
+          !_appConfig.hasSupabaseCredentials,
+    );
     notifyListeners();
+
+    try {
+      final result = await AppStartupService(
+        config: _appConfig,
+        onboardingRepository: _onboardingRepository,
+        adminConfigRepository: _adminConfigRepository,
+        languageRepository: _languageRepository,
+        analyticsService: _analyticsService,
+      ).initialize().timeout(const Duration(seconds: 5));
+      onboardingState = result.onboardingState;
+      config = result.adminConfig;
+      languageCode = result.languageCode;
+      startupState = AppStartupState(
+        isLoading: false,
+        isReady: true,
+        onboardingCompleted: onboardingState.completed,
+        backendMode: _appConfig.backendLabel,
+        languageCode: languageCode,
+        usedFallbackLocalMode: result.usedFallbackLocalMode,
+        errorMessage: result.errorMessage,
+        debugDetails: result.debugDetails,
+      );
+    } catch (error, stackTrace) {
+      startupState = AppStartupState(
+        isLoading: false,
+        isReady: false,
+        onboardingCompleted: false,
+        backendMode: _appConfig.backendLabel,
+        languageCode: 'en',
+        usedFallbackLocalMode: true,
+        errorMessage: 'Startup timed out or failed.',
+        debugDetails: '$error\n$stackTrace',
+      );
+    } finally {
+      initialized = true;
+      _initializing = false;
+      notifyListeners();
+    }
   }
 
   Future<void> completeOnboarding() async {
@@ -51,7 +104,7 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   }
 
   Future<void> setLanguage(String code) async {
-    languageCode = code;
+    languageCode = LocalAppLanguageRepository.sanitize(code);
     await _languageRepository.save(code);
     notifyListeners();
   }
@@ -59,5 +112,34 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   Future<void> updateConfig(AdminConfig newConfig) async {
     config = await _adminConfigRepository.saveConfig(newConfig);
     notifyListeners();
+  }
+
+  Future<void> retryStartup() => initialize();
+
+  Future<void> continueWithFallbackLocalMode() async {
+    languageCode = LocalAppLanguageRepository.sanitize(languageCode);
+    startupState = AppStartupState(
+      isLoading: false,
+      isReady: true,
+      onboardingCompleted: onboardingState.completed,
+      backendMode: 'local',
+      languageCode: languageCode,
+      usedFallbackLocalMode: true,
+    );
+    initialized = true;
+    notifyListeners();
+  }
+
+  Future<void> resetStartupData() async {
+    try {
+      await _onboardingRepository.setCompleted(false);
+    } catch (_) {}
+    try {
+      await _adminConfigRepository.saveConfig(const AdminConfig());
+    } catch (_) {}
+    try {
+      await _languageRepository.save('en');
+    } catch (_) {}
+    await initialize();
   }
 }

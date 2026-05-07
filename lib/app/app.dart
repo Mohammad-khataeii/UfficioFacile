@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_localizations.dart';
 import 'app_routes.dart';
 import 'app_scope.dart';
+import 'app_startup.dart';
+import 'app_startup_widgets.dart';
 import 'app_theme.dart';
+import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 import '../features/italy_admin_copilot/domain/life_admin_mode.dart';
+import '../features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_phase5_screens.dart';
 
@@ -17,18 +23,45 @@ class LifeAdminApp extends StatefulWidget {
 }
 
 class _LifeAdminAppState extends State<LifeAdminApp> {
-  bool _initialized = false;
+  bool _startupRequested = false;
+  bool _deferredLoadsTriggered = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_initialized) return;
-    _initialized = true;
+    if (_startupRequested) return;
+    _startupRequested = true;
     final scope = AppScope.of(context);
-    scope.appController.initialize();
-    scope.profileController.load();
-    scope.requestController.load();
-    scope.adminController.load();
+    unawaited(_initializeStartup(scope));
+  }
+
+  Future<void> _initializeStartup(AppScope scope) async {
+    await scope.appController.initialize();
+    if (!mounted || !scope.appController.startupState.isReady) {
+      return;
+    }
+    _triggerDeferredLoads(scope);
+  }
+
+  void _triggerDeferredLoads(AppScope scope) {
+    if (_deferredLoadsTriggered) return;
+    _deferredLoadsTriggered = true;
+    _runDeferredLoad('profile', scope.profileController.load);
+    _runDeferredLoad('requests', scope.requestController.load);
+    _runDeferredLoad('admin', scope.adminController.load);
+  }
+
+  void _runDeferredLoad(String label, Future<void> Function() action) {
+    unawaited(() async {
+      try {
+        await action().timeout(const Duration(seconds: 3));
+      } catch (error) {
+        assert(() {
+          debugPrint('[Startup] Deferred load skipped for $label: $error');
+          return true;
+        }());
+      }
+    }());
   }
 
   @override
@@ -37,6 +70,14 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
     return AnimatedBuilder(
       animation: scope.appController,
       builder: (context, _) {
+        if (scope.appController.startupState.isReady &&
+            !_deferredLoadsTriggered) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _triggerDeferredLoads(scope);
+            }
+          });
+        }
         final localizations = AppLocalizations(
           scope.appController.languageCode,
         );
@@ -47,7 +88,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                 ? TextDirection.rtl
                 : TextDirection.ltr,
             child: MaterialApp(
-              title: localizations.t('app_title'),
+              title: scope.config.appName,
               debugShowCheckedModeBanner: false,
               locale: Locale(scope.appController.languageCode),
               supportedLocales: AppLocalizations.supportedLocales,
@@ -58,7 +99,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
               ],
               theme: buildAppTheme(Brightness.light),
               darkTheme: buildAppTheme(Brightness.dark),
-              home: const _EntryRouter(),
+              home: _EntryRouter(controller: scope.appController),
               onGenerateRoute: (settings) {
                 switch (settings.name) {
                   case AppRoutes.home:
@@ -174,9 +215,27 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                       builder: (_) =>
                           RequestDetailScreen(request: args.request),
                     );
+                  case AppRoutes.plan:
+                    return MaterialPageRoute(
+                      builder: (_) => const PlanScreen(),
+                    );
+                  case AppRoutes.terms:
+                    final args = settings.arguments! as TermRouteArgs;
+                    return MaterialPageRoute(
+                      builder: (_) =>
+                          TermExplanationScreen(termId: args.termId),
+                    );
                   case AppRoutes.profile:
                     return MaterialPageRoute(
                       builder: (_) => const ProfileScreen(),
+                    );
+                  case AppRoutes.privacy:
+                    return MaterialPageRoute(
+                      builder: (_) => const PrivacyCenterScreen(),
+                    );
+                  case AppRoutes.sync:
+                    return MaterialPageRoute(
+                      builder: (_) => const SyncSettingsScreen(),
                     );
                   case AppRoutes.help:
                     return MaterialPageRoute(
@@ -206,9 +265,29 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => const TelecomHubScreen(),
                     );
+                  case AppRoutes.publicOffice:
+                    return MaterialPageRoute(
+                      builder: (_) => const PublicOfficeComuneHubScreen(),
+                    );
+                  case AppRoutes.workInpsPatronato:
+                    return MaterialPageRoute(
+                      builder: (_) => const WorkInpsPatronatoHubScreen(),
+                    );
+                  case AppRoutes.universityStudent:
+                    return MaterialPageRoute(
+                      builder: (_) => const UniversityStudentHubScreen(),
+                    );
+                  case AppRoutes.general:
+                    return MaterialPageRoute(
+                      builder: (_) => const GeneralHubScreen(),
+                    );
                   case AppRoutes.admin:
                     return MaterialPageRoute(
                       builder: (_) => const AdminPanelScreen(),
+                    );
+                  case AppRoutes.adminPremium:
+                    return MaterialPageRoute(
+                      builder: (_) => const AdminPremiumScreen(),
                     );
                   default:
                     return MaterialPageRoute(
@@ -225,16 +304,21 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
 }
 
 class _EntryRouter extends StatelessWidget {
-  const _EntryRouter();
+  const _EntryRouter({required this.controller});
+
+  final ItalyAdminCopilotController controller;
 
   @override
   Widget build(BuildContext context) {
-    final app = AppScope.of(context).appController;
-    if (!app.initialized) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    switch (decideStartupDestination(controller.startupState)) {
+      case StartupDestination.loading:
+        return StartupLoadingScreen(controller: controller);
+      case StartupDestination.error:
+        return StartupErrorScreen(controller: controller);
+      case StartupDestination.home:
+        return const LifeAdminHomeScreen();
+      case StartupDestination.onboarding:
+        return const OnboardingScreen();
     }
-    return app.onboardingState.completed
-        ? const LifeAdminHomeScreen()
-        : const OnboardingScreen();
   }
 }

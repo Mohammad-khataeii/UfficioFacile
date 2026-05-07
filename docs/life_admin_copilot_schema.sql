@@ -1,4 +1,4 @@
--- Italy Life Admin Copilot future backend schema
+-- UfficcioFacile future backend schema
 -- Prepared for a Supabase-style backend if/when remote sync is added.
 
 create table if not exists life_admin_profiles (

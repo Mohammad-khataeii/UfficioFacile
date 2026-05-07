@@ -29,12 +29,29 @@ class LocalAppLanguageRepository {
   const LocalAppLanguageRepository(this._prefs);
 
   static const storageKey = 'italy_life_admin_selected_language_v1';
+  static const _fallbackLanguageCode = 'en';
   final SharedPreferences _prefs;
 
-  String read() => _prefs.getString(storageKey) ?? 'en';
+  String read() {
+    final raw = _prefs.getString(storageKey);
+    return sanitize(raw);
+  }
+
+  static String sanitize(String? raw) {
+    switch (raw) {
+      case 'it':
+      case 'en':
+      case 'es':
+      case 'fa':
+      case 'ar':
+        return raw!;
+      default:
+        return _fallbackLanguageCode;
+    }
+  }
 
   Future<void> save(String languageCode) =>
-      _prefs.setString(storageKey, languageCode);
+      _prefs.setString(storageKey, sanitize(languageCode));
 }
 
 class LocalDocumentsRepository {
@@ -1239,7 +1256,7 @@ class TelegramHandoffService {
     return TelegramHandoffPayload(
       procedureId: procedureId,
       title: title,
-      summary: 'I created a $title pack in Italy Life Admin Copilot.',
+      summary: 'I created a $title pack in UfficioFacile.',
       language: language,
       suggestedInput: '/start ${procedureId.toLowerCase()}',
       createdAt: DateTime.now(),

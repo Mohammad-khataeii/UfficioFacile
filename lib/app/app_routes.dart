@@ -25,7 +25,11 @@ class AppRoutes {
   static const generated = '/life-admin/generated';
   static const requests = '/life-admin/requests';
   static const requestDetail = '/life-admin/request-detail';
+  static const plan = '/life-admin/plan';
+  static const terms = '/life-admin/terms';
   static const profile = '/life-admin/profile';
+  static const privacy = '/ufficcio/privacy';
+  static const sync = '/ufficcio/sync';
   static const help = '/life-admin/help';
   static const utilities = '/life-admin/utilities';
   static const utilityCompare = '/life-admin/utilities/compare';
@@ -33,7 +37,12 @@ class AppRoutes {
   static const canoneRai = '/life-admin/canone-rai';
   static const canoneRaiGuide = '/life-admin/canone-rai/guide';
   static const telecom = '/life-admin/telecom';
+  static const publicOffice = '/life-admin/public-office';
+  static const workInpsPatronato = '/life-admin/work-inps-patronato';
+  static const universityStudent = '/life-admin/university-student';
+  static const general = '/life-admin/general';
   static const admin = '/life-admin/admin';
+  static const adminPremium = '/life-admin/admin/premium';
   static const adminScanner = '/life-admin/admin/scanner';
   static const adminCityPacks = '/life-admin/admin/city-packs';
   static const adminChecklists = '/life-admin/admin/checklists';

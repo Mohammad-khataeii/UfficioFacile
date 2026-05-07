@@ -37,7 +37,7 @@ extension ProcedureCategoryX on ProcedureCategory {
       case ProcedureCategory.health:
         return 'Health';
       case ProcedureCategory.housing:
-        return 'Housing';
+        return 'Housing / Rent';
       case ProcedureCategory.work:
         return 'Work';
       case ProcedureCategory.publicOffice:

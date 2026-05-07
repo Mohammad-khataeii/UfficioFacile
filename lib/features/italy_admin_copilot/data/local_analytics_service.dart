@@ -5,14 +5,17 @@ import 'package:uuid/uuid.dart';
 
 import '../domain/usage_event.dart';
 import 'analytics_service.dart';
+import 'ufficcio_supabase_readiness.dart';
 
 class LocalAnalyticsService implements AnalyticsService {
-  LocalAnalyticsService(this._prefs);
+  LocalAnalyticsService(this._prefs, {UfficcioAnalyticsSanitizer? sanitizer})
+    : _sanitizer = sanitizer ?? UfficcioAnalyticsSanitizer();
 
   static const storageKey = 'italy_life_admin_usage_events_v1';
 
   final SharedPreferences _prefs;
   final Uuid _uuid = const Uuid();
+  final UfficcioAnalyticsSanitizer _sanitizer;
 
   List<UsageEvent> listEvents() {
     final raw = _prefs.getString(storageKey);
@@ -38,6 +41,7 @@ class LocalAnalyticsService implements AnalyticsService {
     String? category,
     Map<String, dynamic> metadata = const {},
   }) async {
+    final safeMetadata = _sanitizer.sanitize(metadata);
     final items = listEvents()
       ..insert(
         0,
@@ -47,7 +51,7 @@ class LocalAnalyticsService implements AnalyticsService {
           createdAt: DateTime.now(),
           procedureId: procedureId,
           category: category,
-          metadata: metadata,
+          metadata: safeMetadata,
         ),
       );
     await _prefs.setString(
