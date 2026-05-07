@@ -119,6 +119,16 @@ class AppScope extends InheritedWidget {
         ? SupabaseCmsRepository(SupabaseBootstrap.client!)
         : const LocalCmsRepository();
     cmsContentController = CmsContentController(cmsRepository);
+    hybridProblemRequestsRepository = HybridProblemRequestsRepository(
+      local: problemRequestsRepository,
+      config: config,
+      authFacade: authFacade,
+    );
+    hybridConsultancyRequestsRepository = HybridConsultancyRequestsRepository(
+      local: consultancyRequestsRepository,
+      config: config,
+      authFacade: authFacade,
+    );
     bundledCatalogRepository = const BundledCatalogRepository();
     catalogRepository = HybridCatalogRepository(
       bundled: bundledCatalogRepository,
@@ -129,10 +139,6 @@ class AppScope extends InheritedWidget {
     );
     userSettingsRepository = LocalUfficcioUserSettingsRepository(prefs);
     entitlementRepository = LocalUfficcioEntitlementRepository(prefs);
-    premiumConfigRepository = LocalPremiumConfigRepository(
-      prefs,
-      remoteLoader: catalogRepository.getPremiumPublicConfig,
-    );
     repositoryFactory = UfficcioRepositoryFactory(
       config: config,
       authFacade: authFacade,
@@ -141,19 +147,32 @@ class AppScope extends InheritedWidget {
       localSettingsRepository: userSettingsRepository,
       localEntitlementRepository: entitlementRepository,
     );
+    mergedEntitlementRepository = MergedUfficcioEntitlementRepository(
+      factory: repositoryFactory,
+      settingsRepository: userSettingsRepository,
+      localRepository: entitlementRepository,
+    );
+    premiumConfigRepository = LocalPremiumConfigRepository(
+      prefs,
+      remoteLoader: catalogRepository.getPremiumPublicConfig,
+    );
     syncService = UfficcioSyncService(
       factory: repositoryFactory,
       settingsRepository: userSettingsRepository,
     );
     privacyCenterService = LocalPrivacyCenterService(prefs);
     entitlementService = UfficioPremiumEntitlementService(
-      entitlementRepository,
+      mergedEntitlementRepository,
       premiumConfigRepository,
       analytics: analytics,
     );
     productEntitlementsService = EntitlementsService(entitlementService);
-    problemRequestsService = ProblemRequestsService(problemRequestsRepository);
-    consultancyService = ConsultancyService(consultancyRequestsRepository);
+    problemRequestsService = ProblemRequestsService(
+      hybridProblemRequestsRepository,
+    );
+    consultancyService = ConsultancyService(
+      hybridConsultancyRequestsRepository,
+    );
     costDashboardService = CostDashboardService(costItemsRepository);
     contactsDirectoryService = ContactsDirectoryService(
       directoryContactsRepository,
@@ -184,6 +203,9 @@ class AppScope extends InheritedWidget {
   late final LocalBeforeSendingRepository beforeSendingRepository;
   late final LocalProblemRequestsRepository problemRequestsRepository;
   late final LocalConsultancyRequestsRepository consultancyRequestsRepository;
+  late final HybridProblemRequestsRepository hybridProblemRequestsRepository;
+  late final HybridConsultancyRequestsRepository
+  hybridConsultancyRequestsRepository;
   late final LocalCostItemsRepository costItemsRepository;
   late final LocalDirectoryContactsRepository directoryContactsRepository;
   late final LocalDirectoryDocumentsRepository directoryDocumentsRepository;
@@ -212,6 +234,7 @@ class AppScope extends InheritedWidget {
   late final CmsContentController cmsContentController;
   late final LocalUfficcioUserSettingsRepository userSettingsRepository;
   late final LocalUfficcioEntitlementRepository entitlementRepository;
+  late final MergedUfficcioEntitlementRepository mergedEntitlementRepository;
   late final LocalPremiumConfigRepository premiumConfigRepository;
   late final UfficcioRepositoryFactory repositoryFactory;
   late final UfficcioSyncService syncService;

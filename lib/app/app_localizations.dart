@@ -8,11 +8,13 @@ class AppLocalizations {
   static const supportedLocales = [
     Locale('en'),
     Locale('it'),
-    Locale('fa'),
     Locale('fr'),
+    Locale('es'),
+    Locale('fa'),
+    Locale('ar'),
   ];
 
-  static const rtlLanguages = {'fa'};
+  static const rtlLanguages = {'fa', 'ar'};
 
   bool get isRtl => rtlLanguages.contains(languageCode);
 
@@ -33,8 +35,10 @@ class AppLocalizations {
     return normalized[languageCode] ??
         normalized['en'] ??
         normalized['it'] ??
-        normalized['fa'] ??
         normalized['fr'] ??
+        normalized['es'] ??
+        normalized['fa'] ??
+        normalized['ar'] ??
         fallback;
   }
 

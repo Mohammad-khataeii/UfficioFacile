@@ -9,7 +9,6 @@ import 'app_scope.dart';
 import 'app_startup.dart';
 import 'app_startup_widgets.dart';
 import 'app_theme.dart';
-import '../features/admin/presentation/admin_shell_screen.dart';
 import '../features/auth/presentation/account_screen.dart';
 import '../features/auth/presentation/auth_gate.dart';
 import '../features/auth/presentation/auth_screen.dart';
@@ -327,11 +326,11 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.admin:
                     return MaterialPageRoute(
-                      builder: (_) => const AdminShellScreen(),
+                      builder: (_) => const AdminMovedToWebScreen(),
                     );
                   case AppRoutes.adminPremium:
                     return MaterialPageRoute(
-                      builder: (_) => const AdminShellScreen(),
+                      builder: (_) => const AdminMovedToWebScreen(),
                     );
                   default:
                     return MaterialPageRoute(

@@ -1141,6 +1141,53 @@ class UfficcioRepositoryFactory {
   }
 }
 
+class MergedUfficcioEntitlementRepository
+    implements UfficcioEntitlementRepository {
+  MergedUfficcioEntitlementRepository({
+    required this.factory,
+    required this.settingsRepository,
+    required this.localRepository,
+  });
+
+  final UfficcioRepositoryFactory factory;
+  final UfficcioUserSettingsRepository settingsRepository;
+  final UfficcioEntitlementRepository localRepository;
+
+  @override
+  Future<UfficcioEntitlement> getEntitlement() async {
+    final local = await localRepository.getEntitlement();
+    final settings = await settingsRepository.getSettings();
+    final remoteRepository = factory.entitlementRepository(
+      syncEnabled: settings.syncEnabled,
+    );
+    if (identical(remoteRepository, localRepository)) {
+      return local;
+    }
+    try {
+      final remote = await remoteRepository.getEntitlement();
+      return local.copyWith(
+        plan: remote.plan,
+        status: remote.status,
+        premiumAccess: remote.premiumAccess,
+        provider: remote.provider,
+        providerCustomerId: remote.providerCustomerId,
+        providerSubscriptionId: remote.providerSubscriptionId,
+        currentPeriodStart: remote.currentPeriodStart,
+        currentPeriodEnd: remote.currentPeriodEnd,
+      );
+    } catch (_) {
+      return local;
+    }
+  }
+
+  @override
+  Future<UfficcioEntitlement> saveEntitlement(
+    UfficcioEntitlement entitlement,
+  ) {
+    return localRepository.saveEntitlement(entitlement);
+  }
+}
+
 class UfficcioSyncService {
   UfficcioSyncService({
     required this.factory,

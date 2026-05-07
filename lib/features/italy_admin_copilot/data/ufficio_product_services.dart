@@ -1,5 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../app/app_config.dart';
+import '../../../app/supabase_bootstrap.dart';
 import '../domain/health_asl_guidance.dart';
 import '../domain/housing_rent_guidance.dart';
 import '../domain/premium_config.dart';
@@ -13,6 +16,7 @@ import 'premium_service.dart';
 import 'public_office_comune_guidance_definitions.dart';
 import 'telecom_guidance_definitions.dart';
 import 'university_student_guidance_definitions.dart';
+import 'ufficcio_supabase_readiness.dart';
 import 'utilities_electricity_gas_guidance_definitions.dart';
 import 'work_inps_patronato_guidance_definitions.dart';
 
@@ -898,6 +902,106 @@ class LocalProblemRequestsRepository {
   }
 }
 
+abstract class ProblemRequestsRepository {
+  Future<List<ProblemRequestRecord>> listUserProblemRequests();
+  Future<List<ProblemRequestRecord>> listAdminProblemRequests();
+  Future<ProblemRequestRecord> save(ProblemRequestRecord item);
+}
+
+class SupabaseProblemRequestsRepository implements ProblemRequestsRepository {
+  const SupabaseProblemRequestsRepository(this._client);
+
+  final SupabaseClient _client;
+
+  @override
+  Future<List<ProblemRequestRecord>> listUserProblemRequests() async {
+    final rows = await _client
+        .from('ufficio_problem_requests')
+        .select()
+        .order('created_at', ascending: false);
+    return rows
+        .map((item) => _problemRequestFromDb(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
+  @override
+  Future<List<ProblemRequestRecord>> listAdminProblemRequests() async {
+    final rows = await _client
+        .from('ufficio_problem_requests')
+        .select()
+        .order('created_at', ascending: false);
+    return rows
+        .map((item) => _problemRequestFromDb(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
+  @override
+  Future<ProblemRequestRecord> save(ProblemRequestRecord item) async {
+    final row = await _client
+        .from('ufficio_problem_requests')
+        .upsert(_problemRequestToDb(item))
+        .select()
+        .single();
+    return _problemRequestFromDb(Map<String, dynamic>.from(row));
+  }
+}
+
+class HybridProblemRequestsRepository implements ProblemRequestsRepository {
+  HybridProblemRequestsRepository({
+    required this.local,
+    required this.config,
+    required this.authFacade,
+  });
+
+  final LocalProblemRequestsRepository local;
+  final UfficcioFacileConfig config;
+  final UfficcioAuthFacade authFacade;
+
+  SupabaseProblemRequestsRepository? get _remote {
+    final client = SupabaseBootstrap.client;
+    if (!config.isSupabaseEnabled ||
+        !authFacade.state.isAuthenticated ||
+        client == null) {
+      return null;
+    }
+    return SupabaseProblemRequestsRepository(client);
+  }
+
+  @override
+  Future<List<ProblemRequestRecord>> listAdminProblemRequests() async {
+    final remote = _remote;
+    if (remote == null) return local.list();
+    try {
+      return await remote.listAdminProblemRequests();
+    } catch (_) {
+      return local.list();
+    }
+  }
+
+  @override
+  Future<List<ProblemRequestRecord>> listUserProblemRequests() async {
+    final remote = _remote;
+    if (remote == null) return local.list();
+    try {
+      return await remote.listUserProblemRequests();
+    } catch (_) {
+      return local.list();
+    }
+  }
+
+  @override
+  Future<ProblemRequestRecord> save(ProblemRequestRecord item) async {
+    await local.save(item);
+    final remote = _remote;
+    if (remote == null) return item;
+    try {
+      return await remote.save(item);
+    } catch (_) {
+      return item;
+    }
+  }
+}
+
 class LocalConsultancyRequestsRepository {
   const LocalConsultancyRequestsRepository(this._repo);
 
@@ -920,6 +1024,108 @@ class LocalConsultancyRequestsRepository {
       ..removeWhere((entry) => entry.id == item.id)
       ..add(item);
     await _repo.writeAll(items);
+  }
+}
+
+abstract class ConsultancyRequestsRepository {
+  Future<List<ConsultancyRequestRecord>> listUserConsultancyRequests();
+  Future<List<ConsultancyRequestRecord>> listAdminConsultancyRequests();
+  Future<ConsultancyRequestRecord> save(ConsultancyRequestRecord item);
+}
+
+class SupabaseConsultancyRequestsRepository
+    implements ConsultancyRequestsRepository {
+  const SupabaseConsultancyRequestsRepository(this._client);
+
+  final SupabaseClient _client;
+
+  @override
+  Future<List<ConsultancyRequestRecord>> listAdminConsultancyRequests() async {
+    final rows = await _client
+        .from('ufficio_consultancy_requests')
+        .select()
+        .order('created_at', ascending: false);
+    return rows
+        .map((item) => _consultancyRequestFromDb(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
+  @override
+  Future<List<ConsultancyRequestRecord>> listUserConsultancyRequests() async {
+    final rows = await _client
+        .from('ufficio_consultancy_requests')
+        .select()
+        .order('created_at', ascending: false);
+    return rows
+        .map((item) => _consultancyRequestFromDb(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
+  @override
+  Future<ConsultancyRequestRecord> save(ConsultancyRequestRecord item) async {
+    final row = await _client
+        .from('ufficio_consultancy_requests')
+        .upsert(_consultancyRequestToDb(item))
+        .select()
+        .single();
+    return _consultancyRequestFromDb(Map<String, dynamic>.from(row));
+  }
+}
+
+class HybridConsultancyRequestsRepository
+    implements ConsultancyRequestsRepository {
+  HybridConsultancyRequestsRepository({
+    required this.local,
+    required this.config,
+    required this.authFacade,
+  });
+
+  final LocalConsultancyRequestsRepository local;
+  final UfficcioFacileConfig config;
+  final UfficcioAuthFacade authFacade;
+
+  SupabaseConsultancyRequestsRepository? get _remote {
+    final client = SupabaseBootstrap.client;
+    if (!config.isSupabaseEnabled ||
+        !authFacade.state.isAuthenticated ||
+        client == null) {
+      return null;
+    }
+    return SupabaseConsultancyRequestsRepository(client);
+  }
+
+  @override
+  Future<List<ConsultancyRequestRecord>> listAdminConsultancyRequests() async {
+    final remote = _remote;
+    if (remote == null) return local.list();
+    try {
+      return await remote.listAdminConsultancyRequests();
+    } catch (_) {
+      return local.list();
+    }
+  }
+
+  @override
+  Future<List<ConsultancyRequestRecord>> listUserConsultancyRequests() async {
+    final remote = _remote;
+    if (remote == null) return local.list();
+    try {
+      return await remote.listUserConsultancyRequests();
+    } catch (_) {
+      return local.list();
+    }
+  }
+
+  @override
+  Future<ConsultancyRequestRecord> save(ConsultancyRequestRecord item) async {
+    await local.save(item);
+    final remote = _remote;
+    if (remote == null) return item;
+    try {
+      return await remote.save(item);
+    } catch (_) {
+      return item;
+    }
   }
 }
 
@@ -1016,7 +1222,7 @@ class LocalDirectoryDocumentsRepository {
 class ProblemRequestsService {
   const ProblemRequestsService(this._repository);
 
-  final LocalProblemRequestsRepository _repository;
+  final ProblemRequestsRepository _repository;
 
   Future<ProblemRequestRecord> submitProblemRequest(
     ProblemRequestRecord request,
@@ -1027,16 +1233,16 @@ class ProblemRequestsService {
   }
 
   Future<List<ProblemRequestRecord>> listUserProblemRequests() =>
-      _repository.list();
+      _repository.listUserProblemRequests();
 
   Future<List<ProblemRequestRecord>> listAdminProblemRequests() =>
-      _repository.list();
+      _repository.listAdminProblemRequests();
 }
 
 class ConsultancyService {
   const ConsultancyService(this._repository);
 
-  final LocalConsultancyRequestsRepository _repository;
+  final ConsultancyRequestsRepository _repository;
 
   Future<ConsultancyRequestRecord> submitConsultancyRequest(
     ConsultancyRequestRecord request,
@@ -1064,8 +1270,119 @@ class ConsultancyService {
   }
 
   Future<List<ConsultancyRequestRecord>> listUserConsultancyRequests() =>
-      _repository.list();
+      _repository.listUserConsultancyRequests();
+
+  Future<List<ConsultancyRequestRecord>> listAdminConsultancyRequests() =>
+      _repository.listAdminConsultancyRequests();
 }
+
+Map<String, dynamic> _problemRequestToDb(ProblemRequestRecord item) => {
+  'id': item.id,
+  'user_id': item.userId,
+  'user_email': item.userEmail,
+  'category_id': item.categoryId,
+  'subcategory_id': item.subcategoryId,
+  'title': item.title,
+  'description': item.description,
+  'city': item.city,
+  'region': item.region,
+  'urgency': item.urgency,
+  'language': item.language,
+  'attachment_placeholder': item.attachmentPlaceholder,
+  'status': switch (item.status) {
+    ProblemRequestStatus.newRequest => 'new',
+    ProblemRequestStatus.reviewing => 'reviewing',
+    ProblemRequestStatus.planned => 'planned',
+    ProblemRequestStatus.added => 'added',
+    ProblemRequestStatus.rejected => 'rejected',
+  },
+  'is_premium_user': item.isPremiumUser,
+  'source_page': item.sourcePage,
+  'created_at': item.createdAt.toIso8601String(),
+  'updated_at': item.updatedAt.toIso8601String(),
+};
+
+ProblemRequestRecord _problemRequestFromDb(Map<String, dynamic> row) =>
+    ProblemRequestRecord(
+      id: row['id'] as String? ?? '',
+      userId: row['user_id'] as String?,
+      userEmail: row['user_email'] as String?,
+      categoryId: row['category_id'] as String?,
+      subcategoryId: row['subcategory_id'] as String?,
+      title: row['title'] as String? ?? '',
+      description: row['description'] as String? ?? '',
+      city: row['city'] as String? ?? 'Torino',
+      region: row['region'] as String? ?? 'Piemonte',
+      urgency: row['urgency'] as String? ?? 'normal',
+      language: row['language'] as String? ?? 'English',
+      attachmentPlaceholder: row['attachment_placeholder'] as String?,
+      status: switch (row['status']) {
+        'reviewing' => ProblemRequestStatus.reviewing,
+        'planned' => ProblemRequestStatus.planned,
+        'added' => ProblemRequestStatus.added,
+        'rejected' => ProblemRequestStatus.rejected,
+        _ => ProblemRequestStatus.newRequest,
+      },
+      isPremiumUser: row['is_premium_user'] as bool? ?? false,
+      sourcePage: row['source_page'] as String? ?? '',
+      createdAt:
+          DateTime.tryParse(row['created_at'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(row['updated_at'] as String? ?? '') ??
+          DateTime.now(),
+    );
+
+Map<String, dynamic> _consultancyRequestToDb(ConsultancyRequestRecord item) => {
+  'id': item.id,
+  'user_id': item.userId,
+  'user_email': item.userEmail,
+  'full_name': item.fullName,
+  'category_id': item.categoryId,
+  'subcategory_id': item.subcategoryId,
+  'problem_type': item.problemType,
+  'description': item.description,
+  'desired_result': item.desiredResult,
+  'city': item.city,
+  'region': item.region,
+  'documents_available': item.documentsAvailable,
+  'attachment_urls': item.attachmentUrls,
+  'user_plan': item.userPlan,
+  'payment_status': item.paymentStatus.name,
+  'status': item.status.name,
+  'source_page': item.sourcePage,
+  'created_at': item.createdAt.toIso8601String(),
+  'updated_at': item.updatedAt.toIso8601String(),
+};
+
+ConsultancyRequestRecord _consultancyRequestFromDb(Map<String, dynamic> row) =>
+    ConsultancyRequestRecord(
+      id: row['id'] as String? ?? '',
+      userId: row['user_id'] as String?,
+      userEmail: row['user_email'] as String?,
+      fullName: row['full_name'] as String? ?? '',
+      categoryId: row['category_id'] as String?,
+      subcategoryId: row['subcategory_id'] as String?,
+      problemType: row['problem_type'] as String? ?? '',
+      description: row['description'] as String? ?? '',
+      desiredResult: row['desired_result'] as String? ?? '',
+      city: row['city'] as String? ?? 'Torino',
+      region: row['region'] as String? ?? 'Piemonte',
+      documentsAvailable: row['documents_available'] as String? ?? '',
+      attachmentUrls: ((row['attachment_urls'] as List?) ?? const []).cast<String>(),
+      userPlan: row['user_plan'] as String? ?? UfficioPlan.free.name,
+      paymentStatus: consultancyPaymentStatusFromJson(
+        row['payment_status'] as String?,
+      ),
+      status: consultancyRequestStatusFromJson(row['status'] as String?),
+      sourcePage: row['source_page'] as String? ?? '',
+      createdAt:
+          DateTime.tryParse(row['created_at'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(row['updated_at'] as String? ?? '') ??
+          DateTime.now(),
+    );
 
 class CostDashboardService {
   const CostDashboardService(this._repository);

@@ -14,6 +14,7 @@ import '../../data/canone_rai_guidance_definitions.dart';
 import '../../data/general_guidance_definitions.dart';
 import '../../data/health_asl_guidance_definitions.dart';
 import '../../data/housing_rent_guidance_definitions.dart';
+import '../../data/cms_content_repository.dart';
 import '../../data/pack_generator.dart';
 import '../../data/public_office_comune_guidance_definitions.dart';
 import '../../data/procedure_validator.dart';
@@ -129,7 +130,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
-    final app = scope.appController;
     final requests = scope.requestController.requests;
     final profile = scope.profileController.profile;
     final dueReminders = requests
@@ -162,11 +162,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
             onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
             icon: const Icon(Icons.person_outline),
           ),
-          if (app.config.adminModeEnabled)
-            IconButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.admin),
-              icon: const Icon(Icons.admin_panel_settings_outlined),
-            ),
         ],
       ),
       body: SafeArea(
@@ -4218,9 +4213,10 @@ class UtilityHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: context.l10n.t('utilities_bills'),
-      categoryGuidance: UtilitiesElectricityGasGuidanceDefinitions.category,
+      categorySlug: UtilitiesElectricityGasGuidanceDefinitions.category.id,
+      fallbackGuidance: UtilitiesElectricityGasGuidanceDefinitions.category,
       procedureMap: _utilityProcedureMap,
     );
   }
@@ -4515,9 +4511,10 @@ class CanoneRaiHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: context.l10n.t('canone_rai'),
-      categoryGuidance: CanoneRaiGuidanceDefinitions.category,
+      categorySlug: CanoneRaiGuidanceDefinitions.category.id,
+      fallbackGuidance: CanoneRaiGuidanceDefinitions.category,
       procedureMap: _canoneProcedureMap,
     );
   }
@@ -4544,9 +4541,10 @@ class TelecomHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: context.l10n.t('telecom'),
-      categoryGuidance: TelecomGuidanceDefinitions.category,
+      categorySlug: TelecomGuidanceDefinitions.category.id,
+      fallbackGuidance: TelecomGuidanceDefinitions.category,
       procedureMap: _telecomProcedureMap,
     );
   }
@@ -4557,9 +4555,10 @@ class PublicOfficeComuneHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: 'Public Office / Comune',
-      categoryGuidance: PublicOfficeComuneGuidanceDefinitions.category,
+      categorySlug: PublicOfficeComuneGuidanceDefinitions.category.id,
+      fallbackGuidance: PublicOfficeComuneGuidanceDefinitions.category,
       procedureMap: _publicOfficeProcedureMap,
     );
   }
@@ -4570,9 +4569,10 @@ class WorkInpsPatronatoHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: 'Work / INPS / Patronato',
-      categoryGuidance: WorkInpsPatronatoGuidanceDefinitions.category,
+      categorySlug: WorkInpsPatronatoGuidanceDefinitions.category.id,
+      fallbackGuidance: WorkInpsPatronatoGuidanceDefinitions.category,
       procedureMap: _workInpsProcedureMap,
     );
   }
@@ -4583,9 +4583,10 @@ class UniversityStudentHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: 'University / Student',
-      categoryGuidance: UniversityStudentGuidanceDefinitions.category,
+      categorySlug: UniversityStudentGuidanceDefinitions.category.id,
+      fallbackGuidance: UniversityStudentGuidanceDefinitions.category,
       procedureMap: _universityProcedureMap,
     );
   }
@@ -4596,10 +4597,39 @@ class GeneralHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _RichCategoryHubScreen(
+    return _CmsBackedRichCategoryHubScreen(
       appBarTitle: 'General',
-      categoryGuidance: GeneralGuidanceDefinitions.category,
+      categorySlug: GeneralGuidanceDefinitions.category.id,
+      fallbackGuidance: GeneralGuidanceDefinitions.category,
       procedureMap: _generalProcedureMap,
+    );
+  }
+}
+
+class _CmsBackedRichCategoryHubScreen extends StatelessWidget {
+  const _CmsBackedRichCategoryHubScreen({
+    required this.appBarTitle,
+    required this.categorySlug,
+    required this.fallbackGuidance,
+    required this.procedureMap,
+  });
+
+  final String appBarTitle;
+  final String categorySlug;
+  final RichCategoryGuidance fallbackGuidance;
+  final Map<String, String> procedureMap;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<RichCategoryGuidance?>(
+      future: const CmsContentRepository().getRichCategory(categorySlug),
+      builder: (context, snapshot) {
+        return _RichCategoryHubScreen(
+          appBarTitle: appBarTitle,
+          categoryGuidance: snapshot.data ?? fallbackGuidance,
+          procedureMap: procedureMap,
+        );
+      },
     );
   }
 }
@@ -5889,6 +5919,60 @@ class AdminPanelScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class AdminMovedToWebScreen extends StatelessWidget {
+  const AdminMovedToWebScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Admin backoffice')),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.open_in_browser_outlined, size: 42),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Admin moved to the web backoffice',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'UfficioFacile admin is no longer available inside the consumer Flutter app.',
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Run or deploy the dedicated Next.js backoffice in `apps/admin`, then sign in there with your admin Supabase account.',
+                      ),
+                      const SizedBox(height: 20),
+                      FilledButton(
+                        onPressed: () => Navigator.popUntil(
+                          context,
+                          (route) => route.isFirst,
+                        ),
+                        child: const Text('Back to app'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

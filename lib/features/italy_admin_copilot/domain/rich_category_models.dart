@@ -88,6 +88,31 @@ class RichCategoryGuidance {
   final List<RichCategoryOutputGenerator> outputGenerators;
   final List<RichCategoryRoutingRule> routingRules;
   final List<String> implementationNotesForCodex;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'titleIt': titleIt,
+    'region': region,
+    'city': city,
+    'shortDescription': shortDescription,
+    'mainUserQuestion': mainUserQuestion,
+    'routingLogicSummary': routingLogicSummary,
+    if (topWarning != null) 'topWarning': topWarning,
+    'officialReferences': officialReferences.map(
+      (key, value) => MapEntry(key, value.toMap()),
+    ),
+    'contacts': contacts.map((key, value) => MapEntry(key, value.toMap())),
+    'channelRules': channelRules.map((item) => item.toMap()).toList(),
+    'commonDocuments': commonDocuments.map((item) => item.toMap()).toList(),
+    'firstScreenQuestions': firstScreenQuestions
+        .map((item) => item.toMap())
+        .toList(),
+    'subcategories': subcategories.map((item) => item.toMap()).toList(),
+    'outputGenerators': outputGenerators.map((item) => item.toMap()).toList(),
+    'routingRules': routingRules.map((item) => item.toMap()).toList(),
+    'implementationNotesForCodex': implementationNotesForCodex,
+  };
 }
 
 class RichCategoryReference {
@@ -102,6 +127,11 @@ class RichCategoryReference {
 
   final String label;
   final String? url;
+
+  Map<String, dynamic> toMap() => {
+    'label': label,
+    if (url != null) 'url': url,
+  };
 }
 
 class RichCategoryContact {
@@ -200,6 +230,41 @@ class RichCategoryContact {
   final String? publicHours;
   final String? warning;
   final List<String> useFor;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    if (nameIt != null) 'nameIt': nameIt,
+    if (categoryId != null) 'categoryId': categoryId,
+    if (authority != null) 'authority': authority,
+    if (officeCode != null) 'officeCode': officeCode,
+    if (address != null) 'address': address,
+    if (postalAddress != null) 'postalAddress': postalAddress,
+    if (physicalOfficeAddress != null)
+      'physicalOfficeAddress': physicalOfficeAddress,
+    if (phone != null) 'phone': phone,
+    if (phoneHours != null) 'phoneHours': phoneHours,
+    if (phoneSupportLegacy != null) 'phoneSupportLegacy': phoneSupportLegacy,
+    if (phoneFixedLine != null) 'phoneFixedLine': phoneFixedLine,
+    if (phoneMobileOrAbroad != null)
+      'phoneMobileOrAbroad': phoneMobileOrAbroad,
+    if (conciliationFreeNumber != null)
+      'conciliationFreeNumber': conciliationFreeNumber,
+    if (conciliationFreeNumberHours != null)
+      'conciliationFreeNumberHours': conciliationFreeNumberHours,
+    if (consumerPhone != null) 'consumerPhone': consumerPhone,
+    if (email != null) 'email': email,
+    if (pec != null) 'pec': pec,
+    if (permessoSupportPec != null) 'permessoSupportPec': permessoSupportPec,
+    if (url != null) 'url': url,
+    if (access != null) 'access': access,
+    if (howToFind != null) 'howToFind': howToFind,
+    if (requiredBeforeUse != null) 'requiredBeforeUse': requiredBeforeUse,
+    if (openingHours != null) 'openingHours': openingHours,
+    if (publicHours != null) 'publicHours': publicHours,
+    if (warning != null) 'warning': warning,
+    if (useFor.isNotEmpty) 'useFor': useFor,
+  };
 }
 
 class RichCategoryChannelRule {
@@ -237,6 +302,17 @@ class RichCategoryChannelRule {
   final String? address;
   final String? pec;
   final String? warning;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'label': label,
+    'labelIt': labelIt,
+    'priority': priority,
+    'useWhen': useWhen,
+    if (address != null) 'address': address,
+    if (pec != null) 'pec': pec,
+    if (warning != null) 'warning': warning,
+  };
 }
 
 class RichCategoryDocument {
@@ -257,6 +333,12 @@ class RichCategoryDocument {
   final String id;
   final String label;
   final String labelIt;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'label': label,
+    'labelIt': labelIt,
+  };
 }
 
 class RichCategoryQuestion {
@@ -294,6 +376,16 @@ class RichCategoryQuestion {
   final String? placeholder;
   final List<RichCategoryQuestionOption> options;
   final Map<String, String> showWhen;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'question': question,
+    'questionIt': questionIt,
+    'type': type,
+    if (placeholder != null) 'placeholder': placeholder,
+    if (options.isNotEmpty) 'options': options.map((item) => item.toMap()).toList(),
+    if (showWhen.isNotEmpty) 'showWhen': showWhen,
+  };
 }
 
 class RichCategoryQuestionOption {
@@ -308,6 +400,11 @@ class RichCategoryQuestionOption {
 
   final String id;
   final String label;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'label': label,
+  };
 }
 
 class RichCategoryDeadline {
@@ -328,6 +425,12 @@ class RichCategoryDeadline {
   final String id;
   final String label;
   final String rule;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'label': label,
+    'rule': rule,
+  };
 }
 
 class RichCategoryConfigurableRule {
@@ -348,6 +451,12 @@ class RichCategoryConfigurableRule {
   final String label;
   final String value;
   final String? warning;
+
+  Map<String, dynamic> toMap() => {
+    'label': label,
+    'value': value,
+    if (warning != null) 'warning': warning,
+  };
 }
 
 class RichCategorySubcategory {
@@ -437,6 +546,32 @@ class RichCategorySubcategory {
   final List<RichCategoryDeadline> deadlines;
   final Map<String, RichCategoryConfigurableRule> configurableRules;
   final String? urgentWarning;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'titleIt': titleIt,
+    'priority': priority,
+    'whatIsIt': whatIsIt,
+    if (whyDoYouNeedIt.isNotEmpty) 'whyDoYouNeedIt': whyDoYouNeedIt,
+    if (recommendedChannels.isNotEmpty)
+      'recommendedChannels': recommendedChannels,
+    if (recommendedContacts.isNotEmpty)
+      'recommendedContacts': recommendedContacts,
+    if (documents.isNotEmpty) 'documents': documents,
+    if (extraDocuments.isNotEmpty) 'extraDocuments': extraDocuments,
+    if (warnings.isNotEmpty) 'warnings': warnings,
+    if (outputs.isNotEmpty) 'outputs': outputs,
+    if (userQuestions.isNotEmpty) 'userQuestions': userQuestions,
+    if (fieldsToExtractFromBill.isNotEmpty)
+      'fieldsToExtractFromBill': fieldsToExtractFromBill,
+    if (deadlines.isNotEmpty) 'deadlines': deadlines.map((item) => item.toMap()).toList(),
+    if (configurableRules.isNotEmpty)
+      'configurableRules': configurableRules.map(
+        (key, value) => MapEntry(key, value.toMap()),
+      ),
+    if (urgentWarning != null) 'urgentWarning': urgentWarning,
+  };
 }
 
 class RichCategoryOutputGenerator {
@@ -494,6 +629,23 @@ class RichCategoryOutputGenerator {
   final String? warning;
   final List<String> items;
   final List<String> sendToOptions;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'titleIt': titleIt,
+    'outputType': outputType,
+    if (recipient != null) 'recipient': recipient,
+    if (sendTo != null) 'sendTo': sendTo,
+    if (address != null) 'address': address,
+    if (contentIt != null) 'contentIt': contentIt,
+    if (templateIt != null) 'templateIt': templateIt,
+    if (templateBehavior != null) 'templateBehavior': templateBehavior,
+    if (behavior != null) 'behavior': behavior,
+    if (warning != null) 'warning': warning,
+    if (items.isNotEmpty) 'items': items,
+    if (sendToOptions.isNotEmpty) 'sendToOptions': sendToOptions,
+  };
 }
 
 class RichCategoryRoutingRule {
@@ -519,6 +671,13 @@ class RichCategoryRoutingRule {
   final String routeTo;
   final String? priority;
   final String? note;
+
+  Map<String, dynamic> toMap() => {
+    'if': conditions,
+    'routeTo': routeTo,
+    if (priority != null) 'priority': priority,
+    if (note != null) 'note': note,
+  };
 }
 
 Map<String, T> _mapValues<T>(
