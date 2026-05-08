@@ -149,8 +149,8 @@ class BundledCatalogRepository implements CatalogRepository {
 
   @override
   Future<Map<String, dynamic>> getPremiumPublicConfig() async => const {
-    'betaModeEnabled': true,
-    'paywallEnabled': false,
+    'betaModeEnabled': false,
+    'paywallEnabled': true,
   };
 
   @override

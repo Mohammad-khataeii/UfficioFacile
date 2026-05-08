@@ -35,6 +35,7 @@ migrate_working_dir/
 /node_modules/
 **/node_modules/
 **/.next/
+.next/
 apps/admin/.env.local
 
 # Symbolication related

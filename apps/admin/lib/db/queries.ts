@@ -26,6 +26,79 @@ export function catalogPrimaryKey(table: EditableCatalogTable) {
     : "id";
 }
 
+export type SafeQueryResult<T> = {
+  data: T;
+  warning?: string;
+};
+
+function isMissingTableError(error: any) {
+  return (
+    error?.code === "PGRST205" ||
+    String(error?.message ?? "").includes("Could not find table")
+  );
+}
+
+function missingTableWarning(table: string) {
+  return `Missing Supabase table: ${table}. Run the latest Supabase migrations.`;
+}
+
+export async function safeSelectRows(
+  supabase: any,
+  table: string,
+  build?: (query: any) => any,
+): Promise<SafeQueryResult<any[]>> {
+  let query = supabase.from(table).select("*");
+  if (build) {
+    query = build(query);
+  }
+  const { data, error } = await query;
+  if (error) {
+    if (isMissingTableError(error)) {
+      return { data: [], warning: missingTableWarning(table) };
+    }
+    throw error;
+  }
+  return { data: data ?? [] };
+}
+
+export async function safeMaybeSingle(
+  supabase: any,
+  table: string,
+  build?: (query: any) => any,
+): Promise<SafeQueryResult<any | null>> {
+  let query = supabase.from(table).select("*");
+  if (build) {
+    query = build(query);
+  }
+  const { data, error } = await query.maybeSingle();
+  if (error) {
+    if (isMissingTableError(error)) {
+      return { data: null, warning: missingTableWarning(table) };
+    }
+    throw error;
+  }
+  return { data: data ?? null };
+}
+
+export async function safeCountRows(
+  supabase: any,
+  table: string,
+  filter?: { column: string; value: string | boolean },
+): Promise<SafeQueryResult<number>> {
+  let query = supabase.from(table).select("*", { count: "exact", head: true });
+  if (filter) {
+    query = query.eq(filter.column, filter.value);
+  }
+  const { count, error } = await query;
+  if (error) {
+    if (isMissingTableError(error)) {
+      return { data: 0, warning: missingTableWarning(table) };
+    }
+    throw error;
+  }
+  return { data: count ?? 0 };
+}
+
 export async function getDashboardMetrics(supabase: any) {
   const [
     userCount,
@@ -38,41 +111,52 @@ export async function getDashboardMetrics(supabase: any) {
     blockCount,
     planCount,
   ] = await Promise.all([
-    countRows(supabase, "ufficcio_profiles"),
-    countRows(supabase, "ufficio_user_entitlements", {
+    safeCountRows(supabase, "ufficcio_profiles"),
+    safeCountRows(supabase, "ufficio_user_entitlements", {
       column: "premium_access",
       value: true,
     }),
-    countRows(supabase, "ufficio_problem_requests", {
+    safeCountRows(supabase, "ufficio_problem_requests", {
       column: "status",
       value: "new",
     }),
-    countRows(supabase, "ufficio_consultancy_requests", {
+    safeCountRows(supabase, "ufficio_consultancy_requests", {
       column: "status",
       value: "newRequest",
     }),
-    supabase
-      .from("ufficio_admin_audit_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(10),
-    countRows(supabase, "ufficio_cms_categories"),
-    countRows(supabase, "ufficio_cms_procedures"),
-    countRows(supabase, "ufficio_cms_content_blocks"),
-    countRows(supabase, "ufficio_plan_products"),
+    safeSelectRows(supabase, "ufficio_admin_audit_logs", (query) =>
+      query.order("created_at", { ascending: false }).limit(10),
+    ),
+    safeCountRows(supabase, "ufficio_cms_categories"),
+    safeCountRows(supabase, "ufficio_cms_procedures"),
+    safeCountRows(supabase, "ufficio_cms_content_blocks"),
+    safeCountRows(supabase, "ufficio_plan_products"),
   ]);
 
+  const warnings = [
+    userCount.warning,
+    premiumCount.warning,
+    problemCount.warning,
+    consultancyCount.warning,
+    auditRows.warning,
+    categoryCount.warning,
+    procedureCount.warning,
+    blockCount.warning,
+    planCount.warning,
+  ].filter((warning): warning is string => Boolean(warning));
+
   return {
-    totalUsers: userCount,
-    premiumUsers: premiumCount,
-    freeUsers: Math.max(userCount - premiumCount, 0),
-    openProblemRequests: problemCount,
-    openConsultancyRequests: consultancyCount,
-    cmsCategories: categoryCount,
-    cmsProcedures: procedureCount,
-    cmsBlocks: blockCount,
-    planProducts: planCount,
-    auditRows: auditRows.data ?? [],
+    totalUsers: userCount.data,
+    premiumUsers: premiumCount.data,
+    freeUsers: Math.max(userCount.data - premiumCount.data, 0),
+    openProblemRequests: problemCount.data,
+    openConsultancyRequests: consultancyCount.data,
+    cmsCategories: categoryCount.data,
+    cmsProcedures: procedureCount.data,
+    cmsBlocks: blockCount.data,
+    planProducts: planCount.data,
+    auditRows: auditRows.data,
+    warnings,
   };
 }
 
@@ -81,12 +165,8 @@ export async function countRows(
   table: string,
   filter?: { column: string; value: string | boolean },
 ) {
-  let query = supabase.from(table).select("*", { count: "exact", head: true });
-  if (filter) {
-    query = query.eq(filter.column, filter.value);
-  }
-  const { count } = await query;
-  return count ?? 0;
+  const result = await safeCountRows(supabase, table, filter);
+  return result.data;
 }
 
 export async function listAuthUsers(search?: string) {
@@ -124,31 +204,66 @@ export async function getUserBundle(supabase: any, userId: string) {
     unlocks,
     paymentEvents,
   ] = await Promise.all([
-    supabase.from("ufficcio_profiles").select("*").eq("user_id", userId).maybeSingle(),
-    supabase.from("ufficio_user_entitlements").select("*").eq("user_id", userId).maybeSingle(),
-    supabase.from("ufficcio_requests").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_usage_counters").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_consultancy_requests").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_problem_requests").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_cost_items").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_directory_contacts").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_documents_directory").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
-    supabase.from("ufficio_user_content_unlocks").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(50),
-    supabase.from("ufficio_payment_events").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+    safeMaybeSingle(supabase, "ufficcio_profiles", (query) =>
+      query.eq("user_id", userId),
+    ),
+    safeMaybeSingle(supabase, "ufficio_user_entitlements", (query) =>
+      query.eq("user_id", userId),
+    ),
+    safeSelectRows(supabase, "ufficcio_requests", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_usage_counters", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_consultancy_requests", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_problem_requests", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_cost_items", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_directory_contacts", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_documents_directory", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    ),
+    safeSelectRows(supabase, "ufficio_user_content_unlocks", (query) =>
+      query.eq("user_id", userId).order("updated_at", { ascending: false }).limit(50),
+    ),
+    safeSelectRows(supabase, "ufficio_payment_events", (query) =>
+      query.eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+    ),
   ]);
 
   return {
     profile: profile.data,
     entitlement: entitlement.data,
-    requests: requests.data ?? [],
-    usageCounters: usageCounters.data ?? [],
-    consultancy: consultancy.data ?? [],
-    problemRequests: problemRequests.data ?? [],
-    costItems: costItems.data ?? [],
-    contacts: contacts.data ?? [],
-    documents: documents.data ?? [],
-    unlocks: unlocks.data ?? [],
-    paymentEvents: paymentEvents.data ?? [],
+    requests: requests.data,
+    usageCounters: usageCounters.data,
+    consultancy: consultancy.data,
+    problemRequests: problemRequests.data,
+    costItems: costItems.data,
+    contacts: contacts.data,
+    documents: documents.data,
+    unlocks: unlocks.data,
+    paymentEvents: paymentEvents.data,
+    warnings: [
+      profile.warning,
+      entitlement.warning,
+      requests.warning,
+      usageCounters.warning,
+      consultancy.warning,
+      problemRequests.warning,
+      costItems.warning,
+      contacts.warning,
+      documents.warning,
+      unlocks.warning,
+      paymentEvents.warning,
+    ].filter((warning): warning is string => Boolean(warning)),
   };
 }
 
@@ -162,51 +277,79 @@ export async function getAdminUsers(supabase: any) {
 }
 
 export async function getEntitlements(supabase: any) {
-  const { data, error } = await supabase
-    .from("ufficio_user_entitlements")
-    .select("*")
-    .order("updated_at", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
+  return (
+    await safeSelectRows(supabase, "ufficio_user_entitlements", (query) =>
+      query.order("updated_at", { ascending: false }),
+    )
+  ).data;
 }
 
 export async function getPlanProducts(supabase: any) {
-  const { data, error } = await supabase
-    .from("ufficio_plan_products")
-    .select("*")
-    .order("sort_order", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
+  return (
+    await safeSelectRows(supabase, "ufficio_plan_products", (query) =>
+      query.order("sort_order", { ascending: true }),
+    )
+  ).data;
 }
 
 export async function getPremiumEvents(supabase: any) {
-  const { data, error } = await supabase
-    .from("ufficio_premium_events")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  if (error) throw error;
-  return data ?? [];
+  return (
+    await safeSelectRows(supabase, "ufficio_premium_events", (query) =>
+      query.order("created_at", { ascending: false }).limit(100),
+    )
+  ).data;
 }
 
 export async function getPaymentEvents(supabase: any) {
-  const { data, error } = await supabase
-    .from("ufficio_payment_events")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  if (error) throw error;
-  return data ?? [];
+  return (
+    await safeSelectRows(supabase, "ufficio_payment_events", (query) =>
+      query.order("created_at", { ascending: false }).limit(100),
+    )
+  ).data;
 }
 
 export async function getContentUnlocks(supabase: any) {
-  const { data, error } = await supabase
-    .from("ufficio_user_content_unlocks")
-    .select("*")
-    .order("updated_at", { ascending: false })
-    .limit(200);
-  if (error) throw error;
-  return data ?? [];
+  return (
+    await safeSelectRows(supabase, "ufficio_user_content_unlocks", (query) =>
+      query.order("updated_at", { ascending: false }).limit(200),
+    )
+  ).data;
+}
+
+export async function getPremiumOverviewData(supabase: any) {
+  const [entitlements, plans, events, paymentEvents, unlocks] =
+    await Promise.all([
+      safeSelectRows(supabase, "ufficio_user_entitlements", (query) =>
+        query.order("updated_at", { ascending: false }),
+      ),
+      safeSelectRows(supabase, "ufficio_plan_products", (query) =>
+        query.order("sort_order", { ascending: true }),
+      ),
+      safeSelectRows(supabase, "ufficio_premium_events", (query) =>
+        query.order("created_at", { ascending: false }).limit(100),
+      ),
+      safeSelectRows(supabase, "ufficio_payment_events", (query) =>
+        query.order("created_at", { ascending: false }).limit(100),
+      ),
+      safeSelectRows(supabase, "ufficio_user_content_unlocks", (query) =>
+        query.order("updated_at", { ascending: false }).limit(200),
+      ),
+    ]);
+
+  return {
+    entitlements: entitlements.data,
+    plans: plans.data,
+    events: events.data,
+    paymentEvents: paymentEvents.data,
+    unlocks: unlocks.data,
+    warnings: [
+      entitlements.warning,
+      plans.warning,
+      events.warning,
+      paymentEvents.warning,
+      unlocks.warning,
+    ].filter((warning): warning is string => Boolean(warning)),
+  };
 }
 
 export async function getProblemRequests(supabase: any) {

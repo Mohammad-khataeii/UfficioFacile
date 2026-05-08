@@ -21,9 +21,41 @@ Map<String, dynamic> buildCmsSeedBundle({
   final cmsProcedures = resolvedSeeds
       .expand((item) => item.toCmsProcedureRows())
       .toList();
+  final cmsContentBlocks = resolvedSeeds
+      .expand(
+        (category) => category.procedures.expand(
+          (procedure) => procedure.blocks.asMap().entries.map(
+            (entry) => {
+              'id': '${category.slug}_${procedure.slug}_${entry.key}',
+              'category_slug': category.slug,
+              'procedure_slug': procedure.slug,
+              ...entry.value.toJson(),
+              'visibility': 'public',
+              'config': entry.value.metadata,
+            },
+          ),
+        ),
+      )
+      .toList();
+  final cmsSources = resolvedSeeds
+      .expand(
+        (category) => category.procedures.expand(
+          (procedure) => procedure.sources.map(
+            (source) => {
+              'category_slug': category.slug,
+              'procedure_slug': procedure.slug,
+              ...source,
+            },
+          ),
+        ),
+      )
+      .toList();
   final richCategories = resolvedSeeds
       .map((item) => item.richCategorySnapshot)
       .whereType<Map<String, dynamic>>()
+      .toList();
+  final categories = resolvedSeeds
+      .map((item) => item.toPublicSnapshot())
       .toList();
 
   Map<String, dynamic>? categoryBySlug(String slug) {
@@ -34,9 +66,16 @@ Map<String, dynamic> buildCmsSeedBundle({
   }
 
   return {
+    'version': '1',
     'generatedAt': DateTime.now().toUtc().toIso8601String(),
+    'categories': categories,
     'cmsCategories': cmsCategories,
     'cmsProcedures': cmsProcedures,
+    'cmsContentBlocks': cmsContentBlocks,
+    'cmsSources': cmsSources,
+    'cmsLinks': const [],
+    'cmsContacts': const [],
+    'cmsDocuments': const [],
     'richCategories': richCategories,
     'healthCategory': categoryBySlug('health_asl'),
     'housingCategory': categoryBySlug('housing_rent'),

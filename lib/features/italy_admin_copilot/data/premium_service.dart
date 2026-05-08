@@ -473,7 +473,7 @@ class UfficioPremiumEntitlementService {
     }
     if (entitlement.isProLike) {
       return _allowedDecision(
-        reason: 'Pro access active',
+        reason: 'Paid access active',
         isPremiumFeature: true,
       );
     }
@@ -491,7 +491,7 @@ class UfficioPremiumEntitlementService {
       );
     }
     return _blockedDecision(
-      reason: 'This procedure is part of Pro.',
+      reason: 'This procedure is included in Plus or Premium.',
       feature: FeatureKey.serviceIntelligenceAdvanced,
     );
   }
@@ -504,7 +504,7 @@ class UfficioPremiumEntitlementService {
       if (!procedureDecision.allowed) return procedureDecision;
     }
     if (entitlement.isProLike) {
-      return _allowedDecision(reason: 'Pro generation enabled');
+      return _allowedDecision(reason: 'Paid generation enabled');
     }
     if (config.betaModeEnabled) {
       return _allowedDecision(
@@ -564,7 +564,7 @@ class UfficioPremiumEntitlementService {
     }
     if (entitlement.isProLike) {
       return _allowedDecision(
-        reason: 'Pro access active',
+        reason: 'Paid access active',
         isPremiumFeature: true,
       );
     }
@@ -836,9 +836,9 @@ class UfficioPremiumEntitlementService {
     allowed: true,
     isPremiumFeature: isPremiumFeature,
     reason: reason,
-    upgradeTitle: 'This is a Pro feature.',
+    upgradeTitle: 'Upgrade to keep going.',
     upgradeMessage:
-        'Pro unlocks advanced utility tools, Canone RAI flows, proof folders, document vault, cost tracking, and unlimited request packs.',
+        'Plus and Premium unlock expanded tools, premium guides, storage, and higher usage limits.',
     blockedByBeta: blockedByBeta,
     used: used,
     limit: limit,
@@ -856,12 +856,12 @@ class UfficioPremiumEntitlementService {
     allowed: false,
     isPremiumFeature: true,
     reason: reason,
-    upgradeTitle: 'This is a Pro feature.',
+    upgradeTitle: 'Upgrade to keep going.',
     upgradeMessage:
-        'Pro unlocks advanced utility tools, Canone RAI flows, proof folders, document vault, cost tracking, and unlimited request packs.',
+        'Plus and Premium unlock expanded tools, premium guides, storage, and higher usage limits.',
     recommendedPlan: feature == FeatureKey.consultantMode
         ? UfficioPlan.consultant
-        : UfficioPlan.pro,
+        : UfficioPlan.premiumMonthly,
     used: used,
     limit: limit,
     remainingUsage: used != null && limit != null
@@ -874,7 +874,7 @@ class UfficioPremiumEntitlementService {
     final entitlement = await getCurrentEntitlement();
     if (entitlement.isProLike) {
       return _allowedDecision(
-        reason: 'Pro access active',
+        reason: 'Paid access active',
         isPremiumFeature: true,
       );
     }
@@ -948,7 +948,8 @@ class UfficioPremiumEntitlementService {
           .from('ufficio_plan_products')
           .select()
           .eq('is_active', true)
-          .order('sort_order', ascending: true);
+          .order('sort_order', ascending: true)
+          .timeout(const Duration(seconds: 3));
       return rows
           .whereType<Map>()
           .map((item) => PlanProduct.fromJson(Map<String, dynamic>.from(item)))
@@ -968,7 +969,8 @@ class UfficioPremiumEntitlementService {
       final rows = await client
           .from('ufficio_user_content_unlocks')
           .select()
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .timeout(const Duration(seconds: 3));
       return rows
           .whereType<Map>()
           .map(
@@ -1008,17 +1010,98 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     providerMetadata: const {},
   ),
   PlanProduct(
+    productKey: 'plus_monthly',
+    planType: 'subscription',
+    billingInterval: 'month',
+    amountCents: 499,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 1,
+    title: const {
+      'en': 'Plus Monthly',
+      'it': 'Plus mensile',
+      'fr': 'Plus mensuel',
+      'es': 'Plus mensual',
+      'fa': 'پلاس ماهانه',
+      'ar': 'بلس شهري',
+    },
+    description: const {
+      'en': 'More usage, priority requests, and expanded tools.',
+      'it': 'Più utilizzo, richieste prioritarie e strumenti estesi.',
+      'fr': 'Plus d’utilisations, demandes prioritaries et outils étendus.',
+      'es': 'Más uso, solicitudes prioritarias y herramientas ampliadas.',
+      'fa': 'استفاده بیشتر، درخواست‌های اولویت‌دار و ابزارهای گسترده‌تر.',
+      'ar': 'استخدام أكثر وطلبات ذات أولوية وأدوات موسعة.',
+    },
+    features: const {'premium_sections': false, 'priority_requests': true},
+    limits: const {
+      'generated_packs_per_month': 20,
+      'saved_requests_limit': 50,
+      'documents_limit': 50,
+      'contacts_limit': 50,
+      'cost_items_limit': 50,
+      'consultancy_included_per_month': 0,
+    },
+    providerMetadata: const {},
+  ),
+  PlanProduct(
+    productKey: 'plus_yearly',
+    planType: 'subscription',
+    billingInterval: 'year',
+    amountCents: 3999,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 2,
+    title: const {
+      'en': 'Plus Yearly',
+      'it': 'Plus annuale',
+      'fr': 'Plus annuel',
+      'es': 'Plus anual',
+      'fa': 'پلاس سالانه',
+      'ar': 'بلس سنوي',
+    },
+    description: const {
+      'en': 'One-year Plus access with better value.',
+      'it': 'Accesso Plus per un anno con prezzo migliore.',
+      'fr': 'Accès Plus d’un an avec meilleur prix.',
+      'es': 'Acceso Plus de un año con mejor valor.',
+      'fa': 'دسترسی پلاس یک‌ساله با ارزش بهتر.',
+      'ar': 'وصول بلس لمدة سنة بقيمة أفضل.',
+    },
+    features: const {'premium_sections': false, 'priority_requests': true},
+    limits: const {
+      'generated_packs_per_month': 20,
+      'saved_requests_limit': 50,
+      'documents_limit': 50,
+      'contacts_limit': 50,
+      'cost_items_limit': 50,
+      'consultancy_included_per_month': 0,
+    },
+    providerMetadata: const {},
+  ),
+  PlanProduct(
     productKey: 'premium_monthly',
     planType: 'subscription',
     billingInterval: 'month',
     amountCents: 999,
     currency: 'EUR',
     isActive: true,
-    sortOrder: 1,
-    title: const {'en': 'Premium Monthly', 'it': 'Premium mensile'},
+    sortOrder: 3,
+    title: const {
+      'en': 'Premium Monthly',
+      'it': 'Premium mensile',
+      'fr': 'Premium mensuel',
+      'es': 'Premium mensual',
+      'fa': 'پریمیوم ماهانه',
+      'ar': 'بريميوم شهري',
+    },
     description: const {
       'en': 'Full guides, tools, vault, and premium help.',
       'it': 'Guide complete, strumenti, archivio e aiuto premium.',
+      'fr': 'Guides complets, outils, archivage et aide premium.',
+      'es': 'Guías completas, herramientas, archivo y ayuda premium.',
+      'fa': 'راهنماهای کامل، ابزارها، آرشیو و کمک پریمیوم.',
+      'ar': 'أدلة كاملة وأدوات وأرشيف ومساعدة بريميوم.',
     },
     features: const {'premium_sections': true, 'priority_requests': true},
     limits: const {
@@ -1038,11 +1121,22 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     amountCents: 7999,
     currency: 'EUR',
     isActive: true,
-    sortOrder: 2,
-    title: const {'en': 'Premium Yearly', 'it': 'Premium annuale'},
+    sortOrder: 4,
+    title: const {
+      'en': 'Premium Yearly',
+      'it': 'Premium annuale',
+      'fr': 'Premium annuel',
+      'es': 'Premium anual',
+      'fa': 'پریمیوم سالانه',
+      'ar': 'بريميوم سنوي',
+    },
     description: const {
       'en': 'Full premium access with better yearly value.',
       'it': 'Accesso premium completo con prezzo annuale migliore.',
+      'fr': 'Accès premium complet avec meilleure valeur annuelle.',
+      'es': 'Acceso premium completo con mejor valor anual.',
+      'fa': 'دسترسی کامل پریمیوم با ارزش بهتر سالانه.',
+      'ar': 'وصول بريميوم كامل بقيمة سنوية أفضل.',
     },
     features: const {'premium_sections': true, 'priority_requests': true},
     limits: const {
@@ -1062,11 +1156,22 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     amountCents: 1499,
     currency: 'EUR',
     isActive: true,
-    sortOrder: 3,
-    title: const {'en': 'One-shot Consultancy', 'it': 'Consulenza una tantum'},
+    sortOrder: 6,
+    title: const {
+      'en': 'One-shot Consultancy',
+      'it': 'Consulenza una tantum',
+      'fr': 'Consultation ponctuelle',
+      'es': 'Consultoría puntual',
+      'fa': 'مشاوره تک‌مرحله‌ای',
+      'ar': 'استشارة لمرة واحدة',
+    },
     description: const {
       'en': 'Pay once for one private consultancy request.',
       'it': 'Paga una volta per una richiesta di consulenza privata.',
+      'fr': 'Payez une fois pour une demande de consultation privée.',
+      'es': 'Paga una vez por una solicitud de consultoría privada.',
+      'fa': 'برای یک درخواست مشاوره خصوصی یک بار پرداخت کن.',
+      'ar': 'ادفع مرة واحدة مقابل طلب استشارة خاصة.',
     },
     features: const {'private_consultancy': true},
     limits: const {'procedure_count': 1},
@@ -1076,17 +1181,63 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     productKey: 'subcategory_unlock',
     planType: 'one_time',
     billingInterval: 'one_time',
-    amountCents: 299,
+    amountCents: 399,
     currency: 'EUR',
     isActive: true,
-    sortOrder: 4,
-    title: const {'en': 'Single Guide Unlock', 'it': 'Sblocco guida singola'},
+    sortOrder: 5,
+    title: const {
+      'en': 'Single Guide Unlock',
+      'it': 'Sblocco guida singola',
+      'fr': 'Déblocage d’un guide',
+      'es': 'Desbloqueo de una guía',
+      'fa': 'باز کردن یک راهنما',
+      'ar': 'فتح دليل واحد',
+    },
     description: const {
       'en': 'Unlock one premium guide without subscribing.',
       'it': 'Sblocca una guida premium senza abbonarti.',
+      'fr': 'Débloquez un guide premium sans abonnement.',
+      'es': 'Desbloquea una guía premium sin suscribirte.',
+      'fa': 'یک راهنمای پریمیوم را بدون اشتراک باز کن.',
+      'ar': 'افتح دليلاً بريميوم واحداً من دون اشتراك.',
     },
     features: const {'unlocks_single_procedure': true},
     limits: const {'procedure_count': 1},
+    providerMetadata: const {},
+  ),
+  PlanProduct(
+    productKey: 'admin_grant',
+    planType: 'admin_only',
+    billingInterval: 'none',
+    amountCents: 0,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 7,
+    title: const {
+      'en': 'Admin Grant',
+      'it': 'Grant admin',
+      'fr': 'Attribution admin',
+      'es': 'Concesión admin',
+      'fa': 'اعطای ادمین',
+      'ar': 'منح إداري',
+    },
+    description: const {
+      'en': 'Internal administrative entitlement grant.',
+      'it': 'Concessione interna amministrativa.',
+      'fr': 'Attribution administrative interne.',
+      'es': 'Concesión administrativa interna.',
+      'fa': 'اعطای داخلی مدیریتی.',
+      'ar': 'منح إداري داخلي.',
+    },
+    features: const {'premium_sections': true, 'priority_requests': true},
+    limits: const {
+      'generated_packs_per_month': 100,
+      'saved_requests_limit': 500,
+      'documents_limit': 500,
+      'contacts_limit': 500,
+      'cost_items_limit': 500,
+      'consultancy_included_per_month': 2,
+    },
     providerMetadata: const {},
   ),
 ];

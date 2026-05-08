@@ -1552,10 +1552,32 @@ class ProcedureDetailScreen extends StatelessWidget {
   }
 }
 
-class CmsProcedureDetailScreen extends StatelessWidget {
+class CmsProcedureDetailScreen extends StatefulWidget {
   const CmsProcedureDetailScreen({super.key, required this.procedureSlug});
 
   final String procedureSlug;
+
+  @override
+  State<CmsProcedureDetailScreen> createState() =>
+      _CmsProcedureDetailScreenState();
+}
+
+class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
+  late Future<List<Object>> _loadFuture;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadFuture = _buildFuture();
+  }
+
+  Future<List<Object>> _buildFuture() {
+    final scope = AppScope.of(context);
+    return Future.wait<Object>([
+      scope.cmsRepository.listProcedures(),
+      scope.cmsRepository.listBlocks(widget.procedureSlug),
+    ]).timeout(const Duration(seconds: 3));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1563,20 +1585,23 @@ class CmsProcedureDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('CMS')),
       body: SafeArea(
-        child: FutureBuilder(
-          future: Future.wait([
-            scope.cmsRepository.listProcedures(),
-            scope.cmsRepository.listBlocks(procedureSlug),
-          ]),
+        child: FutureBuilder<List<Object>>(
+          future: _loadFuture,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return _CmsLoadError(
+                message: context.l10n.t('no_procedures_yet_body'),
+                onRetry: () => setState(() => _loadFuture = _buildFuture()),
+              );
             }
             final procedures = snapshot.data![0] as List<CmsProcedure>;
             final blocks = snapshot.data![1] as List<CmsContentBlock>;
             CmsProcedure? procedure;
             for (final item in procedures) {
-              if (item.slug == procedureSlug) {
+              if (item.slug == widget.procedureSlug) {
                 procedure = item;
                 break;
               }
@@ -1779,23 +1804,51 @@ class CmsProcedureDetailScreen extends StatelessWidget {
   }
 }
 
-class CmsCategoryHubScreen extends StatelessWidget {
+class CmsCategoryHubScreen extends StatefulWidget {
   const CmsCategoryHubScreen({super.key, required this.categorySlug});
 
   final String categorySlug;
 
   @override
-  Widget build(BuildContext context) {
+  State<CmsCategoryHubScreen> createState() => _CmsCategoryHubScreenState();
+}
+
+class _CmsCategoryHubScreenState extends State<CmsCategoryHubScreen> {
+  late Future<List<Object>> _loadFuture;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadFuture = _buildFuture();
+  }
+
+  Future<List<Object>> _buildFuture() {
     final scope = AppScope.of(context);
-    return FutureBuilder(
-      future: Future.wait([
-        scope.cmsRepository.listCategories(),
-        scope.cmsRepository.listProcedures(categorySlug: categorySlug),
-      ]),
+    return Future.wait<Object>([
+      scope.cmsRepository.listCategories(),
+      scope.cmsRepository.listProcedures(categorySlug: widget.categorySlug),
+    ]).timeout(const Duration(seconds: 3));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Object>>(
+      future: _loadFuture,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
             body: SafeArea(child: Center(child: CircularProgressIndicator())),
+          );
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Scaffold(
+            appBar: AppBar(title: Text(widget.categorySlug)),
+            body: SafeArea(
+              child: _CmsLoadError(
+                message: context.l10n.t('no_procedures_yet_body'),
+                onRetry: () => setState(() => _loadFuture = _buildFuture()),
+              ),
+            ),
           );
         }
         final categories = snapshot.data![0] as List<CmsCategory>;
@@ -1803,7 +1856,7 @@ class CmsCategoryHubScreen extends StatelessWidget {
           ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
         CmsCategory? category;
         for (final item in categories) {
-          if (item.slug == categorySlug && item.isActive) {
+          if (item.slug == widget.categorySlug && item.isActive) {
             category = item;
             break;
           }
@@ -1813,7 +1866,7 @@ class CmsCategoryHubScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(
               category == null
-                  ? categorySlug
+                  ? widget.categorySlug
                   : _localizedCmsText(
                       context,
                       category.title,
@@ -1882,19 +1935,46 @@ class CmsCategoryHubScreen extends StatelessWidget {
                   ),
                 const SizedBox(height: 8),
                 GlobalProblemRequestCard(
-                  categoryId: categorySlug,
-                  sourcePage: category?.slug ?? categorySlug,
+                  categoryId: widget.categorySlug,
+                  sourcePage: category?.slug ?? widget.categorySlug,
                 ),
                 const SizedBox(height: 12),
                 PrivateConsultancyCard(
-                  categoryId: categorySlug,
-                  sourcePage: category?.slug ?? categorySlug,
+                  categoryId: widget.categorySlug,
+                  sourcePage: category?.slug ?? widget.categorySlug,
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _CmsLoadError extends StatelessWidget {
+  const _CmsLoadError({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: onRetry,
+              child: Text(context.l10n.t('retry')),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -6219,7 +6299,7 @@ class AdminPanelScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Local Pro is for testing only. Real payments must be verified server-side later.',
+                    'Local paid-plan settings are for admin verification only. Real payments must be verified server-side.',
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton(
@@ -6232,7 +6312,7 @@ class AdminPanelScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _SectionCard(
-              title: 'Pack preview lab',
+              title: 'Pack quality check',
               child: Column(
                 children: procedures.take(6).map((procedure) {
                   return ListTile(
@@ -6243,9 +6323,9 @@ class AdminPanelScreen extends StatelessWidget {
                       final sample = {
                         'fullName': 'Mario Rossi',
                         'senderName': 'Mario Rossi',
-                        'provider': 'Demo Provider',
-                        'officeName': 'Demo Office',
-                        'reason': 'sample preview',
+                        'provider': 'Sample Provider',
+                        'officeName': 'Sample Office',
+                        'reason': 'quality check',
                         'topic': 'sample topic',
                         'request': 'sample request',
                       };
@@ -6381,11 +6461,11 @@ class AdminPanelScreen extends StatelessWidget {
                   }
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Demo data seeded')),
+                      const SnackBar(content: Text('Sample data added')),
                     );
                   }
                 },
-                child: const Text('Seed demo requests'),
+                child: const Text('Add sample requests'),
               ),
             ),
             const SizedBox(height: 16),
@@ -7450,7 +7530,7 @@ class _AdminPremiumScreenState extends State<AdminPremiumScreen> {
                   );
                   if (mounted) setState(() {});
                 },
-                title: const Text('Beta mode enabled'),
+                title: const Text('Preview override enabled'),
               ),
               SwitchListTile(
                 value: config.paywallEnabled,
@@ -7504,7 +7584,7 @@ class _AdminPremiumScreenState extends State<AdminPremiumScreen> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Local Pro is for testing only. Real payments must be verified server-side.',
+                'Local paid-plan settings are for admin verification only. Real payments must be verified server-side.',
               ),
             ],
           );

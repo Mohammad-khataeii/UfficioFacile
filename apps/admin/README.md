@@ -10,6 +10,22 @@ npm install
 npm run dev
 ```
 
+If Next.js fails with a missing `.next/routes-manifest.json` error, clear the local
+build cache and restart:
+
+```bash
+cd apps/admin
+rm -rf .next
+npm run dev
+```
+
+Or use the package scripts:
+
+```bash
+npm run clean
+npm run dev:clean
+```
+
 Required environment variables:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -39,16 +55,30 @@ This script:
 
 Never expose `SUPABASE_SERVICE_ROLE_KEY` in the browser.
 
-## Bundled content import
+## Bundled content bundle
 
-Generate the import source from the Flutter repo content:
+Generate the canonical bundled CMS export from the Flutter category registry:
 
 ```bash
 cd /Users/mohammadkhataei/Desktop/UfficioFacile
 dart run tool/export_cms_seed.dart
 ```
 
-Then open `/content/import` in the admin app and run the import.
+This writes:
+
+- `docs/generated/cms_bundled_content_export.json`
+- `apps/admin/data/cms_bundled_content_export.json`
+
+The admin content tree uses Supabase first and bundled content as fallback.
+Owner/admin sessions also auto-bootstrap missing bundled categories and procedures
+into Supabase without overwriting existing edited rows.
+
+If you want to verify the generated bundle locally:
+
+```bash
+cd /Users/mohammadkhataei/Desktop/UfficioFacile
+dart run tool/content_doctor.dart
+```
 
 ## Vercel deployment
 
@@ -73,7 +103,17 @@ Supabase auth redirect URLs:
 ## Useful commands
 
 ```bash
+npm run clean
+npm run dev:clean
 npm run lint
 npm run build
 npm run content:lint
 ```
+
+## Supabase schema cache note
+
+If admin still reports a table as missing after you apply migrations:
+
+1. wait a moment for the PostgREST schema cache to refresh
+2. restart the local admin dev server
+3. confirm the table exists in the Supabase SQL editor

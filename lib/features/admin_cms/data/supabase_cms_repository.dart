@@ -9,51 +9,67 @@ class SupabaseCmsRepository implements CmsRepository {
 
   final SupabaseClient _client;
   final LocalCmsRepository _fallback = const LocalCmsRepository();
+  static const _remoteTimeout = Duration(seconds: 3);
 
   @override
   Future<List<CmsCategory>> listCategories() async {
-    final rows = await _client
-        .from('ufficio_cms_categories')
-        .select()
-        .order('sort_order');
-    final remote = rows
-        .map((item) => CmsCategory.fromJson(Map<String, dynamic>.from(item)))
-        .toList();
     final fallback = await _fallback.listCategories();
-    return _mergeCategories(remote, fallback);
+    try {
+      final rows = await _client
+          .from('ufficio_cms_categories')
+          .select()
+          .order('sort_order')
+          .timeout(_remoteTimeout);
+      final remote = rows
+          .map((item) => CmsCategory.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+      return _mergeCategories(remote, fallback);
+    } catch (_) {
+      return fallback;
+    }
   }
 
   @override
   Future<List<CmsProcedure>> listProcedures({String? categorySlug}) async {
-    dynamic query = _client
-        .from('ufficio_cms_procedures')
-        .select()
-        .order('sort_order');
-    if (categorySlug != null && categorySlug.isNotEmpty) {
-      query = query.eq('category_slug', categorySlug);
-    }
-    final rows = await query;
-    final remote = rows
-        .map((item) => CmsProcedure.fromJson(Map<String, dynamic>.from(item)))
-        .toList();
     final fallback = await _fallback.listProcedures(categorySlug: categorySlug);
-    return _mergeProcedures(remote, fallback);
+    try {
+      dynamic query = _client
+          .from('ufficio_cms_procedures')
+          .select()
+          .order('sort_order');
+      if (categorySlug != null && categorySlug.isNotEmpty) {
+        query = query.eq('category_slug', categorySlug);
+      }
+      final rows = await query.timeout(_remoteTimeout);
+      final remote = rows
+          .map((item) => CmsProcedure.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+      return _mergeProcedures(remote, fallback);
+    } catch (_) {
+      return fallback;
+    }
   }
 
   @override
   Future<List<CmsContentBlock>> listBlocks(String procedureSlug) async {
-    final rows = await _client
-        .from('ufficio_cms_content_blocks')
-        .select()
-        .eq('procedure_slug', procedureSlug)
-        .order('sort_order');
-    final remote = rows
-        .map(
-          (item) => CmsContentBlock.fromJson(Map<String, dynamic>.from(item)),
-        )
-        .toList();
-    if (remote.isNotEmpty) return remote;
-    return _fallback.listBlocks(procedureSlug);
+    final fallback = await _fallback.listBlocks(procedureSlug);
+    try {
+      final rows = await _client
+          .from('ufficio_cms_content_blocks')
+          .select()
+          .eq('procedure_slug', procedureSlug)
+          .order('sort_order')
+          .timeout(_remoteTimeout);
+      final remote = rows
+          .map(
+            (item) => CmsContentBlock.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+      if (remote.isNotEmpty) return remote;
+      return fallback;
+    } catch (_) {
+      return fallback;
+    }
   }
 
   @override

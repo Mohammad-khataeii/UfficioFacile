@@ -22,8 +22,26 @@ class CmsContentController extends ChangeNotifier {
     try {
       categories = await _repository.listCategories();
       procedures = await _repository.listProcedures(categorySlug: categorySlug);
+      if (categories.isEmpty) {
+        categories = await _bundledRepository.listCategories();
+      }
+      if (procedures.isEmpty) {
+        procedures = await _bundledRepository.listProcedures(
+          categorySlug: categorySlug,
+        );
+      }
     } catch (error) {
-      errorMessage = '$error';
+      try {
+        categories = await _bundledRepository.listCategories();
+        procedures = await _bundledRepository.listProcedures(
+          categorySlug: categorySlug,
+        );
+        errorMessage = categories.isEmpty && procedures.isEmpty
+            ? '$error'
+            : null;
+      } catch (_) {
+        errorMessage = '$error';
+      }
     } finally {
       isLoading = false;
       notifyListeners();

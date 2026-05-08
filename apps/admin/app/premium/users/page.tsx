@@ -3,18 +3,27 @@ import { DataTable } from "@/components/data-table";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { grantContentUnlock, updateEntitlement } from "@/lib/db/mutations";
-import { getContentUnlocks, getEntitlements } from "@/lib/db/queries";
+import { getPremiumOverviewData } from "@/lib/db/queries";
 
 export default async function PremiumUsersPage() {
   const admin = await requireAdmin("premium.read");
-  const [entitlements, unlocks] = await Promise.all([
-    getEntitlements(admin.supabase),
-    getContentUnlocks(admin.supabase),
-  ]);
+  const { entitlements, unlocks, warnings } = await getPremiumOverviewData(
+    admin.supabase,
+  );
 
   return (
     <AdminShell email={admin.email} role={admin.role}>
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        {warnings.length > 0 ? (
+          <div className="xl:col-span-2 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+            <h2 className="text-lg font-semibold">Premium setup warning</h2>
+            <div className="mt-3 space-y-2 text-sm">
+              {warnings.map((warning) => (
+                <p key={warning}>{warning}</p>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="space-y-6">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
             <h2 className="text-xl font-semibold text-slate-900">Entitlements</h2>

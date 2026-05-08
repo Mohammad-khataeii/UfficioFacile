@@ -29,8 +29,10 @@ type BundledCategory = {
 };
 
 type BundledExport = {
+  categories?: Record<string, unknown>[];
   cmsCategories?: Record<string, unknown>[];
   cmsProcedures?: Record<string, unknown>[];
+  cmsContentBlocks?: Record<string, unknown>[];
   richCategories?: BundledCategory[];
   healthCategory?: BundledCategory;
   housingCategory?: BundledCategory;
@@ -137,6 +139,78 @@ async function getBundledCmsExport(): Promise<BundledExport> {
   return JSON.parse(raw) as BundledExport;
 }
 
+function canonicalCategoryRowsFromTree(exported: BundledExport): Record<string, unknown>[] {
+  return (exported.categories ?? []).map((row: any, index) => ({
+    id: row.slug ?? `category_${index}`,
+    slug: row.slug ?? `category_${index}`,
+    internal_label: row.slug ?? `category_${index}`,
+    title: row.title ?? {},
+    subtitle: row.subtitle ?? {},
+    description: row.description ?? {},
+    short_description: row.description ?? {},
+    long_description: row.subtitle ?? {},
+    icon: row.icon ?? null,
+    color: row.color ?? null,
+    sort_order: row.sort_order ?? index,
+    is_active: row.is_active ?? true,
+    is_premium: row.is_premium ?? false,
+    verification_status: row.verification_status ?? "bundledFallback",
+    tags: row.tags ?? [],
+    synonyms: row.synonyms ?? [],
+    searchable_keywords: row.searchable_keywords ?? [],
+    monetization_type: row.monetization_type ?? "free",
+    allow_single_unlock: row.allow_single_unlock ?? true,
+    single_unlock_price_cents: row.single_unlock_price_cents ?? null,
+    single_unlock_currency: row.single_unlock_currency ?? "EUR",
+    premium_reason: row.premium_reason ?? {},
+    premium_teaser: row.premium_teaser ?? row.description ?? {},
+    metadata: row.metadata ?? {},
+    public_snapshot: row,
+  }));
+}
+
+function canonicalProcedureRowsFromTree(exported: BundledExport): Record<string, unknown>[] {
+  return (exported.categories ?? []).flatMap((category: any) =>
+    ((category.procedures as unknown[]) ?? []).map((row: any, index) => ({
+      id: row.slug ?? `procedure_${index}`,
+      slug: row.slug ?? `procedure_${index}`,
+      category_slug: row.category_slug ?? category.slug ?? "",
+      title: row.title ?? {},
+      subtitle: row.subtitle ?? {},
+      summary: row.summary ?? {},
+      what_is_it: row.what_is_it ?? row.summary ?? {},
+      why_you_may_need_it: row.why_you_may_need_it ?? [],
+      how_to_do_it: row.how_to_do_it ?? [],
+      required_documents: row.required_documents ?? [],
+      optional_documents: row.optional_documents ?? [],
+      warnings: row.warnings ?? [],
+      common_mistakes: row.common_mistakes ?? [],
+      proof_to_keep: row.proof_to_keep ?? [],
+      faq: row.faq ?? row.faqs ?? [],
+      official_links: row.official_links ?? [],
+      status: row.status ?? "published",
+      sort_order: row.sort_order ?? index,
+      is_active: row.is_active ?? true,
+      is_premium: row.is_premium ?? false,
+      verification_status: row.verification_status ?? "bundledFallback",
+      tags: row.tags ?? [],
+      synonyms: row.synonyms ?? [],
+      searchable_keywords: row.searchable_keywords ?? [],
+      monetization_type: row.monetization_type ?? "free",
+      allow_single_unlock: row.allow_single_unlock ?? true,
+      single_unlock_price_cents: row.single_unlock_price_cents ?? null,
+      single_unlock_currency: row.single_unlock_currency ?? "EUR",
+      premium_reason: row.premium_reason ?? {},
+      premium_teaser: row.premium_teaser ?? row.summary ?? {},
+      metadata: {
+        ...(row.metadata ?? {}),
+        blocks: row.blocks ?? [],
+      },
+      public_snapshot: row,
+    })),
+  );
+}
+
 function getBundledCategories(exported: BundledExport): BundledCategory[] {
   return [
     ...(exported.richCategories ?? []),
@@ -146,7 +220,11 @@ function getBundledCategories(exported: BundledExport): BundledCategory[] {
 }
 
 function normalizeBundledCmsCategories(exported: BundledExport): AdminCategoryRecord[] {
-  return (exported.cmsCategories ?? []).map((row: any, index) => ({
+  const sourceRows =
+    exported.categories && exported.categories.length > 0
+      ? canonicalCategoryRowsFromTree(exported)
+      : (exported.cmsCategories ?? []);
+  return sourceRows.map((row: any, index) => ({
     slug: String(row.slug ?? `category_${index}`),
     internal_label: row.internal_label ? String(row.internal_label) : null,
     title: (row.title ?? {}) as LocalizedText,
@@ -176,7 +254,11 @@ function normalizeBundledCmsCategories(exported: BundledExport): AdminCategoryRe
 }
 
 function normalizeBundledCmsProcedures(exported: BundledExport): AdminProcedureRecord[] {
-  return (exported.cmsProcedures ?? []).map((row: any, index) => ({
+  const sourceRows =
+    exported.categories && exported.categories.length > 0
+      ? canonicalProcedureRowsFromTree(exported)
+      : (exported.cmsProcedures ?? []);
+  return sourceRows.map((row: any, index) => ({
     slug: String(row.slug ?? `procedure_${index}`),
     category_slug: String(row.category_slug ?? ""),
     title: (row.title ?? {}) as LocalizedText,

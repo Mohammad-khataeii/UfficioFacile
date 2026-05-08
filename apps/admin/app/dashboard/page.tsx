@@ -29,6 +29,7 @@ export default async function DashboardPage() {
     !appConfigCheck.data?.length && "Missing rows in ufficio_app_public_config.",
     !premiumConfigCheck.data?.length && "Missing rows in ufficio_premium_public_config.",
     adminFunctionCheck.error && "RPC is_ufficio_admin() failed.",
+    ...(metrics.warnings ?? []),
   ].filter((warning): warning is string => Boolean(warning));
 
   return (

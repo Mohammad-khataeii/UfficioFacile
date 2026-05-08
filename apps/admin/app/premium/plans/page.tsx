@@ -2,15 +2,25 @@ import { AdminShell } from "@/components/admin-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { upsertPlanProduct } from "@/lib/db/mutations";
-import { getPlanProducts } from "@/lib/db/queries";
+import { getPremiumOverviewData } from "@/lib/db/queries";
 
 export default async function PremiumPlansPage() {
   const admin = await requireAdmin("premium.read");
-  const plans = await getPlanProducts(admin.supabase);
+  const { plans, warnings } = await getPremiumOverviewData(admin.supabase);
 
   return (
     <AdminShell email={admin.email} role={admin.role}>
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        {warnings.length > 0 ? (
+          <div className="xl:col-span-2 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+            <h2 className="text-lg font-semibold">Premium setup warning</h2>
+            <div className="mt-3 space-y-2 text-sm">
+              {warnings.map((warning) => (
+                <p key={warning}>{warning}</p>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
           <h2 className="text-xl font-semibold text-slate-900">Plan products</h2>
           <div className="mt-5 space-y-4">

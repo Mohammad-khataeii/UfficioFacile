@@ -410,7 +410,7 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
           if (!decision.allowed) {
             await _showFeatureBlockedDialog(
               context,
-              title: 'Document vault is a Pro feature',
+              title: 'Document vault is included in paid plans',
               message: decision.upgradeMessage,
             );
             return;
@@ -826,7 +826,7 @@ class _HouseholdScreenState extends State<HouseholdScreen> {
           if (!decision.allowed) {
             await _showFeatureBlockedDialog(
               context,
-              title: 'Household members are a Pro feature',
+              title: 'Household members are included in paid plans',
               message: decision.upgradeMessage,
             );
             return;
@@ -834,7 +834,7 @@ class _HouseholdScreenState extends State<HouseholdScreen> {
           await scope.householdRepository.save(
             HouseholdMember(
               id: const Uuid().v4(),
-              displayName: 'Roommate Demo',
+              displayName: 'New household member',
               relationship: HouseholdRelationship.roommate,
               isPrimary: false,
               createdAt: DateTime.now(),
@@ -1072,7 +1072,7 @@ class _ProofFolderScreenState extends State<ProofFolderScreen> {
           if (!decision.allowed) {
             await _showFeatureBlockedDialog(
               context,
-              title: 'Proof folder is a Pro feature',
+              title: 'Proof folder is included in paid plans',
               message: decision.upgradeMessage,
             );
             return;
@@ -1080,7 +1080,7 @@ class _ProofFolderScreenState extends State<ProofFolderScreen> {
           await scope.proofFolderRepository.saveCase(
             ProofCase(
               id: const Uuid().v4(),
-              title: 'Landlord heating issue',
+              title: 'Housing issue',
               category: 'housing',
               status: ProofCaseStatus.open,
               createdAt: DateTime.now(),
@@ -1179,7 +1179,7 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
           if (!decision.allowed) {
             await _showFeatureBlockedDialog(
               context,
-              title: 'Cost dashboard is a Pro feature',
+              title: 'Cost dashboard is included in paid plans',
               message: decision.upgradeMessage,
             );
             return;

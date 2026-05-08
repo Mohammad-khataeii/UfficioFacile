@@ -4,11 +4,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import {
-  getContentUnlocks,
-  getEntitlements,
-  getPaymentEvents,
-  getPlanProducts,
-  getPremiumEvents,
+  getPremiumOverviewData,
 } from "@/lib/db/queries";
 
 function countBy(rows: any[], key: string, value: unknown) {
@@ -17,18 +13,23 @@ function countBy(rows: any[], key: string, value: unknown) {
 
 export default async function PremiumPage() {
   const admin = await requireAdmin("premium.read");
-  const [entitlements, plans, events, paymentEvents, unlocks] =
-    await Promise.all([
-      getEntitlements(admin.supabase),
-      getPlanProducts(admin.supabase),
-      getPremiumEvents(admin.supabase),
-      getPaymentEvents(admin.supabase),
-      getContentUnlocks(admin.supabase),
-    ]);
+  const { entitlements, plans, events, paymentEvents, unlocks, warnings } =
+    await getPremiumOverviewData(admin.supabase);
 
   return (
     <AdminShell email={admin.email} role={admin.role}>
       <section className="space-y-6">
+        {warnings.length > 0 ? (
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+            <h2 className="text-lg font-semibold">Premium setup warning</h2>
+            <div className="mt-3 space-y-2 text-sm">
+              {warnings.map((warning) => (
+                <p key={warning}>{warning}</p>
+              ))}
+              <p>Run the latest Supabase migrations, then refresh this page.</p>
+            </div>
+          </div>
+        ) : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
             <p className="text-sm text-slate-500">Active premium</p>
@@ -63,13 +64,13 @@ export default async function PremiumPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Link className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white" href="/premium/users">
+          <Link prefetch={false} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white" href="/premium/users">
             Manage users
           </Link>
-          <Link className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" href="/premium/plans">
+          <Link prefetch={false} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" href="/premium/plans">
             Manage plans
           </Link>
-          <Link className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" href="/premium/events">
+          <Link prefetch={false} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" href="/premium/events">
             View events
           </Link>
         </div>
@@ -78,7 +79,7 @@ export default async function PremiumPage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-slate-900">Plan products</h2>
-              <Link className="text-sm font-medium text-slate-600 hover:text-slate-900" href="/premium/plans">
+              <Link prefetch={false} className="text-sm font-medium text-slate-600 hover:text-slate-900" href="/premium/plans">
                 Open
               </Link>
             </div>
@@ -102,7 +103,7 @@ export default async function PremiumPage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-slate-900">Recent premium events</h2>
-              <Link className="text-sm font-medium text-slate-600 hover:text-slate-900" href="/premium/events">
+              <Link prefetch={false} className="text-sm font-medium text-slate-600 hover:text-slate-900" href="/premium/events">
                 Open
               </Link>
             </div>
