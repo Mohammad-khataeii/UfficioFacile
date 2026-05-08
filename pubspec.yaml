@@ -26,3 +26,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - apps/admin/data/seed/bonus_loans_categories.json
+    - apps/admin/data/cms_bundled_content_export.json

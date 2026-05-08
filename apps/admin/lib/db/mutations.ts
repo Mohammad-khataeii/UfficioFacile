@@ -103,7 +103,7 @@ export async function updateEntitlement(formData: FormData) {
   });
 
   const { data: before } = await admin.supabase
-    .from("ufficcio_entitlements")
+    .from("ufficio_user_entitlements")
     .select("*")
     .eq("user_id", parsed.userId)
     .maybeSingle();
@@ -113,35 +113,160 @@ export async function updateEntitlement(formData: FormData) {
     plan: parsed.plan,
     status: parsed.status,
     premium_access: parsed.premiumAccess,
-    free_pack_limit: parsed.freePackLimit,
-    free_packs_used: parsed.freePacksUsed,
+    source: "admin_grant",
+    metadata: {
+      free_pack_limit: parsed.freePackLimit,
+      free_packs_used: parsed.freePacksUsed,
+    },
   };
 
   const { error } = await admin.supabase
-    .from("ufficcio_entitlements")
+    .from("ufficio_user_entitlements")
     .upsert(payload);
   if (error) throw error;
 
   await admin.supabase.from("ufficio_premium_events").insert({
     user_id: parsed.userId,
     actor_user_id: admin.userId,
-    event_type: "manual_admin_update",
-    plan_before: before?.plan ?? null,
-    plan_after: parsed.plan,
-    premium_access_before: before?.premium_access ?? null,
-    premium_access_after: parsed.premiumAccess,
+    event_type: "entitlement_updated",
+    plan: parsed.plan,
+    source: "admin_grant",
     metadata: payload,
   });
 
   await logAdminAction({
     action: "premium.entitlement.updated",
-    targetTable: "ufficcio_entitlements",
+    targetTable: "ufficio_user_entitlements",
     targetId: parsed.userId,
     targetUserId: parsed.userId,
     beforeValue: before ?? {},
     afterValue: payload,
   });
   revalidatePath("/premium");
+  revalidatePath("/premium/users");
+}
+
+export async function upsertPlanProduct(formData: FormData) {
+  const admin = await requireAdmin("settings.manage");
+  const productKey = String(formData.get("productKey") ?? "");
+  const payload = {
+    product_key: productKey,
+    plan_type: String(formData.get("planType") ?? "free"),
+    billing_interval: String(formData.get("billingInterval") ?? "none"),
+    amount_cents: Number(formData.get("amountCents") ?? 0),
+    currency: String(formData.get("currency") ?? "EUR"),
+    is_active: formData.get("isActive") === "on",
+    sort_order: Number(formData.get("sortOrder") ?? 0),
+    title: localizedFromFormData(formData, "title"),
+    description: localizedFromFormData(formData, "description"),
+    features: JSON.parse(String(formData.get("featuresJson") ?? "{}")),
+    limits: JSON.parse(String(formData.get("limitsJson") ?? "{}")),
+  };
+
+  const { data: before } = await admin.supabase
+    .from("ufficio_plan_products")
+    .select("*")
+    .eq("product_key", productKey)
+    .maybeSingle();
+  const { error } = await admin.supabase
+    .from("ufficio_plan_products")
+    .upsert(payload);
+  if (error) throw error;
+  await logAdminAction({
+    action: before ? "premium.plan.updated" : "premium.plan.created",
+    targetTable: "ufficio_plan_products",
+    targetId: productKey,
+    beforeValue: before ?? {},
+    afterValue: payload,
+  });
+  revalidatePath("/premium");
+  revalidatePath("/premium/plans");
+}
+
+export async function grantContentUnlock(formData: FormData) {
+  const admin = await requireAdmin("premium.manage");
+  const payload = {
+    user_id: String(formData.get("userId") ?? ""),
+    category_slug: String(formData.get("categorySlug") ?? ""),
+    procedure_slug: String(formData.get("procedureSlug") ?? ""),
+    product_key: String(formData.get("productKey") ?? "subcategory_unlock"),
+    status: String(formData.get("status") ?? "active"),
+    unlock_type: String(formData.get("unlockType") ?? "admin_grant"),
+    amount_cents: Number(formData.get("amountCents") ?? 0) || null,
+    currency: String(formData.get("currency") ?? "EUR"),
+    purchased_at: new Date().toISOString(),
+  };
+  const { data: before } = await admin.supabase
+    .from("ufficio_user_content_unlocks")
+    .select("*")
+    .eq("user_id", payload.user_id)
+    .eq("category_slug", payload.category_slug)
+    .eq("procedure_slug", payload.procedure_slug)
+    .maybeSingle();
+  const { error } = await admin.supabase
+    .from("ufficio_user_content_unlocks")
+    .upsert(payload);
+  if (error) throw error;
+  await admin.supabase.from("ufficio_premium_events").insert({
+    user_id: payload.user_id,
+    actor_user_id: admin.userId,
+    event_type: before ? "content_unlock_updated" : "content_unlock_granted",
+    plan: payload.product_key,
+    source: payload.unlock_type,
+    metadata: payload,
+  });
+  await logAdminAction({
+    action: before ? "content_unlock.updated" : "content_unlock.granted",
+    targetTable: "ufficio_user_content_unlocks",
+    targetId: `${payload.user_id}:${payload.category_slug}:${payload.procedure_slug}`,
+    targetUserId: payload.user_id,
+    beforeValue: before ?? {},
+    afterValue: payload,
+  });
+  revalidatePath("/premium");
+  revalidatePath("/premium/users");
+}
+
+export async function revokeContentUnlock(formData: FormData) {
+  const admin = await requireAdmin("premium.manage");
+  const userId = String(formData.get("userId") ?? "");
+  const categorySlug = String(formData.get("categorySlug") ?? "");
+  const procedureSlug = String(formData.get("procedureSlug") ?? "");
+  const { data: before } = await admin.supabase
+    .from("ufficio_user_content_unlocks")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("category_slug", categorySlug)
+    .eq("procedure_slug", procedureSlug)
+    .maybeSingle();
+  const payload = {
+    status: "revoked",
+    revoked_at: new Date().toISOString(),
+  };
+  const { error } = await admin.supabase
+    .from("ufficio_user_content_unlocks")
+    .update(payload)
+    .eq("user_id", userId)
+    .eq("category_slug", categorySlug)
+    .eq("procedure_slug", procedureSlug);
+  if (error) throw error;
+  await admin.supabase.from("ufficio_premium_events").insert({
+    user_id: userId,
+    actor_user_id: admin.userId,
+    event_type: "content_unlock_revoked",
+    source: "admin_grant",
+    metadata: { categorySlug, procedureSlug },
+  });
+  await logAdminAction({
+    action: "content_unlock.revoked",
+    targetTable: "ufficio_user_content_unlocks",
+    targetId: `${userId}:${categorySlug}:${procedureSlug}`,
+    targetUserId: userId,
+    beforeValue: before ?? {},
+    afterValue: payload,
+  });
+  revalidatePath("/premium");
+  revalidatePath("/premium/users");
 }
 
 export async function updateProblemRequest(formData: FormData) {
@@ -240,6 +365,12 @@ export async function upsertCmsCategory(formData: FormData) {
     isPremium: formData.get("isPremium") === "on",
     verificationStatus: formData.get("verificationStatus"),
     adminNotes: formData.get("adminNotes"),
+    tags: formData.get("tags"),
+    synonyms: formData.get("synonyms"),
+    searchableKeywords: formData.get("searchableKeywords"),
+    monetizationType: formData.get("monetizationType"),
+    allowSingleUnlock: formData.get("allowSingleUnlock") === "on",
+    singleUnlockPriceCents: formData.get("singleUnlockPriceCents"),
   });
 
   const payload = {
@@ -254,6 +385,18 @@ export async function upsertCmsCategory(formData: FormData) {
     is_active: parsed.isActive,
     is_premium: parsed.isPremium,
     verification_status: parsed.verificationStatus,
+    tags: splitTextarea(formData.get("tags")),
+    synonyms: splitTextarea(formData.get("synonyms")),
+    searchable_keywords: splitTextarea(formData.get("searchableKeywords")),
+    monetization_type:
+      String(formData.get("monetizationType") ?? "") || "free",
+    allow_single_unlock: formData.get("allowSingleUnlock") === "on",
+    single_unlock_price_cents: Number(
+      formData.get("singleUnlockPriceCents") ?? "",
+    ) || null,
+    single_unlock_currency: "EUR",
+    premium_reason: localizedFromFormData(formData, "premiumReason"),
+    premium_teaser: localizedFromFormData(formData, "premiumTeaser"),
     admin_notes: parsed.adminNotes || null,
   };
 
@@ -297,6 +440,12 @@ export async function upsertCmsProcedure(formData: FormData) {
     isPremium: formData.get("isPremium") === "on",
     verificationStatus: formData.get("verificationStatus"),
     adminNotes: formData.get("adminNotes"),
+    tags: formData.get("tags"),
+    synonyms: formData.get("synonyms"),
+    searchableKeywords: formData.get("searchableKeywords"),
+    monetizationType: formData.get("monetizationType"),
+    allowSingleUnlock: formData.get("allowSingleUnlock") === "on",
+    singleUnlockPriceCents: formData.get("singleUnlockPriceCents"),
   });
 
   const payload = {
@@ -320,6 +469,18 @@ export async function upsertCmsProcedure(formData: FormData) {
     is_active: parsed.isActive,
     is_premium: parsed.isPremium,
     verification_status: parsed.verificationStatus,
+    tags: splitTextarea(formData.get("tags")),
+    synonyms: splitTextarea(formData.get("synonyms")),
+    searchable_keywords: splitTextarea(formData.get("searchableKeywords")),
+    monetization_type:
+      String(formData.get("monetizationType") ?? "") || "free",
+    allow_single_unlock: formData.get("allowSingleUnlock") === "on",
+    single_unlock_price_cents: Number(
+      formData.get("singleUnlockPriceCents") ?? "",
+    ) || null,
+    single_unlock_currency: "EUR",
+    premium_reason: localizedFromFormData(formData, "premiumReason"),
+    premium_teaser: localizedFromFormData(formData, "premiumTeaser"),
     admin_notes: parsed.adminNotes || null,
   };
 

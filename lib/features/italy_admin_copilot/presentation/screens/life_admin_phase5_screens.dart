@@ -377,27 +377,30 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
       final matchesSearch =
           _search.isEmpty ||
           item.title.toLowerCase().contains(_search.toLowerCase()) ||
-          (item.description ?? '').toLowerCase().contains(_search.toLowerCase());
+          (item.description ?? '').toLowerCase().contains(
+            _search.toLowerCase(),
+          );
       final matchesCategory =
           _categoryFilter == null || item.categoryId == _categoryFilter;
       final matchesStatus =
           _statusFilter == null || item.status == _statusFilter;
-      final matchesType = _typeFilter == null || item.documentType == _typeFilter;
+      final matchesType =
+          _typeFilter == null || item.documentType == _typeFilter;
       return matchesSearch && matchesCategory && matchesStatus && matchesType;
-    }).toList()
-      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    }).toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     final summary = scope.documentsService.calculateDocumentSummary(items);
-    final categoryOptions = items
-        .map((item) => item.categoryId)
-        .whereType<String>()
-        .toSet()
-        .toList()
-      ..sort();
+    final categoryOptions =
+        items
+            .map((item) => item.categoryId)
+            .whereType<String>()
+            .toSet()
+            .toList()
+          ..sort();
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.t('document_vault'))),
       floatingActionButton: FloatingActionButton(
@@ -418,9 +421,9 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
           await scope.entitlementService.recordDocumentAdded();
           await _load();
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Document saved')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Document saved')));
           }
         },
         child: const Icon(Icons.add),
@@ -434,7 +437,10 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
               _SummaryCardData('Collected', '${summary.collected}'),
               _SummaryCardData('Uploaded', '${summary.uploaded}'),
               _SummaryCardData('Sent', '${summary.sent}'),
-              _SummaryCardData('Rejected/expired', '${summary.rejectedOrExpired}'),
+              _SummaryCardData(
+                'Rejected/expired',
+                '${summary.rejectedOrExpired}',
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -460,8 +466,10 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                     child: Text('All categories'),
                   ),
                   ...categoryOptions.map(
-                    (item) =>
-                        DropdownMenuItem<String?>(value: item, child: Text(item)),
+                    (item) => DropdownMenuItem<String?>(
+                      value: item,
+                      child: Text(item),
+                    ),
                   ),
                 ],
               ),
@@ -510,7 +518,10 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.title, style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '${item.documentType.name} • ${item.status.name}${item.categoryId != null ? ' • ${item.categoryId}' : ''}',
@@ -549,7 +560,9 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                               existing: item,
                             );
                             if (updated == null) return;
-                            await scope.documentsService.updateDocument(updated);
+                            await scope.documentsService.updateDocument(
+                              updated,
+                            );
                             await _load();
                           },
                           child: const Text('Edit'),
@@ -561,7 +574,9 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                               title: 'Delete document?',
                             );
                             if (confirmed != true) return;
-                            await scope.documentsService.deleteDocument(item.id);
+                            await scope.documentsService.deleteDocument(
+                              item.id,
+                            );
                             await _load();
                           },
                           child: const Text('Delete'),
@@ -620,7 +635,8 @@ class _ContactsDirectoryScreenState extends State<ContactsDirectoryScreen> {
           _search.isEmpty || haystack.contains(_search.toLowerCase());
       final matchesCategory =
           _categoryFilter == null || item.categoryId == _categoryFilter;
-      final matchesType = _typeFilter == null || item.contactType == _typeFilter;
+      final matchesType =
+          _typeFilter == null || item.contactType == _typeFilter;
       final matchesPec = !_hasPec || (item.pec ?? '').isNotEmpty;
       final matchesEmail = !_hasEmail || (item.email ?? '').isNotEmpty;
       final matchesPhone = !_hasPhone || (item.phone ?? '').isNotEmpty;
@@ -630,19 +646,21 @@ class _ContactsDirectoryScreenState extends State<ContactsDirectoryScreen> {
           matchesPec &&
           matchesEmail &&
           matchesPhone;
-    }).toList()
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    }).toList()..sort(
+      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
-    final categories = items
-        .map((item) => item.categoryId)
-        .whereType<String>()
-        .toSet()
-        .toList()
-      ..sort();
+    final categories =
+        items
+            .map((item) => item.categoryId)
+            .whereType<String>()
+            .toSet()
+            .toList()
+          ..sort();
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.t('contacts_directory'))),
       floatingActionButton: FloatingActionButton(
@@ -663,9 +681,9 @@ class _ContactsDirectoryScreenState extends State<ContactsDirectoryScreen> {
           await scope.entitlementService.recordContactAdded();
           await _load();
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Contact saved')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Contact saved')));
           }
         },
         child: const Icon(Icons.add),
@@ -695,8 +713,10 @@ class _ContactsDirectoryScreenState extends State<ContactsDirectoryScreen> {
                     child: Text('All categories'),
                   ),
                   ...categories.map(
-                    (item) =>
-                        DropdownMenuItem<String?>(value: item, child: Text(item)),
+                    (item) => DropdownMenuItem<String?>(
+                      value: item,
+                      child: Text(item),
+                    ),
                   ),
                 ],
               ),
@@ -869,13 +889,13 @@ class _ConsultantModePreviewScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Consultant mode beta')),
+      appBar: AppBar(title: const Text('Client workspace')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await AppScope.of(context).clientsRepository.save(
             LifeAdminClient(
               id: const Uuid().v4(),
-              displayName: 'Demo Client',
+              displayName: 'Client',
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             ),
@@ -887,11 +907,9 @@ class _ConsultantModePreviewScreenState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Consultant mode beta: local client management readiness.',
-          ),
+          const Text('Manage private client workspaces from one place.'),
           const SizedBox(height: 8),
-          const Text('Consultant plan coming soon.'),
+          const Text('Use this area for multi-client support work.'),
           const SizedBox(height: 12),
           ...items.map(
             (item) => Card(child: ListTile(title: Text(item.displayName))),
@@ -1122,7 +1140,8 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
       final matchesCategory =
           _categoryFilter == null || item.categoryId == _categoryFilter;
       final matchesType = _typeFilter == null || item.type == _typeFilter;
-      final matchesStatus = _statusFilter == null || item.status == _statusFilter;
+      final matchesStatus =
+          _statusFilter == null || item.status == _statusFilter;
       if (_dateRange == null) {
         return matchesCategory && matchesType && matchesStatus;
       }
@@ -1131,30 +1150,30 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
           !itemDate.isBefore(_dateRange!.start) &&
           !itemDate.isAfter(_dateRange!.end);
       return matchesCategory && matchesType && matchesStatus && matchesRange;
-    }).toList()
-      ..sort((a, b) {
-        final aDate = a.dueDate ?? a.updatedAt;
-        final bDate = b.dueDate ?? b.updatedAt;
-        return aDate.compareTo(bDate);
-      });
+    }).toList()..sort((a, b) {
+      final aDate = a.dueDate ?? a.updatedAt;
+      final bDate = b.dueDate ?? b.updatedAt;
+      return aDate.compareTo(bDate);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     final summary = scope.costDashboardService.calculateCostSummary(items);
-    final categories = items
-        .map((item) => item.categoryId)
-        .whereType<String>()
-        .toSet()
-        .toList()
-      ..sort();
+    final categories =
+        items
+            .map((item) => item.categoryId)
+            .whereType<String>()
+            .toSet()
+            .toList()
+          ..sort();
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.t('cost_dashboard'))),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final decision = await scope.entitlementService.canUseFeature(
-            FeatureKey.householdContracts,
+            FeatureKey.costDashboard,
           );
           if (!context.mounted) return;
           if (!decision.allowed) {
@@ -1168,6 +1187,7 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
           final created = await _showCostItemFormSheet(context);
           if (created == null) return;
           await scope.costDashboardService.createCostItem(created);
+          await scope.entitlementService.recordCostItemAdded();
           await _load();
         },
         child: const Icon(Icons.add_chart),
@@ -1214,8 +1234,10 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
                     child: Text('All categories'),
                   ),
                   ...categories.map(
-                    (item) =>
-                        DropdownMenuItem<String?>(value: item, child: Text(item)),
+                    (item) => DropdownMenuItem<String?>(
+                      value: item,
+                      child: Text(item),
+                    ),
                   ),
                 ],
               ),
@@ -1287,18 +1309,25 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.title, style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '€${item.amount.toStringAsFixed(2)} • ${item.type.name} • ${item.status.name}',
                     ),
                     if ((item.categoryId ?? '').isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text('${item.categoryId} • ${item.subcategoryId ?? 'General'}'),
+                      Text(
+                        '${item.categoryId} • ${item.subcategoryId ?? 'General'}',
+                      ),
                     ],
                     if (item.dueDate != null) ...[
                       const SizedBox(height: 4),
-                      Text('Due: ${DateFormat('dd/MM/yyyy').format(item.dueDate!)}'),
+                      Text(
+                        'Due: ${DateFormat('dd/MM/yyyy').format(item.dueDate!)}',
+                      ),
                     ],
                     if ((item.description ?? '').isNotEmpty) ...[
                       const SizedBox(height: 8),
@@ -1325,7 +1354,9 @@ class _CostSavingDashboardScreenState extends State<CostSavingDashboardScreen> {
                         ),
                         OutlinedButton(
                           onPressed: () async {
-                            await scope.costDashboardService.markCostItemPaid(item);
+                            await scope.costDashboardService.markCostItemPaid(
+                              item,
+                            );
                             await _load();
                           },
                           child: Text(
@@ -1476,11 +1507,7 @@ class _ContactDirectoryCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                Chip(
-                  label: Text(
-                    contact.isOfficial ? 'Official' : 'Custom',
-                  ),
-                ),
+                Chip(label: Text(contact.isOfficial ? 'Official' : 'Custom')),
               ],
             ),
             if ((contact.description ?? '').isNotEmpty) ...[
@@ -1493,36 +1520,38 @@ class _ContactDirectoryCard extends StatelessWidget {
             ],
             const SizedBox(height: 8),
             ...[
-              ('Phone', contact.phone),
-              ('Email', contact.email),
-              ('PEC', contact.pec),
-              ('Address', contact.address),
-              ('Website', contact.website),
-              ('Hours', contact.openingHours),
-            ].where((entry) => (entry.$2 ?? '').isNotEmpty).map(
-              (entry) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: [
-                    Expanded(child: Text('${entry.$1}: ${entry.$2}')),
-                    IconButton(
-                      tooltip: 'Copy ${entry.$1}',
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: entry.$2!),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${entry.$1} copied')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.copy_outlined),
+                  ('Phone', contact.phone),
+                  ('Email', contact.email),
+                  ('PEC', contact.pec),
+                  ('Address', contact.address),
+                  ('Website', contact.website),
+                  ('Hours', contact.openingHours),
+                ]
+                .where((entry) => (entry.$2 ?? '').isNotEmpty)
+                .map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Expanded(child: Text('${entry.$1}: ${entry.$2}')),
+                        IconButton(
+                          tooltip: 'Copy ${entry.$1}',
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              ClipboardData(text: entry.$2!),
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('${entry.$1} copied')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.copy_outlined),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
             if (contact.useFor.isNotEmpty)
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
@@ -1575,10 +1604,7 @@ class _ContactDirectoryCard extends StatelessWidget {
   }
 }
 
-Future<bool?> _confirmDelete(
-  BuildContext context, {
-  required String title,
-}) {
+Future<bool?> _confirmDelete(BuildContext context, {required String title}) {
   return showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
@@ -1642,9 +1668,7 @@ Future<UfficioDocumentEntry?> _showDocumentFormSheet(
                   controller: descriptionController,
                   minLines: 2,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Description'),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<UfficioDocumentType>(
@@ -1684,9 +1708,8 @@ Future<UfficioDocumentEntry?> _showDocumentFormSheet(
                     ..selection = TextSelection.fromPosition(
                       TextPosition(offset: (categoryId ?? '').length),
                     ),
-                  onChanged: (value) => categoryId = value.trim().isEmpty
-                      ? null
-                      : value.trim(),
+                  onChanged: (value) =>
+                      categoryId = value.trim().isEmpty ? null : value.trim(),
                   decoration: const InputDecoration(labelText: 'Category'),
                 ),
                 const SizedBox(height: 12),
@@ -1733,7 +1756,8 @@ Future<UfficioDocumentEntry?> _showDocumentFormSheet(
                             : descriptionController.text.trim(),
                         documentType: documentType,
                         status: status,
-                        source: existing?.source ?? UfficioDocumentSource.manual,
+                        source:
+                            existing?.source ?? UfficioDocumentSource.manual,
                         fileUrl: existing?.fileUrl,
                         fileName: existing?.fileName,
                         relatedRequestId: existing?.relatedRequestId,
@@ -1767,16 +1791,24 @@ Future<UfficioContactEntry?> _showContactFormSheet(
   final phoneController = TextEditingController(text: existing?.phone ?? '');
   final emailController = TextEditingController(text: existing?.email ?? '');
   final pecController = TextEditingController(text: existing?.pec ?? '');
-  final websiteController = TextEditingController(text: existing?.website ?? '');
-  final addressController = TextEditingController(text: existing?.address ?? '');
-  final cityController = TextEditingController(text: existing?.city ?? 'Torino');
+  final websiteController = TextEditingController(
+    text: existing?.website ?? '',
+  );
+  final addressController = TextEditingController(
+    text: existing?.address ?? '',
+  );
+  final cityController = TextEditingController(
+    text: existing?.city ?? 'Torino',
+  );
   final regionController = TextEditingController(
     text: existing?.region ?? 'Piemonte',
   );
   final useForController = TextEditingController(
     text: existing?.useFor.join(', ') ?? '',
   );
-  final warningController = TextEditingController(text: existing?.warning ?? '');
+  final warningController = TextEditingController(
+    text: existing?.warning ?? '',
+  );
   var contactType = existing?.contactType ?? UfficioContactType.personal;
 
   return showModalBottomSheet<UfficioContactEntry>(
@@ -1907,7 +1939,8 @@ Future<UfficioContactEntry?> _showContactFormSheet(
                       UfficioContactEntry(
                         id: existing?.id ?? const Uuid().v4(),
                         userId: existing?.userId,
-                        source: existing?.source ?? UfficioContactSource.userSaved,
+                        source:
+                            existing?.source ?? UfficioContactSource.userSaved,
                         categoryId: existing?.categoryId,
                         subcategoryId: existing?.subcategoryId,
                         name: nameController.text.trim(),
@@ -2158,7 +2191,8 @@ Future<UfficioCostItem?> _showCostItemFormSheet(
                         paidDate: paidDate,
                         relatedContactId: existing?.relatedContactId,
                         relatedDocumentId: existing?.relatedDocumentId,
-                        source: existing?.source ?? UfficioCostItemSource.manual,
+                        source:
+                            existing?.source ?? UfficioCostItemSource.manual,
                         notes: notesController.text.trim().isEmpty
                             ? null
                             : notesController.text.trim(),

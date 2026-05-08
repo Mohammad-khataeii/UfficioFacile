@@ -1243,9 +1243,9 @@ AdminProcedure _publicOffice(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-  {String shortDescription = 'Comune and document support workflow.'}
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Comune and document support workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.publicOffice,
@@ -1261,9 +1261,9 @@ AdminProcedure _work(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-  {String shortDescription = 'Work and patronato support workflow.'}
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'Work and patronato support workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.work,
@@ -1279,9 +1279,9 @@ AdminProcedure _university(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-  {String shortDescription = 'University administration support workflow.'}
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'University administration support workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.university,
@@ -1297,9 +1297,9 @@ AdminProcedure _general(
   String title,
   String subcategory,
   List<ProcedureField> fields,
-  List<AttachmentSuggestion> attachments,
-  {String shortDescription = 'General formal support workflow.'}
-) => _build(
+  List<AttachmentSuggestion> attachments, {
+  String shortDescription = 'General formal support workflow.',
+}) => _build(
   id: id,
   title: title,
   category: ProcedureCategory.general,

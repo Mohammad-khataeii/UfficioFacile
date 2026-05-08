@@ -8,7 +8,9 @@ import { getAdminCategories } from "@/lib/content/load-content-tree";
 
 export default async function ContentCategoriesPage() {
   const admin = await requireAdmin("content.read");
-  const categories = await getAdminCategories(admin.supabase);
+  const categories = await getAdminCategories(admin.supabase, {
+    bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
+  });
 
   return (
     <AdminShell email={admin.email} role={admin.role}>

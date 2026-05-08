@@ -3,16 +3,16 @@ import '../domain/rich_category_models.dart';
 class GeneralGuidanceDefinitions {
   static final RichCategoryGuidance category = RichCategoryGuidance.fromMap({
     'id': 'general',
-    'title': 'General',
-    'titleIt': 'Generale',
+    'title': 'General admin help',
+    'titleIt': 'Aiuto amministrativo generale',
     'region': 'italy',
     'city': 'torino',
     'shortDescription':
-        'Universal fallback category for requests that do not fit cleanly into a specialized category. Helps users identify the correct office, write formal emails/PECs, reply to rejected requests, send missing documents, request refunds, complain, follow up, ask for clarification, prepare office documents, and convert informal text into formal Italian.',
+        'Not sure where your problem belongs? Start here. We help you choose the right office, prepare a clear message, reply to a rejected request, send missing documents, ask for a refund, make a complaint, and turn rough notes into formal Italian.',
     'mainUserQuestion':
-        'What kind of general administrative message or action do I need: formal request, appointment, rejected request reply, missing documents, refund, complaint, follow-up, PEC, document clarification, or formal Italian rewrite?',
+        'What do you need help with?',
     'routingLogicSummary':
-        'First identify the type of request and recipient. Then generate the right output: email, PEC, appointment request, complaint, refund request, missing-document integration, follow-up, status update, document clarification, office-visit checklist, or formal Italian rewrite. If the problem belongs to a specialized category, route the user there.',
+        'First understand the result you need and who should receive it. Then open the right path: formal request, appointment, rejected-request reply, missing documents, refund, complaint, follow-up, clarification, or formal Italian rewrite. If the issue clearly belongs to a specialized category, send the person there.',
     'topWarning':
         'Start from what you need to do so you can open the right message, checklist, or clarification flow without extra clutter.',
     'contacts': {
@@ -214,7 +214,7 @@ class GeneralGuidanceDefinitions {
       {
         'id': 'need_type',
         'question': 'What do you need to do?',
-        'questionIt': 'Cosa devi fare?',
+        'questionIt': 'In cosa ti serve aiuto?',
         'type': 'single_choice',
         'options': [
           {
@@ -223,20 +223,27 @@ class GeneralGuidanceDefinitions {
           },
           {
             'id': 'generic_formal_request',
-            'label': 'I need to write a generic formal request',
+            'label': 'I need a formal request',
           },
           {'id': 'appointment_request', 'label': 'I need an appointment'},
-          {'id': 'rejected_request', 'label': 'My request was rejected'},
+          {
+            'id': 'rejected_request',
+            'label': 'I need to reply to a rejected request',
+          },
           {
             'id': 'missing_documents',
             'label': 'I need to send missing documents',
           },
-          {'id': 'refund', 'label': 'I need a refund'},
+          {'id': 'refund', 'label': 'I need to request a refund'},
           {'id': 'complaint', 'label': 'I need to make a complaint'},
           {'id': 'no_answer', 'label': 'Nobody answered me'},
           {
             'id': 'status_with_protocol',
-            'label': 'I have a protocol number and need status update',
+            'label': 'I need a status update with my protocol number',
+          },
+          {
+            'id': 'formal_rewrite',
+            'label': 'I need a formal Italian message',
           },
           {
             'id': 'document_clarification',

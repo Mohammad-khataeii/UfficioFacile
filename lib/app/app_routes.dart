@@ -20,6 +20,7 @@ class AppRoutes {
   static const contacts = '/life-admin/contacts';
   static const calendar = '/life-admin/calendar';
   static const procedures = '/life-admin/procedures';
+  static const cmsCategoryDetail = '/life-admin/cms-category-detail';
   static const procedureDetail = '/life-admin/procedure-detail';
   static const cmsProcedureDetail = '/life-admin/cms-procedure-detail';
   static const procedureStart = '/life-admin/procedure-start';

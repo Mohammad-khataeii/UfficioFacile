@@ -13,7 +13,9 @@ export default async function ContentProcedureDetailPage({
 }) {
   const admin = await requireAdmin("content.read");
   const { slug } = await params;
-  const procedure = await getAdminProcedureBySlug(admin.supabase, slug);
+  const procedure = await getAdminProcedureBySlug(admin.supabase, slug, {
+    bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
+  });
   if (!procedure) notFound();
 
   return (
@@ -38,6 +40,12 @@ export default async function ContentProcedureDetailPage({
               <div><label>Verification</label><select name="verificationStatus" defaultValue={procedure.verification_status}><option value="verified">verified</option><option value="needsReview">needsReview</option><option value="unverified">unverified</option></select></div>
               <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="isActive" defaultChecked={procedure.is_active} /><span>Active</span></label>
               <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="isPremium" defaultChecked={procedure.is_premium} /><span>Premium</span></label>
+              <div><label>Monetization type</label><select name="monetizationType" defaultValue={(procedure as any).monetization_type ?? (procedure.is_premium ? "premium_money_value" : "free")}><option value="free">free</option><option value="premium">premium</option><option value="premium_money_value">premium_money_value</option><option value="premium_financial_strategy">premium_financial_strategy</option><option value="premium_comparison_tool">premium_comparison_tool</option></select></div>
+              <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="allowSingleUnlock" defaultChecked={(procedure as any).allow_single_unlock ?? true} /><span>Allow single unlock</span></label>
+              <div><label>Single unlock price (cents)</label><input name="singleUnlockPriceCents" defaultValue={(procedure as any).single_unlock_price_cents ?? ""} /></div>
+              <div><label>Tags</label><textarea name="tags" rows={4} defaultValue={(procedure.tags ?? []).join("\n")} /></div>
+              <div><label>Synonyms</label><textarea name="synonyms" rows={5} defaultValue={(procedure.synonyms ?? []).join("\n")} /></div>
+              <div><label>Search keywords</label><textarea name="searchableKeywords" rows={5} defaultValue={(procedure.searchable_keywords ?? []).join("\n")} /></div>
               <div><label>Admin notes</label><textarea name="adminNotes" rows={6} defaultValue={procedure.admin_notes ?? ""} /></div>
             </div>
             <div className="space-y-4">
@@ -50,6 +58,8 @@ export default async function ContentProcedureDetailPage({
               <div><label>Title (AR)</label><input name="titleAr" defaultValue={procedure.title?.ar ?? ""} /></div>
               <div><label>Summary (EN)</label><textarea name="summaryEn" rows={3} defaultValue={procedure.summary?.en ?? ""} /></div>
               <div><label>What is it? (EN)</label><textarea name="whatIsItEn" rows={4} defaultValue={procedure.what_is_it?.en ?? ""} /></div>
+              <div><label>Premium teaser (EN)</label><textarea name="premiumTeaserEn" rows={4} defaultValue={(procedure as any).premium_teaser?.en ?? procedure.summary?.en ?? ""} /></div>
+              <div><label>Premium reason (EN)</label><textarea name="premiumReasonEn" rows={4} defaultValue={(procedure as any).premium_reason?.en ?? ""} /></div>
             </div>
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-slate-900">Steps</h3>

@@ -1,3 +1,4 @@
+import '../../../app/localized_text.dart';
 import 'official_link.dart';
 
 export 'official_link.dart';
@@ -8,9 +9,7 @@ String localizedValue(
   LocalizedText values,
   String languageCode, {
   String fallback = '',
-}) {
-  return values[languageCode] ?? values['en'] ?? fallback;
-}
+}) => resolveLocalizedText(values, languageCode, fallback: fallback);
 
 enum CatalogVerificationStatus { verified, needsReview, unverified }
 

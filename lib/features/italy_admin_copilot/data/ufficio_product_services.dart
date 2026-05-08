@@ -129,30 +129,29 @@ class ProblemRequestRecord {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory ProblemRequestRecord.fromJson(Map<String, dynamic> json) =>
-      ProblemRequestRecord(
-        id: json['id'] as String? ?? '',
-        userId: json['userId'] as String?,
-        userEmail: json['userEmail'] as String?,
-        categoryId: json['categoryId'] as String?,
-        subcategoryId: json['subcategoryId'] as String?,
-        title: json['title'] as String? ?? '',
-        description: json['description'] as String? ?? '',
-        city: json['city'] as String? ?? 'Torino',
-        region: json['region'] as String? ?? 'Piemonte',
-        urgency: json['urgency'] as String? ?? 'normal',
-        language: json['language'] as String? ?? 'English',
-        attachmentPlaceholder: json['attachmentPlaceholder'] as String?,
-        status: problemRequestStatusFromJson(json['status'] as String?),
-        isPremiumUser: json['isPremiumUser'] as bool? ?? false,
-        sourcePage: json['sourcePage'] as String? ?? '',
-        createdAt:
-            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-        updatedAt:
-            DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+  factory ProblemRequestRecord.fromJson(
+    Map<String, dynamic> json,
+  ) => ProblemRequestRecord(
+    id: json['id'] as String? ?? '',
+    userId: json['userId'] as String?,
+    userEmail: json['userEmail'] as String?,
+    categoryId: json['categoryId'] as String?,
+    subcategoryId: json['subcategoryId'] as String?,
+    title: json['title'] as String? ?? '',
+    description: json['description'] as String? ?? '',
+    city: json['city'] as String? ?? 'Torino',
+    region: json['region'] as String? ?? 'Piemonte',
+    urgency: json['urgency'] as String? ?? 'normal',
+    language: json['language'] as String? ?? 'English',
+    attachmentPlaceholder: json['attachmentPlaceholder'] as String?,
+    status: problemRequestStatusFromJson(json['status'] as String?),
+    isPremiumUser: json['isPremiumUser'] as bool? ?? false,
+    sourcePage: json['sourcePage'] as String? ?? '',
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 enum ConsultancyPaymentStatus {
@@ -251,34 +250,33 @@ class ConsultancyRequestRecord {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory ConsultancyRequestRecord.fromJson(Map<String, dynamic> json) =>
-      ConsultancyRequestRecord(
-        id: json['id'] as String? ?? '',
-        userId: json['userId'] as String?,
-        userEmail: json['userEmail'] as String?,
-        fullName: json['fullName'] as String? ?? '',
-        categoryId: json['categoryId'] as String?,
-        subcategoryId: json['subcategoryId'] as String?,
-        problemType: json['problemType'] as String? ?? '',
-        description: json['description'] as String? ?? '',
-        desiredResult: json['desiredResult'] as String? ?? '',
-        city: json['city'] as String? ?? 'Torino',
-        region: json['region'] as String? ?? 'Piemonte',
-        documentsAvailable: json['documentsAvailable'] as String? ?? '',
-        attachmentUrls: ((json['attachmentUrls'] as List?) ?? []).cast<String>(),
-        userPlan: json['userPlan'] as String? ?? UfficioPlan.free.name,
-        paymentStatus: consultancyPaymentStatusFromJson(
-          json['paymentStatus'] as String?,
-        ),
-        status: consultancyRequestStatusFromJson(json['status'] as String?),
-        sourcePage: json['sourcePage'] as String? ?? '',
-        createdAt:
-            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-        updatedAt:
-            DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+  factory ConsultancyRequestRecord.fromJson(
+    Map<String, dynamic> json,
+  ) => ConsultancyRequestRecord(
+    id: json['id'] as String? ?? '',
+    userId: json['userId'] as String?,
+    userEmail: json['userEmail'] as String?,
+    fullName: json['fullName'] as String? ?? '',
+    categoryId: json['categoryId'] as String?,
+    subcategoryId: json['subcategoryId'] as String?,
+    problemType: json['problemType'] as String? ?? '',
+    description: json['description'] as String? ?? '',
+    desiredResult: json['desiredResult'] as String? ?? '',
+    city: json['city'] as String? ?? 'Torino',
+    region: json['region'] as String? ?? 'Piemonte',
+    documentsAvailable: json['documentsAvailable'] as String? ?? '',
+    attachmentUrls: ((json['attachmentUrls'] as List?) ?? []).cast<String>(),
+    userPlan: json['userPlan'] as String? ?? UfficioPlan.free.name,
+    paymentStatus: consultancyPaymentStatusFromJson(
+      json['paymentStatus'] as String?,
+    ),
+    status: consultancyRequestStatusFromJson(json['status'] as String?),
+    sourcePage: json['sourcePage'] as String? ?? '',
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 enum UfficioCostItemType { expense, refund, deposit, installment, estimate }
@@ -306,11 +304,7 @@ UfficioCostItemStatus ufficioCostItemStatusFromJson(String? value) {
   );
 }
 
-enum UfficioCostItemSource {
-  manual,
-  generatedFromCategory,
-  imported,
-}
+enum UfficioCostItemSource { manual, generatedFromCategory, imported }
 
 UfficioCostItemSource ufficioCostItemSourceFromJson(String? value) {
   return UfficioCostItemSource.values.firstWhere(
@@ -423,31 +417,30 @@ class UfficioCostItem {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory UfficioCostItem.fromJson(Map<String, dynamic> json) =>
-      UfficioCostItem(
-        id: json['id'] as String? ?? '',
-        userId: json['userId'] as String?,
-        categoryId: json['categoryId'] as String?,
-        subcategoryId: json['subcategoryId'] as String?,
-        title: json['title'] as String? ?? '',
-        description: json['description'] as String?,
-        amount: (json['amount'] as num?)?.toDouble() ?? 0,
-        currency: json['currency'] as String? ?? 'EUR',
-        type: ufficioCostItemTypeFromJson(json['type'] as String?),
-        status: ufficioCostItemStatusFromJson(json['status'] as String?),
-        dueDate: DateTime.tryParse(json['dueDate'] as String? ?? ''),
-        paidDate: DateTime.tryParse(json['paidDate'] as String? ?? ''),
-        relatedContactId: json['relatedContactId'] as String?,
-        relatedDocumentId: json['relatedDocumentId'] as String?,
-        source: ufficioCostItemSourceFromJson(json['source'] as String?),
-        notes: json['notes'] as String?,
-        createdAt:
-            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-        updatedAt:
-            DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+  factory UfficioCostItem.fromJson(
+    Map<String, dynamic> json,
+  ) => UfficioCostItem(
+    id: json['id'] as String? ?? '',
+    userId: json['userId'] as String?,
+    categoryId: json['categoryId'] as String?,
+    subcategoryId: json['subcategoryId'] as String?,
+    title: json['title'] as String? ?? '',
+    description: json['description'] as String?,
+    amount: (json['amount'] as num?)?.toDouble() ?? 0,
+    currency: json['currency'] as String? ?? 'EUR',
+    type: ufficioCostItemTypeFromJson(json['type'] as String?),
+    status: ufficioCostItemStatusFromJson(json['status'] as String?),
+    dueDate: DateTime.tryParse(json['dueDate'] as String? ?? ''),
+    paidDate: DateTime.tryParse(json['paidDate'] as String? ?? ''),
+    relatedContactId: json['relatedContactId'] as String?,
+    relatedDocumentId: json['relatedDocumentId'] as String?,
+    source: ufficioCostItemSourceFromJson(json['source'] as String?),
+    notes: json['notes'] as String?,
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 enum UfficioContactSource { official, userSaved, categoryGenerated }
@@ -601,34 +594,33 @@ class UfficioContactEntry {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory UfficioContactEntry.fromJson(Map<String, dynamic> json) =>
-      UfficioContactEntry(
-        id: json['id'] as String? ?? '',
-        userId: json['userId'] as String?,
-        source: ufficioContactSourceFromJson(json['source'] as String?),
-        categoryId: json['categoryId'] as String?,
-        subcategoryId: json['subcategoryId'] as String?,
-        name: json['name'] as String? ?? '',
-        description: json['description'] as String?,
-        address: json['address'] as String?,
-        phone: json['phone'] as String?,
-        email: json['email'] as String?,
-        pec: json['pec'] as String?,
-        website: json['website'] as String?,
-        openingHours: json['openingHours'] as String?,
-        useFor: ((json['useFor'] as List?) ?? []).cast<String>(),
-        warning: json['warning'] as String?,
-        city: json['city'] as String?,
-        region: json['region'] as String?,
-        tags: ((json['tags'] as List?) ?? []).cast<String>(),
-        contactType: ufficioContactTypeFromJson(json['contactType'] as String?),
-        createdAt:
-            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-        updatedAt:
-            DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+  factory UfficioContactEntry.fromJson(
+    Map<String, dynamic> json,
+  ) => UfficioContactEntry(
+    id: json['id'] as String? ?? '',
+    userId: json['userId'] as String?,
+    source: ufficioContactSourceFromJson(json['source'] as String?),
+    categoryId: json['categoryId'] as String?,
+    subcategoryId: json['subcategoryId'] as String?,
+    name: json['name'] as String? ?? '',
+    description: json['description'] as String?,
+    address: json['address'] as String?,
+    phone: json['phone'] as String?,
+    email: json['email'] as String?,
+    pec: json['pec'] as String?,
+    website: json['website'] as String?,
+    openingHours: json['openingHours'] as String?,
+    useFor: ((json['useFor'] as List?) ?? []).cast<String>(),
+    warning: json['warning'] as String?,
+    city: json['city'] as String?,
+    region: json['region'] as String?,
+    tags: ((json['tags'] as List?) ?? []).cast<String>(),
+    contactType: ufficioContactTypeFromJson(json['contactType'] as String?),
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 enum UfficioDocumentType {
@@ -776,31 +768,28 @@ class UfficioDocumentEntry {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory UfficioDocumentEntry.fromJson(Map<String, dynamic> json) =>
-      UfficioDocumentEntry(
-        id: json['id'] as String? ?? '',
-        userId: json['userId'] as String?,
-        categoryId: json['categoryId'] as String?,
-        subcategoryId: json['subcategoryId'] as String?,
-        title: json['title'] as String? ?? '',
-        description: json['description'] as String?,
-        documentType: ufficioDocumentTypeFromJson(
-          json['documentType'] as String?,
-        ),
-        status: ufficioDocumentStatusFromJson(json['status'] as String?),
-        source: ufficioDocumentSourceFromJson(json['source'] as String?),
-        fileUrl: json['fileUrl'] as String?,
-        fileName: json['fileName'] as String?,
-        expiryDate: DateTime.tryParse(json['expiryDate'] as String? ?? ''),
-        relatedRequestId: json['relatedRequestId'] as String?,
-        notes: json['notes'] as String?,
-        createdAt:
-            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-        updatedAt:
-            DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+  factory UfficioDocumentEntry.fromJson(
+    Map<String, dynamic> json,
+  ) => UfficioDocumentEntry(
+    id: json['id'] as String? ?? '',
+    userId: json['userId'] as String?,
+    categoryId: json['categoryId'] as String?,
+    subcategoryId: json['subcategoryId'] as String?,
+    title: json['title'] as String? ?? '',
+    description: json['description'] as String?,
+    documentType: ufficioDocumentTypeFromJson(json['documentType'] as String?),
+    status: ufficioDocumentStatusFromJson(json['status'] as String?),
+    source: ufficioDocumentSourceFromJson(json['source'] as String?),
+    fileUrl: json['fileUrl'] as String?,
+    fileName: json['fileName'] as String?,
+    expiryDate: DateTime.tryParse(json['expiryDate'] as String? ?? ''),
+    relatedRequestId: json['relatedRequestId'] as String?,
+    notes: json['notes'] as String?,
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 class CostSummary {
@@ -1005,15 +994,16 @@ class HybridProblemRequestsRepository implements ProblemRequestsRepository {
 class LocalConsultancyRequestsRepository {
   const LocalConsultancyRequestsRepository(this._repo);
 
-  factory LocalConsultancyRequestsRepository.fromPrefs(SharedPreferences prefs) =>
-      LocalConsultancyRequestsRepository(
-        LocalStorageListRepository<ConsultancyRequestRecord>(
-          prefs: prefs,
-          storageKey: 'ufficio_consultancy_requests_v1',
-          fromJson: ConsultancyRequestRecord.fromJson,
-          toJson: (item) => item.toJson(),
-        ),
-      );
+  factory LocalConsultancyRequestsRepository.fromPrefs(
+    SharedPreferences prefs,
+  ) => LocalConsultancyRequestsRepository(
+    LocalStorageListRepository<ConsultancyRequestRecord>(
+      prefs: prefs,
+      storageKey: 'ufficio_consultancy_requests_v1',
+      fromJson: ConsultancyRequestRecord.fromJson,
+      toJson: (item) => item.toJson(),
+    ),
+  );
 
   final LocalStorageListRepository<ConsultancyRequestRecord> _repo;
 
@@ -1046,7 +1036,9 @@ class SupabaseConsultancyRequestsRepository
         .select()
         .order('created_at', ascending: false);
     return rows
-        .map((item) => _consultancyRequestFromDb(Map<String, dynamic>.from(item)))
+        .map(
+          (item) => _consultancyRequestFromDb(Map<String, dynamic>.from(item)),
+        )
         .toList();
   }
 
@@ -1057,7 +1049,9 @@ class SupabaseConsultancyRequestsRepository
         .select()
         .order('created_at', ascending: false);
     return rows
-        .map((item) => _consultancyRequestFromDb(Map<String, dynamic>.from(item)))
+        .map(
+          (item) => _consultancyRequestFromDb(Map<String, dynamic>.from(item)),
+        )
         .toList();
   }
 
@@ -1192,15 +1186,16 @@ class LocalDirectoryContactsRepository {
 class LocalDirectoryDocumentsRepository {
   const LocalDirectoryDocumentsRepository(this._repo);
 
-  factory LocalDirectoryDocumentsRepository.fromPrefs(SharedPreferences prefs) =>
-      LocalDirectoryDocumentsRepository(
-        LocalStorageListRepository<UfficioDocumentEntry>(
-          prefs: prefs,
-          storageKey: 'ufficio_documents_v2',
-          fromJson: UfficioDocumentEntry.fromJson,
-          toJson: (item) => item.toJson(),
-        ),
-      );
+  factory LocalDirectoryDocumentsRepository.fromPrefs(
+    SharedPreferences prefs,
+  ) => LocalDirectoryDocumentsRepository(
+    LocalStorageListRepository<UfficioDocumentEntry>(
+      prefs: prefs,
+      storageKey: 'ufficio_documents_v2',
+      fromJson: UfficioDocumentEntry.fromJson,
+      toJson: (item) => item.toJson(),
+    ),
+  );
 
   final LocalStorageListRepository<UfficioDocumentEntry> _repo;
 
@@ -1302,36 +1297,35 @@ Map<String, dynamic> _problemRequestToDb(ProblemRequestRecord item) => {
   'updated_at': item.updatedAt.toIso8601String(),
 };
 
-ProblemRequestRecord _problemRequestFromDb(Map<String, dynamic> row) =>
-    ProblemRequestRecord(
-      id: row['id'] as String? ?? '',
-      userId: row['user_id'] as String?,
-      userEmail: row['user_email'] as String?,
-      categoryId: row['category_id'] as String?,
-      subcategoryId: row['subcategory_id'] as String?,
-      title: row['title'] as String? ?? '',
-      description: row['description'] as String? ?? '',
-      city: row['city'] as String? ?? 'Torino',
-      region: row['region'] as String? ?? 'Piemonte',
-      urgency: row['urgency'] as String? ?? 'normal',
-      language: row['language'] as String? ?? 'English',
-      attachmentPlaceholder: row['attachment_placeholder'] as String?,
-      status: switch (row['status']) {
-        'reviewing' => ProblemRequestStatus.reviewing,
-        'planned' => ProblemRequestStatus.planned,
-        'added' => ProblemRequestStatus.added,
-        'rejected' => ProblemRequestStatus.rejected,
-        _ => ProblemRequestStatus.newRequest,
-      },
-      isPremiumUser: row['is_premium_user'] as bool? ?? false,
-      sourcePage: row['source_page'] as String? ?? '',
-      createdAt:
-          DateTime.tryParse(row['created_at'] as String? ?? '') ??
-          DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(row['updated_at'] as String? ?? '') ??
-          DateTime.now(),
-    );
+ProblemRequestRecord _problemRequestFromDb(
+  Map<String, dynamic> row,
+) => ProblemRequestRecord(
+  id: row['id'] as String? ?? '',
+  userId: row['user_id'] as String?,
+  userEmail: row['user_email'] as String?,
+  categoryId: row['category_id'] as String?,
+  subcategoryId: row['subcategory_id'] as String?,
+  title: row['title'] as String? ?? '',
+  description: row['description'] as String? ?? '',
+  city: row['city'] as String? ?? 'Torino',
+  region: row['region'] as String? ?? 'Piemonte',
+  urgency: row['urgency'] as String? ?? 'normal',
+  language: row['language'] as String? ?? 'English',
+  attachmentPlaceholder: row['attachment_placeholder'] as String?,
+  status: switch (row['status']) {
+    'reviewing' => ProblemRequestStatus.reviewing,
+    'planned' => ProblemRequestStatus.planned,
+    'added' => ProblemRequestStatus.added,
+    'rejected' => ProblemRequestStatus.rejected,
+    _ => ProblemRequestStatus.newRequest,
+  },
+  isPremiumUser: row['is_premium_user'] as bool? ?? false,
+  sourcePage: row['source_page'] as String? ?? '',
+  createdAt:
+      DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
+  updatedAt:
+      DateTime.tryParse(row['updated_at'] as String? ?? '') ?? DateTime.now(),
+);
 
 Map<String, dynamic> _consultancyRequestToDb(ConsultancyRequestRecord item) => {
   'id': item.id,
@@ -1355,34 +1349,34 @@ Map<String, dynamic> _consultancyRequestToDb(ConsultancyRequestRecord item) => {
   'updated_at': item.updatedAt.toIso8601String(),
 };
 
-ConsultancyRequestRecord _consultancyRequestFromDb(Map<String, dynamic> row) =>
-    ConsultancyRequestRecord(
-      id: row['id'] as String? ?? '',
-      userId: row['user_id'] as String?,
-      userEmail: row['user_email'] as String?,
-      fullName: row['full_name'] as String? ?? '',
-      categoryId: row['category_id'] as String?,
-      subcategoryId: row['subcategory_id'] as String?,
-      problemType: row['problem_type'] as String? ?? '',
-      description: row['description'] as String? ?? '',
-      desiredResult: row['desired_result'] as String? ?? '',
-      city: row['city'] as String? ?? 'Torino',
-      region: row['region'] as String? ?? 'Piemonte',
-      documentsAvailable: row['documents_available'] as String? ?? '',
-      attachmentUrls: ((row['attachment_urls'] as List?) ?? const []).cast<String>(),
-      userPlan: row['user_plan'] as String? ?? UfficioPlan.free.name,
-      paymentStatus: consultancyPaymentStatusFromJson(
-        row['payment_status'] as String?,
-      ),
-      status: consultancyRequestStatusFromJson(row['status'] as String?),
-      sourcePage: row['source_page'] as String? ?? '',
-      createdAt:
-          DateTime.tryParse(row['created_at'] as String? ?? '') ??
-          DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(row['updated_at'] as String? ?? '') ??
-          DateTime.now(),
-    );
+ConsultancyRequestRecord _consultancyRequestFromDb(
+  Map<String, dynamic> row,
+) => ConsultancyRequestRecord(
+  id: row['id'] as String? ?? '',
+  userId: row['user_id'] as String?,
+  userEmail: row['user_email'] as String?,
+  fullName: row['full_name'] as String? ?? '',
+  categoryId: row['category_id'] as String?,
+  subcategoryId: row['subcategory_id'] as String?,
+  problemType: row['problem_type'] as String? ?? '',
+  description: row['description'] as String? ?? '',
+  desiredResult: row['desired_result'] as String? ?? '',
+  city: row['city'] as String? ?? 'Torino',
+  region: row['region'] as String? ?? 'Piemonte',
+  documentsAvailable: row['documents_available'] as String? ?? '',
+  attachmentUrls: ((row['attachment_urls'] as List?) ?? const [])
+      .cast<String>(),
+  userPlan: row['user_plan'] as String? ?? UfficioPlan.free.name,
+  paymentStatus: consultancyPaymentStatusFromJson(
+    row['payment_status'] as String?,
+  ),
+  status: consultancyRequestStatusFromJson(row['status'] as String?),
+  sourcePage: row['source_page'] as String? ?? '',
+  createdAt:
+      DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
+  updatedAt:
+      DateTime.tryParse(row['updated_at'] as String? ?? '') ?? DateTime.now(),
+);
 
 class CostDashboardService {
   const CostDashboardService(this._repository);
@@ -1484,14 +1478,18 @@ class ContactsDirectoryService {
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
-  Future<UfficioContactEntry> createCustomContact(UfficioContactEntry item) async {
+  Future<UfficioContactEntry> createCustomContact(
+    UfficioContactEntry item,
+  ) async {
     await _repository.save(
       item.copyWith(source: UfficioContactSource.userSaved),
     );
     return item;
   }
 
-  Future<UfficioContactEntry> updateCustomContact(UfficioContactEntry item) async {
+  Future<UfficioContactEntry> updateCustomContact(
+    UfficioContactEntry item,
+  ) async {
     final updated = item.copyWith(updatedAt: DateTime.now());
     await _repository.save(updated);
     return updated;
@@ -1555,8 +1553,7 @@ class DocumentsService {
       }
       entries.add(
         UfficioDocumentEntry(
-          id:
-              '${categoryGuidance.id}_${subcategory.id}_${title.toLowerCase().replaceAll(' ', '_')}',
+          id: '${categoryGuidance.id}_${subcategory.id}_${title.toLowerCase().replaceAll(' ', '_')}',
           userId: userId,
           categoryId: categoryGuidance.id,
           subcategoryId: subcategory.id,
@@ -1583,8 +1580,7 @@ class DocumentsService {
       }
       entries.add(
         UfficioDocumentEntry(
-          id:
-              '${categoryGuidance.id}_${subcategory.id}_${title.toLowerCase().replaceAll(' ', '_')}',
+          id: '${categoryGuidance.id}_${subcategory.id}_${title.toLowerCase().replaceAll(' ', '_')}',
           userId: userId,
           categoryId: categoryGuidance.id,
           subcategoryId: subcategory.id,
@@ -1671,13 +1667,18 @@ class EntitlementsService {
   Future<UfficioUserEntitlements> getUserEntitlements() async {
     final entitlement = await _premiumService.getCurrentEntitlement();
     final isPremium = entitlement.isProLike;
+    final costDecision = await _premiumService.canUseFeature(
+      FeatureKey.costDashboard,
+    );
+    final documentsDecision = await _premiumService.canAddDocument();
+    final contactsDecision = await _premiumService.canAddContact();
     return UfficioUserEntitlements(
       isPremium: isPremium,
-      canRequestProblem: isPremium || entitlement.betaModeEnabled,
+      canRequestProblem: true,
       canUsePrivateConsultancyForFree: isPremium || entitlement.betaModeEnabled,
-      canUseCostDashboard: true,
-      canUseDocuments: true,
-      canUseContactsDirectory: true,
+      canUseCostDashboard: costDecision.allowed,
+      canUseDocuments: documentsDecision.allowed,
+      canUseContactsDirectory: contactsDecision.allowed,
     );
   }
 
@@ -1699,8 +1700,10 @@ class EntitlementsService {
     }
     return RequirePremiumOrPaymentResult(
       allowed: false,
-      paymentAvailable: false,
-      message: 'Payment is not configured yet.',
+      paymentAvailable: purpose == 'consultancy',
+      message: purpose == 'consultancy'
+          ? 'Premium includes consultancy, or you can pay once for a private request when payments are enabled.'
+          : 'Upgrade to Premium to unlock this feature.',
       decision: decision,
     );
   }
@@ -1764,8 +1767,7 @@ List<UfficioContactEntry> _mapRichContacts(RichCategoryGuidance guidance) {
       email: contact.email,
       pec: contact.pec,
       website: contact.url,
-      openingHours:
-          contact.openingHours ?? contact.conciliationFreeNumberHours,
+      openingHours: contact.openingHours ?? contact.conciliationFreeNumberHours,
       useFor: contact.useFor,
       warning: contact.warning,
       city: guidance.city,
@@ -1835,8 +1837,9 @@ UfficioContactType _guessContactType({
   required RichCategoryContact contact,
   required List<String> useFor,
 }) {
-  final haystack = '${contact.name} ${contact.authority ?? ''} ${useFor.join(' ')}'
-      .toLowerCase();
+  final haystack =
+      '${contact.name} ${contact.authority ?? ''} ${useFor.join(' ')}'
+          .toLowerCase();
   if (categoryId.contains('public_office') ||
       haystack.contains('comune') ||
       haystack.contains('anagrafe')) {

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../app/supabase_bootstrap.dart';
+import '../../admin_cms/domain/cms_models.dart';
 import '../domain/premium_config.dart';
 import '../domain/ufficcio_entitlement.dart';
 import 'local_analytics_service.dart';
@@ -11,6 +13,8 @@ class LocalPremiumConfigRepository {
   LocalPremiumConfigRepository(this._prefs, {this.remoteLoader});
 
   static const storageKey = 'ufficiofacile_premium_config_v1';
+  static const cachedPlansKey = 'ufficiofacile_plan_products_v1';
+  static const cachedUnlocksKey = 'ufficiofacile_content_unlocks_v1';
   final SharedPreferences _prefs;
   final Future<Map<String, dynamic>> Function()? remoteLoader;
 
@@ -47,6 +51,8 @@ class LocalPremiumConfigRepository {
             _readInt(remote['freeDocumentsLimit']) ?? config.freeDocumentsLimit,
         freeContactsLimit:
             _readInt(remote['freeContactsLimit']) ?? config.freeContactsLimit,
+        freeCostItemsLimit:
+            _readInt(remote['freeCostItemsLimit']) ?? config.freeCostItemsLimit,
         freeProofCasesLimit:
             _readInt(remote['freeProofCasesLimit']) ??
             config.freeProofCasesLimit,
@@ -65,6 +71,42 @@ class LocalPremiumConfigRepository {
     await _prefs.setString(storageKey, jsonEncode(config.toJson()));
     return config;
   }
+
+  Future<List<Map<String, dynamic>>> getCachedPlanProducts() async {
+    final raw = _prefs.getString(cachedPlansKey);
+    if (raw == null || raw.isEmpty) return const [];
+    try {
+      return ((jsonDecode(raw) as List?) ?? const [])
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> saveCachedPlanProducts(List<Map<String, dynamic>> items) async {
+    await _prefs.setString(cachedPlansKey, jsonEncode(items));
+  }
+
+  Future<List<Map<String, dynamic>>> getCachedContentUnlocks() async {
+    final raw = _prefs.getString(cachedUnlocksKey);
+    if (raw == null || raw.isEmpty) return const [];
+    try {
+      return ((jsonDecode(raw) as List?) ?? const [])
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> saveCachedContentUnlocks(
+    List<Map<String, dynamic>> items,
+  ) async {
+    await _prefs.setString(cachedUnlocksKey, jsonEncode(items));
+  }
 }
 
 bool? _readBool(dynamic value) {
@@ -79,16 +121,17 @@ int? _readInt(dynamic value) {
 }
 
 const PremiumConfig _defaultConfig = PremiumConfig(
-  betaModeEnabled: true,
-  paywallEnabled: false,
+  betaModeEnabled: false,
+  paywallEnabled: true,
   showPremiumBadges: true,
-  freePackLimit: 5,
-  freeSavedRequestsLimit: 10,
+  freePackLimit: 3,
+  freeSavedRequestsLimit: 5,
   freeRemindersLimit: 5,
-  freeDocumentsLimit: 10,
-  freeContactsLimit: 10,
+  freeDocumentsLimit: 5,
+  freeContactsLimit: 5,
+  freeCostItemsLimit: 5,
   freeHouseholdMembersLimit: 2,
-  freeProofCasesLimit: 2,
+  freeProofCasesLimit: 5,
   freeUtilityComparisonLimit: 3,
   freeBillAnalysisLimit: 3,
   premiumProcedureIds: [
@@ -111,15 +154,161 @@ const PremiumConfig _defaultConfig = PremiumConfig(
     FeatureKey.bulkExport,
     FeatureKey.utilityComparison,
     FeatureKey.billAnalysis,
+    FeatureKey.costDashboard,
     FeatureKey.canoneRaiAdvanced,
     FeatureKey.telecomAdvanced,
     FeatureKey.serviceIntelligenceAdvanced,
     FeatureKey.officialLinksAdvanced,
+    FeatureKey.premiumGuides,
+    FeatureKey.advancedScanner,
+    FeatureKey.deadlineReminders,
+    FeatureKey.bonusFinderAdvanced,
+    FeatureKey.loanComparisonAdvanced,
+    FeatureKey.privateConsultancy,
+    FeatureKey.priorityProblemRequest,
   ],
-  consultantFeatureKeys: [FeatureKey.consultantMode],
+  consultantFeatureKeys: [
+    FeatureKey.consultantMode,
+    FeatureKey.privateConsultancy,
+  ],
   trialDays: 7,
   allowLocalDebugPro: true,
 );
+
+class PlanProduct {
+  const PlanProduct({
+    required this.productKey,
+    required this.planType,
+    required this.billingInterval,
+    required this.amountCents,
+    required this.currency,
+    required this.isActive,
+    required this.sortOrder,
+    required this.title,
+    required this.description,
+    required this.features,
+    required this.limits,
+    required this.providerMetadata,
+  });
+
+  final String productKey;
+  final String planType;
+  final String billingInterval;
+  final int amountCents;
+  final String currency;
+  final bool isActive;
+  final int sortOrder;
+  final Map<String, dynamic> title;
+  final Map<String, dynamic> description;
+  final Map<String, dynamic> features;
+  final Map<String, dynamic> limits;
+  final Map<String, dynamic> providerMetadata;
+
+  factory PlanProduct.fromJson(Map<String, dynamic> json) => PlanProduct(
+    productKey: json['product_key'] as String? ?? '',
+    planType: json['plan_type'] as String? ?? 'free',
+    billingInterval: json['billing_interval'] as String? ?? 'none',
+    amountCents: (json['amount_cents'] as num?)?.toInt() ?? 0,
+    currency: json['currency'] as String? ?? 'EUR',
+    isActive: json['is_active'] as bool? ?? true,
+    sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
+    title: _jsonMap(json['title']),
+    description: _jsonMap(json['description']),
+    features: _jsonMap(json['features']),
+    limits: _jsonMap(json['limits']),
+    providerMetadata: _jsonMap(json['provider_metadata']),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'product_key': productKey,
+    'plan_type': planType,
+    'billing_interval': billingInterval,
+    'amount_cents': amountCents,
+    'currency': currency,
+    'is_active': isActive,
+    'sort_order': sortOrder,
+    'title': title,
+    'description': description,
+    'features': features,
+    'limits': limits,
+    'provider_metadata': providerMetadata,
+  };
+}
+
+class UserContentUnlock {
+  const UserContentUnlock({
+    required this.userId,
+    required this.categorySlug,
+    required this.procedureSlug,
+    required this.status,
+    this.unlockType = 'single_purchase',
+    this.productKey = 'subcategory_unlock',
+    this.amountCents,
+    this.currency = 'EUR',
+    this.provider,
+    this.expiresAt,
+    this.revokedAt,
+    this.metadata = const {},
+  });
+
+  final String userId;
+  final String categorySlug;
+  final String procedureSlug;
+  final String status;
+  final String unlockType;
+  final String productKey;
+  final int? amountCents;
+  final String currency;
+  final String? provider;
+  final DateTime? expiresAt;
+  final DateTime? revokedAt;
+  final Map<String, dynamic> metadata;
+
+  bool get isActive {
+    if (status != 'active') return false;
+    if (revokedAt != null) return false;
+    if (expiresAt != null && expiresAt!.isBefore(DateTime.now())) return false;
+    return true;
+  }
+
+  factory UserContentUnlock.fromJson(Map<String, dynamic> json) =>
+      UserContentUnlock(
+        userId: json['user_id'] as String? ?? '',
+        categorySlug: json['category_slug'] as String? ?? '',
+        procedureSlug: json['procedure_slug'] as String? ?? '',
+        status: json['status'] as String? ?? 'active',
+        unlockType: json['unlock_type'] as String? ?? 'single_purchase',
+        productKey: json['product_key'] as String? ?? 'subcategory_unlock',
+        amountCents: (json['amount_cents'] as num?)?.toInt(),
+        currency: json['currency'] as String? ?? 'EUR',
+        provider: json['provider'] as String?,
+        expiresAt: DateTime.tryParse(json['expires_at'] as String? ?? ''),
+        revokedAt: DateTime.tryParse(json['revoked_at'] as String? ?? ''),
+        metadata: _jsonMap(json['metadata']),
+      );
+
+  Map<String, dynamic> toJson() => {
+    'user_id': userId,
+    'category_slug': categorySlug,
+    'procedure_slug': procedureSlug,
+    'status': status,
+    'unlock_type': unlockType,
+    'product_key': productKey,
+    'amount_cents': amountCents,
+    'currency': currency,
+    'provider': provider,
+    'expires_at': expiresAt?.toIso8601String(),
+    'revoked_at': revokedAt?.toIso8601String(),
+    'metadata': metadata,
+  };
+}
+
+Map<String, dynamic> _jsonMap(dynamic value) {
+  if (value is Map) {
+    return Map<String, dynamic>.from(value);
+  }
+  return const <String, dynamic>{};
+}
 
 class UfficioPremiumEntitlementService {
   UfficioPremiumEntitlementService(
@@ -146,6 +335,7 @@ class UfficioPremiumEntitlementService {
         remindersLimit: config.freeRemindersLimit,
         documentsLimit: config.freeDocumentsLimit,
         contactsLimit: config.freeContactsLimit,
+        costItemsLimit: config.freeCostItemsLimit,
         householdMembersLimit: config.freeHouseholdMembersLimit,
         proofCasesLimit: config.freeProofCasesLimit,
         utilityComparisonLimit: config.freeUtilityComparisonLimit,
@@ -163,6 +353,34 @@ class UfficioPremiumEntitlementService {
   Future<UfficioPlan> getCurrentPlan() async =>
       (await getCurrentEntitlement()).plan;
 
+  Future<List<PlanProduct>> getPlanProducts() async {
+    final cached = (await _configRepository.getCachedPlanProducts())
+        .map(PlanProduct.fromJson)
+        .toList();
+    final remote = await _loadRemotePlanProducts();
+    if (remote.isNotEmpty) {
+      await _configRepository.saveCachedPlanProducts(
+        remote.map((item) => item.toJson()).toList(),
+      );
+      return remote;
+    }
+    return cached.isNotEmpty ? cached : _defaultPlanProducts;
+  }
+
+  Future<List<UserContentUnlock>> getContentUnlocks() async {
+    final cached = (await _configRepository.getCachedContentUnlocks())
+        .map(UserContentUnlock.fromJson)
+        .toList();
+    final remote = await _loadRemoteContentUnlocks();
+    if (remote.isNotEmpty) {
+      await _configRepository.saveCachedContentUnlocks(
+        remote.map((item) => item.toJson()).toList(),
+      );
+      return remote;
+    }
+    return cached;
+  }
+
   Future<bool> isPro() async => (await getCurrentEntitlement()).isProLike;
   Future<bool> isBetaMode() async => (await getConfig()).betaModeEnabled;
 
@@ -170,6 +388,80 @@ class UfficioPremiumEntitlementService {
     final config = await getConfig();
     return config.premiumProcedureIds.contains(procedureId) ||
         config.lockedProcedureIds.contains(procedureId);
+  }
+
+  Future<ContentAccessResult> canAccessCmsProcedure(
+    CmsProcedure procedure, {
+    bool adminPreview = false,
+  }) async {
+    if (!procedure.isPremium) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.freeContent,
+        message: 'This guide is available on the free plan.',
+      );
+    }
+
+    final entitlement = await getCurrentEntitlement();
+    if (adminPreview) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.adminPreview,
+        message: 'Admin preview override is active.',
+      );
+    }
+    if (entitlement.isProLike) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.premiumSubscription,
+        message: 'Included with Premium.',
+        alreadyUnlocked: true,
+      );
+    }
+
+    final unlocks = await getContentUnlocks();
+    final unlocked = unlocks.any(
+      (item) =>
+          item.categorySlug == procedure.categorySlug &&
+          item.procedureSlug == procedure.slug &&
+          item.isActive,
+    );
+    if (unlocked) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.singleUnlock,
+        message: 'This guide was unlocked for your account.',
+        alreadyUnlocked: true,
+      );
+    }
+
+    final metadata = procedure.metadata;
+    final allowSingleUnlock =
+        metadata['allow_single_unlock'] as bool? ??
+        metadata['allowSingleUnlock'] as bool? ??
+        true;
+    final price =
+        (metadata['single_unlock_price_cents'] as num?)?.toInt() ??
+        (metadata['singleUnlockPriceCents'] as num?)?.toInt() ??
+        399;
+    final currency =
+        metadata['single_unlock_currency'] as String? ??
+        metadata['singleUnlockCurrency'] as String? ??
+        'EUR';
+
+    return ContentAccessResult(
+      allowed: false,
+      reason: ContentAccessReason.locked,
+      message: 'Premium or a one-time unlock is required for this guide.',
+      unlockOptions: <UnlockOption>[
+        if (allowSingleUnlock) UnlockOption.singlePurchase,
+        UnlockOption.premium,
+        UnlockOption.consultancy,
+      ],
+      singleUnlockPriceCents: allowSingleUnlock ? price : null,
+      singleUnlockCurrency: currency,
+      requiresPremium: true,
+    );
   }
 
   Future<EntitlementDecision> canUseProcedure(String procedureId) async {
@@ -366,6 +658,16 @@ class UfficioPremiumEntitlementService {
     );
   }
 
+  Future<UfficcioEntitlement> recordCostItemAdded() async {
+    final entitlement = await getCurrentEntitlement();
+    return _repository.saveEntitlement(
+      entitlement.copyWith(
+        costItemsCount: entitlement.costItemsCount + 1,
+        updatedAt: DateTime.now(),
+      ),
+    );
+  }
+
   Future<UfficcioEntitlement> recordHouseholdMemberAdded() async {
     final entitlement = await getCurrentEntitlement();
     return _repository.saveEntitlement(
@@ -431,6 +733,11 @@ class UfficioPremiumEntitlementService {
         used: entitlement.utilityComparisonsUsedThisMonth,
         limit: entitlement.utilityComparisonLimit,
       ),
+      UsageSummaryItem(
+        label: 'Cost items',
+        used: entitlement.costItemsCount,
+        limit: entitlement.costItemsLimit,
+      ),
     ];
   }
 
@@ -442,10 +749,18 @@ class UfficioPremiumEntitlementService {
         return 'Pro unlocks advanced utility comparison tools.';
       case FeatureKey.billAnalysis:
         return 'Pro unlocks advanced bill analysis and complaint support.';
+      case FeatureKey.costDashboard:
+        return 'Premium unlocks the full cost dashboard and higher limits.';
+      case FeatureKey.privateConsultancy:
+        return 'Premium includes private consultancy or a paid one-shot option.';
+      case FeatureKey.bonusFinderAdvanced:
+        return 'Premium unlocks the full bonus finder and money-saving guidance.';
+      case FeatureKey.loanComparisonAdvanced:
+        return 'Premium unlocks the full loan comparison guidance.';
       case FeatureKey.consultantMode:
         return 'Consultant mode is planned for a future plan.';
       default:
-        return 'This is a Pro feature.';
+        return 'This is a Premium feature.';
     }
   }
 
@@ -503,6 +818,7 @@ class UfficioPremiumEntitlementService {
         remindersCount: 0,
         documentsCount: 0,
         contactsCount: 0,
+        costItemsCount: 0,
         householdMembersCount: 0,
         proofCasesCount: 0,
         updatedAt: DateTime.now(),
@@ -588,6 +904,9 @@ class UfficioPremiumEntitlementService {
       case FeatureKey.officialLinksAdvanced:
         used = entitlement.contactsCount;
         limit = entitlement.contactsLimit;
+      case FeatureKey.costDashboard:
+        used = entitlement.costItemsCount;
+        limit = entitlement.costItemsLimit;
       case FeatureKey.householdMembers:
         used = entitlement.householdMembersCount;
         limit = entitlement.householdMembersLimit;
@@ -617,4 +936,157 @@ class UfficioPremiumEntitlementService {
       limit: limit,
     );
   }
+
+  Future<List<PlanProduct>> _loadRemotePlanProducts() async {
+    final client = SupabaseBootstrap.client;
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) {
+      return const [];
+    }
+    try {
+      final rows = await client
+          .from('ufficio_plan_products')
+          .select()
+          .eq('is_active', true)
+          .order('sort_order', ascending: true);
+      return rows
+          .whereType<Map>()
+          .map((item) => PlanProduct.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<List<UserContentUnlock>> _loadRemoteContentUnlocks() async {
+    final client = SupabaseBootstrap.client;
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) {
+      return const [];
+    }
+    try {
+      final rows = await client
+          .from('ufficio_user_content_unlocks')
+          .select()
+          .eq('user_id', user.id);
+      return rows
+          .whereType<Map>()
+          .map(
+            (item) =>
+                UserContentUnlock.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
 }
+
+final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
+  PlanProduct(
+    productKey: 'free',
+    planType: 'free',
+    billingInterval: 'none',
+    amountCents: 0,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 0,
+    title: const {'en': 'Free', 'it': 'Gratis'},
+    description: const {
+      'en': 'Basic access with limits.',
+      'it': 'Accesso base con limiti.',
+    },
+    features: const {'premium_sections': false, 'priority_requests': false},
+    limits: const {
+      'generated_packs_per_month': 3,
+      'saved_requests_limit': 5,
+      'documents_limit': 5,
+      'contacts_limit': 5,
+      'cost_items_limit': 5,
+      'consultancy_included_per_month': 0,
+    },
+    providerMetadata: const {},
+  ),
+  PlanProduct(
+    productKey: 'premium_monthly',
+    planType: 'subscription',
+    billingInterval: 'month',
+    amountCents: 999,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 1,
+    title: const {'en': 'Premium Monthly', 'it': 'Premium mensile'},
+    description: const {
+      'en': 'Full guides, tools, vault, and premium help.',
+      'it': 'Guide complete, strumenti, archivio e aiuto premium.',
+    },
+    features: const {'premium_sections': true, 'priority_requests': true},
+    limits: const {
+      'generated_packs_per_month': 100,
+      'saved_requests_limit': 500,
+      'documents_limit': 500,
+      'contacts_limit': 500,
+      'cost_items_limit': 500,
+      'consultancy_included_per_month': 2,
+    },
+    providerMetadata: const {},
+  ),
+  PlanProduct(
+    productKey: 'premium_yearly',
+    planType: 'subscription',
+    billingInterval: 'year',
+    amountCents: 7999,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 2,
+    title: const {'en': 'Premium Yearly', 'it': 'Premium annuale'},
+    description: const {
+      'en': 'Full premium access with better yearly value.',
+      'it': 'Accesso premium completo con prezzo annuale migliore.',
+    },
+    features: const {'premium_sections': true, 'priority_requests': true},
+    limits: const {
+      'generated_packs_per_month': 100,
+      'saved_requests_limit': 500,
+      'documents_limit': 500,
+      'contacts_limit': 500,
+      'cost_items_limit': 500,
+      'consultancy_included_per_month': 2,
+    },
+    providerMetadata: const {},
+  ),
+  PlanProduct(
+    productKey: 'consultancy_one_shot',
+    planType: 'one_time',
+    billingInterval: 'one_time',
+    amountCents: 1499,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 3,
+    title: const {'en': 'One-shot Consultancy', 'it': 'Consulenza una tantum'},
+    description: const {
+      'en': 'Pay once for one private consultancy request.',
+      'it': 'Paga una volta per una richiesta di consulenza privata.',
+    },
+    features: const {'private_consultancy': true},
+    limits: const {'procedure_count': 1},
+    providerMetadata: const {},
+  ),
+  PlanProduct(
+    productKey: 'subcategory_unlock',
+    planType: 'one_time',
+    billingInterval: 'one_time',
+    amountCents: 299,
+    currency: 'EUR',
+    isActive: true,
+    sortOrder: 4,
+    title: const {'en': 'Single Guide Unlock', 'it': 'Sblocco guida singola'},
+    description: const {
+      'en': 'Unlock one premium guide without subscribing.',
+      'it': 'Sblocca una guida premium senza abbonarti.',
+    },
+    features: const {'unlocks_single_procedure': true},
+    limits: const {'procedure_count': 1},
+    providerMetadata: const {},
+  ),
+];

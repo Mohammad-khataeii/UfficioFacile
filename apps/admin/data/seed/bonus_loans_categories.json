@@ -1,0 +1,769 @@
+{
+  "version": "2026-05-08",
+  "source": "manual_research_seed",
+  "languages": ["en", "it", "fr", "es", "fa", "ar"],
+  "categories": [
+    {
+      "slug": "bonuses-benefits",
+      "title": {
+        "en": "Bonuses & Benefits",
+        "it": "Bonus e agevolazioni",
+        "fr": "Primes et aides",
+        "es": "Bonos y ayudas",
+        "fa": "بونوس‌ها و کمک‌هزینه‌ها",
+        "ar": "المكافآت والدعم"
+      },
+      "subtitle": {
+        "en": "Find Italian bonuses, discounts and public benefits you may be able to request.",
+        "it": "Trova bonus, sconti e agevolazioni pubbliche che potresti richiedere.",
+        "fr": "Trouvez les aides, réductions et prestations publiques que vous pourriez demander.",
+        "es": "Encuentra bonos, descuentos y ayudas públicas que podrías solicitar.",
+        "fa": "بونوس‌ها، تخفیف‌ها و کمک‌های دولتی ایتالیا را پیدا کن که ممکن است شامل حالت شود.",
+        "ar": "اعثر على المكافآت والتخفيضات والمساعدات العامة في إيطاليا التي قد تكون مؤهلاً لها."
+      },
+      "description": {
+        "en": "A practical finder for ISEE-based bonuses, family benefits, bill discounts, rent support and regional calls. Always verify dates and requirements before applying.",
+        "it": "Uno strumento pratico per trovare bonus legati all’ISEE, aiuti per famiglie, sconti in bolletta, sostegno affitto e bandi regionali. Verifica sempre date e requisiti prima della domanda.",
+        "fr": "Un outil pratique pour trouver les aides liées à l’ISEE, les prestations familiales, les réductions sur les factures, les aides au loyer et les appels régionaux. Vérifiez toujours les dates et les conditions avant de demander.",
+        "es": "Una herramienta práctica para encontrar ayudas vinculadas al ISEE, prestaciones familiares, descuentos en facturas, ayudas de alquiler y convocatorias regionales. Verifica siempre fechas y requisitos antes de solicitar.",
+        "fa": "یک ابزار کاربردی برای پیدا کردن بونوس‌های وابسته به ISEE، کمک‌های خانوادگی، تخفیف قبض‌ها، کمک اجاره و فراخوان‌های منطقه‌ای. همیشه قبل از درخواست تاریخ‌ها و شرایط را بررسی کن.",
+        "ar": "أداة عملية للعثور على المساعدات المرتبطة بـ ISEE، ودعم العائلات، وتخفيضات الفواتير، ودعم الإيجار، والدعوات الإقليمية. تحقق دائماً من المواعيد والشروط قبل التقديم."
+      },
+      "icon": "gift",
+      "color": "#0EA5E9",
+      "sort_order": 10,
+      "is_active": true,
+      "is_premium": true,
+      "verification_status": "needsReview",
+      "tags": ["bonus", "benefits", "isee", "inps", "arera", "famiglia", "bollette", "affitto", "agevolazioni", "sostegni"],
+      "synonyms": ["bonus", "benefit", "benefits", "agevolazione", "agevolazioni", "sussidio", "sostegno", "aiuto economico", "contributo", "isee", "inps", "discount", "sconto", "bollette", "famiglia", "children", "rent support", "aiuto affitto"],
+      "searchable_keywords": ["bonus", "social bonus", "isee", "inps", "arera", "family benefits", "rent support", "bill discount", "tax deduction", "school voucher"],
+      "metadata": {
+        "time_sensitive": true,
+        "recommended_status_fields": ["active", "seasonal", "automatic", "monitor", "closed"],
+        "legal_warning": "Eligibility depends on current rules, ISEE, residence, family status and application windows. Always verify the official page before applying.",
+        "badges": ["automatic", "seasonal", "ISEE", "INPS", "Regione", "verify date"]
+      },
+      "procedures": [
+        {
+          "slug": "bonus-finder",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Bonus finder", "it": "Trova bonus", "fr": "Trouver des aides", "es": "Buscar bonos", "fa": "جستجوی بونوس", "ar": "البحث عن الدعم"},
+          "subtitle": {"en": "Answer a few questions and see which benefits may fit your situation.", "it": "Rispondi a poche domande e vedi quali agevolazioni potrebbero fare al caso tuo.", "fr": "Répondez à quelques questions et voyez quelles aides pourraient correspondre à votre situation.", "es": "Responde unas preguntas y mira qué ayudas podrían encajar con tu situación.", "fa": "به چند سؤال جواب بده و ببین کدام کمک‌ها ممکن است مناسب وضعیت تو باشند.", "ar": "أجب عن بعض الأسئلة وشاهد أي مساعدات قد تناسب وضعك."},
+          "summary": {"en": "Filters bonuses by ISEE, family, student, tenant, worker, region and deadline.", "it": "Filtra i bonus per ISEE, famiglia, studente, inquilino, lavoro, regione e scadenza.", "fr": "Filtre les aides par ISEE, famille, statut étudiant, location, travail, région et échéance.", "es": "Filtra ayudas por ISEE, familia, estudiante, inquilino, trabajo, región y plazo.", "fa": "بونوس‌ها را بر اساس ISEE، خانواده، دانشجو بودن، مستأجر بودن، کار، منطقه و مهلت فیلتر می‌کند.", "ar": "يفلتر الدعم حسب ISEE، العائلة، الطالب، المستأجر، العمل، المنطقة والموعد النهائي."},
+          "status": "published",
+          "sort_order": 1,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["finder", "eligibility", "isee", "bonus", "benefits"],
+          "synonyms": ["which bonus can I get", "am I eligible", "bonus available", "ISEE bonus"],
+          "searchable_keywords": ["bonus finder", "bonus eligibility", "which benefit", "find my bonus"],
+          "blocks": [
+            {
+              "block_type": "intro",
+              "title": {"en": "Start with your situation", "it": "Parti dalla tua situazione", "fr": "Commencez par votre situation", "es": "Empieza por tu situación", "fa": "از وضعیت خودت شروع کن", "ar": "ابدأ من وضعك"},
+              "body": {"en": "Bonuses depend on ISEE, residence, family status, age, work, study path and deadlines. The finder should show likely matches, not guaranteed eligibility.", "it": "I bonus dipendono da ISEE, residenza, situazione familiare, età, lavoro, percorso di studio e scadenze. Il finder deve mostrare possibili corrispondenze, non un diritto garantito.", "fr": "Les aides dépendent de l’ISEE, de la résidence, de la situation familiale, de l’âge, du travail, du parcours d’études et des délais. L’outil doit montrer des correspondances probables, pas un droit garanti.", "es": "Las ayudas dependen del ISEE, residencia, situación familiar, edad, trabajo, estudios y plazos. El buscador debe mostrar posibles coincidencias, no una elegibilidad garantizada.", "fa": "بونوس‌ها به ISEE، محل اقامت، وضعیت خانوادگی، سن، کار، مسیر تحصیلی و مهلت‌ها بستگی دارند. این بخش باید گزینه‌های احتمالی را نشان دهد، نه واجد شرایط بودن قطعی.", "ar": "تعتمد المساعدات على ISEE، الإقامة، الوضع العائلي، العمر، العمل، الدراسة والمواعيد النهائية. يجب أن يعرض الباحث احتمالات مناسبة، لا أهلية مضمونة."},
+              "items": ["Ask for ISEE band", "Ask region/city", "Ask student/worker/tenant/family status", "Ask children/disability/medical needs", "Show likely, maybe, not relevant, and monitor results"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "slug": "bonus-sociale-bollette",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Bonus sociale for bills", "it": "Bonus sociale bollette", "fr": "Bonus social pour les factures", "es": "Bono social para facturas", "fa": "بونوس اجتماعی قبض‌ها", "ar": "الدعم الاجتماعي للفواتير"},
+          "subtitle": {"en": "Automatic discount for electricity, gas, water and waste bills if ISEE requirements are met.", "it": "Sconto automatico su luce, gas, acqua e rifiuti se rispetti i requisiti ISEE.", "fr": "Réduction automatique sur l’électricité, le gaz, l’eau et les déchets si les conditions ISEE sont remplies.", "es": "Descuento automático en luz, gas, agua y residuos si cumples los requisitos ISEE.", "fa": "تخفیف خودکار روی قبض برق، گاز، آب و زباله اگر شرایط ISEE را داشته باشی.", "ar": "تخفيض تلقائي على فواتير الكهرباء والغاز والمياه والنفايات إذا توفرت شروط ISEE."},
+          "summary": {"en": "For 2026, ARERA lists ISEE thresholds of €9,796 for households with up to 3 dependent children and €20,000 for large families with at least 4 dependent children.", "it": "Per il 2026, ARERA indica soglie ISEE di 9.796 € per nuclei fino a 3 figli a carico e 20.000 € per famiglie numerose con almeno 4 figli a carico.", "fr": "Pour 2026, l’ARERA indique des seuils ISEE de 9 796 € pour les foyers jusqu’à 3 enfants à charge et 20 000 € pour les familles nombreuses avec au moins 4 enfants à charge.", "es": "Para 2026, ARERA indica umbrales ISEE de 9.796 € para hogares con hasta 3 hijos a cargo y 20.000 € para familias numerosas con al menos 4 hijos a cargo.", "fa": "برای سال ۲۰۲۶، ARERA آستانه ISEE را ۹٬۷۹۶ یورو برای خانواده‌های تا ۳ فرزند تحت تکفل و ۲۰٬۰۰۰ یورو برای خانواده‌های پرجمعیت با حداقل ۴ فرزند اعلام کرده است.", "ar": "لعام 2026، تحدد ARERA حدود ISEE بـ 9,796 يورو للأسر التي لديها حتى 3 أطفال معالين و20,000 يورو للعائلات الكبيرة التي لديها 4 أطفال معالين على الأقل."},
+          "status": "published",
+          "sort_order": 2,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "verified",
+          "last_verified_at": "2026-05-08T00:00:00Z",
+          "tags": ["arera", "isee", "bollette", "gas", "luce", "acqua", "tari", "bonus sociale"],
+          "synonyms": ["bonus bollette", "sconto bollette", "bolletta alta", "bonus luce", "bonus gas", "bonus acqua", "bonus tari", "utility discount", "bill discount"],
+          "searchable_keywords": ["bonus bills", "gas discount", "electricity discount", "arera bonus", "isee utility support"],
+          "metadata": {
+            "status": "active",
+            "application_type": "automatic_after_isee",
+            "authority": "ARERA / INPS",
+            "needs_isee": true,
+            "isee_threshold_standard_2026": 9796,
+            "isee_threshold_large_family_2026": 20000,
+            "warning": "For direct supplies, the contract must be in the name of a member of the ISEE household."
+          },
+          "blocks": [
+            {
+              "block_type": "what_is_it",
+              "title": {"en": "What it is", "it": "Che cos’è", "fr": "Qu’est-ce que c’est", "es": "Qué es", "fa": "چیست", "ar": "ما هو"},
+              "body": {"en": "A public discount applied to utility bills for households with economic hardship. It can cover electricity, gas, water and waste tariff support.", "it": "Uno sconto pubblico applicato alle bollette per nuclei in difficoltà economica. Può riguardare luce, gas, acqua e agevolazioni sulla tariffa rifiuti.", "fr": "Une réduction publique appliquée aux factures pour les foyers en difficulté économique. Elle peut couvrir l’électricité, le gaz, l’eau et l’aide sur les déchets.", "es": "Un descuento público aplicado a las facturas para hogares en dificultad económica. Puede cubrir luz, gas, agua y apoyo a la tarifa de residuos.", "fa": "یک تخفیف دولتی روی قبض‌ها برای خانواده‌هایی با وضعیت اقتصادی ضعیف‌تر. می‌تواند برق، گاز، آب و کمک مربوط به زباله را شامل شود.", "ar": "تخفيض عام على الفواتير للأسر التي تواجه صعوبة اقتصادية. يمكن أن يشمل الكهرباء والغاز والمياه ودعم رسوم النفايات."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            },
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "How to get it", "it": "Come ottenerlo", "fr": "Comment l’obtenir", "es": "Cómo obtenerlo", "fa": "چطور دریافت کنی", "ar": "كيفية الحصول عليه"},
+              "body": {"en": "Submit DSU and obtain a valid ISEE. If the household meets the requirements and the supply data matches, the discount is usually applied automatically.", "it": "Presenta la DSU e ottieni un ISEE valido. Se il nucleo rispetta i requisiti e i dati della fornitura coincidono, lo sconto viene normalmente applicato in automatico.", "fr": "Déposez la DSU et obtenez un ISEE valide. Si le foyer remplit les conditions et que les données du contrat correspondent, la réduction est généralement appliquée automatiquement.", "es": "Presenta la DSU y obtén un ISEE válido. Si el hogar cumple los requisitos y los datos del suministro coinciden, el descuento normalmente se aplica automáticamente.", "fa": "DSU را ثبت کن و ISEE معتبر بگیر. اگر خانواده شرایط را داشته باشد و اطلاعات قرارداد قبض‌ها درست باشد، تخفیف معمولاً خودکار اعمال می‌شود.", "ar": "قدّم DSU واحصل على ISEE صالح. إذا استوفت الأسرة الشروط وتطابقت بيانات الخدمة، يُطبق التخفيض عادةً تلقائياً."},
+              "items": ["DSU", "ISEE", "Utility contract holder check", "Bill data"],
+              "sort_order": 2,
+              "is_active": true
+            },
+            {
+              "block_type": "warning",
+              "title": {"en": "Common issue", "it": "Problema frequente", "fr": "Problème fréquent", "es": "Problema frecuente", "fa": "مشکل رایج", "ar": "مشكلة شائعة"},
+              "body": {"en": "If the bill is in the landlord’s name and not in a member of your ISEE household, the direct bonus may not be recognized.", "it": "Se la bolletta è intestata al proprietario di casa e non a un membro del tuo nucleo ISEE, il bonus diretto potrebbe non essere riconosciuto.", "fr": "Si la facture est au nom du propriétaire et non d’un membre de votre foyer ISEE, le bonus direct peut ne pas être reconnu.", "es": "Si la factura está a nombre del propietario y no de un miembro de tu hogar ISEE, el bono directo podría no reconocerse.", "fa": "اگر قبض به نام صاحبخانه باشد و نه یکی از اعضای خانواده در ISEE، ممکن است بونوس مستقیم اعمال نشود.", "ar": "إذا كانت الفاتورة باسم مالك المنزل وليس باسم أحد أفراد أسرتك في ISEE، فقد لا يتم الاعتراف بالدعم المباشر."},
+              "items": [],
+              "sort_order": 3,
+              "is_active": true,
+              "warning_level": "important"
+            },
+            {
+              "block_type": "warning",
+              "title": {"en": "Verify current rules", "it": "Verifica le regole attuali", "fr": "Vérifiez les règles actuelles", "es": "Verifica las reglas actuales", "fa": "قوانین فعلی را بررسی کن", "ar": "تحقق من القواعد الحالية"},
+              "body": {"en": "Eligibility depends on current rules, ISEE, residence, family status and application windows. Always verify the official page before applying.", "it": "L’idoneità dipende da regole attuali, ISEE, residenza, situazione familiare e finestre di domanda. Verifica sempre la pagina ufficiale prima della domanda.", "fr": "L’éligibilité dépend des règles actuelles, de l’ISEE, de la résidence, de la situation familiale et des périodes de demande. Vérifiez toujours la page officielle avant de demander.", "es": "La elegibilidad depende de las reglas actuales, el ISEE, la residencia, la situación familiar y los plazos de solicitud. Verifica siempre la página oficial antes de solicitar.", "fa": "واجد شرایط بودن به قوانین فعلی، ISEE، محل اقامت، وضعیت خانوادگی و بازه‌های درخواست بستگی دارد. همیشه قبل از اقدام صفحه رسمی را بررسی کن.", "ar": "تعتمد الأهلية على القواعد الحالية وISEE والإقامة والوضع العائلي وفترات التقديم. تحقق دائماً من الصفحة الرسمية قبل التقديم."},
+              "items": [],
+              "sort_order": 4,
+              "is_active": true,
+              "warning_level": "important"
+            }
+          ],
+          "sources": [
+            {"title": "ARERA - Requisiti bonus sociale", "url": "https://www.arera.it/consumatori/bonus-sociale/bonus-sociale-per-disagio-economico/quali-sono-i-requisiti", "source_type": "official", "authority": "ARERA", "last_verified_at": "2026-05-08T00:00:00Z"},
+            {"title": "ARERA - Soglie ISEE 2026 bonus sociali", "url": "https://www.arera.it/comunicati-stampa/dettaglio/bonus-sociali-arera-alza-a-9796-euro-la-soglia-isee-per-laccesso-alle-agevolazioni-per-acqua-luce-gas-e-rifiuti", "source_type": "official", "authority": "ARERA", "last_verified_at": "2026-05-08T00:00:00Z"}
+          ]
+        },
+        {
+          "slug": "bonus-elettrico-disagio-fisico",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Electricity bonus for physical hardship", "it": "Bonus elettrico per disagio fisico", "fr": "Bonus électrique pour difficulté physique", "es": "Bono eléctrico por dificultad física", "fa": "بونوس برق برای نیاز پزشکی", "ar": "دعم الكهرباء للحالات الصحية"},
+          "summary": {"en": "For people using life-saving medical equipment at home. It is different from the ISEE economic bonus.", "it": "Per persone che usano apparecchiature elettromedicali salvavita in casa. È diverso dal bonus economico ISEE.", "fr": "Pour les personnes utilisant à domicile des équipements médicaux vitaux. Il est différent du bonus économique ISEE.", "es": "Para personas que usan equipos médicos vitales en casa. Es distinto del bono económico ISEE.", "fa": "برای افرادی که در خانه از دستگاه‌های پزشکی حیاتی استفاده می‌کنند. با بونوس اقتصادی ISEE فرق دارد.", "ar": "للأشخاص الذين يستخدمون في المنزل أجهزة طبية ضرورية للحياة. يختلف عن الدعم الاقتصادي المرتبط بـ ISEE."},
+          "status": "published",
+          "sort_order": 3,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["disagio fisico", "elettromedicale", "medical equipment", "electricity"],
+          "synonyms": ["macchinario salvavita", "medical device electricity", "bonus elettrico malattia"],
+          "searchable_keywords": ["medical electricity support", "home medical device electricity", "disability electricity bonus"],
+          "metadata": {"status": "active", "application_type": "application_required", "needs_medical_certificate": true, "needs_isee": false, "authority": "Comune / ARERA system"},
+          "blocks": [
+            {
+              "block_type": "documents",
+              "title": {"en": "Typical documents", "it": "Documenti tipici", "fr": "Documents habituels", "es": "Documentos típicos", "fa": "مدارک معمول", "ar": "المستندات المعتادة"},
+              "body": {"en": "Usually requires medical certification, user identity documents and electricity supply data. Verify the exact current form with your Comune or CAF.", "it": "Di solito servono certificazione medica, documenti d’identità e dati della fornitura elettrica. Verifica il modulo aggiornato con Comune o CAF.", "fr": "Il faut généralement un certificat médical, des documents d’identité et les données del contrat d’électricité. Vérifiez le formulaire actuel auprès de la commune ou du CAF.", "es": "Normalmente requiere certificado médico, documentos de identidad y datos del suministro eléctrico. Verifica el formulario actual con el Comune o CAF.", "fa": "معمولاً گواهی پزشکی، مدارک هویتی و اطلاعات قرارداد برق لازم است. فرم دقیق را از Comune یا CAF بررسی کن.", "ar": "عادةً يتطلب شهادة طبية، وثائق هوية وبيانات عقد الكهرباء. تحقق من النموذج الحالي لدى البلدية أو CAF."},
+              "items": ["Medical certificate", "ID", "Codice fiscale", "Electricity supply/POD data"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "slug": "bonus-asilo-nido",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Nursery school bonus", "it": "Bonus asilo nido", "fr": "Aide crèche", "es": "Bono guardería", "fa": "بونوس مهدکودک", "ar": "دعم الحضانة"},
+          "summary": {"en": "INPS contribution for nursery fees or home support for children under 3. The application is managed through INPS.", "it": "Contributo INPS per rette di asilo nido o supporto domiciliare per bambini sotto i 3 anni. La domanda si gestisce tramite INPS.", "fr": "Contribution INPS pour les frais de crèche ou le soutien à domicile pour les enfants de moins de 3 ans. La demande se fait via INPS.", "es": "Contribución INPS para guardería o apoyo en casa para niños menores de 3 años. La solicitud se gestiona por INPS.", "fa": "کمک INPS برای هزینه مهدکودک یا حمایت خانگی برای کودکان زیر ۳ سال. درخواست از طریق INPS انجام می‌شود.", "ar": "مساهمة INPS لرسوم الحضانة أو الدعم المنزلي للأطفال دون 3 سنوات. يتم الطلب عبر INPS."},
+          "status": "published",
+          "sort_order": 4,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["inps", "asilo nido", "children", "family", "isee"],
+          "synonyms": ["nursery", "childcare", "bonus nido", "kindergarten", "bambino"],
+          "searchable_keywords": ["nursery bonus", "childcare support", "nido reimbursement"],
+          "metadata": {"status": "active_2026", "application_type": "inps_application", "needs_isee": true, "needs_spid_cie_cns": true, "authority": "INPS", "document_deadline_rule": "Expense documents usually uploaded by the next-year deadline; verify current INPS instructions."},
+          "blocks": [
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "How to apply", "it": "Come fare domanda", "fr": "Comment demander", "es": "Cómo solicitar", "fa": "چطور درخواست بدهی", "ar": "كيفية التقديم"},
+              "body": {"en": "Apply through INPS online services, Contact Center or patronato. Keep invoices and payment proof for the months requested.", "it": "Fai domanda tramite servizi online INPS, Contact Center o patronato. Conserva fatture e prove di pagamento per i mesi richiesti.", "fr": "Demandez via les services en ligne INPS, le Contact Center ou un patronato. Gardez les factures et preuves de paiement pour les mois demandés.", "es": "Solicita mediante servicios online INPS, Contact Center o patronato. Conserva facturas y comprobantes de pago de los meses solicitados.", "fa": "از طریق خدمات آنلاین INPS، مرکز تماس یا patronato درخواست بده. فاکتورها و رسید پرداخت ماه‌های موردنظر را نگه دار.", "ar": "قدّم عبر خدمات INPS الإلكترونية أو مركز الاتصال أو patronato. احتفظ بالفواتير وإثباتات الدفع للأشهر المطلوبة."},
+              "items": ["SPID/CIE/CNS", "Child data", "ISEE", "Invoices", "Payment proof", "IBAN"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "INPS - Bonus asilo nido", "url": "https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2026.03.bonus-asilo-nido-2026-attivo-il-servizio-per-la-domanda.html", "source_type": "official", "authority": "INPS"}
+          ]
+        },
+        {
+          "slug": "bonus-nuovi-nati",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Newborn bonus", "it": "Bonus nuovi nati", "fr": "Prime nouveaux-nés", "es": "Bono recién nacidos", "fa": "بونوس نوزادان", "ar": "دعم المواليد الجدد"},
+          "summary": {"en": "A one-time benefit for children born, adopted or in pre-adoptive foster care in the current year, subject to INPS rules and ISEE limits.", "it": "Contributo una tantum per figli nati, adottati o in affido preadottivo nell’anno corrente, secondo regole INPS e limiti ISEE.", "fr": "Aide unique pour les enfants nés, adoptés ou placés en vue d’adoption dans l’année, selon les règles INPS et les limites ISEE.", "es": "Ayuda única para hijos nacidos, adoptados o en acogimiento preadoptivo durante el año, según reglas INPS y límites ISEE.", "fa": "کمک یک‌باره برای فرزند متولدشده، فرزندخوانده یا در سرپرستی پیش از فرزندخواندگی در سال جاری، طبق قوانین INPS و محدودیت ISEE.", "ar": "مساعدة لمرة واحدة للأطفال المولودين أو المتبنين أو في رعاية ما قبل التبني خلال السنة، وفق قواعد INPS وحدود ISEE."},
+          "status": "published",
+          "sort_order": 5,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["inps", "newborn", "family", "children", "isee"],
+          "synonyms": ["baby bonus", "birth bonus", "bonus nascita", "figlio nato"],
+          "searchable_keywords": ["newborn support", "birth benefit", "baby payment"],
+          "metadata": {"status": "active_2026_verify", "amount_recent": 1000, "deadline_rule_recent": "120 days from birth/adoption/pre-adoptive foster placement", "isee_threshold_recent": 40000, "application_type": "inps_application"},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Deadline matters", "it": "Attenzione alla scadenza", "fr": "Attention au délai", "es": "Atención al plazo", "fa": "مهلت مهم است", "ar": "الموعد النهائي مهم"},
+              "body": {"en": "This type of benefit usually has a strict deadline from the child’s birth, adoption or placement date. Verify the current INPS deadline before applying.", "it": "Questo tipo di contributo di solito ha una scadenza rigida dalla nascita, adozione o affido. Verifica la scadenza INPS aggiornata prima della domanda.", "fr": "Ce type d’aide a généralement un délai strict à partir de la naissance, de l’adoption ou du placement. Vérifiez le délai INPS actuel avant de demander.", "es": "Este tipo de ayuda suele tener un plazo estricto desde el nacimiento, adopción o acogimiento. Verifica el plazo INPS actualizado antes de solicitar.", "fa": "این نوع کمک معمولاً از تاریخ تولد، فرزندخواندگی یا سرپرستی مهلت سخت‌گیرانه دارد. قبل از درخواست، مهلت فعلی INPS را بررسی کن.", "ar": "هذا النوع من الدعم عادةً له موعد نهائي صارم من تاريخ الولادة أو التبني أو الرعاية. تحقق من موعد INPS الحالي قبل التقديم."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true,
+              "warning_level": "important"
+            }
+          ],
+          "sources": [
+            {"title": "INPS - Bonus nuovi nati 2026", "url": "https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2026.04.bonus-nuovi-nati-2026-al-via-le-domande.html", "source_type": "official", "authority": "INPS"}
+          ]
+        },
+        {
+          "slug": "assegno-unico-universale",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Universal child allowance", "it": "Assegno unico universale", "fr": "Allocation unique universelle", "es": "Asignación única universal", "fa": "کمک‌هزینه فرزند", "ar": "الإعانة الموحدة للأطفال"},
+          "summary": {"en": "Monthly INPS support for dependent children, with amount linked to ISEE and family conditions.", "it": "Sostegno mensile INPS per figli a carico, con importo legato a ISEE e condizioni familiari.", "fr": "Soutien mensuel INPS pour les enfants à charge, avec montant lié à l’ISEE et à la situation familiale.", "es": "Apoyo mensual INPS para hijos a cargo, con importe vinculado al ISEE y a la situación familiar.", "fa": "کمک ماهانه INPS برای فرزندان تحت تکفل، با مبلغ وابسته به ISEE و شرایط خانوادگی.", "ar": "دعم شهري من INPS للأطفال المعالين، وقيمته مرتبطة بـ ISEE ووضع الأسرة."},
+          "status": "published",
+          "sort_order": 6,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["inps", "children", "family", "assegno unico", "isee"],
+          "synonyms": ["child allowance", "family allowance", "figli a carico", "assegno figli"],
+          "searchable_keywords": ["child payment", "monthly family benefit", "assegno unico"],
+          "metadata": {"status": "active", "application_type": "inps_application_or_continuation", "needs_isee": "recommended_for_correct_amount", "authority": "INPS"},
+          "blocks": [
+            {
+              "block_type": "intro",
+              "title": {"en": "Useful for families", "it": "Utile per famiglie", "fr": "Utile pour les familles", "es": "Útil para familias", "fa": "مفید برای خانواده‌ها", "ar": "مفيد للعائلات"},
+              "body": {"en": "Families may receive a minimum amount even without ISEE, but ISEE is normally needed to calculate the correct amount.", "it": "Le famiglie possono ricevere un importo minimo anche senza ISEE, ma l’ISEE serve normalmente per calcolare l’importo corretto.", "fr": "Les familles peuvent recevoir un montant minimum même sans ISEE, mais l’ISEE est normalement nécessaire pour calculer le bon montant.", "es": "Las familias pueden recibir un importe mínimo incluso sin ISEE, pero el ISEE normalmente sirve para calcular el importe correcto.", "fa": "خانواده‌ها ممکن است حتی بدون ISEE مبلغ حداقلی بگیرند، اما معمولاً برای محاسبه مبلغ درست به ISEE نیاز است.", "ar": "قد تحصل الأسر على مبلغ أدنى حتى بدون ISEE، لكن ISEE عادةً ضروري لحساب المبلغ الصحيح."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "slug": "bonus-psicologo",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Psychologist bonus", "it": "Bonus psicologo", "fr": "Bonus psychologue", "es": "Bono psicólogo", "fa": "بونوس روان‌شناس", "ar": "دعم العلاج النفسي"},
+          "summary": {"en": "Contribution for psychotherapy sessions. It usually opens in application windows and depends on ISEE ranking.", "it": "Contributo per sedute di psicoterapia. Di solito apre in finestre di domanda e dipende da graduatoria ISEE.", "fr": "Contribution pour des séances de psychothérapie. Elle ouvre généralement par périodes de demande et dépend du classement ISEE.", "es": "Contribución para sesiones de psicoterapia. Suele abrirse por ventanas de solicitud y depende del ranking ISEE.", "fa": "کمک برای جلسات روان‌درمانی. معمولاً در بازه‌های مشخص باز می‌شود و به رتبه‌بندی ISEE بستگی دارد.", "ar": "مساهمة لجلسات العلاج النفسي. عادةً تفتح في فترات تقديم محددة وتعتمد على ترتيب ISEE."},
+          "status": "published",
+          "sort_order": 7,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["inps", "psychologist", "mental health", "isee", "bonus psicologo"],
+          "synonyms": ["therapy bonus", "psicoterapia", "psicologo", "mental health support"],
+          "searchable_keywords": ["therapy sessions support", "psychotherapy reimbursement", "mental health voucher"],
+          "metadata": {"status": "seasonal_monitor", "application_type": "inps_application_window", "needs_isee": true, "isee_threshold_recent": 50000, "authority": "INPS", "warning": "Application windows change. Verify current year dates before showing as open."},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Check if the window is open", "it": "Controlla se la finestra è aperta", "fr": "Vérifiez si la période est ouverte", "es": "Comprueba si el plazo está abierto", "fa": "بررسی کن بازه درخواست باز است یا نه", "ar": "تحقق مما إذا كانت فترة التقديم مفتوحة"},
+              "body": {"en": "This bonus is usually not available all year. The app should show it as monitor/seasonal unless INPS has an open window.", "it": "Questo bonus di solito non è disponibile tutto l’anno. L’app deve mostrarlo come monitor/stagionale se INPS non ha una finestra aperta.", "fr": "Ce bonus n’est généralement pas disponible toute l’année. L’app doit l’indiquer comme à surveiller/saisonnier sauf si INPS a ouvert les demandes.", "es": "Este bono normalmente no está disponible todo el año. La app debe mostrarlo como seguimiento/estacional salvo que INPS tenga una ventana abierta.", "fa": "این بونوس معمولاً تمام سال در دسترس نیست. اگر INPS بازه فعال اعلام نکرده، اپ باید آن را در حالت پیگیری/فصلی نشان دهد.", "ar": "هذا الدعم عادةً ليس متاحاً طوال السنة. يجب أن يعرضه التطبيق كمتابعة/موسمي ما لم تفتح INPS فترة التقديم."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true,
+              "warning_level": "important"
+            }
+          ]
+        },
+        {
+          "slug": "carta-dedicata-a-te",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Carta Dedicata a te", "it": "Carta Dedicata a te", "fr": "Carte Dedicata a te", "es": "Tarjeta Dedicata a te", "fa": "کارت Dedicata a te", "ar": "بطاقة Dedicata a te"},
+          "summary": {"en": "A yearly card usually assigned through INPS and municipalities. Citizens normally do not submit a direct application.", "it": "Carta annuale normalmente assegnata tramite INPS e Comuni. Di solito il cittadino non presenta domanda diretta.", "fr": "Carte annuelle généralement attribuée via INPS et les communes. Le citoyen ne dépose normalement pas de demande directe.", "es": "Tarjeta anual normalmente asignada por INPS y municipios. Normalmente el ciudadano no presenta solicitud directa.", "fa": "کارتی سالانه که معمولاً از طریق INPS و Comune اختصاص داده می‌شود. معمولاً شهروند درخواست مستقیم نمی‌دهد.", "ar": "بطاقة سنوية تُمنح عادةً عبر INPS والبلديات. عادةً لا يقدم المواطن طلباً مباشراً."},
+          "status": "published",
+          "sort_order": 8,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["inps", "comune", "food card", "postepay", "low income"],
+          "synonyms": ["social card", "carta spesa", "carta alimentare", "postepay bonus"],
+          "searchable_keywords": ["food support card", "municipality card support", "shopping card italy"],
+          "metadata": {"status": "yearly_list_based", "application_type": "no_direct_application_usually", "authority": "INPS / Comune / Poste Italiane", "warning": "Usually assigned by beneficiary lists. Check Comune communication."},
+          "blocks": [
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "How it usually works", "it": "Come funziona di solito", "fr": "Comment cela fonctionne généralement", "es": "Cómo funciona normalmente", "fa": "معمولاً چطور کار می‌کند", "ar": "كيف يعمل عادةً"},
+              "body": {"en": "Check your Comune’s communications and beneficiary lists. If assigned, follow the Comune/Poste instructions for pickup or activation.", "it": "Controlla comunicazioni e liste beneficiari del tuo Comune. Se sei assegnatario, segui le istruzioni di Comune/Poste per ritiro o attivazione.", "fr": "Vérifiez les communications et listes de bénéficiaires de votre commune. Si la carte vous est attribuée, suivez les instructions de la commune/Poste.", "es": "Consulta comunicaciones y listas de beneficiarios de tu municipio. Si eres beneficiario, sigue las instrucciones del Comune/Poste.", "fa": "اطلاعیه‌ها و فهرست‌های Comune خودت را بررسی کن. اگر کارت به تو اختصاص داده شد، دستورالعمل Comune/Poste را دنبال کن.", "ar": "تحقق من إعلانات وقوائم المستفيدين في بلديتك. إذا تم اختيارك، اتبع تعليمات البلدية/Poste للاستلام أو التفعيل."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "slug": "bonus-mamme",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Working mothers bonus", "it": "Bonus mamme", "fr": "Aide pour mères travailleuses", "es": "Bono madres trabajadoras", "fa": "بونوس مادران شاغل", "ar": "دعم الأمهات العاملات"},
+          "summary": {"en": "Support for working mothers. Rules changed between years, so it must always be verified with current INPS instructions.", "it": "Sostegno per madri lavoratrici. Le regole sono cambiate negli anni, quindi va sempre verificato con le istruzioni INPS aggiornate.", "fr": "Soutien pour les mères travailleuses. Les règles ont changé selon les années, donc il faut toujours vérifier les instructions INPS actuelles.", "es": "Apoyo para madres trabajadoras. Las reglas han cambiado según el año, así que hay que verificar siempre las instrucciones INPS actuales.", "fa": "کمک برای مادران شاغل. قوانین در سال‌های مختلف تغییر کرده‌اند، پس باید همیشه دستورالعمل فعلی INPS بررسی شود.", "ar": "دعم للأمهات العاملات. تغيرت القواعد بين السنوات، لذلك يجب دائماً التحقق من تعليمات INPS الحالية."},
+          "status": "published",
+          "sort_order": 9,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["mothers", "working mothers", "inps", "children"],
+          "synonyms": ["madri lavoratrici", "bonus madre", "working mother support"],
+          "searchable_keywords": ["mothers support", "working mother inps", "children mother bonus"],
+          "metadata": {"status": "verify_current_year", "application_type": "inps_or_employer_depending_case", "target": "working_mothers"},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Yearly rules change", "it": "Regole variabili per anno", "fr": "Règles variables selon l’année", "es": "Reglas variables por año", "fa": "قوانین سالانه تغییر می‌کنند", "ar": "القواعد تتغير حسب السنة"},
+              "body": {"en": "Do not present this as always open. Verify the current INPS circular/service before publishing final instructions.", "it": "Non mostrarlo come sempre aperto. Verifica circolare/servizio INPS aggiornato prima di pubblicare istruzioni definitive.", "fr": "Ne l’affichez pas comme toujours ouvert. Vérifiez la circulaire/le service INPS actuel avant de publier des instructions définitives.", "es": "No lo muestres como siempre abierto. Verifica la circular/servicio INPS actual antes de publicar instrucciones definitivas.", "fa": "آن را به عنوان همیشه فعال نشان نده. قبل از انتشار راهنمای قطعی، بخشنامه/سرویس فعلی INPS را بررسی کن.", "ar": "لا تعرضه كمتاح دائماً. تحقق من تعميم/خدمة INPS الحالية قبل نشر تعليمات نهائية."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true,
+              "warning_level": "important"
+            }
+          ]
+        },
+        {
+          "slug": "voucher-scuola-piemonte",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Piemonte school voucher", "it": "Voucher scuola Piemonte", "fr": "Chèque école Piémont", "es": "Voucher escuela Piemonte", "fa": "ووچر مدرسه Piemonte", "ar": "قسيمة المدرسة في بييمونتي"},
+          "summary": {"en": "Regional support for school students in Piemonte. It is not for university students.", "it": "Sostegno regionale per studenti della scuola in Piemonte. Non è per studenti universitari.", "fr": "Aide régionale pour les élèves en Piémont. Elle ne concerne pas les étudiants universitaires.", "es": "Ayuda regional para estudiantes escolares en Piemonte. No es para estudiantes universitarios.", "fa": "کمک منطقه‌ای برای دانش‌آموزان مدرسه در Piemonte. برای دانشجویان دانشگاه نیست.", "ar": "دعم إقليمي لطلاب المدارس في بييمونتي. ليس مخصصاً لطلاب الجامعات."},
+          "status": "published",
+          "sort_order": 10,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["piemonte", "school", "voucher", "isee", "education"],
+          "synonyms": ["voucher libri", "school books", "trasporto scuola", "materiale didattico"],
+          "searchable_keywords": ["school voucher piemonte", "books support piemonte", "education grant piemonte"],
+          "metadata": {"status": "seasonal_2026_2027", "region": "Piemonte", "target": "school_students_not_university", "isee_threshold_recent": 26000, "application_window": "Usually yearly call; verify exact dates."},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Not for university", "it": "Non per l’università", "fr": "Pas pour l’université", "es": "No es para universidad", "fa": "برای دانشگاه نیست", "ar": "ليس للجامعة"},
+              "body": {"en": "University students in Piemonte should usually check EDISU benefits instead.", "it": "Gli studenti universitari in Piemonte devono normalmente controllare le agevolazioni EDISU.", "fr": "Les étudiants universitaires au Piémont doivent généralement vérifier les aides EDISU.", "es": "Los estudiantes universitarios en Piemonte normalmente deben consultar las ayudas EDISU.", "fa": "دانشجویان دانشگاه در Piemonte معمولاً باید کمک‌های EDISU را بررسی کنند.", "ar": "طلاب الجامعات في بييمونتي يجب أن يتحققوا عادةً من مساعدات EDISU."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Regione Piemonte - Voucher scuola", "url": "https://www.regione.piemonte.it/web/temi/istruzione-formazione-lavoro/istruzione/voucher-scuola/voucher-scuola-2026-2027", "source_type": "official", "authority": "Regione Piemonte"}
+          ]
+        },
+        {
+          "slug": "rent-support-piemonte",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Rent support in Piemonte", "it": "Sostegno affitto Piemonte", "fr": "Aide au loyer Piémont", "es": "Ayuda de alquiler Piemonte", "fa": "کمک اجاره در Piemonte", "ar": "دعم الإيجار في بييمونتي"},
+          "summary": {"en": "Regional/local support for tenants in difficulty. Usually depends on Comune, open calls and specific conditions.", "it": "Sostegno regionale/locale per inquilini in difficoltà. Di solito dipende da Comune, bandi aperti e condizioni specifiche.", "fr": "Aide régionale/locale pour les locataires en difficulté. Elle dépend généralement de la commune, des appels ouverts et des conditions spécifiques.", "es": "Ayuda regional/local para inquilinos en dificultad. Normalmente depende del municipio, convocatorias abiertas y condiciones específicas.", "fa": "کمک منطقه‌ای/محلی برای مستأجران در مشکل. معمولاً به Comune، فراخوان‌های باز و شرایط خاص بستگی دارد.", "ar": "دعم إقليمي/محلي للمستأجرين في صعوبة. يعتمد عادةً على البلدية والدعوات المفتوحة والشروط المحددة."},
+          "status": "published",
+          "sort_order": 11,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["affitto", "rent", "piemonte", "morosità", "tenant"],
+          "synonyms": ["aiuto affitto", "rent arrears", "deposit support", "morosità incolpevole"],
+          "searchable_keywords": ["rent help piemonte", "tenant support piemonte", "housing grant piemonte"],
+          "metadata": {"status": "local_or_bando_based", "region": "Piemonte", "target": "tenants", "application_type": "comune_region_procedure", "cross_category": ["home-rent", "bonuses-benefits"]},
+          "blocks": [
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "Where to check", "it": "Dove controllare", "fr": "Où vérifier", "es": "Dónde comprobar", "fa": "کجا بررسی کنی", "ar": "أين تتحقق"},
+              "body": {"en": "Check Regione Piemonte and your Comune. In Torino, verify current Comune housing notices before applying.", "it": "Controlla Regione Piemonte e il tuo Comune. A Torino, verifica gli avvisi casa aggiornati del Comune prima di muoverti.", "fr": "Vérifiez la Région Piémont et votre commune. À Turin, vérifiez les avis logement actuels de la commune avant d’agir.", "es": "Consulta Regione Piemonte y tu Comune. En Turín, verifica los avisos actuales de vivienda del Comune antes de actuar.", "fa": "Regione Piemonte و Comune خودت را بررسی کن. در تورین، قبل از اقدام اطلاعیه‌های مسکن Comune را بررسی کن.", "ar": "تحقق من Regione Piemonte وبلديتك. في تورينو، تحقق من إعلانات السكن الحالية في البلدية قبل التقديم."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Regione Piemonte - Sostegno al pagamento canoni d'affitto", "url": "https://www.regione.piemonte.it/web/temi/diritti-politiche-sociali/casa/sostegno-al-pagamento-canoni-daffitto", "source_type": "official", "authority": "Regione Piemonte"}
+          ]
+        },
+        {
+          "slug": "home-tax-deductions",
+          "category_slug": "bonuses-benefits",
+          "title": {"en": "Home and tax deductions", "it": "Bonus casa e detrazioni fiscali", "fr": "Aides logement et déductions fiscales", "es": "Bonos vivienda y deducciones fiscales", "fa": "بونوس خانه و کسر مالیاتی", "ar": "مكافآت المنزل والخصومات الضريبية"},
+          "summary": {"en": "Renovation, furniture, energy and accessibility incentives are usually tax deductions, not immediate cash.", "it": "Agevolazioni per ristrutturazioni, mobili, energia e accessibilità sono di solito detrazioni fiscali, non soldi immediati.", "fr": "Les aides pour rénovation, meubles, énergie et accessibilité sont généralement des déductions fiscales, pas de l’argent immédiat.", "es": "Las ayudas por reformas, muebles, energía y accesibilidad suelen ser deducciones fiscales, no dinero inmediato.", "fa": "کمک‌های مربوط به بازسازی، مبلمان، انرژی و دسترسی معمولاً کسر مالیاتی هستند، نه پول نقد فوری.", "ar": "حوافز الترميم والأثاث والطاقة وإتاحة الوصول تكون عادةً خصومات ضريبية، وليست أموالاً فورية."},
+          "status": "published",
+          "sort_order": 12,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["agenzia entrate", "tax deduction", "home", "renovation", "mobili", "ecobonus"],
+          "synonyms": ["bonus mobili", "ristrutturazione", "ecobonus", "detrazione", "730"],
+          "searchable_keywords": ["tax deduction home", "renovation bonus", "home furniture deduction", "ecobonus home"],
+          "metadata": {"status": "tax_deduction_verify_year", "application_type": "tax_return", "authority": "Agenzia Entrate / ENEA where applicable", "warning": "Not immediate cash. Depends on invoices, payment method, tax return and current rules."},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Not free money", "it": "Non sono soldi immediati", "fr": "Ce n’est pas de l’argent immédiat", "es": "No es dinero inmediato", "fa": "پول فوری نیست", "ar": "ليس مالاً فورياً"},
+              "body": {"en": "These benefits usually reduce taxes through a tax return. Keep invoices, payment proof and check whether a special payment method is required.", "it": "Queste agevolazioni di solito riducono le tasse tramite dichiarazione. Conserva fatture, pagamenti e verifica se serve un bonifico specifico.", "fr": "Ces aides réduisent généralement les impôts via la déclaration. Gardez les factures, preuves de paiement et vérifiez si un virement spécifique est requis.", "es": "Estas ayudas normalmente reducen impuestos mediante la declaración. Guarda facturas, pagos y verifica si se requiere una transferencia específica.", "fa": "این مزایا معمولاً از طریق اظهارنامه مالیاتی مالیات را کم می‌کنند. فاکتور، رسید پرداخت و روش پرداخت لازم را بررسی و نگه دار.", "ar": "هذه المزايا عادةً تخفض الضرائب عبر الإقرار الضريبي. احتفظ بالفواتير وإثباتات الدفع وتحقق من طريقة الدفع المطلوبة."},
+              "items": ["Invoices", "Payment proof", "Tax return", "Agenzia Entrate guidance"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "loans-credit",
+      "title": {
+        "en": "Loans & Credit",
+        "it": "Prestiti e credito",
+        "fr": "Prêts et crédit",
+        "es": "Préstamos y crédito",
+        "fa": "وام‌ها و اعتبار",
+        "ar": "القروض والائتمان"
+      },
+      "subtitle": {
+        "en": "Compare student loans, public guarantees and safer credit options before signing anything.",
+        "it": "Confronta prestiti per studenti, garanzie pubbliche e opzioni di credito più sicure prima di firmare.",
+        "fr": "Comparez les prêts étudiants, garanties publiques et options de crédit plus sûres avant de signer.",
+        "es": "Compara préstamos para estudiantes, garantías públicas y opciones de crédito más seguras antes de firmar.",
+        "fa": "قبل از امضا، وام‌های دانشجویی، ضمانت‌های دولتی و گزینه‌های امن‌تر اعتبار را مقایسه کن.",
+        "ar": "قارن قروض الطلاب والضمانات العامة وخيارات الائتمان الأكثر أماناً قبل التوقيع."
+      },
+      "description": {
+        "en": "Guidance for student loans, first-home mortgage guarantees, mortgage suspension and rent/deposit support. Loans are credit products, not bonuses.",
+        "it": "Guida a prestiti per studenti, garanzie mutuo prima casa, sospensione mutuo e sostegni affitto/cauzione. I prestiti sono prodotti di credito, non bonus.",
+        "fr": "Guide des prêts étudiants, garanties de prêt immobilier première maison, suspension de prêt et aides loyer/caution. Les prêts sont des produits de crédit, pas des aides gratuites.",
+        "es": "Guía para préstamos estudiantiles, garantías de hipoteca primera vivienda, suspensión de hipoteca y ayudas de alquiler/fianza. Los préstamos son crédito, no bonos.",
+        "fa": "راهنمای وام دانشجویی، ضمانت وام خانه اول، تعلیق قسط و کمک اجاره/ودیعه. وام محصول اعتباری است، نه بونوس.",
+        "ar": "دليل لقروض الطلاب، ضمانات قرض المنزل الأول، تعليق القرض ودعم الإيجار/الوديعة. القروض منتجات ائتمانية وليست مكافآت."
+      },
+      "icon": "credit-card",
+      "color": "#6366F1",
+      "sort_order": 11,
+      "is_active": true,
+      "is_premium": true,
+      "verification_status": "needsReview",
+      "tags": ["loan", "prestito", "credito", "student loan", "mutuo", "consap", "bank"],
+      "synonyms": ["loan", "loans", "prestito", "prestiti", "credito", "student loan", "prestito studenti", "prestito onore", "per merito", "mutuo", "mortgage", "garanzia", "consap", "banca"],
+      "searchable_keywords": ["student loan", "credit comparison", "mortgage guarantee", "consap fund", "deposit support"],
+      "metadata": {
+        "time_sensitive": true,
+        "legal_warning": "This is credit, not free money. Compare TAEG, total cost, repayment duration, guarantees and late-payment consequences before signing.",
+        "badges": ["credit product", "student loan", "guarantee", "bank approval", "compare TAEG", "verify conditions"]
+      },
+      "procedures": [
+        {
+          "slug": "loan-comparison",
+          "category_slug": "loans-credit",
+          "title": {"en": "Loan comparison", "it": "Confronto prestiti", "fr": "Comparaison de prêts", "es": "Comparación de préstamos", "fa": "مقایسه وام‌ها", "ar": "مقارنة القروض"},
+          "summary": {"en": "Compare amount, interest, grace period, guarantee, repayment length and risk before choosing.", "it": "Confronta importo, interessi, periodo ponte, garanzie, durata rimborso e rischi prima di scegliere.", "fr": "Comparez montant, intérêts, période de grâce, garantie, durée de remboursement et risques avant de choisir.", "es": "Compara importe, intereses, periodo de gracia, garantía, plazo de devolución y riesgos antes de elegir.", "fa": "قبل از انتخاب، مبلغ، بهره، دوره تنفس، ضمانت، مدت بازپرداخت و ریسک را مقایسه کن.", "ar": "قارن المبلغ والفائدة وفترة السماح والضمان ومدة السداد والمخاطر قبل الاختيار."},
+          "status": "published",
+          "sort_order": 1,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["comparison", "taeg", "tan", "risk", "loan"],
+          "synonyms": ["compare loans", "best student loan", "prestito migliore", "TAEG", "TAN"],
+          "searchable_keywords": ["loan comparison", "compare credit offers", "taeg tan meaning"],
+          "metadata": {"status": "active", "application_type": "comparison_tool", "warning": "Do not rank as best without verifying current terms and user profile."},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Loans are not bonuses", "it": "I prestiti non sono bonus", "fr": "Les prêts ne sont pas des aides gratuites", "es": "Los préstamos no son bonos", "fa": "وام بونوس نیست", "ar": "القروض ليست مكافآت"},
+              "body": {"en": "This is credit, not free money. Compare TAEG, total cost, repayment duration, guarantees and late-payment consequences before signing.", "it": "Questo è credito, non denaro gratuito. Confronta TAEG, costo totale, durata del rimborso, garanzie e conseguenze dei ritardi prima di firmare.", "fr": "Il s’agit de crédit, pas d’argent gratuit. Comparez TAEG, coût total, durée de remboursement, garanties et conséquences des retards avant de signer.", "es": "Esto es crédito, no dinero gratis. Compara TAEG, coste total, duración del reembolso, garantías y consecuencias por retrasos antes de firmar.", "fa": "این اعتبار است، نه پول رایگان. قبل از امضا TAEG، هزینه کل، مدت بازپرداخت، ضمانت‌ها و پیامدهای دیرکرد را مقایسه کن.", "ar": "هذا ائتمان وليس مالاً مجانياً. قارن TAEG والتكلفة الإجمالية ومدة السداد والضمانات وعواقب التأخير قبل التوقيع."},
+              "items": ["TAN", "TAEG", "Total cost", "Grace period", "Guarantee", "Repayment length", "Default risk"],
+              "sort_order": 1,
+              "is_active": true,
+              "warning_level": "important"
+            }
+          ]
+        },
+        {
+          "slug": "intesa-per-merito",
+          "category_slug": "loans-credit",
+          "title": {"en": "Intesa Sanpaolo per Merito", "it": "Intesa Sanpaolo per Merito", "fr": "Intesa Sanpaolo per Merito", "es": "Intesa Sanpaolo per Merito", "fa": "وام دانشجویی per Merito اینتزا سان‌پائولو", "ar": "قرض Intesa Sanpaolo per Merito"},
+          "summary": {"en": "Student credit product for university, master and post-diploma studies. Intesa states no personal or parental patrimonial guarantees are needed and repayment can start up to 2 years after studies.", "it": "Prodotto di credito per università, master e corsi post diploma. Intesa indica che non servono garanzie patrimoniali personali o dei genitori e il rimborso può iniziare fino a 2 anni dopo gli studi.", "fr": "Produit de crédit étudiant pour université, master et formations post-diplôme. Intesa indique qu’aucune garantie patrimoniale personnelle ou parentale n’est requise et que le remboursement peut commencer jusqu’à 2 ans après les études.", "es": "Producto de crédito para universidad, máster y cursos post-diploma. Intesa indica que no se requieren garantías patrimoniales personales ni de los padres y que la devolución puede empezar hasta 2 años después de los estudios.", "fa": "محصول اعتباری دانشجویی برای دانشگاه، مستر و دوره‌های بعد از دیپلم. اینتزا اعلام کرده ضمانت مالی شخصی یا والدین لازم نیست و بازپرداخت می‌تواند تا ۲ سال بعد از تحصیل شروع شود.", "ar": "منتج ائتماني للطلاب للجامعة والماجستير والدورات بعد الدبلوم. تذكر Intesa أنه لا يلزم ضمان مالي شخصي أو من الوالدين، ويمكن أن يبدأ السداد حتى سنتين بعد الدراسة."},
+          "status": "published",
+          "sort_order": 2,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "verified",
+          "last_verified_at": "2026-05-08T00:00:00Z",
+          "tags": ["intesa", "per merito", "student loan", "prestito studenti", "university"],
+          "synonyms": ["per merito", "intesa student loan", "prestito onore intesa", "loan without parents guarantee"],
+          "searchable_keywords": ["student loan intesa", "intesa per merito", "loan for university without guarantee"],
+          "metadata": {"provider": "Intesa Sanpaolo", "product_type": "student_loan", "max_amount_recent": 75000, "grace_period_months": 24, "guarantee_required": false, "example_tan_credit_2026": "2.50%", "example_taeg_credit_2026": "2.50%", "example_tan_personal_loan_2026": "3.10%", "example_taeg_personal_loan_2026": "3.14%", "application_channel": "online platform then branch", "warning": "Credit product. Final approval is by the bank."},
+          "blocks": [
+            {
+              "block_type": "what_is_it",
+              "title": {"en": "What it is", "it": "Che cos’è", "fr": "Qu’est-ce que c’est", "es": "Qué es", "fa": "چیست", "ar": "ما هو"},
+              "body": {"en": "A student credit product that can cover university, master, post-diploma paths, rent and study material. Final approval remains with the bank.", "it": "Un prodotto di credito per studenti che può coprire università, master, percorsi post diploma, affitto e materiale didattico. L’approvazione finale resta alla banca.", "fr": "Un produit de crédit étudiant pouvant couvrir université, master, formations post-diplôme, loyer et matériel d’étude. L’approbation finale dépend de la banque.", "es": "Un producto de crédito estudiantil que puede cubrir universidad, máster, formación post-diploma, alquiler y material de estudio. La aprobación final depende del banco.", "fa": "یک محصول اعتباری دانشجویی که می‌تواند دانشگاه، مستر، دوره بعد از دیپلم، اجاره و وسایل آموزشی را پوشش دهد. تأیید نهایی با بانک است.", "ar": "منتج ائتماني للطلاب يمكن أن يغطي الجامعة والماجستير والدورات بعد الدبلوم والإيجار والمواد الدراسية. الموافقة النهائية للبنك."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            },
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "How to request it", "it": "Come richiederlo", "fr": "Comment le demander", "es": "Cómo solicitarlo", "fa": "چطور درخواست بدهی", "ar": "كيفية طلبه"},
+              "body": {"en": "Register on the dedicated platform, upload the requested documents, wait for the access requirement check, then go to branch if the result is positive.", "it": "Registrati sulla piattaforma dedicata, carica i documenti richiesti, attendi la verifica dei requisiti e poi vai in filiale se l’esito è positivo.", "fr": "Inscrivez-vous sur la plateforme dédiée, téléversez les documents demandés, attendez la vérification des conditions puis allez en agence si le résultat est positif.", "es": "Regístrate en la plataforma dedicada, sube los documentos requeridos, espera la verificación de requisitos y luego ve a la sucursal si el resultado es positivo.", "fa": "در پلتفرم مخصوص ثبت‌نام کن، مدارک خواسته‌شده را بارگذاری کن، منتظر بررسی شرایط بمان و اگر نتیجه مثبت بود به شعبه برو.", "ar": "سجّل في المنصة المخصصة، ارفع المستندات المطلوبة، انتظر التحقق من الشروط ثم اذهب إلى الفرع إذا كانت النتيجة إيجابية."},
+              "items": ["Identity document", "Codice fiscale", "Study path documents", "Bank questionnaire"],
+              "sort_order": 2,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Intesa Sanpaolo - per Merito", "url": "https://www.intesasanpaolo.com/it/persone-e-famiglie/prodotti/prestiti/prestito-onore-per-merito.html", "source_type": "official_provider", "authority": "Intesa Sanpaolo", "last_verified_at": "2026-05-08T00:00:00Z"}
+          ]
+        },
+        {
+          "slug": "consap-fondo-studio",
+          "category_slug": "loans-credit",
+          "title": {"en": "Consap Fondo Studio", "it": "Consap Fondo Studio", "fr": "Consap Fondo Studio", "es": "Consap Fondo Studio", "fa": "Fondo Studio کنساپ", "ar": "صندوق الدراسة Consap"},
+          "summary": {"en": "State-backed student credit guarantee for young students. Consap checks fund requirements; the bank evaluates credit and grants financing.", "it": "Garanzia pubblica per credito agli studenti giovani. Consap verifica i requisiti del Fondo; la banca valuta il merito creditizio ed eroga il finanziamento.", "fr": "Garantie publique pour le crédit aux jeunes étudiants. Consap vérifie les conditions du Fonds; la banque évalue le crédit et accorde le financement.", "es": "Garantía pública para crédito a estudiantes jóvenes. Consap verifica los requisitos del Fondo; el banco evalúa el crédito y concede la financiación.", "fa": "ضمانت دولتی برای اعتبار دانشجویی جوانان. Consap شرایط صندوق را بررسی می‌کند؛ بانک اعتبارسنجی و پرداخت وام را انجام می‌دهد.", "ar": "ضمان عام لائتمان الطلاب الشباب. تتحقق Consap من شروط الصندوق؛ ويقيّم البنك الجدارة الائتمانية ويمنح التمويل."},
+          "status": "published",
+          "sort_order": 3,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "verified",
+          "last_verified_at": "2026-05-08T00:00:00Z",
+          "tags": ["consap", "fondo studio", "student loan", "state guarantee", "18-40"],
+          "synonyms": ["fondo credito giovani", "state student loan", "prestito garantito studenti", "myconsap"],
+          "searchable_keywords": ["consap student loan", "myconsap study fund", "state guarantee student credit"],
+          "metadata": {"provider": "Consap + participating banks", "product_type": "state_guaranteed_student_credit", "age_min": 18, "age_max": 40, "max_amount_italy_recent": 50000, "max_amount_abroad_recent": 70000, "annual_tranche_max_recent": 15000, "repayment_start_rule": "Not before 30 months after last tranche", "state_guarantee_percent_recent": 70, "application_channel": "MyConsap then participating bank", "warning": "The bank still evaluates creditworthiness."},
+          "blocks": [
+            {
+              "block_type": "eligibility",
+              "title": {"en": "Who it is for", "it": "A chi è rivolto", "fr": "À qui s’adresse-t-il", "es": "A quién va dirigido", "fa": "برای چه کسانی است", "ar": "لمن هو مخصص"},
+              "body": {"en": "For students aged 18 to 40 in eligible study paths, with merit requirements depending on the course. Check MyConsap for current criteria.", "it": "Per studenti tra 18 e 40 anni in percorsi di studio ammessi, con requisiti di merito variabili per corso. Controlla MyConsap per i criteri aggiornati.", "fr": "Pour les étudiants de 18 à 40 ans dans des parcours admissibles, avec des critères de mérite selon le cursus. Vérifiez MyConsap pour les critères actuels.", "es": "Para estudiantes de 18 a 40 años en estudios admitidos, con requisitos de mérito según el curso. Consulta MyConsap para criterios actuales.", "fa": "برای دانشجویان ۱۸ تا ۴۰ سال در مسیرهای تحصیلی مجاز، با شرایط شایستگی وابسته به دوره. معیارهای فعلی را در MyConsap بررسی کن.", "ar": "للطلاب بين 18 و40 عاماً في مسارات دراسية مؤهلة، مع شروط جدارة حسب المسار. تحقق من MyConsap للمعايير الحالية."},
+              "items": ["Age 18-40", "Eligible study path", "Merit requirements", "Bank credit evaluation"],
+              "sort_order": 1,
+              "is_active": true
+            },
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "How it works", "it": "Come funziona", "fr": "Comment cela fonctionne", "es": "Cómo funciona", "fa": "چطور کار می‌کند", "ar": "كيف يعمل"},
+              "body": {"en": "Enter your personal and academic data in MyConsap. If fund requirements are met, continue with a participating bank. The bank decides whether to finance.", "it": "Inserisci dati anagrafici e accademici su MyConsap. Se i requisiti del Fondo sono rispettati, prosegui con una banca aderente. La banca decide se finanziare.", "fr": "Saisissez vos données personnelles et académiques dans MyConsap. Si les conditions du Fonds sont remplies, continuez avec une banque participante. La banque décide du financement.", "es": "Introduce tus datos personales y académicos en MyConsap. Si cumples los requisitos del Fondo, continúa con un banco participante. El banco decide si financia.", "fa": "اطلاعات شخصی و تحصیلی را در MyConsap وارد کن. اگر شرایط صندوق برقرار بود، با بانک عضو ادامه بده. تصمیم نهایی تأمین مالی با بانک است.", "ar": "أدخل بياناتك الشخصية والأكاديمية في MyConsap. إذا تحققت شروط الصندوق، تابع مع بنك مشارك. البنك يقرر التمويل."},
+              "items": ["MyConsap account", "Academic data", "Participating bank", "Credit evaluation"],
+              "sort_order": 2,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Consap - Fondo Studio", "url": "https://www.consap.it/fondostudio/", "source_type": "official", "authority": "Consap", "last_verified_at": "2026-05-08T00:00:00Z"}
+          ]
+        },
+        {
+          "slug": "unicredit-ad-honorem",
+          "category_slug": "loans-credit",
+          "title": {"en": "UniCredit Ad Honorem", "it": "UniCredit Ad Honorem", "fr": "UniCredit Ad Honorem", "es": "UniCredit Ad Honorem", "fa": "UniCredit Ad Honorem", "ar": "UniCredit Ad Honorem"},
+          "summary": {"en": "Honor loan for students linked to partner universities or entities. It can include a credit line and later repayment as a personal loan.", "it": "Prestito d’onore per studenti collegato a università o enti partner. Può includere una linea di credito e poi rimborso come prestito personale.", "fr": "Prêt d’honneur pour étudiants lié à des universités ou organismes partenaires. Il peut inclure une ligne de crédit puis un remboursement sous forme de prêt personnel.", "es": "Préstamo de honor para estudiantes vinculado a universidades o entidades asociadas. Puede incluir una línea de crédito y luego devolución como préstamo personal.", "fa": "وام افتخاری دانشجویی مرتبط با دانشگاه‌ها یا نهادهای همکار. می‌تواند شامل خط اعتباری و سپس بازپرداخت به شکل وام شخصی باشد.", "ar": "قرض شرف للطلاب مرتبط بجامعات أو جهات شريكة. قد يشمل خط ائتمان ثم سداداً كقرض شخصي."},
+          "status": "published",
+          "sort_order": 4,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["unicredit", "ad honorem", "student loan", "university partner"],
+          "synonyms": ["unicredit student loan", "prestito ad honorem", "prestito università"],
+          "searchable_keywords": ["unicredit ad honorem", "partner university loan", "honor loan unicredit"],
+          "metadata": {"provider": "UniCredit", "product_type": "student_loan", "max_amount_recent": 27700, "grace_period_months_recent": 24, "repayment_months_min_recent": 12, "repayment_months_max_recent": 180, "application_channel": "partner university/entity then bank", "warning": "Depends on partner institution and bank approval."},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Check your university first", "it": "Controlla prima la tua università", "fr": "Vérifiez d’abord votre université", "es": "Consulta primero tu universidad", "fa": "اول دانشگاهت را بررسی کن", "ar": "تحقق أولاً من جامعتك"},
+              "body": {"en": "This product often depends on agreements with universities or partner entities. Ask your university whether you can access it.", "it": "Questo prodotto spesso dipende da convenzioni con università o enti partner. Chiedi alla tua università se puoi accedervi.", "fr": "Ce produit dépend souvent d’accords avec des universités ou organismes partenaires. Demandez à votre université si vous pouvez y accéder.", "es": "Este producto suele depender de convenios con universidades o entidades asociadas. Pregunta a tu universidad si puedes acceder.", "fa": "این محصول اغلب به توافق با دانشگاه‌ها یا نهادهای همکار بستگی دارد. از دانشگاهت بپرس آیا می‌توانی استفاده کنی یا نه.", "ar": "يعتمد هذا المنتج غالباً على اتفاقيات مع جامعات أو جهات شريكة. اسأل جامعتك إن كان بإمكانك الوصول إليه."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true,
+              "warning_level": "important"
+            }
+          ],
+          "sources": [
+            {"title": "UniCredit - Ad Honorem", "url": "https://www.unicredit.it/it/privati/prestiti/tutti-i-prestiti/altri-prestiti/unicredit-ad-honorem.html", "source_type": "official_provider", "authority": "UniCredit"}
+          ]
+        },
+        {
+          "slug": "unicredit-fondo-per-lo-studio",
+          "category_slug": "loans-credit",
+          "title": {"en": "UniCredit Fondo per lo Studio", "it": "UniCredit Fondo per lo Studio", "fr": "UniCredit Fondo per lo Studio", "es": "UniCredit Fondo per lo Studio", "fa": "UniCredit Fondo per lo Studio", "ar": "UniCredit Fondo per lo Studio"},
+          "summary": {"en": "UniCredit product connected to Consap Fondo Studio. Check both Consap requirements and UniCredit conditions.", "it": "Prodotto UniCredit collegato al Fondo Studio Consap. Verifica sia requisiti Consap sia condizioni UniCredit.", "fr": "Produit UniCredit lié au Fondo Studio Consap. Vérifiez à la fois les conditions Consap et celles d’UniCredit.", "es": "Producto UniCredit vinculado al Fondo Studio Consap. Verifica tanto requisitos Consap como condiciones UniCredit.", "fa": "محصول UniCredit مرتبط با Fondo Studio کنساپ. هم شرایط Consap و هم شرایط UniCredit را بررسی کن.", "ar": "منتج UniCredit مرتبط بصندوق الدراسة Consap. تحقق من شروط Consap وشروط UniCredit."},
+          "status": "published",
+          "sort_order": 5,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["unicredit", "consap", "fondo studio", "student loan"],
+          "synonyms": ["unicredit consap", "fondo studio unicredit", "prestito consap unicredit"],
+          "searchable_keywords": ["unicredit study fund", "consap unicredit loan", "fondo studio bank loan"],
+          "metadata": {"provider": "UniCredit", "product_type": "consap_student_loan", "amount_max_recent_provider_page": 25000, "repayment_months_min_recent": 36, "repayment_months_max_recent": 126, "warning": "Provider page conditions may differ from general Consap fund maximums. Verify both."},
+          "blocks": [
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "How to check", "it": "Come controllare", "fr": "Comment vérifier", "es": "Cómo comprobar", "fa": "چطور بررسی کنی", "ar": "كيفية التحقق"},
+              "body": {"en": "Check eligibility through Consap rules, then ask UniCredit for current product conditions and branch process.", "it": "Controlla l’idoneità tramite le regole Consap, poi chiedi a UniCredit condizioni aggiornate e procedura in filiale.", "fr": "Vérifiez l’éligibilité selon les règles Consap, puis demandez à UniCredit les conditions actuelles et la procédure en agence.", "es": "Comprueba la elegibilidad con las reglas Consap y luego pide a UniCredit condiciones actuales y proceso en sucursal.", "fa": "واجد شرایط بودن را با قوانین Consap بررسی کن، سپس از UniCredit شرایط فعلی و روند شعبه را بپرس.", "ar": "تحقق من الأهلية وفق قواعد Consap، ثم اسأل UniCredit عن الشروط الحالية وإجراءات الفرع."},
+              "items": ["Consap requirements", "UniCredit conditions", "Branch appointment"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "UniCredit - Fondo per lo Studio", "url": "https://www.unicredit.it/it/privati/prestiti/tutti-i-prestiti/altri-prestiti/fondo-per-lo-studio.html", "source_type": "official_provider", "authority": "UniCredit"}
+          ]
+        },
+        {
+          "slug": "banca-sella-prestito-onore",
+          "category_slug": "loans-credit",
+          "title": {"en": "Banca Sella Prestito d’onore", "it": "Banca Sella Prestito d’onore", "fr": "Banca Sella Prestito d’onore", "es": "Banca Sella Prestito d’onore", "fa": "وام افتخاری Banca Sella", "ar": "قرض الشرف Banca Sella"},
+          "summary": {"en": "Student honor loan often focused on master and postgraduate studies. Conditions depend on bank and conventions.", "it": "Prestito d’onore spesso orientato a master e studi post-universitari. Le condizioni dipendono da banca e convenzioni.", "fr": "Prêt d’honneur souvent destiné aux masters et études post-universitaires. Les conditions dépendent de la banque et des conventions.", "es": "Préstamo de honor orientado a másteres y estudios de posgrado. Las condiciones dependen del banco y convenios.", "fa": "وام افتخاری که اغلب برای مستر و دوره‌های پسادانشگاهی است. شرایط به بانک و توافق‌ها بستگی دارد.", "ar": "قرض شرف غالباً موجه للماجستير والدراسات بعد الجامعة. الشروط تعتمد على البنك والاتفاقيات."},
+          "status": "published",
+          "sort_order": 6,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["banca sella", "prestito d'onore", "master loan"],
+          "synonyms": ["sella student loan", "prestito master", "postgraduate loan"],
+          "searchable_keywords": ["banca sella student credit", "master study loan sella", "prestito onore sella"],
+          "metadata": {"provider": "Banca Sella", "product_type": "master_loan", "repayment_start_recent": "24 months after master completion", "repayment_max_months_recent": 120, "warning": "Conditions depend on bank approval and conventions."},
+          "blocks": [
+            {
+              "block_type": "intro",
+              "title": {"en": "Best fit", "it": "Quando può servire", "fr": "Quand cela peut servir", "es": "Cuándo puede servir", "fa": "برای چه حالتی مناسب است", "ar": "متى قد يكون مناسباً"},
+              "body": {"en": "This may fit postgraduate students who need to finance master costs and part of living expenses, with repayment after the course.", "it": "Può essere utile per studenti post-laurea che devono finanziare master e parte delle spese di vita, con rimborso dopo il corso.", "fr": "Cela peut convenir aux étudiants post-universitaires qui doivent financer un master et une partie des frais de vie, avec remboursement après le cursus.", "es": "Puede servir a estudiantes de posgrado que necesitan financiar máster y parte de gastos de vida, con devolución después del curso.", "fa": "ممکن است برای دانشجویان پسادانشگاهی مناسب باشد که باید هزینه مستر و بخشی از زندگی را تأمین کنند و بعد از دوره بازپرداخت کنند.", "ar": "قد يناسب طلاب الدراسات العليا الذين يحتاجون لتمويل الماجستير وجزء من تكاليف المعيشة، مع السداد بعد الدورة."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Banca Sella - Prestito d'onore", "url": "https://www.sella.it/banca-on-line/privati/finanziamenti/prestiti/prestito-d-onore", "source_type": "official_provider", "authority": "Banca Sella"}
+          ]
+        },
+        {
+          "slug": "sparkasse-prestito-studio-spark",
+          "category_slug": "loans-credit",
+          "title": {"en": "Sparkasse Prestito Studio Spark", "it": "Sparkasse Prestito Studio Spark", "fr": "Sparkasse Prestito Studio Spark", "es": "Sparkasse Prestito Studio Spark", "fa": "وام تحصیلی Sparkasse", "ar": "قرض الدراسة Sparkasse"},
+          "summary": {"en": "Study loan connected to Consap-style student guarantee logic, with Italy/abroad amount limits to verify on provider page.", "it": "Prestito per lo studio collegato alla logica di garanzia Consap, con limiti Italia/estero da verificare sulla pagina del provider.", "fr": "Prêt d’études lié à la logique de garantie Consap, avec plafonds Italie/étranger à vérifier sur la page du fournisseur.", "es": "Préstamo de estudios ligado a la lógica de garantía Consap, con límites Italia/extranjero a verificar en la página del proveedor.", "fa": "وام تحصیلی مرتبط با منطق ضمانت Consap، با سقف‌های ایتالیا/خارج که باید در صفحه ارائه‌دهنده بررسی شود.", "ar": "قرض دراسة مرتبط بمنطق ضمان Consap، مع حدود لإيطاليا/الخارج يجب التحقق منها في صفحة المزود."},
+          "status": "published",
+          "sort_order": 7,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["sparkasse", "consap", "student loan", "study loan"],
+          "synonyms": ["prestito studio spark", "spark student loan", "prestito sparkasse"],
+          "searchable_keywords": ["sparkasse study loan", "consap sparkasse", "student credit sparkasse"],
+          "metadata": {"provider": "Sparkasse", "product_type": "consap_student_loan", "age_min_recent": 18, "age_max_recent": 40, "max_amount_italy_recent": 50000, "max_amount_abroad_recent": 70000, "warning": "Verify current provider conditions."},
+          "blocks": [
+            {
+              "block_type": "warning",
+              "title": {"en": "Compare with Consap rules", "it": "Confronta con le regole Consap", "fr": "Comparez avec les règles Consap", "es": "Compara con las reglas Consap", "fa": "با قوانین Consap مقایسه کن", "ar": "قارن مع قواعد Consap"},
+              "body": {"en": "If a bank product uses Consap logic, check both the bank page and the official Consap Fondo Studio page.", "it": "Se un prodotto bancario usa la logica Consap, controlla sia la pagina della banca sia la pagina ufficiale Fondo Studio Consap.", "fr": "Si un produit bancaire utilise la logique Consap, vérifiez à la fois la page de la banque et la page officielle Fondo Studio Consap.", "es": "Si un producto bancario usa lógica Consap, consulta tanto la página del banco como la página oficial Fondo Studio Consap.", "fa": "اگر محصول بانکی از منطق Consap استفاده می‌کند، هم صفحه بانک و هم صفحه رسمی Fondo Studio Consap را بررسی کن.", "ar": "إذا كان منتج مصرفي يستخدم منطق Consap، تحقق من صفحة البنك ومن صفحة Fondo Studio Consap الرسمية."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Sparkasse - Prestito Studio Spark", "url": "https://www.sparkasse.it/privati-e-famiglie/prodotti/mutui-e-prestiti/prestito-per-lo-studio-spark/", "source_type": "official_provider", "authority": "Sparkasse"}
+          ]
+        },
+        {
+          "slug": "consap-fondo-prima-casa",
+          "category_slug": "loans-credit",
+          "title": {"en": "Consap first-home mortgage guarantee", "it": "Consap Fondo Prima Casa", "fr": "Garantie Consap première maison", "es": "Garantía Consap primera vivienda", "fa": "ضمانت Consap برای خانه اول", "ar": "ضمان Consap للمنزل الأول"},
+          "summary": {"en": "Public guarantee for first-home mortgages. Consap checks applications sent by banks. It is a guarantee, not cash.", "it": "Garanzia pubblica per mutui prima casa. Consap verifica le domande inviate dalle banche. È una garanzia, non denaro.", "fr": "Garantie publique pour les prêts première maison. Consap vérifie les demandes envoyées par les banques. C’est une garantie, pas de l’argent.", "es": "Garantía pública para hipotecas de primera vivienda. Consap revisa solicitudes enviadas por bancos. Es una garantía, no dinero.", "fa": "ضمانت دولتی برای وام خانه اول. Consap درخواست‌های ارسال‌شده توسط بانک‌ها را بررسی می‌کند. این ضمانت است، نه پول نقد.", "ar": "ضمان عام لقروض المنزل الأول. تتحقق Consap من الطلبات المرسلة من البنوك. إنه ضمان وليس مالاً."},
+          "status": "published",
+          "sort_order": 8,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "verified",
+          "last_verified_at": "2026-05-08T00:00:00Z",
+          "tags": ["consap", "fondo prima casa", "mutuo", "mortgage", "under 36"],
+          "synonyms": ["first home", "prima casa", "mortgage guarantee", "garanzia mutuo", "young mortgage"],
+          "searchable_keywords": ["first home mortgage guarantee", "consap first home", "under 36 mortgage guarantee"],
+          "metadata": {"provider": "Consap + banks", "product_type": "first_home_mortgage_guarantee", "max_mortgage_recent": 250000, "application_channel": "through_bank", "warning": "Not cash. It is a public guarantee for eligible mortgage requests."},
+          "blocks": [
+            {
+              "block_type": "what_is_it",
+              "title": {"en": "What it does", "it": "A cosa serve", "fr": "À quoi ça sert", "es": "Para qué sirve", "fa": "به چه درد می‌خورد", "ar": "ما فائدته"},
+              "body": {"en": "It helps the relationship between citizen and bank by offering a public guarantee on a first-home mortgage request.", "it": "Agevola il rapporto tra cittadino e banca offrendo una garanzia pubblica sulla richiesta di mutuo prima casa.", "fr": "Il facilite la relation entre citoyen et banque en offrant une garantie publique sur une demande de prêt première maison.", "es": "Facilita la relación entre ciudadano y banco ofreciendo una garantía pública sobre una solicitud de hipoteca primera vivienda.", "fa": "با ارائه ضمانت دولتی روی درخواست وام خانه اول، رابطه بین شهروند و بانک را آسان‌تر می‌کند.", "ar": "يسهل العلاقة بين المواطن والبنك من خلال تقديم ضمان عام على طلب قرض المنزل الأول."},
+              "items": [],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Consap - Fondo Prima Casa", "url": "https://www.consap.it/fondo-prima-casa/", "source_type": "official", "authority": "Consap", "last_verified_at": "2026-05-08T00:00:00Z"}
+          ]
+        },
+        {
+          "slug": "fondo-sospensione-mutui-prima-casa",
+          "category_slug": "loans-credit",
+          "title": {"en": "First-home mortgage payment suspension", "it": "Sospensione mutui prima casa", "fr": "Suspension du prêt première maison", "es": "Suspensión de hipoteca primera vivienda", "fa": "تعلیق قسط وام خانه اول", "ar": "تعليق أقساط قرض المنزل الأول"},
+          "summary": {"en": "Consap-managed fund for temporary mortgage payment suspension in specific income difficulty situations. Application goes through the bank.", "it": "Fondo gestito da Consap per sospendere temporaneamente il mutuo in specifiche difficoltà reddituali. La domanda passa dalla banca.", "fr": "Fonds géré par Consap pour suspendre temporairement le prêt dans certaines difficultés de revenus. La demande passe par la banque.", "es": "Fondo gestionado por Consap para suspender temporalmente la hipoteca en situaciones específicas de dificultad económica. La solicitud pasa por el banco.", "fa": "صندوق تحت مدیریت Consap برای تعلیق موقت قسط وام در برخی وضعیت‌های سختی درآمدی. درخواست از طریق بانک انجام می‌شود.", "ar": "صندوق تديره Consap لتعليق مؤقت لأقساط القرض في حالات صعوبة الدخل المحددة. يتم الطلب عبر البنك."},
+          "status": "published",
+          "sort_order": 9,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["consap", "mortgage suspension", "mutuo", "prima casa"],
+          "synonyms": ["sospendere mutuo", "mortgage pause", "non riesco pagare mutuo", "fondo gasparrini"],
+          "searchable_keywords": ["pause mortgage", "mortgage suspension italy", "fondo gasparrini"],
+          "metadata": {"provider": "Consap + mortgage bank", "product_type": "mortgage_payment_suspension", "target": "existing first-home mortgage holders", "application_channel": "through_bank"},
+          "blocks": [
+            {
+              "block_type": "how_to_do_it",
+              "title": {"en": "Where to apply", "it": "Dove presentare domanda", "fr": "Où déposer la demande", "es": "Dónde solicitar", "fa": "کجا درخواست بدهی", "ar": "أين تقدم الطلب"},
+              "body": {"en": "Contact the bank where the mortgage is active and ask for the Consap first-home mortgage suspension procedure.", "it": "Contatta la banca dove hai il mutuo attivo e chiedi la procedura Consap per sospensione mutuo prima casa.", "fr": "Contactez la banque où le prêt est actif et demandez la procédure Consap de suspension du prêt première maison.", "es": "Contacta con el banco donde tienes la hipoteca activa y pide el procedimiento Consap de suspensión de hipoteca primera vivienda.", "fa": "با بانکی که وام در آن فعال است تماس بگیر و روند Consap برای تعلیق وام خانه اول را بپرس.", "ar": "اتصل بالبنك الذي يوجد لديه القرض واطلب إجراء Consap لتعليق قرض المنزل الأول."},
+              "items": ["Mortgage bank", "Income difficulty documents", "Consap form if required"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ],
+          "sources": [
+            {"title": "Consap - Fondo sospensione mutui prima casa", "url": "https://www.consap.it/fondo-di-sospensione-mutui-per-l-acquisto-della-prima-casa/", "source_type": "official", "authority": "Consap"}
+          ]
+        },
+        {
+          "slug": "rent-deposit-support",
+          "category_slug": "loans-credit",
+          "title": {"en": "Rent and deposit support", "it": "Sostegno affitto e cauzione", "fr": "Aide loyer et caution", "es": "Ayuda alquiler y fianza", "fa": "کمک اجاره و ودیعه", "ar": "دعم الإيجار والوديعة"},
+          "summary": {"en": "Local or regional support that may help with rent arrears or deposit. It is not usually a bank loan and should be cross-linked with Home/Rent and Bonuses.", "it": "Sostegno locale o regionale che può aiutare con morosità o cauzione. Di solito non è un prestito bancario e va collegato anche a Casa/Affitto e Bonus.", "fr": "Aide locale ou régionale pouvant aider pour les loyers impayés ou la caution. Ce n’est généralement pas un prêt bancaire et doit être lié à Logement/Loyer et Aides.", "es": "Ayuda local o regional que puede apoyar con atrasos de alquiler o fianza. Normalmente no es préstamo bancario y debe enlazarse con Casa/Alquiler y Bonos.", "fa": "کمک محلی یا منطقه‌ای که می‌تواند برای بدهی اجاره یا ودیعه کمک کند. معمولاً وام بانکی نیست و باید با خانه/اجاره و بونوس‌ها مرتبط شود.", "ar": "دعم محلي أو إقليمي قد يساعد في متأخرات الإيجار أو الوديعة. عادةً ليس قرضاً بنكياً ويجب ربطه بالسكن/الإيجار والدعم."},
+          "status": "published",
+          "sort_order": 10,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["rent", "deposit", "affitto", "cauzione", "piemonte", "tenant"],
+          "synonyms": ["deposit loan", "aiuto cauzione", "rent arrears", "morosità", "deposit support"],
+          "searchable_keywords": ["rent deposit help", "cauzione support", "arrears support", "tenant deposit"],
+          "metadata": {"provider": "Regione/Comune depending on location", "product_type": "rent_support_not_bank_loan", "region": "Piemonte", "cross_category": ["home-rent", "bonuses-benefits"], "warning": "Depends on Comune/local services and open funds."},
+          "blocks": [
+            {
+              "block_type": "links",
+              "title": {"en": "Related areas", "it": "Aree collegate", "fr": "Zones liées", "es": "Áreas relacionadas", "fa": "بخش‌های مرتبط", "ar": "الأقسام المرتبطة"},
+              "body": {"en": "This topic should also appear under Home/Rent and Bonuses because it is usually local public support, not consumer credit.", "it": "Questo tema deve comparire anche in Casa/Affitto e Bonus perché di solito è sostegno pubblico locale, non credito al consumo.", "fr": "Ce sujet doit aussi apparaître dans Logement/Loyer et Aides car il s’agit généralement d’un soutien public local, pas de crédit à la consommation.", "es": "Este tema debe aparecer también en Casa/Alquiler y Bonos porque suele ser apoyo público local, no crédito al consumo.", "fa": "این موضوع باید در خانه/اجاره و بونوس‌ها هم دیده شود چون معمولاً حمایت عمومی محلی است، نه اعتبار مصرفی.", "ar": "يجب أن يظهر هذا الموضوع أيضاً في السكن/الإيجار والدعم لأنه عادةً دعم عام محلي، وليس ائتماناً استهلاكياً."},
+              "items": ["Home / Rent", "Bonuses & Benefits", "Comune housing office"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "slug": "credit-warnings-and-documents",
+          "category_slug": "loans-credit",
+          "title": {"en": "Credit warnings and documents", "it": "Avvertenze e documenti per il credito", "fr": "Avertissements et documents de crédit", "es": "Advertencias y documentos de crédito", "fa": "هشدارها و مدارک وام", "ar": "تحذيرات ومستندات الائتمان"},
+          "summary": {"en": "Understand TAEG, TAN, total cost, guarantees, missed payments and documents before signing.", "it": "Capisci TAEG, TAN, costo totale, garanzie, rate non pagate e documenti prima di firmare.", "fr": "Comprenez TAEG, TAN, coût total, garanties, impayés et documents avant de signer.", "es": "Entiende TAEG, TAN, coste total, garantías, impagos y documentos antes de firmar.", "fa": "قبل از امضا TAEG، TAN، هزینه کل، ضمانت‌ها، قسط‌های پرداخت‌نشده و مدارک را بفهم.", "ar": "افهم TAEG وTAN والتكلفة الإجمالية والضمانات والمدفوعات المتأخرة والمستندات قبل التوقيع."},
+          "status": "published",
+          "sort_order": 11,
+          "is_active": true,
+          "is_premium": true,
+          "verification_status": "needsReview",
+          "tags": ["taeg", "tan", "credit risk", "documents", "loan warning"],
+          "synonyms": ["loan risk", "TAEG meaning", "TAN meaning", "bad credit", "missed payments"],
+          "searchable_keywords": ["credit risks", "loan documents", "taeg tan explanation", "before signing loan"],
+          "metadata": {"status": "evergreen", "product_type": "credit_education", "warning": "This is educational, not financial advice."},
+          "blocks": [
+            {
+              "block_type": "common_mistakes",
+              "title": {"en": "Common mistakes", "it": "Errori comuni", "fr": "Erreurs fréquentes", "es": "Errores comunes", "fa": "اشتباهات رایج", "ar": "أخطاء شائعة"},
+              "body": {"en": "Do not compare loans only by monthly payment. Compare total amount due, TAEG, duration, grace period and penalties.", "it": "Non confrontare i prestiti solo dalla rata mensile. Confronta importo totale dovuto, TAEG, durata, periodo ponte e penali.", "fr": "Ne comparez pas les prêts seulement par la mensualité. Comparez montant total dû, TAEG, durée, période de grâce et pénalités.", "es": "No compares préstamos solo por la cuota mensual. Compara importe total debido, TAEG, duración, periodo de gracia y penalizaciones.", "fa": "وام‌ها را فقط با قسط ماهانه مقایسه نکن. مبلغ کل بدهی، TAEG، مدت، دوره تنفس و جریمه‌ها را مقایسه کن.", "ar": "لا تقارن القروض فقط بالقسط الشهري. قارن إجمالي المبلغ المستحق وTAEG والمدة وفترة السماح والغرامات."},
+              "items": ["Ignoring TAEG", "Looking only at monthly instalment", "Missing grace period conditions", "Not checking default consequences", "Not reading Foglio Informativo"],
+              "sort_order": 1,
+              "is_active": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

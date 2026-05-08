@@ -2,11 +2,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/cms_models.dart';
 import 'cms_repository.dart';
+import 'local_cms_repository.dart';
 
 class SupabaseCmsRepository implements CmsRepository {
   SupabaseCmsRepository(this._client);
 
   final SupabaseClient _client;
+  final LocalCmsRepository _fallback = const LocalCmsRepository();
 
   @override
   Future<List<CmsCategory>> listCategories() async {
@@ -14,9 +16,11 @@ class SupabaseCmsRepository implements CmsRepository {
         .from('ufficio_cms_categories')
         .select()
         .order('sort_order');
-    return rows
+    final remote = rows
         .map((item) => CmsCategory.fromJson(Map<String, dynamic>.from(item)))
         .toList();
+    final fallback = await _fallback.listCategories();
+    return _mergeCategories(remote, fallback);
   }
 
   @override
@@ -29,9 +33,11 @@ class SupabaseCmsRepository implements CmsRepository {
       query = query.eq('category_slug', categorySlug);
     }
     final rows = await query;
-    return rows
+    final remote = rows
         .map((item) => CmsProcedure.fromJson(Map<String, dynamic>.from(item)))
         .toList();
+    final fallback = await _fallback.listProcedures(categorySlug: categorySlug);
+    return _mergeProcedures(remote, fallback);
   }
 
   @override
@@ -41,11 +47,13 @@ class SupabaseCmsRepository implements CmsRepository {
         .select()
         .eq('procedure_slug', procedureSlug)
         .order('sort_order');
-    return rows
+    final remote = rows
         .map(
           (item) => CmsContentBlock.fromJson(Map<String, dynamic>.from(item)),
         )
         .toList();
+    if (remote.isNotEmpty) return remote;
+    return _fallback.listBlocks(procedureSlug);
   }
 
   @override
@@ -97,5 +105,37 @@ class SupabaseCmsRepository implements CmsRepository {
       'after_value': afterValue,
       'actor_user_id': _client.auth.currentUser?.id,
     });
+  }
+
+  List<CmsCategory> _mergeCategories(
+    List<CmsCategory> remote,
+    List<CmsCategory> fallback,
+  ) {
+    final bySlug = <String, CmsCategory>{for (final item in remote) item.slug: item};
+    for (final item in fallback) {
+      bySlug.putIfAbsent(item.slug, () => item);
+    }
+    final merged = bySlug.values.toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return merged;
+  }
+
+  List<CmsProcedure> _mergeProcedures(
+    List<CmsProcedure> remote,
+    List<CmsProcedure> fallback,
+  ) {
+    final byKey = <String, CmsProcedure>{
+      for (final item in remote) '${item.categorySlug}::${item.slug}': item,
+    };
+    for (final item in fallback) {
+      byKey.putIfAbsent('${item.categorySlug}::${item.slug}', () => item);
+    }
+    final merged = byKey.values.toList()
+      ..sort((a, b) {
+        final categoryCompare = a.categorySlug.compareTo(b.categorySlug);
+        if (categoryCompare != 0) return categoryCompare;
+        return a.sortOrder.compareTo(b.sortOrder);
+      });
+    return merged;
   }
 }

@@ -128,10 +128,7 @@ class RichCategoryReference {
   final String label;
   final String? url;
 
-  Map<String, dynamic> toMap() => {
-    'label': label,
-    if (url != null) 'url': url,
-  };
+  Map<String, dynamic> toMap() => {'label': label, if (url != null) 'url': url};
 }
 
 class RichCategoryContact {
@@ -246,8 +243,7 @@ class RichCategoryContact {
     if (phoneHours != null) 'phoneHours': phoneHours,
     if (phoneSupportLegacy != null) 'phoneSupportLegacy': phoneSupportLegacy,
     if (phoneFixedLine != null) 'phoneFixedLine': phoneFixedLine,
-    if (phoneMobileOrAbroad != null)
-      'phoneMobileOrAbroad': phoneMobileOrAbroad,
+    if (phoneMobileOrAbroad != null) 'phoneMobileOrAbroad': phoneMobileOrAbroad,
     if (conciliationFreeNumber != null)
       'conciliationFreeNumber': conciliationFreeNumber,
     if (conciliationFreeNumberHours != null)
@@ -383,7 +379,8 @@ class RichCategoryQuestion {
     'questionIt': questionIt,
     'type': type,
     if (placeholder != null) 'placeholder': placeholder,
-    if (options.isNotEmpty) 'options': options.map((item) => item.toMap()).toList(),
+    if (options.isNotEmpty)
+      'options': options.map((item) => item.toMap()).toList(),
     if (showWhen.isNotEmpty) 'showWhen': showWhen,
   };
 }
@@ -401,10 +398,7 @@ class RichCategoryQuestionOption {
   final String id;
   final String label;
 
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'label': label,
-  };
+  Map<String, dynamic> toMap() => {'id': id, 'label': label};
 }
 
 class RichCategoryDeadline {
@@ -426,11 +420,7 @@ class RichCategoryDeadline {
   final String label;
   final String rule;
 
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'label': label,
-    'rule': rule,
-  };
+  Map<String, dynamic> toMap() => {'id': id, 'label': label, 'rule': rule};
 }
 
 class RichCategoryConfigurableRule {
@@ -565,7 +555,8 @@ class RichCategorySubcategory {
     if (userQuestions.isNotEmpty) 'userQuestions': userQuestions,
     if (fieldsToExtractFromBill.isNotEmpty)
       'fieldsToExtractFromBill': fieldsToExtractFromBill,
-    if (deadlines.isNotEmpty) 'deadlines': deadlines.map((item) => item.toMap()).toList(),
+    if (deadlines.isNotEmpty)
+      'deadlines': deadlines.map((item) => item.toMap()).toList(),
     if (configurableRules.isNotEmpty)
       'configurableRules': configurableRules.map(
         (key, value) => MapEntry(key, value.toMap()),

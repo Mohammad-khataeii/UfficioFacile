@@ -1,4 +1,12 @@
-enum UfficioPlan { free, pro, consultant }
+enum UfficioPlan {
+  free,
+  pro,
+  consultant,
+  premiumMonthly,
+  premiumYearly,
+  consultancyOneShot,
+  adminGrant,
+}
 
 enum EntitlementStatus { active, trialing, expired, cancelled, beta }
 
@@ -22,6 +30,14 @@ enum FeatureKey {
   advancedTemplates,
   serviceIntelligenceAdvanced,
   officialLinksAdvanced,
+  costDashboard,
+  premiumGuides,
+  advancedScanner,
+  deadlineReminders,
+  bonusFinderAdvanced,
+  loanComparisonAdvanced,
+  privateConsultancy,
+  priorityProblemRequest,
 }
 
 class PremiumConfig {
@@ -34,6 +50,7 @@ class PremiumConfig {
     this.freeRemindersLimit = 5,
     this.freeDocumentsLimit = 10,
     this.freeContactsLimit = 10,
+    this.freeCostItemsLimit = 5,
     this.freeHouseholdMembersLimit = 2,
     this.freeProofCasesLimit = 2,
     this.freeUtilityComparisonLimit = 3,
@@ -54,6 +71,7 @@ class PremiumConfig {
   final int freeRemindersLimit;
   final int freeDocumentsLimit;
   final int freeContactsLimit;
+  final int freeCostItemsLimit;
   final int freeHouseholdMembersLimit;
   final int freeProofCasesLimit;
   final int freeUtilityComparisonLimit;
@@ -74,6 +92,7 @@ class PremiumConfig {
     int? freeRemindersLimit,
     int? freeDocumentsLimit,
     int? freeContactsLimit,
+    int? freeCostItemsLimit,
     int? freeHouseholdMembersLimit,
     int? freeProofCasesLimit,
     int? freeUtilityComparisonLimit,
@@ -95,6 +114,7 @@ class PremiumConfig {
       freeRemindersLimit: freeRemindersLimit ?? this.freeRemindersLimit,
       freeDocumentsLimit: freeDocumentsLimit ?? this.freeDocumentsLimit,
       freeContactsLimit: freeContactsLimit ?? this.freeContactsLimit,
+      freeCostItemsLimit: freeCostItemsLimit ?? this.freeCostItemsLimit,
       freeHouseholdMembersLimit:
           freeHouseholdMembersLimit ?? this.freeHouseholdMembersLimit,
       freeProofCasesLimit: freeProofCasesLimit ?? this.freeProofCasesLimit,
@@ -121,6 +141,7 @@ class PremiumConfig {
     'freeRemindersLimit': freeRemindersLimit,
     'freeDocumentsLimit': freeDocumentsLimit,
     'freeContactsLimit': freeContactsLimit,
+    'freeCostItemsLimit': freeCostItemsLimit,
     'freeHouseholdMembersLimit': freeHouseholdMembersLimit,
     'freeProofCasesLimit': freeProofCasesLimit,
     'freeUtilityComparisonLimit': freeUtilityComparisonLimit,
@@ -144,6 +165,7 @@ class PremiumConfig {
     freeRemindersLimit: json['freeRemindersLimit'] as int? ?? 5,
     freeDocumentsLimit: json['freeDocumentsLimit'] as int? ?? 10,
     freeContactsLimit: json['freeContactsLimit'] as int? ?? 10,
+    freeCostItemsLimit: json['freeCostItemsLimit'] as int? ?? 5,
     freeHouseholdMembersLimit: json['freeHouseholdMembersLimit'] as int? ?? 2,
     freeProofCasesLimit: json['freeProofCasesLimit'] as int? ?? 2,
     freeUtilityComparisonLimit: json['freeUtilityComparisonLimit'] as int? ?? 3,
@@ -171,6 +193,38 @@ class PremiumConfig {
     trialDays: json['trialDays'] as int? ?? 7,
     allowLocalDebugPro: json['allowLocalDebugPro'] as bool? ?? true,
   );
+}
+
+enum ContentAccessReason {
+  freeContent,
+  premiumSubscription,
+  singleUnlock,
+  adminPreview,
+  locked,
+}
+
+enum UnlockOption { premium, singlePurchase, consultancy }
+
+class ContentAccessResult {
+  const ContentAccessResult({
+    required this.allowed,
+    required this.reason,
+    required this.message,
+    this.unlockOptions = const <UnlockOption>[],
+    this.singleUnlockPriceCents,
+    this.singleUnlockCurrency = 'EUR',
+    this.requiresPremium = false,
+    this.alreadyUnlocked = false,
+  });
+
+  final bool allowed;
+  final ContentAccessReason reason;
+  final String message;
+  final List<UnlockOption> unlockOptions;
+  final int? singleUnlockPriceCents;
+  final String singleUnlockCurrency;
+  final bool requiresPremium;
+  final bool alreadyUnlocked;
 }
 
 class EntitlementDecision {

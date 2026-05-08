@@ -3,7 +3,8 @@ import 'dart:convert';
 import '../../domain/catalog_models.dart';
 
 final verifiedCatalogOfficialLinks = <OfficialLink>[
-  OfficialLink.fromJson(jsonDecode(r'''{
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-canone-tv-dichiarazione-online",
   "title": "Agenzia Entrate - Canone TV dichiarazione sostitutiva invio online",
   "category": "canoneRai",
@@ -30,8 +31,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-canone-tv-dichiarazione-info",
   "title": "Agenzia Entrate - Canone TV dichiarazione sostitutiva",
   "category": "canoneRai",
@@ -59,8 +63,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-canone-tv-modelli",
   "title": "Agenzia Entrate - Canone TV modelli e istruzioni",
   "category": "canoneRai",
@@ -89,8 +96,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-canone-tv-rimborso",
   "title": "Agenzia Entrate - Rimborso canone TV addebitato in bolletta",
   "category": "canoneRai",
@@ -117,8 +127,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-canone-tv-modello-pdf",
   "title": "Agenzia Entrate - Modello dichiarazione sostitutiva Canone TV PDF",
   "category": "canoneRai",
@@ -146,8 +159,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-rental-cessione-subentro",
   "title": "Agenzia Entrate - Cessione e subentro contratto di locazione",
   "category": "housing",
@@ -174,8 +190,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-rli-modello",
   "title": "Agenzia Entrate - Modello RLI PDF",
   "category": "housing",
@@ -203,8 +222,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-rli-istruzioni",
   "title": "Agenzia Entrate - Istruzioni Modello RLI PDF",
   "category": "housing",
@@ -232,8 +254,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "poste-raccomandata",
   "title": "Poste Italiane - Posta Raccomandata",
   "category": "general",
@@ -264,8 +289,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "arera-consumatori",
   "title": "ARERA per il consumatore",
   "category": "utilities",
@@ -294,8 +322,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "arera-conciliazione",
   "title": "ARERA - Servizio Conciliazione",
   "category": "utilities",
@@ -324,8 +355,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "sportello-consumatore-conciliazione",
   "title": "Sportello per il Consumatore - Servizio Conciliazione",
   "category": "utilities",
@@ -353,8 +387,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "sportello-consumatore-home",
   "title": "Sportello per il Consumatore Energia e Ambiente",
   "category": "utilities",
@@ -382,8 +419,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "agcom-conciliaweb",
   "title": "AGCOM ConciliaWeb",
   "category": "telecom",
@@ -413,8 +453,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "agcom-contenzioso",
   "title": "AGCOM - Contenzioso tra utenti e operatori",
   "category": "telecom",
@@ -443,8 +486,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "agcom-assistenza",
   "title": "AGCOM ConciliaWeb - Assistenza e contact center",
   "category": "telecom",
@@ -473,8 +519,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "inps-naspi-servizio",
   "title": "INPS - NASpI: indennità mensile di disoccupazione",
   "category": "work",
@@ -501,8 +550,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "inps-naspi-come-fare-domanda",
   "title": "INPS - NASpI come fare domanda",
   "category": "work",
@@ -530,8 +582,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "inps-portale-disoccupazione",
   "title": "INPS - Portale disoccupazione",
   "category": "work",
@@ -558,8 +613,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "salute-piemonte-il-mio-medico",
   "title": "Salute Piemonte - Il mio medico",
   "category": "health",
@@ -586,8 +644,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "regione-piemonte-il-mio-medico",
   "title": "Regione Piemonte - Il mio medico scheda servizio",
   "category": "health",
@@ -614,8 +675,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-tessera-sanitaria-duplicato",
   "title": "Agenzia Entrate - Richiesta riemissione Tessera Sanitaria",
   "category": "health",
@@ -642,8 +706,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-duplicato-ts-online",
   "title": "Agenzia Entrate - Servizio online riemissione Tessera Sanitaria",
   "category": "health",
@@ -670,8 +737,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "ae-modello-aa4-8",
   "title": "Agenzia Entrate - Codice Fiscale e Tessera Sanitaria: modello e istruzioni",
   "category": "health",
@@ -698,8 +768,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "torino-prenota-appuntamento",
   "title": "Città di Torino - Prenota un appuntamento",
   "category": "publicOffice",
@@ -727,8 +800,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "torino-anagrafe-sedi",
   "title": "Città di Torino - Sedi anagrafiche e orari",
   "category": "publicOffice",
@@ -756,8 +832,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "milano-prenota-appuntamento",
   "title": "Comune di Milano - Prenota appuntamento in Comune",
   "category": "publicOffice",
@@ -785,8 +864,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "bologna-residenza",
   "title": "Comune di Bologna - Residenza",
   "category": "publicOffice",
@@ -813,8 +895,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "bologna-prenotazioni",
   "title": "Comune di Bologna - Servizi online di prenotazione appuntamenti",
   "category": "publicOffice",
@@ -842,8 +927,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "agid-spid",
   "title": "AgID - SPID Sistema Pubblico di Identità Digitale",
   "category": "terms",
@@ -868,8 +956,11 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
-  OfficialLink.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialLink.fromJson(
+    jsonDecode(r'''{
   "id": "cie-home",
   "title": "Carta di Identità Elettronica - sito ufficiale",
   "category": "terms",
@@ -894,11 +985,14 @@ final verifiedCatalogOfficialLinks = <OfficialLink>[
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   },
   "notes": {}
-}''') as Map<String, dynamic>),
+}''')
+        as Map<String, dynamic>,
+  ),
 ];
 
 final verifiedCatalogOfficialContacts = <OfficialContact>[
-  OfficialContact.fromJson(jsonDecode(r'''{
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "agcom-contact-center",
   "label": "AGCOM Contact Center",
   "contactType": "phone_email",
@@ -932,8 +1026,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "phoneMobile": "081.750750",
     "email": "info@agcom.it"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "asl-citta-torino-general",
   "label": "ASL Città di Torino - recapiti generali",
   "contactType": "pec_email_phone_address",
@@ -968,8 +1065,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "pec": "protocollo@pec.aslcittaditorino.it",
     "address": "Via San Secondo 29, 10128 Torino"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "asl-torino-via-juvarra",
   "label": "ASL Città di Torino - Via Juvarra 19 sportelli amministrativi",
   "contactType": "office",
@@ -1002,8 +1102,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "pec": "protocollo@pec.aslcittaditorino.it",
     "address": "Via Juvarra 19, Torino"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "asl-torino-lungo-dora-savona",
   "label": "ASL Città di Torino - CUP/Scelta e revoca/prelievi Lungo Dora Savona",
   "contactType": "office_email_phone",
@@ -1035,8 +1138,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "email": "distretto.circ6-7@aslcittaditorino.it",
     "address": "Lungo Dora Savona, 24, Torino"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "torino-anagrafe",
   "label": "Città di Torino - Anagrafe contatti",
   "contactType": "email_pec_phone",
@@ -1068,8 +1174,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "email": "info.anagrafe@comune.torino.it",
     "pec": "Servizi.Civici@cert.comune.torino.it"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "torino-cambio-residenza-email",
   "label": "Città di Torino - Cambio residenza da altro comune/estero",
   "contactType": "email",
@@ -1099,8 +1208,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
   "notes": {
     "email": "iscrizioni.anagrafe@comune.torino.it"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "milano-protocollo-pec",
   "label": "Comune di Milano - Protocollo Generale PEC",
   "contactType": "pec",
@@ -1131,8 +1243,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
   "notes": {
     "pec": "protocollo@postacert.comune.milano.it"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "bologna-urp",
   "label": "Comune di Bologna - URP / Protocollo generale",
   "contactType": "phone_email_pec_address",
@@ -1165,8 +1280,11 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "pec": "protocollogenerale@pec.comune.bologna.it",
     "address": "Piazza Maggiore 6, 40124 Bologna"
   }
-}''') as Map<String, dynamic>),
-  OfficialContact.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  OfficialContact.fromJson(
+    jsonDecode(r'''{
   "id": "roma-municipio-viii-cambio-residenza",
   "label": "Roma Municipio VIII - Ufficio Gestione Cambi di Residenza e Domicilio",
   "contactType": "email_pec_address",
@@ -1198,11 +1316,14 @@ final verifiedCatalogOfficialContacts = <OfficialContact>[
     "pec": "cambiresidenza.municipioroma8@pec.comune.roma.it",
     "address": "Via Benedetto Croce 50, 00142 Roma"
   }
-}''') as Map<String, dynamic>),
+}''')
+        as Map<String, dynamic>,
+  ),
 ];
 
 final verifiedCatalogServiceProviders = <ServiceProvider>[
-  ServiceProvider.fromJson(jsonDecode(r'''{
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "tim",
   "name": "TIM",
   "category": "telecom",
@@ -1334,8 +1455,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "vodafone",
   "name": "Vodafone",
   "category": "telecom",
@@ -1495,8 +1619,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "windtre",
   "name": "WINDTRE",
   "category": "telecom",
@@ -1656,8 +1783,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "fastweb",
   "name": "Fastweb",
   "category": "telecom",
@@ -1824,8 +1954,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "enel-energia",
   "name": "Enel Energia",
   "category": "dualEnergy",
@@ -1929,8 +2062,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "edison-energia",
   "name": "Edison Energia",
   "category": "dualEnergy",
@@ -2062,8 +2198,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "iren",
   "name": "Iren Luce Gas",
   "category": "dualEnergy",
@@ -2195,8 +2334,11 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
-  ServiceProvider.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ServiceProvider.fromJson(
+    jsonDecode(r'''{
   "id": "a2a-energia",
   "name": "A2A Energia",
   "category": "dualEnergy",
@@ -2363,7 +2505,9 @@ final verifiedCatalogServiceProviders = <ServiceProvider>[
     "fa": "لینک‌ها و اطلاعات تماس ممکن است تغییر کنند. قبل از ارسال در وب‌سایت رسمی بررسی کنید.",
     "ar": "قد تتغير الروابط وجهات الاتصال. تحقق من الموقع الرسمي قبل الإرسال."
   }
-}''') as Map<String, dynamic>),
+}''')
+        as Map<String, dynamic>,
+  ),
 ];
 
 final verifiedCatalogProviderForms = <ProviderForm>[
@@ -2371,7 +2515,8 @@ final verifiedCatalogProviderForms = <ProviderForm>[
 ];
 
 final verifiedCatalogSourceReferences = <SourceReference>[
-  SourceReference.fromJson(jsonDecode(r'''{
+  SourceReference.fromJson(
+    jsonDecode(r'''{
   "id": "inps-naspi-ref",
   "title": "INPS - NASpI guidance",
   "sourceType": "authorityGuidance",
@@ -2398,8 +2543,11 @@ final verifiedCatalogSourceReferences = <SourceReference>[
     "ar": "هذه إرشادات عملية فقط وليست استشارة قانونية."
   },
   "notLegalAdvice": true
-}''') as Map<String, dynamic>),
-  SourceReference.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  SourceReference.fromJson(
+    jsonDecode(r'''{
   "id": "sportello-consumatore-ref",
   "title": "ARERA / Sportello per il Consumatore",
   "sourceType": "energyAuthorityGuidance",
@@ -2429,8 +2577,11 @@ final verifiedCatalogSourceReferences = <SourceReference>[
     "ar": "هذه إرشادات عملية فقط وليست استشارة قانونية."
   },
   "notLegalAdvice": true
-}''') as Map<String, dynamic>),
-  SourceReference.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  SourceReference.fromJson(
+    jsonDecode(r'''{
   "id": "agcom-assistance-ref",
   "title": "AGCOM assistance and ConciliaWeb guidance",
   "sourceType": "telecomAuthorityGuidance",
@@ -2460,8 +2611,11 @@ final verifiedCatalogSourceReferences = <SourceReference>[
     "ar": "هذه إرشادات عملية فقط وليست استشارة قانونية."
   },
   "notLegalAdvice": true
-}''') as Map<String, dynamic>),
-  SourceReference.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  SourceReference.fromJson(
+    jsonDecode(r'''{
   "id": "agenzia-entrate-rli-ref",
   "title": "Agenzia Entrate - RLI and rental contract changes",
   "sourceType": "taxAuthorityGuidance",
@@ -2489,11 +2643,14 @@ final verifiedCatalogSourceReferences = <SourceReference>[
     "ar": "هذه إرشادات عملية فقط وليست استشارة قانونية."
   },
   "notLegalAdvice": true
-}''') as Map<String, dynamic>),
+}''')
+        as Map<String, dynamic>,
+  ),
 ];
 
 final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-tessera_sanitaria_renewal",
   "procedureId": "TESSERA_SANITARIA_RENEWAL",
   "category": "health",
@@ -2556,8 +2713,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-change_doctor",
   "procedureId": "CHANGE_DOCTOR",
   "category": "health",
@@ -2620,8 +2780,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-comune_residence_request",
   "procedureId": "COMUNE_RESIDENCE_REQUEST",
   "category": "comune",
@@ -2680,8 +2843,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-internet_phone_cancellation",
   "procedureId": "INTERNET_PHONE_CANCELLATION",
   "category": "telecom",
@@ -2758,8 +2924,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-telecom_wrong_bill_complaint",
   "procedureId": "TELECOM_WRONG_BILL_COMPLAINT",
   "category": "telecom",
@@ -2833,8 +3002,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-high_bill_complaint",
   "procedureId": "HIGH_BILL_COMPLAINT",
   "category": "utilities",
@@ -2908,8 +3080,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-energy_supplier_comparison",
   "procedureId": "ENERGY_SUPPLIER_COMPARISON",
   "category": "utilities",
@@ -2961,8 +3136,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-canone_rai_no_tv_declaration_checklist",
   "procedureId": "CANONE_RAI_NO_TV_DECLARATION_CHECKLIST",
   "category": "canoneRai",
@@ -3022,8 +3200,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-canone_rai_refund_or_wrong_charge",
   "procedureId": "CANONE_RAI_REFUND_OR_WRONG_CHARGE",
   "category": "canoneRai",
@@ -3083,8 +3264,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-rental_contract_change",
   "procedureId": "RENTAL_CONTRACT_CHANGE",
   "category": "housing",
@@ -3149,8 +3333,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-landlord_maintenance_or_contract",
   "procedureId": "LANDLORD_MAINTENANCE_OR_CONTRACT",
   "category": "housing",
@@ -3213,8 +3400,11 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
-  ProcedureGuidance.fromJson(jsonDecode(r'''{
+}''')
+        as Map<String, dynamic>,
+  ),
+  ProcedureGuidance.fromJson(
+    jsonDecode(r'''{
   "id": "verified-naspi_preparation",
   "procedureId": "NASPI_PREPARATION",
   "category": "work",
@@ -3279,7 +3469,9 @@ final verifiedCatalogProcedureGuidance = <ProcedureGuidance>[
   "notes": {
     "importedFromVerifiedSeed": true
   }
-}''') as Map<String, dynamic>),
+}''')
+        as Map<String, dynamic>,
+  ),
 ];
 
 final verifiedCatalogResearchTodos = <String>[

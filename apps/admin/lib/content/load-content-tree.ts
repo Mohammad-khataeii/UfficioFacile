@@ -29,6 +29,8 @@ type BundledCategory = {
 };
 
 type BundledExport = {
+  cmsCategories?: Record<string, unknown>[];
+  cmsProcedures?: Record<string, unknown>[];
   richCategories?: BundledCategory[];
   healthCategory?: BundledCategory;
   housingCategory?: BundledCategory;
@@ -48,6 +50,15 @@ export type AdminCategoryRecord = {
   is_active: boolean;
   is_premium: boolean;
   verification_status: string;
+  tags?: string[];
+  synonyms?: string[];
+  searchable_keywords?: string[];
+  monetization_type?: string;
+  allow_single_unlock?: boolean;
+  single_unlock_price_cents?: number | null;
+  single_unlock_currency?: string;
+  premium_reason?: LocalizedText;
+  premium_teaser?: LocalizedText;
   admin_notes: string | null;
   public_snapshot?: Record<string, unknown>;
   source: AdminContentSource;
@@ -74,6 +85,15 @@ export type AdminProcedureRecord = {
   is_active: boolean;
   is_premium: boolean;
   verification_status: string;
+  tags?: string[];
+  synonyms?: string[];
+  searchable_keywords?: string[];
+  monetization_type?: string;
+  allow_single_unlock?: boolean;
+  single_unlock_price_cents?: number | null;
+  single_unlock_currency?: string;
+  premium_reason?: LocalizedText;
+  premium_teaser?: LocalizedText;
   admin_notes: string | null;
   public_snapshot?: Record<string, unknown>;
   source: AdminContentSource;
@@ -123,6 +143,83 @@ function getBundledCategories(exported: BundledExport): BundledCategory[] {
     ...(exported.healthCategory ? [exported.healthCategory] : []),
     ...(exported.housingCategory ? [exported.housingCategory] : []),
   ];
+}
+
+function normalizeBundledCmsCategories(exported: BundledExport): AdminCategoryRecord[] {
+  return (exported.cmsCategories ?? []).map((row: any, index) => ({
+    slug: String(row.slug ?? `category_${index}`),
+    internal_label: row.internal_label ? String(row.internal_label) : null,
+    title: (row.title ?? {}) as LocalizedText,
+    subtitle: (row.subtitle ?? {}) as LocalizedText,
+    description: (row.description ?? row.short_description ?? {}) as LocalizedText,
+    icon: row.icon ? String(row.icon) : null,
+    color: row.color ? String(row.color) : null,
+    sort_order: Number(row.sort_order ?? index),
+    is_active: Boolean(row.is_active ?? true),
+    is_premium: Boolean(row.is_premium ?? false),
+    verification_status: String(row.verification_status ?? "bundledFallback"),
+    tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
+    synonyms: Array.isArray(row.synonyms) ? row.synonyms.map(String) : [],
+    searchable_keywords: Array.isArray(row.searchable_keywords)
+      ? row.searchable_keywords.map(String)
+      : [],
+    monetization_type: row.monetization_type ? String(row.monetization_type) : "free",
+    allow_single_unlock: row.allow_single_unlock !== false,
+    single_unlock_price_cents: typeof row.single_unlock_price_cents === "number" ? row.single_unlock_price_cents : null,
+    single_unlock_currency: row.single_unlock_currency ? String(row.single_unlock_currency) : "EUR",
+    premium_reason: (row.premium_reason ?? {}) as LocalizedText,
+    premium_teaser: (row.premium_teaser ?? row.subtitle ?? {}) as LocalizedText,
+    admin_notes: row.admin_notes ? String(row.admin_notes) : null,
+    public_snapshot: (row.public_snapshot ?? row) as Record<string, unknown>,
+    source: "bundled",
+  }));
+}
+
+function normalizeBundledCmsProcedures(exported: BundledExport): AdminProcedureRecord[] {
+  return (exported.cmsProcedures ?? []).map((row: any, index) => ({
+    slug: String(row.slug ?? `procedure_${index}`),
+    category_slug: String(row.category_slug ?? ""),
+    title: (row.title ?? {}) as LocalizedText,
+    subtitle: (row.subtitle ?? {}) as LocalizedText,
+    summary: (row.summary ?? {}) as LocalizedText,
+    what_is_it: (row.what_is_it ?? row.summary ?? {}) as LocalizedText,
+    why_you_may_need_it: Array.isArray(row.why_you_may_need_it)
+      ? row.why_you_may_need_it.map(String)
+      : [],
+    how_to_do_it: Array.isArray(row.how_to_do_it) ? row.how_to_do_it.map(String) : [],
+    required_documents: Array.isArray(row.required_documents)
+      ? row.required_documents.map(String)
+      : [],
+    optional_documents: Array.isArray(row.optional_documents)
+      ? row.optional_documents.map(String)
+      : [],
+    warnings: Array.isArray(row.warnings) ? row.warnings.map(String) : [],
+    common_mistakes: Array.isArray(row.common_mistakes)
+      ? row.common_mistakes.map(String)
+      : [],
+    proof_to_keep: Array.isArray(row.proof_to_keep) ? row.proof_to_keep.map(String) : [],
+    faq: Array.isArray(row.faq) ? row.faq.map(String) : [],
+    official_links: Array.isArray(row.official_links) ? row.official_links.map(String) : [],
+    status: String(row.status ?? "bundledFallback"),
+    sort_order: Number(row.sort_order ?? index),
+    is_active: Boolean(row.is_active ?? true),
+    is_premium: Boolean(row.is_premium ?? false),
+    verification_status: String(row.verification_status ?? "bundledFallback"),
+    tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
+    synonyms: Array.isArray(row.synonyms) ? row.synonyms.map(String) : [],
+    searchable_keywords: Array.isArray(row.searchable_keywords)
+      ? row.searchable_keywords.map(String)
+      : [],
+    monetization_type: row.monetization_type ? String(row.monetization_type) : "free",
+    allow_single_unlock: row.allow_single_unlock !== false,
+    single_unlock_price_cents: typeof row.single_unlock_price_cents === "number" ? row.single_unlock_price_cents : null,
+    single_unlock_currency: row.single_unlock_currency ? String(row.single_unlock_currency) : "EUR",
+    premium_reason: (row.premium_reason ?? {}) as LocalizedText,
+    premium_teaser: (row.premium_teaser ?? row.subtitle ?? row.summary ?? {}) as LocalizedText,
+    admin_notes: row.admin_notes ? String(row.admin_notes) : null,
+    public_snapshot: (row.public_snapshot ?? row) as Record<string, unknown>,
+    source: "bundled",
+  }));
 }
 
 function toLocalizedText(en?: string, it?: string): LocalizedText {
@@ -198,6 +295,15 @@ function toBundledProcedureRecord(
 
 async function getBundledContentTree(): Promise<AdminContentTree> {
   const exported = await getBundledCmsExport();
+  const normalizedCategories = normalizeBundledCmsCategories(exported);
+  const normalizedProcedures = normalizeBundledCmsProcedures(exported);
+  if (normalizedCategories.length > 0) {
+    return {
+      source: "bundled",
+      categories: normalizedCategories,
+      procedures: normalizedProcedures,
+    };
+  }
   const bundledCategories = getBundledCategories(exported);
   const categories = bundledCategories.map(toBundledCategoryRecord);
   const procedures = bundledCategories.flatMap((category, categoryIndex) =>
@@ -217,8 +323,130 @@ async function getBundledContentTree(): Promise<AdminContentTree> {
   };
 }
 
-export async function getAdminContentTree(supabase: any): Promise<AdminContentTree> {
+async function bootstrapBundledContent(
+  supabase: any,
+  tree: AdminContentTree,
+): Promise<void> {
+  const { data: existingCategories } = await supabase
+    .from("ufficio_cms_categories")
+    .select("slug");
+  const { data: existingProcedures } = await supabase
+    .from("ufficio_cms_procedures")
+    .select("category_slug, slug");
+
+  const existingCategorySlugs = new Set(
+    (existingCategories ?? []).map((row: any) => String(row.slug)),
+  );
+  const existingProcedureKeys = new Set(
+    (existingProcedures ?? []).map(
+      (row: any) => `${String(row.category_slug)}::${String(row.slug)}`,
+    ),
+  );
+
+  const missingCategories = tree.categories
+    .filter((category) => !existingCategorySlugs.has(category.slug))
+    .map((category) => ({
+      slug: category.slug,
+      internal_label: category.internal_label,
+      title: category.title,
+      subtitle: category.subtitle ?? {},
+      description: category.description ?? {},
+      icon: category.icon,
+      color: category.color,
+      sort_order: category.sort_order,
+      is_active: category.is_active,
+      is_premium: category.is_premium,
+      verification_status: category.verification_status,
+      tags: category.tags ?? [],
+      synonyms: category.synonyms ?? [],
+      searchable_keywords: category.searchable_keywords ?? [],
+      monetization_type: category.monetization_type ?? "free",
+      allow_single_unlock: category.allow_single_unlock ?? true,
+      single_unlock_price_cents: category.single_unlock_price_cents ?? null,
+      single_unlock_currency: category.single_unlock_currency ?? "EUR",
+      premium_reason: category.premium_reason ?? {},
+      premium_teaser: category.premium_teaser ?? {},
+      metadata: category.public_snapshot ?? {},
+      public_snapshot: category.public_snapshot ?? {},
+    }));
+
+  const missingProcedures = tree.procedures
+    .filter(
+      (procedure) =>
+        !existingProcedureKeys.has(
+          `${procedure.category_slug}::${procedure.slug}`,
+        ),
+    )
+    .map((procedure) => ({
+      category_slug: procedure.category_slug,
+      slug: procedure.slug,
+      title: procedure.title,
+      subtitle: procedure.subtitle ?? {},
+      summary: procedure.summary,
+      what_is_it: procedure.what_is_it,
+      why_you_may_need_it: procedure.why_you_may_need_it,
+      how_to_do_it: procedure.how_to_do_it,
+      required_documents: procedure.required_documents,
+      optional_documents: procedure.optional_documents,
+      warnings: procedure.warnings,
+      common_mistakes: procedure.common_mistakes,
+      proof_to_keep: procedure.proof_to_keep,
+      faq: procedure.faq,
+      official_links: procedure.official_links,
+      status: procedure.status,
+      sort_order: procedure.sort_order,
+      is_active: procedure.is_active,
+      is_premium: procedure.is_premium,
+      verification_status: procedure.verification_status,
+      tags: procedure.tags ?? [],
+      synonyms: procedure.synonyms ?? [],
+      searchable_keywords: procedure.searchable_keywords ?? [],
+      monetization_type: procedure.monetization_type ?? "free",
+      allow_single_unlock: procedure.allow_single_unlock ?? true,
+      single_unlock_price_cents: procedure.single_unlock_price_cents ?? null,
+      single_unlock_currency: procedure.single_unlock_currency ?? "EUR",
+      premium_reason: procedure.premium_reason ?? {},
+      premium_teaser: procedure.premium_teaser ?? {},
+      metadata: procedure.public_snapshot ?? {},
+      public_snapshot: procedure.public_snapshot ?? {},
+    }));
+
+  if (missingCategories.length > 0) {
+    await supabase.from("ufficio_cms_categories").insert(missingCategories);
+  }
+
+  if (missingProcedures.length > 0) {
+    await supabase.from("ufficio_cms_procedures").insert(missingProcedures);
+  }
+
+  if (missingCategories.length > 0 || missingProcedures.length > 0) {
+    await supabase.from("ufficio_admin_audit_logs").insert({
+      action: "auto_bootstrap_missing_bundled_content",
+      target_table: "ufficio_cms_categories",
+      target_id: null,
+      metadata: {
+        categoriesInserted: missingCategories.map((item) => item.slug),
+        proceduresInserted: missingProcedures.map(
+          (item) => `${item.category_slug}::${item.slug}`,
+        ),
+      },
+    });
+  }
+}
+
+export async function getAdminContentTree(
+  supabase: any,
+  options?: { bootstrapIfEmpty?: boolean },
+): Promise<AdminContentTree> {
+  const bundled = await getBundledContentTree();
   try {
+    if (options?.bootstrapIfEmpty) {
+      try {
+        await bootstrapBundledContent(supabase, bundled);
+      } catch {
+        // Keep existing content visible even if sync repair fails.
+      }
+    }
     const categories = await getCategoriesFromSupabase(supabase);
     if (categories.length > 0) {
       const procedures = await getProceduresFromSupabase(supabase);
@@ -232,28 +460,40 @@ export async function getAdminContentTree(supabase: any): Promise<AdminContentTr
     // Fall through to bundled content.
   }
 
-  return getBundledContentTree();
+  return bundled;
 }
 
-export async function getAdminCategories(supabase: any) {
-  const tree = await getAdminContentTree(supabase);
+export async function getAdminCategories(
+  supabase: any,
+  options?: { bootstrapIfEmpty?: boolean },
+) {
+  const tree = await getAdminContentTree(supabase, options);
   return tree.categories;
 }
 
-export async function getAdminCategoryBySlug(supabase: any, slug: string) {
-  const tree = await getAdminContentTree(supabase);
+export async function getAdminCategoryBySlug(
+  supabase: any,
+  slug: string,
+  options?: { bootstrapIfEmpty?: boolean },
+) {
+  const tree = await getAdminContentTree(supabase, options);
   return tree.categories.find((category) => category.slug === slug) ?? null;
 }
 
 export async function getAdminProceduresByCategorySlug(
   supabase: any,
   categorySlug: string,
+  options?: { bootstrapIfEmpty?: boolean },
 ) {
-  const tree = await getAdminContentTree(supabase);
+  const tree = await getAdminContentTree(supabase, options);
   return tree.procedures.filter((procedure) => procedure.category_slug === categorySlug);
 }
 
-export async function getAdminProcedureBySlug(supabase: any, slug: string) {
-  const tree = await getAdminContentTree(supabase);
+export async function getAdminProcedureBySlug(
+  supabase: any,
+  slug: string,
+  options?: { bootstrapIfEmpty?: boolean },
+) {
+  const tree = await getAdminContentTree(supabase, options);
   return tree.procedures.find((procedure) => procedure.slug === slug) ?? null;
 }

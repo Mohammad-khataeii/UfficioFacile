@@ -1,8 +1,12 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { getAdminCategoryBySlug } from "@/lib/content/load-content-tree";
+import {
+  getAdminCategoryBySlug,
+  getAdminProceduresByCategorySlug,
+} from "@/lib/content/load-content-tree";
 import { upsertCmsCategory } from "@/lib/db/mutations";
 
 export default async function ContentCategoryDetailPage({
@@ -12,7 +16,12 @@ export default async function ContentCategoryDetailPage({
 }) {
   const admin = await requireAdmin("content.read");
   const { slug } = await params;
-  const category = await getAdminCategoryBySlug(admin.supabase, slug);
+  const category = await getAdminCategoryBySlug(admin.supabase, slug, {
+    bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
+  });
+  const procedures = await getAdminProceduresByCategorySlug(admin.supabase, slug, {
+    bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
+  });
   if (!category) notFound();
 
   return (
@@ -37,6 +46,12 @@ export default async function ContentCategoryDetailPage({
             <div><label>Verification</label><select name="verificationStatus" defaultValue={category.verification_status}><option value="verified">verified</option><option value="needsReview">needsReview</option><option value="unverified">unverified</option></select></div>
             <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="isActive" defaultChecked={category.is_active} /><span>Active</span></label>
             <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="isPremium" defaultChecked={category.is_premium} /><span>Premium</span></label>
+            <div><label>Monetization type</label><select name="monetizationType" defaultValue={(category as any).monetization_type ?? (category.is_premium ? "premium_money_value" : "free")}><option value="free">free</option><option value="premium">premium</option><option value="premium_money_value">premium_money_value</option><option value="premium_financial_strategy">premium_financial_strategy</option><option value="premium_comparison_tool">premium_comparison_tool</option></select></div>
+            <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="allowSingleUnlock" defaultChecked={(category as any).allow_single_unlock ?? true} /><span>Allow single unlock</span></label>
+            <div><label>Single unlock price (cents)</label><input name="singleUnlockPriceCents" defaultValue={(category as any).single_unlock_price_cents ?? ""} /></div>
+            <div><label>Tags</label><textarea name="tags" rows={4} defaultValue={(category.tags ?? []).join("\n")} /></div>
+            <div><label>Synonyms</label><textarea name="synonyms" rows={5} defaultValue={(category.synonyms ?? []).join("\n")} /></div>
+            <div><label>Search keywords</label><textarea name="searchableKeywords" rows={5} defaultValue={(category.searchable_keywords ?? []).join("\n")} /></div>
             <div><label>Admin notes</label><textarea name="adminNotes" rows={8} defaultValue={category.admin_notes ?? ""} /></div>
           </div>
           <div className="space-y-4">
@@ -51,6 +66,8 @@ export default async function ContentCategoryDetailPage({
             <div><label>Description (EN)</label><textarea name="descriptionEn" rows={6} defaultValue={category.description?.en ?? ""} /></div>
             <div><label>Description (IT)</label><textarea name="descriptionIt" rows={4} defaultValue={category.description?.it ?? ""} /></div>
             <div><label>Description (FR)</label><textarea name="descriptionFr" rows={4} defaultValue={category.description?.fr ?? ""} /></div>
+            <div><label>Premium teaser (EN)</label><textarea name="premiumTeaserEn" rows={4} defaultValue={(category as any).premium_teaser?.en ?? category.description?.en ?? ""} /></div>
+            <div><label>Premium reason (EN)</label><textarea name="premiumReasonEn" rows={4} defaultValue={(category as any).premium_reason?.en ?? ""} /></div>
           </div>
           <div className="xl:col-span-2">
             <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
@@ -58,6 +75,31 @@ export default async function ContentCategoryDetailPage({
             </button>
           </div>
         </form>
+      </section>
+
+      <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-slate-900">Procedures in this category</h3>
+          <span className="text-sm text-slate-500">{procedures.length} items</span>
+        </div>
+        <div className="mt-4 grid gap-3">
+          {procedures.map((procedure) => (
+            <div
+              key={procedure.slug}
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3"
+            >
+              <div>
+                <div className="font-medium text-slate-900">
+                  {procedure.title?.en || procedure.slug}
+                </div>
+                <div className="text-sm text-slate-500">{procedure.slug}</div>
+              </div>
+              <Link className="text-sm font-medium text-slate-900" href={`/content/procedures/${procedure.slug}`}>
+                Open
+              </Link>
+            </div>
+          ))}
+        </div>
       </section>
     </AdminShell>
   );

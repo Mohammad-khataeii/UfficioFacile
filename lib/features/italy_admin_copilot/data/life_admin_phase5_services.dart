@@ -41,8 +41,10 @@ class LocalAppLanguageRepository {
     switch (raw) {
       case 'it':
       case 'en':
+      case 'es':
       case 'fa':
       case 'fr':
+      case 'ar':
         return raw!;
       default:
         return _fallbackLanguageCode;

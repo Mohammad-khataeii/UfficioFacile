@@ -289,7 +289,7 @@ void main() {
       expect(await service.getCurrentPlan(), UfficioPlan.free);
     });
 
-    test('beta mode allows pro feature', () async {
+    test('default paywall blocks premium feature for free users', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       final service = UfficioPremiumEntitlementService(
@@ -298,8 +298,8 @@ void main() {
         analytics: LocalAnalyticsService(prefs),
       );
       final decision = await service.canUseProcedure('HIGH_BILL_COMPLAINT');
-      expect(decision.allowed, isTrue);
-      expect(decision.blockedByBeta, isTrue);
+      expect(decision.allowed, isFalse);
+      expect(decision.blockedByBeta, isFalse);
     });
 
     test('paywall enabled and beta disabled blocks pro feature', () async {
@@ -339,8 +339,8 @@ void main() {
       });
       final prefs = await SharedPreferences.getInstance();
       final config = await LocalPremiumConfigRepository(prefs).getConfig();
-      expect(config.freePackLimit, 5);
-      expect(config.betaModeEnabled, isTrue);
+      expect(config.freePackLimit, 3);
+      expect(config.betaModeEnabled, isFalse);
     });
 
     test('local debug pro activates and deactivates pro', () async {

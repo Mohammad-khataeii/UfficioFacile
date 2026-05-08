@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'localized_text.dart';
+
 class AppLocalizations {
   AppLocalizations(this.languageCode);
 
@@ -29,25 +31,20 @@ class AppLocalizations {
   }
 
   String localizedMap(Map<String, dynamic> values, {String fallback = ''}) {
-    final normalized = values.map(
-      (key, value) => MapEntry(key.toString(), value?.toString() ?? ''),
+    return resolveLocalizedText(
+      values,
+      languageCode,
+      fallback: fallback,
     );
-    return normalized[languageCode] ??
-        normalized['en'] ??
-        normalized['it'] ??
-        normalized['fr'] ??
-        normalized['es'] ??
-        normalized['fa'] ??
-        normalized['ar'] ??
-        fallback;
   }
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'app_title': 'UfficioFacile',
-      'hero_title': 'Handle Italian admin without starting from zero.',
+      'hero_title':
+          'Tell us the problem. We’ll find the right Italian procedure.',
       'hero_subtitle':
-          'Choose a problem, answer guided questions, and generate a formal Italian message, checklist, and follow-up.',
+          'Use normal words: bills, ASL, rent contract, university, INPS, documents. UfficioFacile matches your issue with the right category, steps, documents, and contacts.',
       'start_problem': 'Start from my problem',
       'browse_procedures': 'Browse procedures',
       'utilities_bills': 'Bills and utilities',
@@ -170,12 +167,79 @@ class AppLocalizations {
       'cta_payment_unavailable':
           'Premium payments are not available yet. Contact support.',
       'import_bundled_content': 'Import bundled content into CMS',
+      'premium_locked_title': 'Premium guide',
+      'unlock_this_guide_only': 'Unlock this guide only',
+      'single_unlock_available': 'Single unlock available',
+      'payment_not_active_yet': 'Payment is not active yet.',
+      'upgrade_to_premium': 'Upgrade to Premium',
+      'my_italy_life': 'My Italy Life',
+      'checklist_progress': 'Checklist progress',
+      'deadlines_short': 'Deadlines',
+      'city_pack_title': 'City pack',
+      'estimated_expenses': 'Estimated expenses',
+      'cost_dashboard_summary':
+          'Track fees, refunds, installments, and disputed amounts.',
+      'category_health_asl': 'Health / ASL',
+      'category_housing_rent': 'Housing / Rent',
+      'category_utilities': 'Bills & Utilities',
+      'category_canone_rai': 'Canone RAI',
+      'category_telecom': 'Internet & Phone',
+      'category_public_office': 'Comune / Registry',
+      'category_work_inps': 'Work / INPS',
+      'category_university': 'University / Student',
+      'category_general': 'General',
+      'category_general_help': 'General admin help',
+      'trust_title': 'Trust',
+      'problem_input_placeholder':
+          'Describe the problem in your own words.',
+      'search_placeholder_generic': 'Search by title, tag, or description...',
+      'problem_example_1': 'I want to remove Canone RAI from my bill',
+      'problem_example_2': 'My gas bill is too high',
+      'problem_example_3': 'I need to change my family doctor',
+      'problem_example_4': 'I want to cancel internet',
+      'problem_example_5': 'My landlord is not fixing the heating',
+      'problem_example_6': 'I need NASpI',
+      'all_label': 'All',
+      'no_procedures_yet_title': 'No procedures yet',
+      'no_procedures_yet_body':
+          'This category does not have active procedures yet.',
+      'onboarding_scope_title': 'What can UfficioFacile help with?',
+      'onboarding_scope_body':
+          'Bills, Canone RAI, health, rent, telecom, work, university, benefits, loans, refunds, and public-office tasks.',
+      'privacy_body':
+          'UfficioFacile helps you organize steps and write clearly. Always verify official rules, offices, deadlines, and eligibility before you send anything.',
+      'optional_profile_setup': 'Optional profile setup',
+      'full_name': 'Full name',
+      'codice_fiscale': 'Codice fiscale',
+      'city_label': 'City',
+      'plan_title': 'Your plan',
+      'plan_intro': 'Choose the level of help that fits your situation.',
+      'current_plan_label': 'Current plan',
+      'free_plan_label': 'Free',
+      'plus_plan_label': 'Plus',
+      'premium_plan_label': 'Premium',
+      'one_shot_consultancy_label': 'One-shot consultancy',
+      'admin_grant_label': 'Admin grant',
+      'free_plan_desc':
+          'Public categories, intelligent search, and basic guidance with limits.',
+      'plus_plan_desc':
+          'More packs, more saved requests, larger dashboards, and priority requests.',
+      'premium_plan_desc':
+          'All premium guides, all money-saving categories, full vaults, advanced scanner, reminders, and private help.',
+      'paywall_open_plan': 'Open plans',
+      'paywall_maybe_later': 'Maybe later',
+      'payment_setup_message':
+          'Purchase options appear when billing is configured for your workspace.',
+      'already_unlocked': 'Already unlocked',
+      'of_label': 'of',
+      'packs_used_this_month': 'packs used this month',
     },
     'it': {
       'app_title': 'UfficioFacile',
-      'hero_title': 'Gestisci la burocrazia italiana senza partire da zero.',
+      'hero_title':
+          'Raccontaci il problema. Troviamo la procedura italiana giusta.',
       'hero_subtitle':
-          'Scegli un problema, rispondi a domande guidate e genera un messaggio formale in italiano, una checklist e il follow-up.',
+          'Usa parole normali: bollette, ASL, contratto di affitto, università, INPS, documenti. UfficioFacile collega il tuo problema alla categoria, ai passaggi, ai documenti e ai contatti giusti.',
       'start_problem': 'Parti dal mio problema',
       'browse_procedures': 'Esplora procedure',
       'utilities_bills': 'Bollette e utenze',
@@ -300,12 +364,80 @@ class AppLocalizations {
       'cta_payment_unavailable':
           'I pagamenti Premium non sono ancora disponibili. Contatta il supporto.',
       'import_bundled_content': 'Importa i contenuti inclusi nel CMS',
+      'premium_locked_title': 'Guida Premium',
+      'unlock_this_guide_only': 'Sblocca solo questa guida',
+      'single_unlock_available': 'Sblocco singolo disponibile',
+      'payment_not_active_yet': 'Il pagamento non è ancora attivo.',
+      'upgrade_to_premium': 'Passa a Premium',
+      'my_italy_life': 'La mia vita in Italia',
+      'checklist_progress': 'Avanzamento checklist',
+      'deadlines_short': 'Scadenze',
+      'city_pack_title': 'Pacchetto città',
+      'estimated_expenses': 'Spese stimate',
+      'cost_dashboard_summary':
+          'Controlla costi, rimborsi, rate e importi contestati.',
+      'category_health_asl': 'Salute / ASL',
+      'category_housing_rent': 'Casa / Affitto',
+      'category_utilities': 'Bollette e utenze',
+      'category_canone_rai': 'Canone RAI',
+      'category_telecom': 'Internet e telefono',
+      'category_public_office': 'Comune / Anagrafe',
+      'category_work_inps': 'Lavoro / INPS',
+      'category_university': 'Università / Studenti',
+      'category_general': 'Generale',
+      'category_general_help': 'Aiuto amministrativo generale',
+      'trust_title': 'Affidabilità',
+      'problem_input_placeholder':
+          'Descrivi il problema con parole tue.',
+      'search_placeholder_generic':
+          'Cerca per titolo, tag o descrizione...',
+      'problem_example_1': 'Voglio togliere il Canone RAI dalla bolletta',
+      'problem_example_2': 'La bolletta del gas è troppo alta',
+      'problem_example_3': 'Devo cambiare medico di base',
+      'problem_example_4': 'Voglio disdire internet',
+      'problem_example_5': 'Il proprietario non aggiusta il riscaldamento',
+      'problem_example_6': 'Ho bisogno della NASpI',
+      'all_label': 'Tutto',
+      'no_procedures_yet_title': 'Nessuna procedura disponibile',
+      'no_procedures_yet_body':
+          'Questa categoria non ha ancora procedure attive.',
+      'onboarding_scope_title': 'Con cosa può aiutarti UfficioFacile?',
+      'onboarding_scope_body':
+          'Bollette, Canone RAI, sanità, affitto, telecom, lavoro, università, bonus, prestiti, rimborsi e pratiche con uffici pubblici.',
+      'privacy_body':
+          'UfficioFacile ti aiuta a organizzare i passaggi e scrivere in modo chiaro. Verifica sempre regole ufficiali, uffici, scadenze e requisiti prima di inviare qualcosa.',
+      'optional_profile_setup': 'Profilo facoltativo',
+      'full_name': 'Nome completo',
+      'codice_fiscale': 'Codice fiscale',
+      'city_label': 'Città',
+      'plan_title': 'Il tuo piano',
+      'plan_intro': 'Scegli il livello di aiuto più adatto alla tua situazione.',
+      'current_plan_label': 'Piano attuale',
+      'free_plan_label': 'Free',
+      'plus_plan_label': 'Plus',
+      'premium_plan_label': 'Premium',
+      'one_shot_consultancy_label': 'Consulenza una tantum',
+      'admin_grant_label': 'Concessione admin',
+      'free_plan_desc':
+          'Categorie pubbliche, ricerca intelligente e guide di base con limiti.',
+      'plus_plan_desc':
+          'Più pack, più richieste salvate, dashboard più ampie e richieste prioritarie.',
+      'premium_plan_desc':
+          'Tutte le guide Premium, tutte le categorie che fanno risparmiare, archivi completi, scanner avanzato, promemoria e aiuto privato.',
+      'paywall_open_plan': 'Apri i piani',
+      'paywall_maybe_later': 'Forse più tardi',
+      'payment_setup_message':
+          'Le opzioni di acquisto compaiono quando la fatturazione è configurata per il tuo workspace.',
+      'already_unlocked': 'Già sbloccato',
+      'of_label': 'di',
+      'packs_used_this_month': 'pack usati questo mese',
     },
     'fa': {
       'app_title': 'UfficioFacile',
-      'hero_title': 'کارهای اداری ایتالیا را بدون شروع از صفر مدیریت کنید.',
+      'hero_title':
+          'مشکل را بگو. ما روند اداری درست در ایتالیا را پیدا می‌کنیم.',
       'hero_subtitle':
-          'مشکل را انتخاب کنید، به پرسش‌های مرحله‌ای پاسخ دهید و متن رسمی، چک‌لیست و پیگیری بسازید.',
+          'با کلمات عادی بنویس: قبض، ASL، قرارداد اجاره، دانشگاه، INPS، مدارک. اوفیتسیو فاسیله مشکل تو را به دسته‌بندی، مراحل، مدارک و تماس‌های درست وصل می‌کند.',
       'start_problem': 'از مشکل من شروع کن',
       'browse_procedures': 'مرور فرایندها',
       'utilities_bills': 'قبض‌ها و خدمات',
@@ -427,12 +559,79 @@ class AppLocalizations {
       'cta_payment_unavailable':
           'پرداخت‌های پریمیوم هنوز فعال نیستند. با پشتیبانی تماس بگیرید.',
       'import_bundled_content': 'وارد کردن محتوای پیش‌فرض به CMS',
+      'premium_locked_title': 'راهنمای پریمیوم',
+      'unlock_this_guide_only': 'فقط همین راهنما را باز کن',
+      'single_unlock_available': 'باز کردن تکی موجود است',
+      'payment_not_active_yet': 'پرداخت هنوز فعال نیست.',
+      'upgrade_to_premium': 'ارتقا به پریمیوم',
+      'my_italy_life': 'زندگی من در ایتالیا',
+      'checklist_progress': 'پیشرفت چک‌لیست',
+      'deadlines_short': 'مهلت‌ها',
+      'city_pack_title': 'بسته شهر',
+      'estimated_expenses': 'هزینه‌های تخمینی',
+      'cost_dashboard_summary':
+          'کارمزدها، بازپرداخت‌ها، قسط‌ها و مبالغ مورد اختلاف را پیگیری کن.',
+      'category_health_asl': 'سلامت / ASL',
+      'category_housing_rent': 'خانه / اجاره',
+      'category_utilities': 'قبض‌ها و خدمات',
+      'category_canone_rai': 'Canone RAI',
+      'category_telecom': 'اینترنت و تلفن',
+      'category_public_office': 'Comune / ثبت احوال',
+      'category_work_inps': 'کار / INPS',
+      'category_university': 'دانشگاه / دانشجو',
+      'category_general': 'عمومی',
+      'category_general_help': 'راهنمای اداری عمومی',
+      'trust_title': 'اعتماد',
+      'problem_input_placeholder': 'مشکل را با زبان خودت توضیح بده.',
+      'search_placeholder_generic':
+          'بر اساس عنوان، برچسب یا توضیح جستجو کن...',
+      'problem_example_1': 'می‌خواهم Canone RAI را از قبض حذف کنم',
+      'problem_example_2': 'قبض گاز خیلی زیاد است',
+      'problem_example_3': 'باید پزشک خانواده را عوض کنم',
+      'problem_example_4': 'می‌خواهم اینترنت را لغو کنم',
+      'problem_example_5': 'صاحبخانه گرمایش را تعمیر نمی‌کند',
+      'problem_example_6': 'به NASpI نیاز دارم',
+      'all_label': 'همه',
+      'no_procedures_yet_title': 'هنوز فرایندی نیست',
+      'no_procedures_yet_body':
+          'هنوز هیچ فرایند فعالی در این دسته وجود ندارد.',
+      'onboarding_scope_title': 'UfficioFacile در چه چیزهایی کمک می‌کند؟',
+      'onboarding_scope_body':
+          'قبض‌ها، Canone RAI، درمان، اجاره، مخابرات، کار، دانشگاه، بونوس‌ها، وام‌ها، بازپرداخت‌ها و کارهای اداری با اداره‌های عمومی.',
+      'privacy_body':
+          'UfficioFacile به تو کمک می‌کند مراحل را مرتب کنی و واضح بنویسی. قبل از ارسال هر چیزی، همیشه قوانین رسمی، اداره مربوط، مهلت‌ها و شرایط را بررسی کن.',
+      'optional_profile_setup': 'تنظیم اختیاری پروفایل',
+      'full_name': 'نام کامل',
+      'codice_fiscale': 'Codice fiscale',
+      'city_label': 'شهر',
+      'plan_title': 'پلن شما',
+      'plan_intro': 'سطح کمکی را انتخاب کن که با وضعیت تو هماهنگ باشد.',
+      'current_plan_label': 'پلن فعلی',
+      'free_plan_label': 'رایگان',
+      'plus_plan_label': 'پلاس',
+      'premium_plan_label': 'پریمیوم',
+      'one_shot_consultancy_label': 'مشاوره یک‌باره',
+      'admin_grant_label': 'امتیاز مدیریتی',
+      'free_plan_desc':
+          'دسته‌های عمومی، جستجوی هوشمند و راهنمای پایه با محدودیت.',
+      'plus_plan_desc':
+          'بسته‌های بیشتر، درخواست‌های ذخیره‌شده بیشتر، داشبوردهای بزرگ‌تر و درخواست‌های اولویت‌دار.',
+      'premium_plan_desc':
+          'همه راهنماهای پریمیوم، همه دسته‌های صرفه‌جویی مالی، آرشیو کامل، اسکن پیشرفته، یادآورها و کمک خصوصی.',
+      'paywall_open_plan': 'دیدن پلن‌ها',
+      'paywall_maybe_later': 'بعداً',
+      'payment_setup_message':
+          'وقتی پرداخت برای این محیط فعال شود، گزینه‌های خرید اینجا نمایش داده می‌شوند.',
+      'already_unlocked': 'قبلاً باز شده',
+      'of_label': 'از',
+      'packs_used_this_month': 'بسته استفاده شده در این ماه',
     },
     'fr': {
       'app_title': 'UfficioFacile',
-      'hero_title': 'Gérez les démarches italiennes sans repartir de zéro.',
+      'hero_title':
+          'Dites-nous le problème. Nous trouvons la bonne démarche italienne.',
       'hero_subtitle':
-          'Choisissez un problème, répondez aux questions guidées et générez un message formel, une checklist et un suivi.',
+          'Utilisez des mots simples : factures, ASL, bail, université, INPS, documents. UfficioFacile relie votre besoin à la bonne catégorie, aux étapes, aux documents et aux contacts utiles.',
       'start_problem': 'Partir de mon problème',
       'browse_procedures': 'Parcourir les démarches',
       'utilities_bills': 'Factures et contrats',
@@ -556,6 +755,245 @@ class AppLocalizations {
       'cta_payment_unavailable':
           'Les paiements Premium ne sont pas encore disponibles. Contactez le support.',
       'import_bundled_content': 'Importer le contenu intégré dans le CMS',
+      'premium_locked_title': 'Guide Premium',
+      'unlock_this_guide_only': 'Débloquer ce guide seulement',
+      'single_unlock_available': 'Déblocage unique disponible',
+      'payment_not_active_yet': 'Le paiement n’est pas encore actif.',
+      'upgrade_to_premium': 'Passer à Premium',
+      'my_italy_life': 'Ma vie en Italie',
+      'checklist_progress': 'Progression de la checklist',
+      'deadlines_short': 'Délais',
+      'city_pack_title': 'Pack ville',
+      'estimated_expenses': 'Dépenses estimées',
+      'cost_dashboard_summary':
+          'Suivez les frais, remboursements, mensualités et montants contestés.',
+      'category_health_asl': 'Santé / ASL',
+      'category_housing_rent': 'Logement / Loyer',
+      'category_utilities': 'Factures et contrats',
+      'category_canone_rai': 'Canone RAI',
+      'category_telecom': 'Internet et téléphone',
+      'category_public_office': 'Commune / Registre',
+      'category_work_inps': 'Travail / INPS',
+      'category_university': 'Université / Étudiant',
+      'category_general': 'Général',
+      'category_general_help': 'Aide administrative générale',
+      'trust_title': 'Confiance',
+      'problem_input_placeholder':
+          'Décrivez le problème avec vos propres mots.',
+      'search_placeholder_generic':
+          'Chercher par titre, tag ou description...',
+      'problem_example_1':
+          'Je veux retirer le Canone RAI de ma facture',
+      'problem_example_2': 'Ma facture de gaz est trop élevée',
+      'problem_example_3': 'Je dois changer de médecin traitant',
+      'problem_example_4': 'Je veux résilier internet',
+      'problem_example_5':
+          'Mon propriétaire ne répare pas le chauffage',
+      'problem_example_6': 'J’ai besoin de la NASpI',
+      'all_label': 'Tout',
+      'no_procedures_yet_title': 'Aucune démarche pour le moment',
+      'no_procedures_yet_body':
+          'Cette catégorie ne contient pas encore de démarches actives.',
+      'onboarding_scope_title': 'Avec quoi UfficioFacile peut vous aider ?',
+      'onboarding_scope_body':
+          'Factures, Canone RAI, santé, logement, télécoms, travail, université, aides, prêts, remboursements et démarches auprès des bureaux publics.',
+      'privacy_body':
+          'UfficioFacile vous aide à organiser les étapes et à écrire clairement. Vérifiez toujours les règles officielles, les bureaux, les délais et les conditions avant tout envoi.',
+      'optional_profile_setup': 'Profil facultatif',
+      'full_name': 'Nom complet',
+      'codice_fiscale': 'Codice fiscale',
+      'city_label': 'Ville',
+      'plan_title': 'Votre offre',
+      'plan_intro': 'Choisissez le niveau d’aide qui convient à votre situation.',
+      'current_plan_label': 'Offre actuelle',
+      'free_plan_label': 'Gratuit',
+      'plus_plan_label': 'Plus',
+      'premium_plan_label': 'Premium',
+      'one_shot_consultancy_label': 'Consultation ponctuelle',
+      'admin_grant_label': 'Attribution admin',
+      'free_plan_desc':
+          'Catégories publiques, recherche intelligente et guides de base avec limites.',
+      'plus_plan_desc':
+          'Plus de packs, plus de demandes enregistrées, tableaux élargis et demandes prioritaires.',
+      'premium_plan_desc':
+          'Tous les guides Premium, toutes les catégories qui font économiser, coffres complets, scanner avancé, rappels et aide privée.',
+      'paywall_open_plan': 'Voir les offres',
+      'paywall_maybe_later': 'Plus tard',
+      'payment_setup_message':
+          'Les options d’achat apparaissent quand la facturation est configurée pour votre espace.',
+      'already_unlocked': 'Déjà débloqué',
+      'of_label': 'sur',
+      'packs_used_this_month': 'packs utilisés ce mois-ci',
+    },
+    'es': {
+      'app_title': 'UfficioFacile',
+      'hero_title':
+          'Cuéntanos el problema. Encontramos el trámite italiano correcto.',
+      'hero_subtitle':
+          'Usa palabras normales: facturas, ASL, contrato de alquiler, universidad, INPS, documentos. UfficioFacile conecta tu problema con la categoría, los pasos, los documentos y los contactos correctos.',
+      'start_problem': 'Empezar por mi problema',
+      'browse_procedures': 'Explorar trámites',
+      'utilities_bills': 'Facturas y servicios',
+      'saved_requests': 'Solicitudes guardadas',
+      'what_help': '¿En qué necesitas ayuda?',
+      'scan_situation': 'Analizar mi situación',
+      'document_vault': 'Archivo de documentos',
+      'contacts_directory': 'Directorio de contactos',
+      'official_links': 'Enlaces oficiales',
+      'cost_dashboard': 'Panel de costes',
+      'premium_locked_title': 'Guía Premium',
+      'unlock_this_guide_only': 'Desbloquear solo esta guía',
+      'single_unlock_available': 'Desbloqueo único disponible',
+      'payment_not_active_yet': 'El pago todavía no está activo.',
+      'upgrade_to_premium': 'Pasar a Premium',
+      'my_italy_life': 'Mi vida en Italia',
+      'checklist_progress': 'Progreso de la lista',
+      'deadlines_short': 'Plazos',
+      'city_pack_title': 'Paquete de ciudad',
+      'estimated_expenses': 'Gastos estimados',
+      'cost_dashboard_summary':
+          'Sigue tasas, reembolsos, cuotas e importes en disputa.',
+      'category_health_asl': 'Salud / ASL',
+      'category_housing_rent': 'Vivienda / Alquiler',
+      'category_utilities': 'Facturas y servicios',
+      'category_canone_rai': 'Canone RAI',
+      'category_telecom': 'Internet y teléfono',
+      'category_public_office': 'Comune / Registro',
+      'category_work_inps': 'Trabajo / INPS',
+      'category_university': 'Universidad / Estudiante',
+      'category_general': 'General',
+      'category_general_help': 'Ayuda administrativa general',
+      'trust_title': 'Confianza',
+      'problem_input_placeholder':
+          'Describe el problema con tus propias palabras.',
+      'search_placeholder_generic':
+          'Buscar por título, etiqueta o descripción...',
+      'problem_example_1': 'Quiero quitar el Canone RAI de mi factura',
+      'problem_example_2': 'Mi factura de gas es demasiado alta',
+      'problem_example_3': 'Necesito cambiar de médico de cabecera',
+      'problem_example_4': 'Quiero cancelar internet',
+      'problem_example_5': 'Mi casero no arregla la calefacción',
+      'problem_example_6': 'Necesito la NASpI',
+      'all_label': 'Todo',
+      'no_procedures_yet_title': 'Todavía no hay trámites',
+      'no_procedures_yet_body':
+          'Esta categoría todavía no tiene trámites activos.',
+      'onboarding_scope_title': '¿Con qué puede ayudarte UfficioFacile?',
+      'onboarding_scope_body':
+          'Facturas, Canone RAI, salud, alquiler, telecomunicaciones, trabajo, universidad, ayudas, préstamos, reembolsos y gestiones con oficinas públicas.',
+      'privacy_title': 'Privacidad y aviso',
+      'privacy_body':
+          'UfficioFacile te ayuda a organizar los pasos y escribir con claridad. Verifica siempre las reglas oficiales, las oficinas, los plazos y los requisitos antes de enviar algo.',
+      'optional_profile_setup': 'Perfil opcional',
+      'full_name': 'Nombre completo',
+      'codice_fiscale': 'Codice fiscale',
+      'city_label': 'Ciudad',
+      'auth_email': 'Correo electrónico',
+      'plan_title': 'Tu plan',
+      'plan_intro': 'Elige el nivel de ayuda que mejor se adapte a tu situación.',
+      'current_plan_label': 'Plan actual',
+      'free_plan_label': 'Gratis',
+      'plus_plan_label': 'Plus',
+      'premium_plan_label': 'Premium',
+      'one_shot_consultancy_label': 'Consultoría puntual',
+      'admin_grant_label': 'Concesión admin',
+      'free_plan_desc':
+          'Categorías públicas, búsqueda inteligente y guías básicas con límites.',
+      'plus_plan_desc':
+          'Más packs, más solicitudes guardadas, paneles ampliados y solicitudes prioritarias.',
+      'premium_plan_desc':
+          'Todas las guías Premium, todas las categorías para ahorrar dinero, archivos completos, escáner avanzado, recordatorios y ayuda privada.',
+      'paywall_open_plan': 'Ver planes',
+      'paywall_maybe_later': 'Quizá más tarde',
+      'payment_setup_message':
+          'Las opciones de compra aparecen cuando la facturación está configurada para tu espacio.',
+      'already_unlocked': 'Ya desbloqueado',
+      'of_label': 'de',
+      'packs_used_this_month': 'packs usados este mes',
+    },
+    'ar': {
+      'app_title': 'UfficioFacile',
+      'hero_title': 'اشرح لنا المشكلة. وسنجد لك الإجراء الإيطالي المناسب.',
+      'hero_subtitle':
+          'استخدم كلمات عادية: فواتير، ASL، عقد إيجار، جامعة، INPS، مستندات. يربط UfficioFacile مشكلتك بالفئة والخطوات والمستندات وجهات الاتصال المناسبة.',
+      'start_problem': 'ابدأ من مشكلتي',
+      'browse_procedures': 'تصفح الإجراءات',
+      'utilities_bills': 'الفواتير والخدمات',
+      'saved_requests': 'الطلبات المحفوظة',
+      'what_help': 'ما الذي تحتاج إلى مساعدة فيه؟',
+      'scan_situation': 'افحص وضعي',
+      'document_vault': 'أرشيف المستندات',
+      'contacts_directory': 'دليل جهات الاتصال',
+      'official_links': 'الروابط الرسمية',
+      'cost_dashboard': 'لوحة التكاليف',
+      'premium_locked_title': 'دليل Premium',
+      'unlock_this_guide_only': 'افتح هذا الدليل فقط',
+      'single_unlock_available': 'فتح منفرد متاح',
+      'payment_not_active_yet': 'الدفع غير مفعل بعد.',
+      'upgrade_to_premium': 'الترقية إلى Premium',
+      'my_italy_life': 'حياتي في إيطاليا',
+      'checklist_progress': 'تقدم القائمة',
+      'deadlines_short': 'المواعيد',
+      'city_pack_title': 'حزمة المدينة',
+      'estimated_expenses': 'المصاريف المقدرة',
+      'cost_dashboard_summary':
+          'تابع الرسوم والاستردادات والأقساط والمبالغ المتنازع عليها.',
+      'category_health_asl': 'الصحة / ASL',
+      'category_housing_rent': 'السكن / الإيجار',
+      'category_utilities': 'الفواتير والخدمات',
+      'category_canone_rai': 'Canone RAI',
+      'category_telecom': 'الإنترنت والهاتف',
+      'category_public_office': 'البلدية / السجل',
+      'category_work_inps': 'العمل / INPS',
+      'category_university': 'الجامعة / الطالب',
+      'category_general': 'عام',
+      'category_general_help': 'مساعدة إدارية عامة',
+      'trust_title': 'الثقة',
+      'problem_input_placeholder': 'اشرح المشكلة بكلماتك.',
+      'search_placeholder_generic':
+          'ابحث حسب العنوان أو الوسم أو الوصف...',
+      'problem_example_1': 'أريد إزالة Canone RAI من الفاتورة',
+      'problem_example_2': 'فاتورة الغاز مرتفعة جداً',
+      'problem_example_3': 'أحتاج إلى تغيير طبيب الأسرة',
+      'problem_example_4': 'أريد إلغاء الإنترنت',
+      'problem_example_5': 'المالك لا يصلح التدفئة',
+      'problem_example_6': 'أحتاج إلى NASpI',
+      'all_label': 'الكل',
+      'no_procedures_yet_title': 'لا توجد إجراءات بعد',
+      'no_procedures_yet_body':
+          'لا تحتوي هذه الفئة على إجراءات نشطة حتى الآن.',
+      'onboarding_scope_title': 'في ماذا يمكن أن يساعدك UfficioFacile؟',
+      'onboarding_scope_body':
+          'الفواتير، Canone RAI، الصحة، الإيجار، الاتصالات، العمل، الجامعة، المساعدات، القروض، الاستردادات، والمعاملات مع الجهات العامة.',
+      'privacy_title': 'الخصوصية والتنبيه',
+      'privacy_body':
+          'يساعدك UfficioFacile على ترتيب الخطوات والكتابة بوضوح. تحقق دائماً من القواعد الرسمية والجهات والمواعيد والشروط قبل إرسال أي شيء.',
+      'optional_profile_setup': 'إعداد ملف شخصي اختياري',
+      'full_name': 'الاسم الكامل',
+      'codice_fiscale': 'الرمز الضريبي',
+      'city_label': 'المدينة',
+      'auth_email': 'البريد الإلكتروني',
+      'plan_title': 'خطتك',
+      'plan_intro': 'اختر مستوى المساعدة المناسب لوضعك.',
+      'current_plan_label': 'الخطة الحالية',
+      'free_plan_label': 'مجاني',
+      'plus_plan_label': 'Plus',
+      'premium_plan_label': 'Premium',
+      'one_shot_consultancy_label': 'استشارة لمرة واحدة',
+      'admin_grant_label': 'منحة إدارية',
+      'free_plan_desc':
+          'فئات عامة وبحث ذكي وإرشاد أساسي مع حدود استخدام.',
+      'plus_plan_desc':
+          'حزم أكثر، طلبات محفوظة أكثر، لوحات أكبر، وطلبات ذات أولوية.',
+      'premium_plan_desc':
+          'جميع الأدلة المميزة، كل الفئات التي تساعد على التوفير، أرشيفات كاملة، فحص متقدم، تذكيرات، ومساعدة خاصة.',
+      'paywall_open_plan': 'عرض الخطط',
+      'paywall_maybe_later': 'ربما لاحقاً',
+      'payment_setup_message':
+          'تظهر خيارات الشراء عندما يتم تفعيل الفوترة لمساحة العمل الخاصة بك.',
+      'already_unlocked': 'مفتوح بالفعل',
+      'of_label': 'من',
+      'packs_used_this_month': 'حزم مستخدمة هذا الشهر',
     },
   };
 }

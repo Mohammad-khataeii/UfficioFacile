@@ -8,7 +8,9 @@ import { getAdminContentTree } from "@/lib/content/load-content-tree";
 
 export default async function ContentProceduresPage() {
   const admin = await requireAdmin("content.read");
-  const tree = await getAdminContentTree(admin.supabase);
+  const tree = await getAdminContentTree(admin.supabase, {
+    bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
+  });
 
   return (
     <AdminShell email={admin.email} role={admin.role}>

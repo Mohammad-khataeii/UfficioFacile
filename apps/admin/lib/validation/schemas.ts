@@ -9,7 +9,15 @@ export const adminUserSchema = z.object({
 
 export const entitlementSchema = z.object({
   userId: z.string().uuid(),
-  plan: z.enum(["free", "pro", "consultant"]),
+  plan: z.enum([
+    "free",
+    "premium_monthly",
+    "premium_yearly",
+    "consultancy_one_shot",
+    "admin_grant",
+    "pro",
+    "consultant",
+  ]),
   status: z.string().min(1),
   premiumAccess: z.boolean(),
   freePackLimit: z.coerce.number().int().nonnegative(),
@@ -38,6 +46,12 @@ export const categorySchema = z.object({
   isPremium: z.boolean(),
   verificationStatus: z.enum(["verified", "needsReview", "unverified"]),
   adminNotes: z.string().optional(),
+  tags: z.string().optional(),
+  synonyms: z.string().optional(),
+  searchableKeywords: z.string().optional(),
+  monetizationType: z.string().optional(),
+  allowSingleUnlock: z.boolean().optional(),
+  singleUnlockPriceCents: z.coerce.number().int().optional(),
 });
 
 export const procedureSchema = z.object({
@@ -57,4 +71,10 @@ export const procedureSchema = z.object({
   isPremium: z.boolean(),
   verificationStatus: z.enum(["verified", "needsReview", "unverified"]),
   adminNotes: z.string().optional(),
+  tags: z.string().optional(),
+  synonyms: z.string().optional(),
+  searchableKeywords: z.string().optional(),
+  monetizationType: z.string().optional(),
+  allowSingleUnlock: z.boolean().optional(),
+  singleUnlockPriceCents: z.coerce.number().int().optional(),
 });

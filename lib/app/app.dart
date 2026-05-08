@@ -200,6 +200,12 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => const ProcedureSelectionScreen(),
                     );
+                  case AppRoutes.cmsCategoryDetail:
+                    final args = settings.arguments! as CmsCategoryRouteArgs;
+                    return MaterialPageRoute(
+                      builder: (_) =>
+                          CmsCategoryHubScreen(categorySlug: args.categorySlug),
+                    );
                   case AppRoutes.procedureDetail:
                     final args = settings.arguments! as ProcedureRouteArgs;
                     return MaterialPageRoute(

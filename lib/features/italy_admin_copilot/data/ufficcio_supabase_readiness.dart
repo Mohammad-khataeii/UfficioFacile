@@ -999,7 +999,8 @@ class SupabaseUfficcioEntitlementRepository
                 ?.toIso8601String(),
             'premium_since': entitlement.currentPeriodStart?.toIso8601String(),
             'metadata': {
-              'generatedPacksUsedThisMonth': entitlement.generatedPacksUsedThisMonth,
+              'generatedPacksUsedThisMonth':
+                  entitlement.generatedPacksUsedThisMonth,
             },
           })
           .select()
@@ -1181,9 +1182,7 @@ class MergedUfficcioEntitlementRepository
   }
 
   @override
-  Future<UfficcioEntitlement> saveEntitlement(
-    UfficcioEntitlement entitlement,
-  ) {
+  Future<UfficcioEntitlement> saveEntitlement(UfficcioEntitlement entitlement) {
     return localRepository.saveEntitlement(entitlement);
   }
 }

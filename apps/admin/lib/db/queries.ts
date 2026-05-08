@@ -36,9 +36,10 @@ export async function getDashboardMetrics(supabase: any) {
     categoryCount,
     procedureCount,
     blockCount,
+    planCount,
   ] = await Promise.all([
     countRows(supabase, "ufficcio_profiles"),
-    countRows(supabase, "ufficcio_entitlements", {
+    countRows(supabase, "ufficio_user_entitlements", {
       column: "premium_access",
       value: true,
     }),
@@ -58,6 +59,7 @@ export async function getDashboardMetrics(supabase: any) {
     countRows(supabase, "ufficio_cms_categories"),
     countRows(supabase, "ufficio_cms_procedures"),
     countRows(supabase, "ufficio_cms_content_blocks"),
+    countRows(supabase, "ufficio_plan_products"),
   ]);
 
   return {
@@ -69,6 +71,7 @@ export async function getDashboardMetrics(supabase: any) {
     cmsCategories: categoryCount,
     cmsProcedures: procedureCount,
     cmsBlocks: blockCount,
+    planProducts: planCount,
     auditRows: auditRows.data ?? [],
   };
 }
@@ -112,31 +115,40 @@ export async function getUserBundle(supabase: any, userId: string) {
     profile,
     entitlement,
     requests,
+    usageCounters,
     consultancy,
     problemRequests,
     costItems,
     contacts,
     documents,
+    unlocks,
+    paymentEvents,
   ] = await Promise.all([
     supabase.from("ufficcio_profiles").select("*").eq("user_id", userId).maybeSingle(),
-    supabase.from("ufficcio_entitlements").select("*").eq("user_id", userId).maybeSingle(),
+    supabase.from("ufficio_user_entitlements").select("*").eq("user_id", userId).maybeSingle(),
     supabase.from("ufficcio_requests").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    supabase.from("ufficio_usage_counters").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
     supabase.from("ufficio_consultancy_requests").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
     supabase.from("ufficio_problem_requests").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
     supabase.from("ufficio_cost_items").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
     supabase.from("ufficio_directory_contacts").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
     supabase.from("ufficio_documents_directory").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(20),
+    supabase.from("ufficio_user_content_unlocks").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(50),
+    supabase.from("ufficio_payment_events").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
   ]);
 
   return {
     profile: profile.data,
     entitlement: entitlement.data,
     requests: requests.data ?? [],
+    usageCounters: usageCounters.data ?? [],
     consultancy: consultancy.data ?? [],
     problemRequests: problemRequests.data ?? [],
     costItems: costItems.data ?? [],
     contacts: contacts.data ?? [],
     documents: documents.data ?? [],
+    unlocks: unlocks.data ?? [],
+    paymentEvents: paymentEvents.data ?? [],
   };
 }
 
@@ -151,9 +163,18 @@ export async function getAdminUsers(supabase: any) {
 
 export async function getEntitlements(supabase: any) {
   const { data, error } = await supabase
-    .from("ufficcio_entitlements")
+    .from("ufficio_user_entitlements")
     .select("*")
     .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getPlanProducts(supabase: any) {
+  const { data, error } = await supabase
+    .from("ufficio_plan_products")
+    .select("*")
+    .order("sort_order", { ascending: true });
   if (error) throw error;
   return data ?? [];
 }
@@ -164,6 +185,26 @@ export async function getPremiumEvents(supabase: any) {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(100);
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getPaymentEvents(supabase: any) {
+  const { data, error } = await supabase
+    .from("ufficio_payment_events")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getContentUnlocks(supabase: any) {
+  const { data, error } = await supabase
+    .from("ufficio_user_content_unlocks")
+    .select("*")
+    .order("updated_at", { ascending: false })
+    .limit(200);
   if (error) throw error;
   return data ?? [];
 }

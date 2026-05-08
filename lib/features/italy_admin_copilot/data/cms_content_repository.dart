@@ -20,7 +20,9 @@ class CmsContentRepository {
     try {
       final row = await client
           .from('ufficio_cms_categories')
-          .select('slug, title, subtitle, description, public_snapshot, is_active')
+          .select(
+            'slug, title, subtitle, description, public_snapshot, is_active',
+          )
           .eq('slug', slug)
           .eq('is_active', true)
           .maybeSingle();
@@ -59,7 +61,9 @@ class CmsContentRepository {
         categorySlug: slug,
         base: base,
         categoryRow: Map<String, dynamic>.from(row),
-        procedureRows: procedures.map((item) => Map<String, dynamic>.from(item)).toList(),
+        procedureRows: procedures
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList(),
         blockRows: blocks
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
@@ -103,10 +107,11 @@ class CmsContentRepository {
         '';
 
     final baseSubcategories = <String, Map<String, dynamic>>{};
-    final rawSubcategories = (result['subcategories'] as List<dynamic>? ?? const [])
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+    final rawSubcategories =
+        (result['subcategories'] as List<dynamic>? ?? const [])
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
     for (final subcategory in rawSubcategories) {
       final id = subcategory['id'] as String?;
       if (id != null && id.isNotEmpty) {
@@ -118,7 +123,9 @@ class CmsContentRepository {
     for (final row in blockRows) {
       final slug = row['procedure_slug'] as String?;
       if (slug == null || slug.isEmpty) continue;
-      blocksByProcedure.putIfAbsent(slug, () => <Map<String, dynamic>>[]).add(row);
+      blocksByProcedure
+          .putIfAbsent(slug, () => <Map<String, dynamic>>[])
+          .add(row);
     }
 
     if (procedureRows.isNotEmpty) {
@@ -128,16 +135,18 @@ class CmsContentRepository {
         final baseSnapshot = snapshot is Map
             ? Map<String, dynamic>.from(snapshot)
             : <String, dynamic>{};
-        final baseSubcategory = Map<String, dynamic>.from(
-          {
-            ...baseSubcategories[slug] ?? const <String, dynamic>{},
-            ...baseSnapshot,
-          },
-        );
-        final procedureBlocks = blocksByProcedure[slug] ?? const <Map<String, dynamic>>[];
+        final baseSubcategory = Map<String, dynamic>.from({
+          ...baseSubcategories[slug] ?? const <String, dynamic>{},
+          ...baseSnapshot,
+        });
+        final procedureBlocks =
+            blocksByProcedure[slug] ?? const <Map<String, dynamic>>[];
         baseSubcategory['id'] = slug;
         baseSubcategory['title'] =
-            _localizedString(row['title'], fallback: baseSubcategory['title']) ??
+            _localizedString(
+              row['title'],
+              fallback: baseSubcategory['title'],
+            ) ??
             slug;
         baseSubcategory['titleIt'] =
             _localizedString(
@@ -156,7 +165,10 @@ class CmsContentRepository {
             ) ??
             '';
         baseSubcategory['whyDoYouNeedIt'] = _mergeStringLists([
-          _stringList(row['why_you_may_need_it'], baseSubcategory['whyDoYouNeedIt']),
+          _stringList(
+            row['why_you_may_need_it'],
+            baseSubcategory['whyDoYouNeedIt'],
+          ),
           _blockStringList(procedureBlocks, 'why_you_need_it'),
           _blockStringList(procedureBlocks, 'eligibility'),
         ]);
@@ -165,7 +177,10 @@ class CmsContentRepository {
           _blockStringList(procedureBlocks, 'documents'),
         ]);
         baseSubcategory['extraDocuments'] = _mergeStringLists([
-          _stringList(row['optional_documents'], baseSubcategory['extraDocuments']),
+          _stringList(
+            row['optional_documents'],
+            baseSubcategory['extraDocuments'],
+          ),
           _prefixedList('Proof to keep', row['proof_to_keep']),
           _prefixedList('Official links', row['official_links']),
           _prefixedList('Forms', row['forms']),
@@ -242,10 +257,7 @@ class CmsContentRepository {
       return _sanitizeMap(Map<String, dynamic>.from(value));
     }
     if (value is List) {
-      return value
-          .map(_sanitizeValue)
-          .where((item) => item != null)
-          .toList();
+      return value.map(_sanitizeValue).where((item) => item != null).toList();
     }
     if (value is String) {
       return _containsForbiddenSnippet(value) ? null : value;
@@ -364,31 +376,19 @@ class CmsContentRepository {
     final result = <String, dynamic>{};
     var index = 0;
     for (final item in _dynamicStringList(costs)) {
-      result['cost_${index++}'] = {
-        'label': 'Cost',
-        'value': item,
-      };
+      result['cost_${index++}'] = {'label': 'Cost', 'value': item};
     }
     index = 0;
     for (final item in _dynamicStringList(timing)) {
-      result['timing_${index++}'] = {
-        'label': 'Timing',
-        'value': item,
-      };
+      result['timing_${index++}'] = {'label': 'Timing', 'value': item};
     }
     index = 0;
     for (final item in _dynamicStringList(premium)) {
-      result['premium_${index++}'] = {
-        'label': 'Premium help',
-        'value': item,
-      };
+      result['premium_${index++}'] = {'label': 'Premium help', 'value': item};
     }
     index = 0;
     for (final item in _dynamicStringList(faq)) {
-      result['faq_${index++}'] = {
-        'label': 'FAQ',
-        'value': item,
-      };
+      result['faq_${index++}'] = {'label': 'FAQ', 'value': item};
     }
     return result;
   }
