@@ -387,7 +387,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
               if (cityPack != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                    child: _SectionCard(
+                  child: _SectionCard(
                     title: context.l10n.t('city_pack_title'),
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -412,9 +412,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                       title: Text(
                         '${context.l10n.t('estimated_expenses')}: €${summary.totalEstimatedExpenses.toStringAsFixed(2)}',
                       ),
-                      subtitle: Text(
-                        context.l10n.t('cost_dashboard_summary'),
-                      ),
+                      subtitle: Text(context.l10n.t('cost_dashboard_summary')),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () =>
                           Navigator.pushNamed(context, AppRoutes.costs),
@@ -495,18 +493,14 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                     _CategoryTile(
                       context.l10n.t('category_work_inps'),
                       Icons.work_outline,
-                      () => _openCategoryFromSlug(
-                        context,
-                        'work_inps_patronato',
-                      ),
+                      () =>
+                          _openCategoryFromSlug(context, 'work_inps_patronato'),
                     ),
                     _CategoryTile(
                       context.l10n.t('category_university'),
                       Icons.school_outlined,
-                      () => _openCategoryFromSlug(
-                        context,
-                        'university_student',
-                      ),
+                      () =>
+                          _openCategoryFromSlug(context, 'university_student'),
                     ),
                     _CategoryTile(
                       context.l10n.t('category_general'),
@@ -1793,23 +1787,27 @@ class CmsCategoryHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
-    return AnimatedBuilder(
-      animation: scope.cmsContentController,
-      builder: (context, _) {
+    return FutureBuilder(
+      future: Future.wait([
+        scope.cmsRepository.listCategories(),
+        scope.cmsRepository.listProcedures(categorySlug: categorySlug),
+      ]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: SafeArea(child: Center(child: CircularProgressIndicator())),
+          );
+        }
+        final categories = snapshot.data![0] as List<CmsCategory>;
+        final procedures = snapshot.data![1] as List<CmsProcedure>
+          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
         CmsCategory? category;
-        for (final item in scope.cmsContentController.categories) {
+        for (final item in categories) {
           if (item.slug == categorySlug && item.isActive) {
             category = item;
             break;
           }
         }
-        final procedures =
-            scope.cmsContentController.procedures
-                .where(
-                  (item) => item.categorySlug == categorySlug && item.isActive,
-                )
-                .toList()
-              ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
         return Scaffold(
           appBar: AppBar(
@@ -5443,14 +5441,12 @@ class _CmsProcedureCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
-                                if (procedure.isPremium)
-                                  PremiumBadge(
-                                    label: access?.alreadyUnlocked == true
-                                        ? context.l10n.t('already_unlocked')
-                                        : context.l10n.t(
-                                            'premium_plan_label',
-                                          ),
-                                  ),
+                    if (procedure.isPremium)
+                      PremiumBadge(
+                        label: access?.alreadyUnlocked == true
+                            ? context.l10n.t('already_unlocked')
+                            : context.l10n.t('premium_plan_label'),
+                      ),
                   ],
                 ),
                 if (_localizedCmsText(
@@ -7370,7 +7366,6 @@ class PlanScreen extends StatelessWidget {
           final values = snapshot.data!;
           final entitlement = values[0] as dynamic;
           final usage = values[1] as List<UsageSummaryItem>;
-          final config = values[2] as PremiumConfig;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [

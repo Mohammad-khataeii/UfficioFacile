@@ -111,7 +111,9 @@ class SupabaseCmsRepository implements CmsRepository {
     List<CmsCategory> remote,
     List<CmsCategory> fallback,
   ) {
-    final bySlug = <String, CmsCategory>{for (final item in remote) item.slug: item};
+    final bySlug = <String, CmsCategory>{
+      for (final item in remote) item.slug: item,
+    };
     for (final item in fallback) {
       bySlug.putIfAbsent(item.slug, () => item);
     }

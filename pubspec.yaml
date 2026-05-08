@@ -29,3 +29,4 @@ flutter:
   assets:
     - apps/admin/data/seed/bonus_loans_categories.json
     - apps/admin/data/cms_bundled_content_export.json
+    - docs/generated/cms_bundled_content_export.json

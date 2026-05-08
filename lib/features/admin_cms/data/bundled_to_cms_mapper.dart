@@ -27,95 +27,89 @@ class BundledToCmsMapper {
   ];
 
   List<Map<String, dynamic>> exportCategories() {
-    return allGuidance()
-        .asMap()
-        .entries
-        .map(
-          (entry) {
-            final slug = entry.value.id;
-            final localized = _categoryLocalizedContent(
-              slug,
-              defaultTitleEn: entry.value.title,
-              defaultTitleIt: entry.value.titleIt,
-              defaultQuestionEn: entry.value.mainUserQuestion,
-              defaultQuestionIt: entry.value.mainUserQuestion,
-              defaultDescriptionEn: entry.value.shortDescription,
-              defaultDescriptionIt: entry.value.shortDescription,
-            );
-            return {
-            'slug': entry.value.id,
-            'id': entry.value.id,
-            'title': _completeLocaleMap(
-              en: localized.titleEn,
-              it: localized.titleIt,
-              fr: localized.titleFr,
-              es: localized.titleEs,
-              fa: localized.titleFa,
-              ar: localized.titleAr,
-            ),
-            'subtitle': _completeLocaleMap(
-              en: localized.questionEn,
-              it: localized.questionIt,
-              fr: localized.questionFr,
-              es: localized.questionEs,
-              fa: localized.questionFa,
-              ar: localized.questionAr,
-            ),
-            'description': _completeLocaleMap(
-              en: localized.descriptionEn,
-              it: localized.descriptionIt,
-              fr: localized.descriptionFr,
-              es: localized.descriptionEs,
-              fa: localized.descriptionFa,
-              ar: localized.descriptionAr,
-            ),
-            'short_description': _completeLocaleMap(
-              en: localized.descriptionEn,
-              it: localized.descriptionIt,
-              fr: localized.descriptionFr,
-              es: localized.descriptionEs,
-              fa: localized.descriptionFa,
-              ar: localized.descriptionAr,
-            ),
-            'long_description': _completeLocaleMap(
-              en: localized.questionEn,
-              it: localized.questionIt,
-              fr: localized.questionFr,
-              es: localized.questionEs,
-              fa: localized.questionFa,
-              ar: localized.questionAr,
-            ),
-            'icon': null,
-            'color': null,
-            'sort_order': entry.key + 1,
-            'is_active': true,
-            'is_premium': _categoryIsPremium(entry.value.id),
-            'visibility': 'public',
-            'verification_status': 'bundledFallback',
-            'monetization_type': _categoryIsPremium(entry.value.id)
-                ? 'premium_money_value'
-                : 'free',
-            'allow_single_unlock': true,
-            'single_unlock_currency': 'EUR',
-            'premium_reason': _categoryIsPremium(entry.value.id)
-                ? _completeLocaleMap(
-                    en: 'This category can help save money, reduce bills, or access financial support.',
-                    it: 'Questa categoria puo aiutare a risparmiare, ridurre costi o ottenere sostegni economici.',
-                  )
-                : <String, dynamic>{},
-            'premium_teaser': _completeLocaleMap(
-              en: localized.descriptionEn,
-              it: localized.descriptionIt,
-              fr: localized.descriptionFr,
-              es: localized.descriptionEs,
-              fa: localized.descriptionFa,
-              ar: localized.descriptionAr,
-            ),
-            'metadata': <String, dynamic>{},
-          };
-          },
-        )
-        .toList();
+    return allGuidance().asMap().entries.map((entry) {
+      final slug = entry.value.id;
+      final localized = _categoryLocalizedContent(
+        slug,
+        defaultTitleEn: entry.value.title,
+        defaultTitleIt: entry.value.titleIt,
+        defaultQuestionEn: entry.value.mainUserQuestion,
+        defaultQuestionIt: entry.value.mainUserQuestion,
+        defaultDescriptionEn: entry.value.shortDescription,
+        defaultDescriptionIt: entry.value.shortDescription,
+      );
+      return {
+        'slug': entry.value.id,
+        'id': entry.value.id,
+        'title': _completeLocaleMap(
+          en: localized.titleEn,
+          it: localized.titleIt,
+          fr: localized.titleFr,
+          es: localized.titleEs,
+          fa: localized.titleFa,
+          ar: localized.titleAr,
+        ),
+        'subtitle': _completeLocaleMap(
+          en: localized.questionEn,
+          it: localized.questionIt,
+          fr: localized.questionFr,
+          es: localized.questionEs,
+          fa: localized.questionFa,
+          ar: localized.questionAr,
+        ),
+        'description': _completeLocaleMap(
+          en: localized.descriptionEn,
+          it: localized.descriptionIt,
+          fr: localized.descriptionFr,
+          es: localized.descriptionEs,
+          fa: localized.descriptionFa,
+          ar: localized.descriptionAr,
+        ),
+        'short_description': _completeLocaleMap(
+          en: localized.descriptionEn,
+          it: localized.descriptionIt,
+          fr: localized.descriptionFr,
+          es: localized.descriptionEs,
+          fa: localized.descriptionFa,
+          ar: localized.descriptionAr,
+        ),
+        'long_description': _completeLocaleMap(
+          en: localized.questionEn,
+          it: localized.questionIt,
+          fr: localized.questionFr,
+          es: localized.questionEs,
+          fa: localized.questionFa,
+          ar: localized.questionAr,
+        ),
+        'icon': null,
+        'color': null,
+        'sort_order': entry.key + 1,
+        'is_active': true,
+        'is_premium': _categoryIsPremium(entry.value.id),
+        'visibility': 'public',
+        'verification_status': 'bundledFallback',
+        'monetization_type': _categoryIsPremium(entry.value.id)
+            ? 'premium_money_value'
+            : 'free',
+        'allow_single_unlock': true,
+        'single_unlock_currency': 'EUR',
+        'premium_reason': _categoryIsPremium(entry.value.id)
+            ? _completeLocaleMap(
+                en: 'This category can help save money, reduce bills, or access financial support.',
+                it: 'Questa categoria puo aiutare a risparmiare, ridurre costi o ottenere sostegni economici.',
+              )
+            : <String, dynamic>{},
+        'premium_teaser': _completeLocaleMap(
+          en: localized.descriptionEn,
+          it: localized.descriptionIt,
+          fr: localized.descriptionFr,
+          es: localized.descriptionEs,
+          fa: localized.descriptionFa,
+          ar: localized.descriptionAr,
+        ),
+        'metadata': <String, dynamic>{},
+      };
+    }).toList();
   }
 
   List<Map<String, dynamic>> exportProcedures() {

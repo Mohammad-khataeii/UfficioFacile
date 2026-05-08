@@ -40,8 +40,5 @@ String localizedMap(
   BuildContext context,
   Map<String, dynamic> values, {
   String fallback = '',
-}) => resolveLocalizedText(
-  values,
-  context.l10n.languageCode,
-  fallback: fallback,
-);
+}) =>
+    resolveLocalizedText(values, context.l10n.languageCode, fallback: fallback);

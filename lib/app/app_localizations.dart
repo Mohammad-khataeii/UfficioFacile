@@ -31,11 +31,7 @@ class AppLocalizations {
   }
 
   String localizedMap(Map<String, dynamic> values, {String fallback = ''}) {
-    return resolveLocalizedText(
-      values,
-      languageCode,
-      fallback: fallback,
-    );
+    return resolveLocalizedText(values, languageCode, fallback: fallback);
   }
 
   static const Map<String, Map<String, String>> _localizedValues = {
@@ -190,8 +186,7 @@ class AppLocalizations {
       'category_general': 'General',
       'category_general_help': 'General admin help',
       'trust_title': 'Trust',
-      'problem_input_placeholder':
-          'Describe the problem in your own words.',
+      'problem_input_placeholder': 'Describe the problem in your own words.',
       'search_placeholder_generic': 'Search by title, tag, or description...',
       'problem_example_1': 'I want to remove Canone RAI from my bill',
       'problem_example_2': 'My gas bill is too high',
@@ -387,10 +382,8 @@ class AppLocalizations {
       'category_general': 'Generale',
       'category_general_help': 'Aiuto amministrativo generale',
       'trust_title': 'Affidabilità',
-      'problem_input_placeholder':
-          'Descrivi il problema con parole tue.',
-      'search_placeholder_generic':
-          'Cerca per titolo, tag o descrizione...',
+      'problem_input_placeholder': 'Descrivi il problema con parole tue.',
+      'search_placeholder_generic': 'Cerca per titolo, tag o descrizione...',
       'problem_example_1': 'Voglio togliere il Canone RAI dalla bolletta',
       'problem_example_2': 'La bolletta del gas è troppo alta',
       'problem_example_3': 'Devo cambiare medico di base',
@@ -411,7 +404,8 @@ class AppLocalizations {
       'codice_fiscale': 'Codice fiscale',
       'city_label': 'Città',
       'plan_title': 'Il tuo piano',
-      'plan_intro': 'Scegli il livello di aiuto più adatto alla tua situazione.',
+      'plan_intro':
+          'Scegli il livello di aiuto più adatto alla tua situazione.',
       'current_plan_label': 'Piano attuale',
       'free_plan_label': 'Free',
       'plus_plan_label': 'Plus',
@@ -583,8 +577,7 @@ class AppLocalizations {
       'category_general_help': 'راهنمای اداری عمومی',
       'trust_title': 'اعتماد',
       'problem_input_placeholder': 'مشکل را با زبان خودت توضیح بده.',
-      'search_placeholder_generic':
-          'بر اساس عنوان، برچسب یا توضیح جستجو کن...',
+      'search_placeholder_generic': 'بر اساس عنوان، برچسب یا توضیح جستجو کن...',
       'problem_example_1': 'می‌خواهم Canone RAI را از قبض حذف کنم',
       'problem_example_2': 'قبض گاز خیلی زیاد است',
       'problem_example_3': 'باید پزشک خانواده را عوض کنم',
@@ -593,8 +586,7 @@ class AppLocalizations {
       'problem_example_6': 'به NASpI نیاز دارم',
       'all_label': 'همه',
       'no_procedures_yet_title': 'هنوز فرایندی نیست',
-      'no_procedures_yet_body':
-          'هنوز هیچ فرایند فعالی در این دسته وجود ندارد.',
+      'no_procedures_yet_body': 'هنوز هیچ فرایند فعالی در این دسته وجود ندارد.',
       'onboarding_scope_title': 'UfficioFacile در چه چیزهایی کمک می‌کند؟',
       'onboarding_scope_body':
           'قبض‌ها، Canone RAI، درمان، اجاره، مخابرات، کار، دانشگاه، بونوس‌ها، وام‌ها، بازپرداخت‌ها و کارهای اداری با اداره‌های عمومی.',
@@ -780,15 +772,12 @@ class AppLocalizations {
       'trust_title': 'Confiance',
       'problem_input_placeholder':
           'Décrivez le problème avec vos propres mots.',
-      'search_placeholder_generic':
-          'Chercher par titre, tag ou description...',
-      'problem_example_1':
-          'Je veux retirer le Canone RAI de ma facture',
+      'search_placeholder_generic': 'Chercher par titre, tag ou description...',
+      'problem_example_1': 'Je veux retirer le Canone RAI de ma facture',
       'problem_example_2': 'Ma facture de gaz est trop élevée',
       'problem_example_3': 'Je dois changer de médecin traitant',
       'problem_example_4': 'Je veux résilier internet',
-      'problem_example_5':
-          'Mon propriétaire ne répare pas le chauffage',
+      'problem_example_5': 'Mon propriétaire ne répare pas le chauffage',
       'problem_example_6': 'J’ai besoin de la NASpI',
       'all_label': 'Tout',
       'no_procedures_yet_title': 'Aucune démarche pour le moment',
@@ -804,7 +793,8 @@ class AppLocalizations {
       'codice_fiscale': 'Codice fiscale',
       'city_label': 'Ville',
       'plan_title': 'Votre offre',
-      'plan_intro': 'Choisissez le niveau d’aide qui convient à votre situation.',
+      'plan_intro':
+          'Choisissez le niveau d’aide qui convient à votre situation.',
       'current_plan_label': 'Offre actuelle',
       'free_plan_label': 'Gratuit',
       'plus_plan_label': 'Plus',
@@ -890,7 +880,8 @@ class AppLocalizations {
       'city_label': 'Ciudad',
       'auth_email': 'Correo electrónico',
       'plan_title': 'Tu plan',
-      'plan_intro': 'Elige el nivel de ayuda que mejor se adapte a tu situación.',
+      'plan_intro':
+          'Elige el nivel de ayuda que mejor se adapte a tu situación.',
       'current_plan_label': 'Plan actual',
       'free_plan_label': 'Gratis',
       'plus_plan_label': 'Plus',
@@ -950,8 +941,7 @@ class AppLocalizations {
       'category_general_help': 'مساعدة إدارية عامة',
       'trust_title': 'الثقة',
       'problem_input_placeholder': 'اشرح المشكلة بكلماتك.',
-      'search_placeholder_generic':
-          'ابحث حسب العنوان أو الوسم أو الوصف...',
+      'search_placeholder_generic': 'ابحث حسب العنوان أو الوسم أو الوصف...',
       'problem_example_1': 'أريد إزالة Canone RAI من الفاتورة',
       'problem_example_2': 'فاتورة الغاز مرتفعة جداً',
       'problem_example_3': 'أحتاج إلى تغيير طبيب الأسرة',
@@ -960,8 +950,7 @@ class AppLocalizations {
       'problem_example_6': 'أحتاج إلى NASpI',
       'all_label': 'الكل',
       'no_procedures_yet_title': 'لا توجد إجراءات بعد',
-      'no_procedures_yet_body':
-          'لا تحتوي هذه الفئة على إجراءات نشطة حتى الآن.',
+      'no_procedures_yet_body': 'لا تحتوي هذه الفئة على إجراءات نشطة حتى الآن.',
       'onboarding_scope_title': 'في ماذا يمكن أن يساعدك UfficioFacile؟',
       'onboarding_scope_body':
           'الفواتير، Canone RAI، الصحة، الإيجار، الاتصالات، العمل، الجامعة، المساعدات، القروض، الاستردادات، والمعاملات مع الجهات العامة.',
@@ -981,8 +970,7 @@ class AppLocalizations {
       'premium_plan_label': 'Premium',
       'one_shot_consultancy_label': 'استشارة لمرة واحدة',
       'admin_grant_label': 'منحة إدارية',
-      'free_plan_desc':
-          'فئات عامة وبحث ذكي وإرشاد أساسي مع حدود استخدام.',
+      'free_plan_desc': 'فئات عامة وبحث ذكي وإرشاد أساسي مع حدود استخدام.',
       'plus_plan_desc':
           'حزم أكثر، طلبات محفوظة أكثر، لوحات أكبر، وطلبات ذات أولوية.',
       'premium_plan_desc':

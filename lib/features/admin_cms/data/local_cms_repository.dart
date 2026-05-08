@@ -8,8 +8,10 @@ import 'cms_repository.dart';
 class LocalCmsRepository implements CmsRepository {
   const LocalCmsRepository();
 
-  static const _bundledExportAssetPath =
-      'apps/admin/data/cms_bundled_content_export.json';
+  static const _bundledExportAssetPaths = [
+    'apps/admin/data/cms_bundled_content_export.json',
+    'docs/generated/cms_bundled_content_export.json',
+  ];
 
   @override
   Future<void> addRevision({
@@ -35,11 +37,12 @@ class LocalCmsRepository implements CmsRepository {
     );
     final blocks =
         ((snapshot['blocks'] as List<dynamic>?) ??
-                ((procedure['metadata'] as Map?)?['blocks'] as List<dynamic>?) ??
+                ((procedure['metadata'] as Map?)?['blocks']
+                    as List<dynamic>?) ??
                 const [])
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
     return blocks
         .asMap()
         .entries
@@ -66,7 +69,9 @@ class LocalCmsRepository implements CmsRepository {
 
   @override
   Future<List<CmsProcedure>> listProcedures({String? categorySlug}) async {
-    final all = (await _loadBundledProcedures()).map(CmsProcedure.fromJson).toList();
+    final all = (await _loadBundledProcedures())
+        .map(CmsProcedure.fromJson)
+        .toList();
     final filtered = categorySlug == null || categorySlug.isEmpty
         ? all
         : all.where((item) => item.categorySlug == categorySlug).toList();
@@ -95,9 +100,21 @@ class LocalCmsRepository implements CmsRepository {
   @override
   Future<void> saveProcedure(Map<String, dynamic> values) async {}
 
+  Future<Map<String, dynamic>> loadCanonicalBundle() async {
+    final raw = await _loadBundledRaw();
+    if (raw == null || raw.trim().isEmpty) {
+      return const <String, dynamic>{};
+    }
+    final decoded = jsonDecode(raw);
+    if (decoded is Map<String, dynamic>) return decoded;
+    if (decoded is Map) {
+      return decoded.map((key, value) => MapEntry(key.toString(), value));
+    }
+    return const <String, dynamic>{};
+  }
+
   Future<List<Map<String, dynamic>>> _loadBundledCategories() async {
-    final raw = await rootBundle.loadString(_bundledExportAssetPath);
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final decoded = await loadCanonicalBundle();
     return (decoded['cmsCategories'] as List<dynamic>? ?? const [])
         .whereType<Map>()
         .map((item) => Map<String, dynamic>.from(item))
@@ -105,11 +122,21 @@ class LocalCmsRepository implements CmsRepository {
   }
 
   Future<List<Map<String, dynamic>>> _loadBundledProcedures() async {
-    final raw = await rootBundle.loadString(_bundledExportAssetPath);
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final decoded = await loadCanonicalBundle();
     return (decoded['cmsProcedures'] as List<dynamic>? ?? const [])
         .whereType<Map>()
         .map((item) => Map<String, dynamic>.from(item))
         .toList();
+  }
+
+  Future<String?> _loadBundledRaw() async {
+    for (final assetPath in _bundledExportAssetPaths) {
+      try {
+        return await rootBundle.loadString(assetPath);
+      } catch (_) {
+        continue;
+      }
+    }
+    return null;
   }
 }

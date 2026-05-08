@@ -9,8 +9,7 @@ class GeneralGuidanceDefinitions {
     'city': 'torino',
     'shortDescription':
         'Not sure where your problem belongs? Start here. We help you choose the right office, prepare a clear message, reply to a rejected request, send missing documents, ask for a refund, make a complaint, and turn rough notes into formal Italian.',
-    'mainUserQuestion':
-        'What do you need help with?',
+    'mainUserQuestion': 'What do you need help with?',
     'routingLogicSummary':
         'First understand the result you need and who should receive it. Then open the right path: formal request, appointment, rejected-request reply, missing documents, refund, complaint, follow-up, clarification, or formal Italian rewrite. If the issue clearly belongs to a specialized category, send the person there.',
     'topWarning':
@@ -221,10 +220,7 @@ class GeneralGuidanceDefinitions {
             'id': 'not_sure_office',
             'label': 'I don’t know which office to contact',
           },
-          {
-            'id': 'generic_formal_request',
-            'label': 'I need a formal request',
-          },
+          {'id': 'generic_formal_request', 'label': 'I need a formal request'},
           {'id': 'appointment_request', 'label': 'I need an appointment'},
           {
             'id': 'rejected_request',
@@ -241,10 +237,7 @@ class GeneralGuidanceDefinitions {
             'id': 'status_with_protocol',
             'label': 'I need a status update with my protocol number',
           },
-          {
-            'id': 'formal_rewrite',
-            'label': 'I need a formal Italian message',
-          },
+          {'id': 'formal_rewrite', 'label': 'I need a formal Italian message'},
           {
             'id': 'document_clarification',
             'label': 'I need to ask which documents are needed',

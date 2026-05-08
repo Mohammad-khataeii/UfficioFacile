@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 
-import '../data/bundled_to_cms_mapper.dart';
 import '../data/cms_repository.dart';
+import '../data/local_cms_repository.dart';
 import '../domain/cms_models.dart';
 
 class CmsContentController extends ChangeNotifier {
   CmsContentController(this._repository);
 
   final CmsRepository _repository;
-  final BundledToCmsMapper _mapper = const BundledToCmsMapper();
+  final LocalCmsRepository _bundledRepository = const LocalCmsRepository();
 
   List<CmsCategory> categories = const [];
   List<CmsProcedure> procedures = const [];
@@ -31,7 +31,16 @@ class CmsContentController extends ChangeNotifier {
   }
 
   Future<void> importBundledContent({bool publish = true}) async {
-    for (final category in _mapper.exportCategories()) {
+    final bundle = await _bundledRepository.loadCanonicalBundle();
+    final categories = (bundle['cmsCategories'] as List<dynamic>? ?? const [])
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+    final procedures = (bundle['cmsProcedures'] as List<dynamic>? ?? const [])
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+    for (final category in categories) {
       await _repository.saveCategory(category);
       await _repository.addRevision(
         entityType: 'category',
@@ -40,7 +49,7 @@ class CmsContentController extends ChangeNotifier {
         afterValue: category,
       );
     }
-    for (final procedure in _mapper.exportProcedures()) {
+    for (final procedure in procedures) {
       await _repository.saveProcedure(procedure);
       await _repository.addRevision(
         entityType: 'procedure',
