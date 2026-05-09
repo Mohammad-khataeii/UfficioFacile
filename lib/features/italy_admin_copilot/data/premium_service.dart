@@ -173,7 +173,7 @@ const PremiumConfig _defaultConfig = PremiumConfig(
     FeatureKey.privateConsultancy,
   ],
   trialDays: 7,
-  allowLocalDebugPro: true,
+  allowLocalDebugPro: false,
 );
 
 class PlanProduct {
@@ -327,8 +327,16 @@ class UfficioPremiumEntitlementService {
   Future<UfficcioEntitlement> getCurrentEntitlement() async {
     final config = await getConfig();
     final entitlement = await _repository.getEntitlement();
+    final allowLocalDebugPro =
+        config.allowLocalDebugPro && SupabaseBootstrap.client == null;
+    final resetLocalDebug =
+        entitlement.localDebugProEnabled && !allowLocalDebugPro;
     final normalized = await resetMonthlyUsageIfNeeded(
       entitlement.copyWith(
+        plan: resetLocalDebug && entitlement.plan == UfficioPlan.pro
+            ? UfficioPlan.free
+            : entitlement.plan,
+        premiumAccess: resetLocalDebug ? false : entitlement.premiumAccess,
         betaModeEnabled: config.betaModeEnabled,
         paywallEnabled: config.paywallEnabled,
         freePackLimit: config.freePackLimit,
@@ -343,6 +351,8 @@ class UfficioPremiumEntitlementService {
         billAnalysisLimit: config.freeBillAnalysisLimit,
         enabledPremiumProcedureIds: config.premiumProcedureIds,
         lockedProcedureIds: config.lockedProcedureIds,
+        localDebugProEnabled:
+            allowLocalDebugPro && entitlement.localDebugProEnabled,
       ),
     );
     if (normalized != entitlement) {
@@ -525,6 +535,57 @@ class UfficioPremiumEntitlementService {
       singleUnlockCurrency: 'EUR',
       requiresPremium: true,
     );
+  }
+
+  Future<EntitlementDecision> canAccessCategory(
+    UfficioCategory category,
+  ) async {
+    if (!category.isPremiumOnly) {
+      return _allowedDecision(
+        reason: category.hasPremiumContent
+            ? 'Free category with some Premium content inside.'
+            : 'Free category.',
+        isPremiumFeature: category.hasPremiumContent,
+      );
+    }
+    return _catalogLockedDecision();
+  }
+
+  Future<EntitlementDecision> canAccessSubcategory(
+    UfficioSubcategory subcategory,
+  ) async {
+    if (!subcategory.isPremiumOnly) {
+      return _allowedDecision(
+        reason: subcategory.hasPremiumContent
+            ? 'Free subcategory with some Premium content inside.'
+            : 'Free subcategory.',
+        isPremiumFeature: subcategory.hasPremiumContent,
+      );
+    }
+    return _catalogLockedDecision();
+  }
+
+  Future<EntitlementDecision> canAccessProcedure(
+    UfficioProcedure procedure,
+  ) async {
+    if (!procedure.isPremiumOnly) {
+      return _allowedDecision(
+        reason: procedure.hasPremiumContent
+            ? 'Free guide with some Premium content inside.'
+            : 'Free guide.',
+        isPremiumFeature: procedure.hasPremiumContent,
+      );
+    }
+    return _catalogLockedDecision();
+  }
+
+  Future<EntitlementDecision> canAccessSection(
+    UfficioContentSection section,
+  ) async {
+    if (!section.isPremiumOnly) {
+      return _allowedDecision(reason: 'Free section');
+    }
+    return _catalogLockedDecision();
   }
 
   Future<EntitlementDecision> canUseProcedure(String procedureId) async {
@@ -828,12 +889,16 @@ class UfficioPremiumEntitlementService {
   }
 
   Future<UfficcioEntitlement> activateLocalProForDebug() async {
+    if (SupabaseBootstrap.client != null) {
+      return getCurrentEntitlement();
+    }
     final entitlement = await getCurrentEntitlement();
     await analytics.trackStatusUpdated('local_debug_pro_enabled');
     return _repository.saveEntitlement(
       entitlement.copyWith(
         plan: UfficioPlan.pro,
         premiumAccess: true,
+        source: 'local_debug',
         localDebugProEnabled: true,
         updatedAt: DateTime.now(),
       ),
@@ -850,6 +915,26 @@ class UfficioPremiumEntitlementService {
         localDebugProEnabled: false,
         updatedAt: DateTime.now(),
       ),
+    );
+  }
+
+  Future<EntitlementDecision> _catalogLockedDecision() async {
+    final entitlement = await getCurrentEntitlement();
+    if (entitlement.isProLike) {
+      return _allowedDecision(
+        reason: 'Paid access active',
+        isPremiumFeature: true,
+      );
+    }
+    return const EntitlementDecision(
+      allowed: false,
+      isPremiumFeature: true,
+      reason:
+          'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+      upgradeTitle: 'Premium feature',
+      upgradeMessage:
+          'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+      recommendedPlan: UfficioPlan.premiumMonthly,
     );
   }
 

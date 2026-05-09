@@ -86,85 +86,123 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
               return const _CatalogNotFoundState();
             }
             final marker = const CatalogPremiumMarker();
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _CatalogHeaderCard(
-                  title: ufficioLocalizedValue(
-                    category.title,
-                    context.l10n.languageCode,
-                    fallback: category.id,
-                  ),
-                  description: ufficioLocalizedValue(
-                    category.description,
-                    context.l10n.languageCode,
-                  ),
-                  badge: marker.categoryHasPremiumContent(category)
-                      ? context.l10n.t('premium_plan_label')
-                      : null,
-                  icon: _iconForCategory(category.icon, category.id),
-                ),
-                const SizedBox(height: 12),
-                ...category.subcategories.map(
-                  (subcategory) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Card(
-                      child: ListTile(
-                        leading: Icon(
-                          _iconForCategory(category.icon, category.id),
-                        ),
-                        title: Text(
-                          ufficioLocalizedValue(
-                            subcategory.title,
-                            context.l10n.languageCode,
-                            fallback: subcategory.id,
-                          ),
-                        ),
-                        subtitle: Text(
-                          ufficioLocalizedValue(
-                            subcategory.description,
-                            context.l10n.languageCode,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (marker.subcategoryHasPremiumContent(
-                              subcategory,
-                            ))
-                              PremiumBadge(
-                                label: context.l10n.t('premium_plan_label'),
+            return FutureBuilder(
+              future: AppScope.of(
+                context,
+              ).entitlementService.canAccessCategory(category),
+              builder: (context, accessSnapshot) {
+                if (!accessSnapshot.hasData) {
+                  return const _CatalogLoadingState();
+                }
+                final access = accessSnapshot.data!;
+                if (!access.allowed) {
+                  return _CatalogLockedState(
+                    decision: access,
+                    description: ufficioLocalizedValue(
+                      category.description,
+                      context.l10n.languageCode,
+                    ),
+                  );
+                }
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _CatalogHeaderCard(
+                      title: ufficioLocalizedValue(
+                        category.title,
+                        context.l10n.languageCode,
+                        fallback: category.id,
+                      ),
+                      description: ufficioLocalizedValue(
+                        category.description,
+                        context.l10n.languageCode,
+                      ),
+                      badge: marker.categoryHasPremiumContent(category)
+                          ? context.l10n.t('premium_plan_label')
+                          : null,
+                      icon: _iconForCategory(category.icon, category.id),
+                    ),
+                    const SizedBox(height: 12),
+                    ...category.subcategories.map(
+                      (subcategory) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Card(
+                          child: ListTile(
+                            leading: Icon(
+                              _iconForCategory(category.icon, category.id),
+                            ),
+                            title: Text(
+                              ufficioLocalizedValue(
+                                subcategory.title,
+                                context.l10n.languageCode,
+                                fallback: subcategory.id,
                               ),
-                            const SizedBox(width: 8),
-                            Text('${subcategory.procedures.length}'),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.subcategory,
-                          arguments: CatalogSubcategoryRouteArgs(
-                            categoryId: category.id,
-                            subcategoryId: subcategory.id,
+                            ),
+                            subtitle: Text(
+                              ufficioLocalizedValue(
+                                subcategory.description,
+                                context.l10n.languageCode,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (marker.subcategoryHasPremiumContent(
+                                  subcategory,
+                                ))
+                                  PremiumBadge(
+                                    label: context.l10n.t('premium_plan_label'),
+                                  ),
+                                const SizedBox(width: 8),
+                                Text('${subcategory.procedures.length}'),
+                                const Icon(Icons.chevron_right),
+                              ],
+                            ),
+                            onTap: () async {
+                              final subcategoryAccess =
+                                  await AppScope.of(context).entitlementService
+                                      .canAccessSubcategory(subcategory);
+                              if (!context.mounted) return;
+                              if (!subcategoryAccess.allowed) {
+                                await showPremiumPaywallSheet(
+                                  context,
+                                  decision: subcategoryAccess,
+                                  featureLabel: ufficioLocalizedValue(
+                                    subcategory.title,
+                                    context.l10n.languageCode,
+                                    fallback: subcategory.id,
+                                  ),
+                                );
+                                return;
+                              }
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.subcategory,
+                                arguments: CatalogSubcategoryRouteArgs(
+                                  categoryId: category.id,
+                                  subcategoryId: subcategory.id,
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GlobalProblemRequestCard(
-                  categoryId: category.id,
-                  sourcePage: category.id,
-                ),
-                const SizedBox(height: 12),
-                PrivateConsultancyCard(
-                  categoryId: category.id,
-                  sourcePage: category.id,
-                ),
-              ],
+                    const SizedBox(height: 8),
+                    GlobalProblemRequestCard(
+                      categoryId: category.id,
+                      sourcePage: category.id,
+                    ),
+                    const SizedBox(height: 12),
+                    PrivateConsultancyCard(
+                      categoryId: category.id,
+                      sourcePage: category.id,
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -229,80 +267,126 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
               return const _CatalogNotFoundState();
             }
             final marker = const CatalogPremiumMarker();
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _CatalogHeaderCard(
-                  title: ufficioLocalizedValue(
-                    subcategory.title,
-                    context.l10n.languageCode,
-                    fallback: subcategory.id,
-                  ),
-                  description: ufficioLocalizedValue(
-                    subcategory.description,
-                    context.l10n.languageCode,
-                  ),
-                  badge: marker.subcategoryHasPremiumContent(subcategory)
-                      ? context.l10n.t('premium_plan_label')
-                      : null,
-                  icon: _iconForCategory(category.icon, category.id),
-                ),
-                const SizedBox(height: 12),
-                ...subcategory.procedures.map(
-                  (procedure) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: FutureBuilder(
-                      future: AppScope.of(
-                        context,
-                      ).entitlementService.canAccessCatalogProcedure(procedure),
-                      builder: (context, accessSnapshot) {
-                        final access = accessSnapshot.data;
-                        return Card(
-                          child: ListTile(
-                            title: Text(
-                              ufficioLocalizedValue(
-                                procedure.title,
-                                context.l10n.languageCode,
-                                fallback: procedure.id,
-                              ),
-                            ),
-                            subtitle: Text(
-                              ufficioLocalizedValue(
-                                procedure.shortDescription,
-                                context.l10n.languageCode,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (marker.procedureIsPremium(procedure))
-                                  PremiumBadge(
-                                    label: access?.alreadyUnlocked == true
-                                        ? context.l10n.t('already_unlocked')
-                                        : context.l10n.t('premium_plan_label'),
-                                  ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.chevron_right),
-                              ],
-                            ),
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.catalogProcedure,
-                              arguments: CatalogProcedureRouteArgs(
-                                categoryId: widget.categoryId,
-                                subcategoryId: widget.subcategoryId,
-                                procedureId: procedure.id,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+            return FutureBuilder(
+              future: AppScope.of(
+                context,
+              ).entitlementService.canAccessSubcategory(subcategory),
+              builder: (context, accessSnapshot) {
+                if (!accessSnapshot.hasData) {
+                  return const _CatalogLoadingState();
+                }
+                final subcategoryAccess = accessSnapshot.data!;
+                if (!subcategoryAccess.allowed) {
+                  return _CatalogLockedState(
+                    decision: subcategoryAccess,
+                    description: ufficioLocalizedValue(
+                      subcategory.description,
+                      context.l10n.languageCode,
                     ),
-                  ),
-                ),
-              ],
+                  );
+                }
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _CatalogHeaderCard(
+                      title: ufficioLocalizedValue(
+                        subcategory.title,
+                        context.l10n.languageCode,
+                        fallback: subcategory.id,
+                      ),
+                      description: ufficioLocalizedValue(
+                        subcategory.description,
+                        context.l10n.languageCode,
+                      ),
+                      badge: marker.subcategoryHasPremiumContent(subcategory)
+                          ? context.l10n.t('premium_plan_label')
+                          : null,
+                      icon: _iconForCategory(category.icon, category.id),
+                    ),
+                    const SizedBox(height: 12),
+                    ...subcategory.procedures.map(
+                      (procedure) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: FutureBuilder(
+                          future: AppScope.of(context).entitlementService
+                              .canAccessCatalogProcedure(procedure),
+                          builder: (context, accessSnapshot) {
+                            final access = accessSnapshot.data;
+                            return Card(
+                              child: ListTile(
+                                title: Text(
+                                  ufficioLocalizedValue(
+                                    procedure.title,
+                                    context.l10n.languageCode,
+                                    fallback: procedure.id,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  ufficioLocalizedValue(
+                                    procedure.shortDescription,
+                                    context.l10n.languageCode,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (marker.procedureIsPremium(procedure))
+                                      PremiumBadge(
+                                        label: access?.alreadyUnlocked == true
+                                            ? context.l10n.t('already_unlocked')
+                                            : context.l10n.t(
+                                                'premium_plan_label',
+                                              ),
+                                      ),
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.chevron_right),
+                                  ],
+                                ),
+                                onTap: () async {
+                                  final procedureAccess =
+                                      await AppScope.of(context)
+                                          .entitlementService
+                                          .canAccessProcedure(procedure);
+                                  if (!context.mounted) return;
+                                  if (!procedureAccess.allowed) {
+                                    await showPremiumPaywallSheet(
+                                      context,
+                                      decision: procedureAccess,
+                                      featureLabel: ufficioLocalizedValue(
+                                        procedure.title,
+                                        context.l10n.languageCode,
+                                        fallback: procedure.id,
+                                      ),
+                                      teaser: ufficioLocalizedValue(
+                                        procedure.premiumTeaser.isNotEmpty
+                                            ? procedure.premiumTeaser
+                                            : procedure.shortDescription,
+                                        context.l10n.languageCode,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.catalogProcedure,
+                                    arguments: CatalogProcedureRouteArgs(
+                                      categoryId: widget.categoryId,
+                                      subcategoryId: widget.subcategoryId,
+                                      procedureId: procedure.id,
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -370,18 +454,12 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
               return const _CatalogNotFoundState();
             }
             return FutureBuilder(
-              future: scope.entitlementService.canAccessCatalogProcedure(
-                procedure,
-              ),
+              future: scope.entitlementService.canAccessProcedure(procedure),
               builder: (context, accessSnapshot) {
                 if (!accessSnapshot.hasData) {
                   return const _CatalogLoadingState();
                 }
                 final access = accessSnapshot.data!;
-                final visibleSections = procedure.sections.where((section) {
-                  if (!section.isPremiumOnly) return true;
-                  return access.allowed;
-                }).toList();
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -399,7 +477,7 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                           ? context.l10n.t('premium_plan_label')
                           : null,
                     ),
-                    if (!access.allowed) ...[
+                    if (procedure.isPremiumOnly && !access.allowed) ...[
                       const SizedBox(height: 12),
                       Card(
                         child: Padding(
@@ -483,17 +561,25 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    ...visibleSections.map(
+                    ...procedure.sections.map(
                       (section) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _CatalogSectionCard(
-                          title: ufficioLocalizedValue(
-                            section.title,
-                            context.l10n.languageCode,
-                            fallback: section.key,
-                          ),
-                          child: _CatalogSectionBody(section: section),
-                        ),
+                        child: section.isPremiumOnly && !access.allowed
+                            ? _CatalogLockedSectionCard(
+                                title: ufficioLocalizedValue(
+                                  section.title,
+                                  context.l10n.languageCode,
+                                  fallback: section.key,
+                                ),
+                              )
+                            : _CatalogSectionCard(
+                                title: ufficioLocalizedValue(
+                                  section.title,
+                                  context.l10n.languageCode,
+                                  fallback: section.key,
+                                ),
+                                child: _CatalogSectionBody(section: section),
+                              ),
                       ),
                     ),
                     if (procedure.officialLinks.isNotEmpty) ...[
@@ -632,6 +718,80 @@ class _CatalogSectionCard extends StatelessWidget {
             child,
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CatalogLockedState extends StatelessWidget {
+  const _CatalogLockedState({
+    required this.decision,
+    required this.description,
+  });
+
+  final EntitlementDecision decision;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _CatalogHeaderCard(
+          title: 'Premium feature',
+          description: description,
+          badge: context.l10n.t('premium_plan_label'),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
+                  child: const Text('See plans'),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Not now'),
+                ),
+                const SizedBox(height: 8),
+                Text(decision.reason),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CatalogLockedSectionCard extends StatelessWidget {
+  const _CatalogLockedSectionCard({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CatalogSectionCard(
+      title: title,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('This section is part of UfficioFacile Premium.'),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
+            child: const Text('See plans'),
+          ),
+        ],
       ),
     );
   }

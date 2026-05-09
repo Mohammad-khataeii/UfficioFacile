@@ -18,4 +18,15 @@ class ProfileController extends ChangeNotifier {
     profile = await _repository.saveProfile(next);
     notifyListeners();
   }
+
+  Future<void> clear() async {
+    await _repository.clearProfile();
+    profile = const AdminCopilotProfile();
+    notifyListeners();
+  }
+
+  void resetLocalState() {
+    profile = const AdminCopilotProfile();
+    notifyListeners();
+  }
 }

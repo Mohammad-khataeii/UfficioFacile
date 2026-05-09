@@ -19,12 +19,16 @@ class _AuthScreenState extends State<AuthScreen>
   );
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _signupEmailController = TextEditingController();
+  final _signupPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _tabController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _signupEmailController.dispose();
+    _signupPasswordController.dispose();
     super.dispose();
   }
 
@@ -84,29 +88,18 @@ class _AuthScreenState extends State<AuthScreen>
                                 }
                               },
                               onSecondary: () async {
-                                final ok = await controller
-                                    .sendPasswordResetEmail(
-                                      _emailController.text,
-                                    );
-                                if (ok && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        context.l10n.t('auth_reset_sent'),
-                                      ),
-                                    ),
-                                  );
-                                }
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.forgotPassword,
+                                );
                               },
-                              secondaryLabel: context.l10n.t(
-                                'auth_reset_password',
-                              ),
+                              secondaryLabel: 'Forgot password?',
                             ),
                             _AuthFormCard(
                               title: context.l10n.t('auth_create_account'),
                               subtitle: context.l10n.t('auth_signup_subtitle'),
-                              emailController: _emailController,
-                              passwordController: _passwordController,
+                              emailController: _signupEmailController,
+                              passwordController: _signupPasswordController,
                               isLoading: controller.isLoading,
                               errorMessage: controller.errorMessage,
                               primaryLabel: context.l10n.t(
@@ -114,8 +107,8 @@ class _AuthScreenState extends State<AuthScreen>
                               ),
                               onPrimary: () async {
                                 final ok = await controller.signUp(
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
+                                  email: _signupEmailController.text,
+                                  password: _signupPasswordController.text,
                                 );
                                 if (ok && context.mounted) {
                                   if (controller.isAuthenticated) {
@@ -131,9 +124,9 @@ class _AuthScreenState extends State<AuthScreen>
                                     return;
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content: Text(
-                                        context.l10n.t('auth_signup_success'),
+                                        'Check your email to confirm your account.',
                                       ),
                                     ),
                                   );

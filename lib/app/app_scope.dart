@@ -49,7 +49,6 @@ class AppScope extends InheritedWidget {
         config.isSupabaseEnabled && SupabaseBootstrap.client != null
         ? SupabaseAuthRepository(SupabaseBootstrap.client!)
         : LocalAuthRepository(prefs);
-    authController = AuthController(authRepository);
     final analytics = LocalAnalyticsService(prefs);
     appController = ItalyAdminCopilotController(
       appConfig: config,
@@ -186,6 +185,12 @@ class AppScope extends InheritedWidget {
       directoryContactsRepository,
     );
     documentsService = DocumentsService(directoryDocumentsRepository);
+    authController = AuthController(
+      authRepository,
+      beforeAuthChange: clearAuthSensitiveState,
+      afterAuthenticated: (_) => reloadAuthSensitiveState(),
+      afterSignedOut: clearAuthSensitiveState,
+    );
   }
 
   final SharedPreferences _prefs;
@@ -256,6 +261,45 @@ class AppScope extends InheritedWidget {
   late final CostDashboardService costDashboardService;
   late final ContactsDirectoryService contactsDirectoryService;
   late final DocumentsService documentsService;
+
+  Future<void> clearAuthSensitiveState() async {
+    const keysToRemove = <String>[
+      LocalAdminCopilotProfileRepository.profileStorageKey,
+      LocalAdminCopilotRequestRepository.requestsStorageKey,
+      LocalAdminCopilotRequestRepository.draftsStorageKey,
+      'italy_life_admin_documents_v1',
+      'italy_life_admin_contacts_v1',
+      'italy_life_admin_household_members_v1',
+      'italy_life_admin_household_contracts_v1',
+      'italy_life_admin_deadlines_v1',
+      'italy_life_admin_templates_v1',
+      'italy_life_admin_proof_cases_v1',
+      'italy_life_admin_proof_items_v1',
+      'italy_life_admin_before_sending_v1',
+      'italy_life_admin_cost_items_v1',
+      'italy_life_admin_directory_contacts_v1',
+      'italy_life_admin_directory_documents_v1',
+      'italy_life_admin_problem_requests_v1',
+      'italy_life_admin_consultancy_requests_v1',
+      'italy_life_admin_telegram_handoff_v1',
+      LocalUfficcioEntitlementRepository.storageKey,
+    ];
+    for (final key in keysToRemove) {
+      await _prefs.remove(key);
+    }
+    profileController.resetLocalState();
+    await requestController.clearLocalState();
+    await adminPanelController.reset();
+  }
+
+  Future<void> reloadAuthSensitiveState() async {
+    await Future.wait([
+      profileController.load(),
+      requestController.load(),
+      adminPanelController.load(),
+      entitlementService.getCurrentEntitlement(),
+    ]);
+  }
 
   static AppScope of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();

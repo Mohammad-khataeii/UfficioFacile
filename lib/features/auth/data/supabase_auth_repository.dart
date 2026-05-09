@@ -24,7 +24,7 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Stream<app_auth.AuthUser?> authStateChanges() =>
       _client.auth.onAuthStateChange.map((event) {
-        final user = event.session?.user ?? _client.auth.currentUser;
+        final user = event.session?.user;
         if (user == null) return null;
         return app_auth.AuthUser(
           id: user.id,
@@ -39,11 +39,19 @@ class SupabaseAuthRepository implements AuthRepository {
     required String password,
   }) async {
     try {
+      await _signOutIfNeeded();
       final response = await _client.auth.signUp(
         email: email.trim(),
         password: password,
       );
-      final user = response.user;
+      final user = response.session?.user;
+      if (user == null && response.user != null) {
+        return app_auth.AuthUser(
+          id: '',
+          email: response.user!.email ?? email.trim(),
+          isAnonymous: false,
+        );
+      }
       if (user == null) {
         throw const AuthFailure(
           'We could not create the account. Please check your email and try again.',
@@ -69,11 +77,12 @@ class SupabaseAuthRepository implements AuthRepository {
     required String password,
   }) async {
     try {
+      await _signOutIfNeeded();
       final response = await _client.auth.signInWithPassword(
         email: email.trim(),
         password: password,
       );
-      final user = response.user;
+      final user = response.session?.user ?? response.user;
       if (user == null) {
         throw const AuthFailure(
           'We could not sign you in. Please check your details and try again.',
@@ -96,16 +105,22 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      await _client.auth.signOut();
+      await _client.auth.signOut(scope: SignOutScope.local);
     } on AuthException catch (error) {
       throw AuthFailure(_humanizeAuthError(error.message));
     }
   }
 
   @override
-  Future<void> sendPasswordResetEmail(String email) async {
+  Future<void> sendPasswordResetEmail(
+    String email, {
+    String? redirectTo,
+  }) async {
     try {
-      await _client.auth.resetPasswordForEmail(email.trim());
+      await _client.auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: redirectTo,
+      );
     } on AuthException catch (error) {
       throw AuthFailure(_humanizeAuthError(error.message));
     } catch (_) {
@@ -113,6 +128,28 @@ class SupabaseAuthRepository implements AuthRepository {
         'We could not send the password reset email right now.',
       );
     }
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _client.auth.updateUser(UserAttributes(password: newPassword));
+    } on AuthException catch (error) {
+      throw AuthFailure(_humanizeAuthError(error.message));
+    } catch (_) {
+      throw const AuthFailure(
+        'We could not update your password right now. Please try again.',
+      );
+    }
+  }
+
+  Future<void> _signOutIfNeeded() async {
+    if (_client.auth.currentSession == null) {
+      return;
+    }
+    try {
+      await _client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {}
   }
 }
 

@@ -120,6 +120,35 @@ String _formatCurrencyCents(int cents, [String currency = 'EUR']) {
   return '${currency.toUpperCase()} ${amount.toStringAsFixed(2)}';
 }
 
+String _planPriceLabel(PlanProduct product) {
+  final amount = _formatCurrencyCents(product.amountCents, product.currency);
+  switch (product.billingInterval) {
+    case 'month':
+      return '$amount/month';
+    case 'year':
+      return '$amount/year';
+    case 'one_time':
+      return 'from $amount / request';
+    case 'none':
+      return amount;
+    default:
+      return amount;
+  }
+}
+
+bool _isPubliclyVisiblePlan(PlanProduct product) {
+  if (!product.isActive) return false;
+  return switch (product.productKey) {
+    'free' => true,
+    'plus_monthly' => true,
+    'plus_yearly' => true,
+    'premium_monthly' => true,
+    'premium_yearly' => true,
+    'consultancy_one_shot' => true,
+    _ => false,
+  };
+}
+
 String _planLabel(BuildContext context, UfficioPlan plan) {
   switch (plan) {
     case UfficioPlan.free:
@@ -502,11 +531,28 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             fallback: item.id,
                           ),
                           _iconForCategorySlug(item.id),
-                          () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.category,
-                            arguments: CatalogCategoryRouteArgs(item.id),
-                          ),
+                          () async {
+                            final access = await scope.entitlementService
+                                .canAccessCategory(item);
+                            if (!context.mounted) return;
+                            if (!access.allowed) {
+                              await showPremiumPaywallSheet(
+                                context,
+                                decision: access,
+                                featureLabel: ufficioLocalizedValue(
+                                  item.title,
+                                  context.l10n.languageCode,
+                                  fallback: item.id,
+                                ),
+                              );
+                              return;
+                            }
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.category,
+                              arguments: CatalogCategoryRouteArgs(item.id),
+                            );
+                          },
                           subtitle: ufficioLocalizedValue(
                             item.description,
                             context.l10n.languageCode,
@@ -4522,6 +4568,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _applyProfile(AppScope scope) {
     final profile = scope.profileController.profile;
+    final currentLanguage = LocalAppLanguageRepository.sanitize(
+      scope.appController.languageCode,
+    );
     _name.text = profile.fullName ?? '';
     _cf.text = profile.codiceFiscale ?? '';
     _email.text = (profile.email ?? '').isEmpty
@@ -4530,7 +4579,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _city = (profile.city ?? '').isEmpty ? 'Torino' : profile.city!;
     _languageCode = LocalAppLanguageRepository.sanitize(
       profile.preferredLanguage.isEmpty
-          ? scope.appController.languageCode
+          ? currentLanguage
           : profile.preferredLanguage,
     );
   }
@@ -4560,12 +4609,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.t('profile'))),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+    final currentLanguage = LocalAppLanguageRepository.sanitize(
+      scope.appController.languageCode,
+    );
+    if (_languageCode != currentLanguage) {
+      _languageCode = currentLanguage;
+    }
+    return AnimatedBuilder(
+      animation: Listenable.merge([scope.appController, scope.authController]),
+      builder: (context, _) => Scaffold(
+        appBar: AppBar(title: Text(context.l10n.t('profile'))),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (scope.authController.user?.email.isNotEmpty == true)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Current authenticated email'),
+                  subtitle: Text(scope.authController.user!.email),
+                ),
             TextField(
               controller: _name,
               decoration: InputDecoration(
@@ -4581,7 +4644,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              initialValue: _city,
+              value: _city,
               items: const [
                 DropdownMenuItem(value: 'Torino', child: Text('Torino')),
               ],
@@ -4601,7 +4664,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
-              initialValue: _languageCode,
+              value: currentLanguage,
               items: const [
                 DropdownMenuItem(value: 'en', child: Text('English')),
                 DropdownMenuItem(value: 'it', child: Text('Italiano')),
@@ -4613,13 +4676,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onChanged: (value) {
                 if (value == null) return;
                 setState(() => _languageCode = value);
-                scope.appController.setLanguage(value);
+                unawaited(scope.appController.setLanguage(value));
               },
               decoration: InputDecoration(
                 labelText: context.l10n.t('profile_language'),
               ),
             ),
             const SizedBox(height: 24),
+            OutlinedButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.changePassword),
+              child: const Text('Change password'),
+            ),
+            const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(context.l10n.t('profile_backend_mode')),
@@ -4705,7 +4774,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 label: Text(context.l10n.t('account_log_out')),
               ),
             ],
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -7671,6 +7741,7 @@ Future<bool?> showPremiumPaywallSheet(
   BuildContext context, {
   required EntitlementDecision decision,
   required String featureLabel,
+  String? teaser,
 }) {
   return showModalBottomSheet<bool>(
     context: context,
@@ -7682,13 +7753,19 @@ Future<bool?> showPremiumPaywallSheet(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            decision.upgradeTitle,
+            'Premium feature',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 12),
-          Text(featureLabel),
+          Text(
+            'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+          ),
+          if (teaser != null && teaser.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(teaser),
+          ],
           const SizedBox(height: 8),
-          Text(decision.upgradeMessage),
+          Text(featureLabel),
           if (decision.limit != null && decision.used != null) ...[
             const SizedBox(height: 8),
             Text('Usage: ${decision.used} / ${decision.limit}'),
@@ -7698,14 +7775,12 @@ Future<bool?> showPremiumPaywallSheet(
           const SizedBox(height: 16),
           FilledButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
-            child: Text(context.l10n.t('paywall_open_plan')),
+            child: const Text('See plans'),
           ),
-          const SizedBox(height: 8),
-          Text(context.l10n.t('payment_setup_message')),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.t('paywall_maybe_later')),
+            child: const Text('Not now'),
           ),
         ],
       ),
@@ -7725,7 +7800,7 @@ class PlanScreen extends StatelessWidget {
         future: Future.wait([
           entitlementService.getCurrentEntitlement(),
           entitlementService.getUsageSummary(),
-          entitlementService.getConfig(),
+          entitlementService.getPlanProducts(),
         ]),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -7734,6 +7809,10 @@ class PlanScreen extends StatelessWidget {
           final values = snapshot.data!;
           final entitlement = values[0] as dynamic;
           final usage = values[1] as List<UsageSummaryItem>;
+          final plans = (values[2] as List<PlanProduct>)
+              .where(_isPubliclyVisiblePlan)
+              .toList()
+            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -7759,22 +7838,76 @@ class PlanScreen extends StatelessWidget {
                     .toList(),
               ),
               const SizedBox(height: 16),
-              _SectionCard(
-                title: context.l10n.t('free_plan_label'),
-                child: Text(context.l10n.t('free_plan_desc')),
+              ...plans.map(
+                (plan) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _SectionCard(
+                    title:
+                        '${_localizedCatalogText(context, plan.title, fallback: plan.productKey)} — ${_planPriceLabel(plan)}',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _localizedCatalogText(
+                            context,
+                            plan.description,
+                            fallback: plan.productKey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (entitlement.plan.name == plan.productKey ||
+                            (plan.productKey == 'free' &&
+                                entitlement.plan == UfficioPlan.free))
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: PremiumBadge(label: 'Current plan'),
+                          ),
+                        ...plan.features.entries
+                            .where((entry) => entry.value == true)
+                            .map((entry) => Text('• ${entry.key}')),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            if (plan.productKey == 'free')
+                              OutlinedButton(
+                                onPressed: null,
+                                child: const Text('Current plan'),
+                              )
+                            else if (plan.productKey == 'consultancy_one_shot')
+                              FilledButton(
+                                onPressed: () => ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      context.l10n.t('payment_not_active_yet'),
+                                    ),
+                                  ),
+                                ),
+                                child: const Text('Request consultancy'),
+                              )
+                            else
+                              FilledButton(
+                                onPressed: () => ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      context.l10n.t('payment_not_active_yet'),
+                                    ),
+                                  ),
+                                ),
+                                child: const Text('Choose plan'),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                title: context.l10n.t('plus_plan_label'),
-                child: Text(context.l10n.t('plus_plan_desc')),
-              ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                title: context.l10n.t('premium_plan_label'),
-                child: Text(context.l10n.t('premium_plan_desc')),
-              ),
-              const SizedBox(height: 16),
-              Text(context.l10n.t('payment_setup_message')),
             ],
           );
         },

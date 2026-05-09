@@ -165,4 +165,9 @@ class RequestController extends ChangeNotifier {
   Future<void> clearDraft(String procedureId) {
     return _draftRepository.deleteDraft(procedureId);
   }
+
+  Future<void> clearLocalState() async {
+    requests = const [];
+    notifyListeners();
+  }
 }

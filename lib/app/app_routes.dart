@@ -3,6 +3,8 @@ class AppRoutes {
   static const dashboard = '/life-admin/dashboard';
   static const onboarding = '/life-admin/onboarding';
   static const auth = '/life-admin/auth';
+  static const forgotPassword = '/auth/forgot-password';
+  static const resetPassword = '/auth/reset-password';
   static const category = '/life-admin/category';
   static const subcategory = '/life-admin/subcategory';
   static const catalogProcedure = '/life-admin/catalog-procedure';
@@ -35,6 +37,7 @@ class AppRoutes {
   static const plan = '/life-admin/plan';
   static const terms = '/life-admin/terms';
   static const profile = '/life-admin/profile';
+  static const changePassword = '/account/change-password';
   static const privacy = '/ufficcio/privacy';
   static const sync = '/ufficcio/sync';
   static const help = '/life-admin/help';

@@ -12,6 +12,7 @@ import 'app_theme.dart';
 import '../features/auth/presentation/account_screen.dart';
 import '../features/auth/presentation/auth_gate.dart';
 import '../features/auth/presentation/auth_screen.dart';
+import '../features/auth/presentation/password_screens.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 import '../features/italy_admin_copilot/domain/life_admin_mode.dart';
 import '../features/italy_admin_copilot/presentation/screens/catalog_screens.dart';
@@ -118,6 +119,14 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                   case AppRoutes.auth:
                     return MaterialPageRoute(
                       builder: (_) => const AuthScreen(),
+                    );
+                  case AppRoutes.forgotPassword:
+                    return MaterialPageRoute(
+                      builder: (_) => const ForgotPasswordScreen(),
+                    );
+                  case AppRoutes.resetPassword:
+                    return MaterialPageRoute(
+                      builder: (_) => const ResetPasswordScreen(),
                     );
                   case AppRoutes.onboarding:
                     return MaterialPageRoute(
@@ -303,6 +312,13 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => const AccountScreen(),
                     );
+                  case AppRoutes.changePassword:
+                    return MaterialPageRoute(
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'change password',
+                        child: ChangePasswordScreen(),
+                      ),
+                    );
                   case AppRoutes.privacy:
                     return MaterialPageRoute(
                       builder: (_) => const AuthGate(
@@ -394,6 +410,13 @@ class _EntryRouter extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([controller, authController]),
       builder: (context, _) {
+        final path = Uri.base.path;
+        if (path == AppRoutes.resetPassword) {
+          return const ResetPasswordScreen();
+        }
+        if (path == AppRoutes.forgotPassword) {
+          return const ForgotPasswordScreen();
+        }
         switch (decideStartupDestination(
           controller.startupState,
           isAuthenticated: authController.isAuthenticated,

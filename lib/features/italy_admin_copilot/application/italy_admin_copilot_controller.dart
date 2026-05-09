@@ -105,7 +105,7 @@ class ItalyAdminCopilotController extends ChangeNotifier {
 
   Future<void> setLanguage(String code) async {
     languageCode = LocalAppLanguageRepository.sanitize(code);
-    await _languageRepository.save(code);
+    await _languageRepository.save(languageCode);
     notifyListeners();
   }
 

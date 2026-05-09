@@ -65,6 +65,16 @@ class AccountScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton(
+                      onPressed: user == null
+                          ? null
+                          : () => Navigator.pushNamed(
+                              context,
+                              AppRoutes.changePassword,
+                            ),
+                      child: const Text('Change password'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
                       onPressed: () =>
                           Navigator.pushNamed(context, AppRoutes.privacy),
                       child: Text(context.l10n.t('account_privacy')),

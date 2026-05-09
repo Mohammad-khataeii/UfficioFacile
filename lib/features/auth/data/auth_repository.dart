@@ -20,7 +20,8 @@ abstract class AuthRepository {
   Future<AuthUser> signUp({required String email, required String password});
   Future<AuthUser> signIn({required String email, required String password});
   Future<void> signOut();
-  Future<void> sendPasswordResetEmail(String email);
+  Future<void> sendPasswordResetEmail(String email, {String? redirectTo});
+  Future<void> updatePassword(String newPassword);
 }
 
 class LocalAuthRepository implements AuthRepository {
@@ -85,9 +86,22 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> sendPasswordResetEmail(String email) async {
+  Future<void> sendPasswordResetEmail(
+    String email, {
+    String? redirectTo,
+  }) async {
     if (email.trim().isEmpty) {
       throw const AuthFailure('Enter your email first.');
+    }
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    if (_currentUser == null) {
+      throw const AuthFailure('Sign in before changing your password.');
+    }
+    if (newPassword.trim().length < 8) {
+      throw const AuthFailure('Choose a stronger password.');
     }
   }
 }

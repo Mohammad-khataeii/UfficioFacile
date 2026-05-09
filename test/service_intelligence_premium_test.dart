@@ -22,6 +22,7 @@ import 'package:ufficiofacile/features/italy_admin_copilot/data/ufficcio_supabas
 import 'package:ufficiofacile/features/italy_admin_copilot/data/utilities_electricity_gas_guidance_definitions.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/premium_config.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/service_intelligence.dart';
+import 'package:ufficiofacile/features/italy_admin_copilot/domain/ufficio_catalog.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/presentation/screens/life_admin_screens.dart';
 
 const _localConfig = UfficcioFacileConfig(
@@ -353,6 +354,115 @@ void main() {
       await service.deactivateLocalProForDebug();
       expect(await service.isPro(), isFalse);
     });
+
+    test('public plan products expose non-empty prices', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final service = UfficioPremiumEntitlementService(
+        LocalUfficcioEntitlementRepository(prefs),
+        LocalPremiumConfigRepository(prefs),
+        analytics: LocalAnalyticsService(prefs),
+      );
+
+      final publicPlans = (await service.getPlanProducts()).where(
+        (item) => <String>{
+          'free',
+          'plus_monthly',
+          'plus_yearly',
+          'premium_monthly',
+          'premium_yearly',
+          'consultancy_one_shot',
+        }.contains(item.productKey),
+      );
+
+      expect(publicPlans, isNotEmpty);
+      for (final plan in publicPlans) {
+        expect(plan.title['en'], isNotEmpty);
+        expect(plan.currency, isNotEmpty);
+        if (plan.productKey != 'free') {
+          expect(plan.amountCents, greaterThan(0));
+        }
+      }
+    });
+
+    test('free user cannot access premium-only catalog items', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final service = UfficioPremiumEntitlementService(
+        LocalUfficcioEntitlementRepository(prefs),
+        LocalPremiumConfigRepository(prefs),
+        analytics: LocalAnalyticsService(prefs),
+      );
+
+      final category = UfficioCategory.fromJson(const {
+        'id': 'premium-cat',
+        'icon': 'lock',
+        'sortOrder': 1,
+        'isPremiumOnly': true,
+        'title': {'en': 'Premium category'},
+        'description': {'en': 'Locked'},
+        'subcategories': [],
+      });
+      final subcategory = UfficioSubcategory.fromJson(const {
+        'id': 'premium-sub',
+        'sortOrder': 1,
+        'isPremiumOnly': true,
+        'title': {'en': 'Premium subcategory'},
+        'description': {'en': 'Locked'},
+        'procedures': [],
+      }, categoryId: 'premium-cat');
+      final procedure = UfficioProcedure.fromJson(
+        const {
+          'id': 'premium-proc',
+          'sortOrder': 1,
+          'isPremiumOnly': true,
+          'requiresAuth': false,
+          'title': {'en': 'Premium procedure'},
+          'shortDescription': {'en': 'Locked'},
+          'sections': [],
+        },
+        categoryId: 'premium-cat',
+        subcategoryId: 'premium-sub',
+      );
+      final section = UfficioContentSection.fromJson(const {
+        'type': 'text',
+        'key': 'premium',
+        'title': {'en': 'Premium section'},
+        'body': {'en': 'Locked'},
+        'isPremiumOnly': true,
+      });
+
+      expect((await service.canAccessCategory(category)).allowed, isFalse);
+      expect(
+        (await service.canAccessSubcategory(subcategory)).allowed,
+        isFalse,
+      );
+      expect((await service.canAccessProcedure(procedure)).allowed, isFalse);
+      expect((await service.canAccessSection(section)).allowed, isFalse);
+    });
+
+    test('free user can access public category with premium content', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final service = UfficioPremiumEntitlementService(
+        LocalUfficcioEntitlementRepository(prefs),
+        LocalPremiumConfigRepository(prefs),
+        analytics: LocalAnalyticsService(prefs),
+      );
+
+      final category = UfficioCategory.fromJson(const {
+        'id': 'mixed-cat',
+        'icon': 'folder',
+        'sortOrder': 1,
+        'isPremiumOnly': false,
+        'hasPremiumContent': true,
+        'title': {'en': 'Mixed category'},
+        'description': {'en': 'Free shell'},
+        'subcategories': [],
+      });
+
+      expect((await service.canAccessCategory(category)).allowed, isTrue);
+    });
   });
 
   group('generated pack enrichment', () {
@@ -480,6 +590,68 @@ void main() {
       expect(find.text('What is your problem?'), findsOneWidget);
       expect(find.text('Read these details from the bill'), findsNothing);
       expect(find.text('Guided selector'), findsOneWidget);
+    });
+
+    testWidgets('plan screen renders visible prices', (tester) async {
+      await pumpWithScope(tester, const PlanScreen());
+      expect(find.textContaining('EUR 4.99/month'), findsOneWidget);
+      expect(find.textContaining('EUR 39.99/year'), findsOneWidget);
+      expect(find.textContaining('EUR 9.99/month'), findsOneWidget);
+    });
+
+    testWidgets('paywall See plans button opens plan screen', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      await tester.pumpWidget(
+        AppScope(
+          prefs: prefs,
+          config: _localConfig,
+          supabaseBootstrapResult: const SupabaseBootstrapResult(
+            configured: false,
+            initialized: false,
+          ),
+          child: AppLocalizationsScope(
+            localizations: AppLocalizations('en'),
+            child: MaterialApp(
+              onGenerateRoute: (settings) {
+                if (settings.name == AppRoutes.plan) {
+                  return MaterialPageRoute(builder: (_) => const PlanScreen());
+                }
+                return MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    body: Center(
+                      child: FilledButton(
+                        onPressed: () => showPremiumPaywallSheet(
+                          context,
+                          decision: const EntitlementDecision(
+                            allowed: false,
+                            isPremiumFeature: true,
+                            reason: 'Locked',
+                            upgradeTitle: 'Premium feature',
+                            upgradeMessage: 'Locked',
+                          ),
+                          featureLabel: 'Premium guide',
+                        ),
+                        child: const Text('Open paywall'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open paywall'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('See plans'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Choose the level of help that fits your situation.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('canone hub shows guided selector without global postal dump', (

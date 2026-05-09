@@ -6,7 +6,12 @@ import '../data/auth_repository.dart';
 import '../domain/auth_user.dart';
 
 class AuthController extends ChangeNotifier {
-  AuthController(this._repository) {
+  AuthController(
+    this._repository, {
+    this.beforeAuthChange,
+    this.afterAuthenticated,
+    this.afterSignedOut,
+  }) {
     user = _repository.currentUser;
     _subscription = _repository.authStateChanges().listen((nextUser) {
       user = nextUser;
@@ -15,6 +20,9 @@ class AuthController extends ChangeNotifier {
   }
 
   final AuthRepository _repository;
+  final Future<void> Function()? beforeAuthChange;
+  final Future<void> Function(AuthUser user)? afterAuthenticated;
+  final Future<void> Function()? afterSignedOut;
   StreamSubscription<AuthUser?>? _subscription;
 
   AuthUser? user;
@@ -28,7 +36,19 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      user = await _repository.signIn(email: email, password: password);
+      await beforeAuthChange?.call();
+      final signedInUser = await _repository.signIn(
+        email: email,
+        password: password,
+      );
+      final sessionUser = _repository.currentUser ?? signedInUser;
+      if (!_matchesExpectedSession(email, sessionUser)) {
+        return await _handleSessionMismatch();
+      }
+      user = sessionUser;
+      if (sessionUser.isAuthenticated) {
+        await afterAuthenticated?.call(sessionUser);
+      }
       return true;
     } on AuthFailure catch (error) {
       errorMessage = error.message;
@@ -44,7 +64,21 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      user = await _repository.signUp(email: email, password: password);
+      await beforeAuthChange?.call();
+      final createdUser = await _repository.signUp(
+        email: email,
+        password: password,
+      );
+      final sessionUser = _repository.currentUser;
+      if (!createdUser.isAuthenticated || sessionUser == null) {
+        user = null;
+        return true;
+      }
+      if (!_matchesExpectedSession(email, sessionUser)) {
+        return await _handleSessionMismatch();
+      }
+      user = sessionUser;
+      await afterAuthenticated?.call(sessionUser);
       return true;
     } on AuthFailure catch (error) {
       errorMessage = error.message;
@@ -55,12 +89,15 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendPasswordResetEmail(String email) async {
+  Future<bool> sendPasswordResetEmail(
+    String email, {
+    String? redirectTo,
+  }) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
     try {
-      await _repository.sendPasswordResetEmail(email);
+      await _repository.sendPasswordResetEmail(email, redirectTo: redirectTo);
       return true;
     } on AuthFailure catch (error) {
       errorMessage = error.message;
@@ -78,12 +115,47 @@ class AuthController extends ChangeNotifier {
     try {
       await _repository.signOut();
       user = null;
+      await afterSignedOut?.call();
     } on AuthFailure catch (error) {
       errorMessage = error.message;
     } finally {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> updatePassword(String newPassword) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+    try {
+      await _repository.updatePassword(newPassword);
+      return true;
+    } on AuthFailure catch (error) {
+      errorMessage = error.message;
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  bool _matchesExpectedSession(String expectedEmail, AuthUser? sessionUser) {
+    if (sessionUser == null || !sessionUser.isAuthenticated) {
+      return false;
+    }
+    return sessionUser.email.trim().toLowerCase() ==
+        expectedEmail.trim().toLowerCase();
+  }
+
+  Future<bool> _handleSessionMismatch() async {
+    try {
+      await _repository.signOut();
+    } catch (_) {}
+    user = null;
+    await afterSignedOut?.call();
+    errorMessage = 'Session mismatch. Please sign in again.';
+    return false;
   }
 
   @override

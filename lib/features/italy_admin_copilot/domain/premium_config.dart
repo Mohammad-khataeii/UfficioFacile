@@ -64,7 +64,7 @@ class PremiumConfig {
     this.proFeatureKeys = const [],
     this.consultantFeatureKeys = const [FeatureKey.consultantMode],
     this.trialDays = 7,
-    this.allowLocalDebugPro = true,
+    this.allowLocalDebugPro = false,
   });
 
   final bool betaModeEnabled;
@@ -161,8 +161,8 @@ class PremiumConfig {
   };
 
   factory PremiumConfig.fromJson(Map<String, dynamic> json) => PremiumConfig(
-    betaModeEnabled: json['betaModeEnabled'] as bool? ?? true,
-    paywallEnabled: json['paywallEnabled'] as bool? ?? false,
+    betaModeEnabled: json['betaModeEnabled'] as bool? ?? false,
+    paywallEnabled: json['paywallEnabled'] as bool? ?? true,
     showPremiumBadges: json['showPremiumBadges'] as bool? ?? true,
     freePackLimit: json['freePackLimit'] as int? ?? 5,
     freeSavedRequestsLimit: json['freeSavedRequestsLimit'] as int? ?? 10,
@@ -195,7 +195,7 @@ class PremiumConfig {
         )
         .toList(),
     trialDays: json['trialDays'] as int? ?? 7,
-    allowLocalDebugPro: json['allowLocalDebugPro'] as bool? ?? true,
+    allowLocalDebugPro: json['allowLocalDebugPro'] as bool? ?? false,
   );
 }
 

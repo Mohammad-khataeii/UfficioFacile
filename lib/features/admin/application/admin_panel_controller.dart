@@ -24,7 +24,14 @@ class AdminPanelController extends ChangeNotifier {
     notifyListeners();
     try {
       isAdmin = await _repository.isCurrentUserAdmin();
-      if (!isAdmin) return;
+      if (!isAdmin) {
+        adminUsers = const [];
+        entitlements = const [];
+        premiumEvents = const [];
+        auditLogs = const [];
+        stats = null;
+        return;
+      }
       adminUsers = await _repository.listAdminUsers();
       entitlements = await _repository.listEntitlements();
       final problemRequests = await _repository.listProblemRequests();
@@ -56,6 +63,18 @@ class AdminPanelController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> reset() async {
+    isLoading = false;
+    isAdmin = false;
+    errorMessage = null;
+    stats = null;
+    adminUsers = const [];
+    entitlements = const [];
+    premiumEvents = const [];
+    auditLogs = const [];
+    notifyListeners();
   }
 
   Future<void> saveEntitlement(AdminEntitlementRecord record) async {
