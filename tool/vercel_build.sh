@@ -9,10 +9,14 @@ else
   echo "Flutter found."
 fi
 
+if ! command -v dart >/dev/null 2>&1; then
+  export PATH="$(dirname "$(command -v flutter)")/cache/dart-sdk/bin:$PATH"
+fi
+
 flutter --version
 flutter pub get
-/usr/local/share/flutter/bin/dart run tool/export_cms_seed.dart
-/usr/local/share/flutter/bin/dart run tool/validate_catalog.dart
+dart run tool/export_cms_seed.dart
+dart run tool/validate_catalog.dart
 
 flutter build web --release \
   --dart-define=UFFICCIOFACILE_BACKEND_MODE="${UFFICCIOFACILE_BACKEND_MODE:-supabase}" \
