@@ -32,6 +32,7 @@ import '../features/italy_admin_copilot/data/local_template_override_repository.
 import '../features/italy_admin_copilot/data/life_admin_phase5_services.dart';
 import '../features/italy_admin_copilot/data/premium_service.dart';
 import '../features/italy_admin_copilot/data/supabase_catalog_repository.dart';
+import '../features/italy_admin_copilot/data/ufficio_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/ufficio_product_services.dart';
 import '../features/italy_admin_copilot/data/ufficcio_supabase_readiness.dart';
 import 'supabase_bootstrap.dart';
@@ -128,6 +129,7 @@ class AppScope extends InheritedWidget {
           : null,
       prefs: prefs,
     );
+    ufficioCatalogRepository = UfficioCatalogRepository(cmsRepository);
     userSettingsRepository = LocalUfficcioUserSettingsRepository(prefs);
     entitlementRepository = LocalUfficcioEntitlementRepository(prefs);
     repositoryFactory = UfficcioRepositoryFactory(
@@ -234,6 +236,7 @@ class AppScope extends InheritedWidget {
   late final LocalizationInspectorService localizationInspectorService;
   late final BundledCatalogRepository bundledCatalogRepository;
   late final HybridCatalogRepository catalogRepository;
+  late final UfficioCatalogRepository ufficioCatalogRepository;
   late final UfficcioAuthFacade authFacade;
   late final AdminRepository adminRepository;
   late final AdminPanelController adminPanelController;

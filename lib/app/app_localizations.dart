@@ -49,6 +49,18 @@ class AppLocalizations {
       'onboarding_title': 'Italian admin, step by step.',
       'onboarding_subtitle':
           'Organize procedures, reminders, documents, and formal messages for bills, rent, health, university, and public offices.',
+      'onboarding_demo_title': 'UfficioFacile',
+      'onboarding_demo_subtitle':
+          'Handle Italian bureaucracy without getting lost.',
+      'onboarding_card_1_title': 'Find the right procedure',
+      'onboarding_card_1_body':
+          'Choose a category and see what to do, where to go, and which documents you need.',
+      'onboarding_card_2_title': 'Use verified contacts',
+      'onboarding_card_2_body':
+          'Get official links, offices, PEC addresses, emails, and forms when available.',
+      'onboarding_card_3_title': 'Unlock premium help',
+      'onboarding_card_3_body':
+          'Save time with deeper guides, request missing problems, and get private support.',
       'privacy_title': 'Privacy and disclaimer',
       'skip': 'Skip',
       'next': 'Next',
@@ -139,6 +151,7 @@ class AppLocalizations {
       'account_not_signed_in': 'Not signed in',
       'account_plan': 'Plan',
       'account_log_out': 'Log out',
+      'signed_out': 'Signed out',
       'account_privacy': 'Privacy center',
       'access_denied_title': 'Access denied',
       'access_denied_message':
@@ -226,6 +239,8 @@ class AppLocalizations {
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
       'retry': 'Retry',
+      'not_found': 'We could not find that page.',
+      'back_to_dashboard': 'Back to dashboard',
       'one_shot_consultancy_label': 'One-shot consultancy',
       'admin_grant_label': 'Admin grant',
       'free_plan_desc':
@@ -256,6 +271,18 @@ class AppLocalizations {
       'onboarding_title': 'Burocrazia italiana, passo dopo passo.',
       'onboarding_subtitle':
           'Organizza procedure, promemoria, documenti e messaggi formali per bollette, affitto, sanità, università e uffici pubblici.',
+      'onboarding_demo_title': 'UfficioFacile',
+      'onboarding_demo_subtitle':
+          'Gestisci la burocrazia italiana senza perderti.',
+      'onboarding_card_1_title': 'Trova la procedura giusta',
+      'onboarding_card_1_body':
+          'Scegli una categoria e scopri cosa fare, dove andare e quali documenti servono.',
+      'onboarding_card_2_title': 'Usa contatti verificati',
+      'onboarding_card_2_body':
+          'Trova link ufficiali, uffici, PEC, email e moduli quando sono disponibili.',
+      'onboarding_card_3_title': 'Sblocca aiuto premium',
+      'onboarding_card_3_body':
+          'Risparmia tempo con guide più approfondite, richieste di nuovi problemi e supporto privato.',
       'privacy_title': 'Privacy e disclaimer',
       'skip': 'Salta',
       'next': 'Avanti',
@@ -347,6 +374,7 @@ class AppLocalizations {
       'account_not_signed_in': 'Non hai effettuato l’accesso',
       'account_plan': 'Piano',
       'account_log_out': 'Esci',
+      'signed_out': 'Disconnessione effettuata',
       'account_privacy': 'Centro privacy',
       'access_denied_title': 'Accesso negato',
       'access_denied_message':
@@ -436,6 +464,8 @@ class AppLocalizations {
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
       'retry': 'Riprova',
+      'not_found': 'Non abbiamo trovato questa pagina.',
+      'back_to_dashboard': 'Torna alla dashboard',
       'one_shot_consultancy_label': 'Consulenza una tantum',
       'admin_grant_label': 'Concessione admin',
       'free_plan_desc':
@@ -466,6 +496,18 @@ class AppLocalizations {
       'onboarding_title': 'کارهای اداری ایتالیا، مرحله به مرحله.',
       'onboarding_subtitle':
           'برای قبض، اجاره، درمان، دانشگاه و اداره‌های عمومی، فرایندها، یادآورها، مدارک و پیام‌های رسمی را مدیریت کنید.',
+      'onboarding_demo_title': 'UfficioFacile',
+      'onboarding_demo_subtitle':
+          'کارهای اداری ایتالیا را بدون سردرگمی انجام بده.',
+      'onboarding_card_1_title': 'روند درست را پیدا کن',
+      'onboarding_card_1_body':
+          'یک دسته را انتخاب کن تا ببینی چه کاری باید انجام بدهی، کجا بروی و چه مدارکی لازم است.',
+      'onboarding_card_2_title': 'از راه‌های تماس معتبر استفاده کن',
+      'onboarding_card_2_body':
+          'در صورت وجود، لینک‌های رسمی، اداره‌ها، آدرس PEC، ایمیل‌ها و فرم‌ها را ببین.',
+      'onboarding_card_3_title': 'کمک پریمیوم را باز کن',
+      'onboarding_card_3_body':
+          'با راهنماهای عمیق‌تر، درخواست برای مشکلات جدید و پشتیبانی خصوصی در زمان صرفه‌جویی کن.',
       'privacy_title': 'حریم خصوصی و توضیحات',
       'skip': 'رد کردن',
       'next': 'بعدی',
@@ -641,6 +683,9 @@ class AppLocalizations {
       'plus_plan_label': 'پلاس',
       'premium_plan_label': 'پریمیوم',
       'retry': 'تلاش دوباره',
+      'signed_out': 'از حساب خارج شدی',
+      'not_found': 'این صفحه پیدا نشد.',
+      'back_to_dashboard': 'بازگشت به داشبورد',
       'one_shot_consultancy_label': 'مشاوره یک‌باره',
       'admin_grant_label': 'امتیاز مدیریتی',
       'free_plan_desc':
@@ -671,6 +716,18 @@ class AppLocalizations {
       'onboarding_title': 'Les démarches italiennes, étape par étape.',
       'onboarding_subtitle':
           'Organisez vos démarches, rappels, documents et messages formels pour les factures, le logement, la santé, l’université et les bureaux publics.',
+      'onboarding_demo_title': 'UfficioFacile',
+      'onboarding_demo_subtitle':
+          'Gérez les démarches italiennes sans vous perdre.',
+      'onboarding_card_1_title': 'Trouver la bonne procédure',
+      'onboarding_card_1_body':
+          'Choisissez une catégorie et voyez quoi faire, où aller et quels documents préparer.',
+      'onboarding_card_2_title': 'Utiliser des contacts vérifiés',
+      'onboarding_card_2_body':
+          'Retrouvez des liens officiels, bureaux, adresses PEC, emails et formulaires quand ils existent.',
+      'onboarding_card_3_title': 'Débloquer l’aide Premium',
+      'onboarding_card_3_body':
+          'Gagnez du temps avec des guides plus complets, des demandes de nouveaux problèmes et un support privé.',
       'privacy_title': 'Confidentialité et avertissement',
       'skip': 'Passer',
       'next': 'Suivant',
@@ -764,6 +821,7 @@ class AppLocalizations {
       'account_not_signed_in': 'Non connecté',
       'account_plan': 'Offre',
       'account_log_out': 'Se déconnecter',
+      'signed_out': 'Déconnexion effectuée',
       'account_privacy': 'Centre de confidentialité',
       'access_denied_title': 'Accès refusé',
       'access_denied_message': 'Votre compte n’a pas accès à cette section.',
@@ -852,6 +910,8 @@ class AppLocalizations {
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
       'retry': 'Réessayer',
+      'not_found': 'Cette page est introuvable.',
+      'back_to_dashboard': 'Retour au tableau de bord',
       'one_shot_consultancy_label': 'Consultation ponctuelle',
       'admin_grant_label': 'Attribution admin',
       'free_plan_desc':
@@ -879,6 +939,18 @@ class AppLocalizations {
       'utilities_bills': 'Facturas y servicios',
       'saved_requests': 'Solicitudes guardadas',
       'what_help': '¿En qué necesitas ayuda?',
+      'onboarding_demo_title': 'UfficioFacile',
+      'onboarding_demo_subtitle':
+          'Gestiona la burocracia italiana sin perderte.',
+      'onboarding_card_1_title': 'Encuentra el trámite correcto',
+      'onboarding_card_1_body':
+          'Elige una categoría y mira qué hacer, dónde ir y qué documentos necesitas.',
+      'onboarding_card_2_title': 'Usa contactos verificados',
+      'onboarding_card_2_body':
+          'Obtén enlaces oficiales, oficinas, direcciones PEC, correos y formularios cuando estén disponibles.',
+      'onboarding_card_3_title': 'Desbloquea ayuda Premium',
+      'onboarding_card_3_body':
+          'Ahorra tiempo con guías más profundas, solicitudes de nuevos problemas y soporte privado.',
       'profile': 'Perfil',
       'profile_full_name': 'Nombre completo',
       'profile_codice_fiscale': 'Código fiscal',
@@ -953,6 +1025,9 @@ class AppLocalizations {
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
       'retry': 'Reintentar',
+      'signed_out': 'Sesión cerrada',
+      'not_found': 'No pudimos encontrar esa página.',
+      'back_to_dashboard': 'Volver al panel',
       'one_shot_consultancy_label': 'Consultoría puntual',
       'admin_grant_label': 'Concesión admin',
       'free_plan_desc':
@@ -979,6 +1054,18 @@ class AppLocalizations {
       'utilities_bills': 'الفواتير والخدمات',
       'saved_requests': 'الطلبات المحفوظة',
       'what_help': 'ما الذي تحتاج إلى مساعدة فيه؟',
+      'onboarding_demo_title': 'UfficioFacile',
+      'onboarding_demo_subtitle':
+          'تعامل مع البيروقراطية الإيطالية بدون أن تضيع.',
+      'onboarding_card_1_title': 'اعثر على الإجراء الصحيح',
+      'onboarding_card_1_body':
+          'اختر فئة لترى ماذا تفعل وأين تذهب وما المستندات المطلوبة.',
+      'onboarding_card_2_title': 'استخدم جهات اتصال موثقة',
+      'onboarding_card_2_body':
+          'احصل على الروابط الرسمية والمكاتب وعناوين PEC ورسائل البريد والنماذج عند توفرها.',
+      'onboarding_card_3_title': 'افتح المساعدة Premium',
+      'onboarding_card_3_body':
+          'وفّر الوقت مع أدلة أعمق وطلبات لمشكلات جديدة ودعم خاص.',
       'profile': 'الملف الشخصي',
       'profile_full_name': 'الاسم الكامل',
       'profile_codice_fiscale': 'الرمز الضريبي',
@@ -1049,6 +1136,9 @@ class AppLocalizations {
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
       'retry': 'إعادة المحاولة',
+      'signed_out': 'تم تسجيل الخروج',
+      'not_found': 'تعذر العثور على هذه الصفحة.',
+      'back_to_dashboard': 'العودة إلى لوحة التحكم',
       'one_shot_consultancy_label': 'استشارة لمرة واحدة',
       'admin_grant_label': 'منحة إدارية',
       'free_plan_desc': 'فئات عامة وبحث ذكي وإرشاد أساسي مع حدود استخدام.',

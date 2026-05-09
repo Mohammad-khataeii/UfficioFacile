@@ -155,12 +155,13 @@ void main() {
             languageCode: 'en',
             usedFallbackLocalMode: false,
           ),
+          isAuthenticated: false,
         ),
         StartupDestination.onboarding,
       );
     });
 
-    test('Route decision goes to home when onboarding true', () {
+    test('Route decision goes to auth when onboarding true and signed out', () {
       expect(
         decideStartupDestination(
           const AppStartupState(
@@ -171,6 +172,24 @@ void main() {
             languageCode: 'en',
             usedFallbackLocalMode: false,
           ),
+          isAuthenticated: false,
+        ),
+        StartupDestination.auth,
+      );
+    });
+
+    test('Route decision goes to home when authenticated', () {
+      expect(
+        decideStartupDestination(
+          const AppStartupState(
+            isLoading: false,
+            isReady: true,
+            onboardingCompleted: false,
+            backendMode: 'local',
+            languageCode: 'en',
+            usedFallbackLocalMode: false,
+          ),
+          isAuthenticated: true,
         ),
         StartupDestination.home,
       );

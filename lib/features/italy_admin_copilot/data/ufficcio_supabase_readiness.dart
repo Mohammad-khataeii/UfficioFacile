@@ -703,7 +703,7 @@ class SupabaseAdminCopilotProfileRepository
     final table = await _tableName();
     final row = await _client
         .from(table)
-        .upsert(profile.toSupabaseJson(userId: _userId))
+        .upsert(profile.toSupabaseJson(userId: _userId), onConflict: 'user_id')
         .select()
         .single();
     return AdminCopilotProfileSupabaseMapper.fromSupabaseJson(row);

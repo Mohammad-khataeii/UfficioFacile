@@ -1,6 +1,11 @@
 class AppRoutes {
   static const home = '/life-admin';
+  static const dashboard = '/life-admin/dashboard';
   static const onboarding = '/life-admin/onboarding';
+  static const auth = '/life-admin/auth';
+  static const category = '/life-admin/category';
+  static const subcategory = '/life-admin/subcategory';
+  static const catalogProcedure = '/life-admin/catalog-procedure';
   static const start = '/life-admin/start';
   static const scan = '/life-admin/scan';
   static const cityPacks = '/life-admin/city-packs';
@@ -43,7 +48,6 @@ class AppRoutes {
   static const workInpsPatronato = '/life-admin/work-inps-patronato';
   static const universityStudent = '/life-admin/university-student';
   static const general = '/life-admin/general';
-  static const auth = '/life-admin/auth';
   static const account = '/life-admin/account';
   static const admin = '/life-admin/admin';
   static const adminPremium = '/life-admin/admin/premium';

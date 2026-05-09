@@ -14,6 +14,7 @@ import '../features/auth/presentation/auth_gate.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 import '../features/italy_admin_copilot/domain/life_admin_mode.dart';
+import '../features/italy_admin_copilot/presentation/screens/catalog_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_phase5_screens.dart';
@@ -110,8 +111,13 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
               onGenerateRoute: (settings) {
                 switch (settings.name) {
                   case AppRoutes.home:
+                  case AppRoutes.dashboard:
                     return MaterialPageRoute(
                       builder: (_) => const LifeAdminHomeScreen(),
+                    );
+                  case AppRoutes.auth:
+                    return MaterialPageRoute(
+                      builder: (_) => const AuthScreen(),
                     );
                   case AppRoutes.onboarding:
                     return MaterialPageRoute(
@@ -209,6 +215,32 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                       builder: (_) =>
                           CmsCategoryHubScreen(categorySlug: args.categorySlug),
                     );
+                  case AppRoutes.category:
+                    final args =
+                        settings.arguments! as CatalogCategoryRouteArgs;
+                    return MaterialPageRoute(
+                      builder: (_) =>
+                          CatalogCategoryScreen(categoryId: args.categoryId),
+                    );
+                  case AppRoutes.subcategory:
+                    final args =
+                        settings.arguments! as CatalogSubcategoryRouteArgs;
+                    return MaterialPageRoute(
+                      builder: (_) => CatalogSubcategoryScreen(
+                        categoryId: args.categoryId,
+                        subcategoryId: args.subcategoryId,
+                      ),
+                    );
+                  case AppRoutes.catalogProcedure:
+                    final args =
+                        settings.arguments! as CatalogProcedureRouteArgs;
+                    return MaterialPageRoute(
+                      builder: (_) => CatalogProcedureScreen(
+                        categoryId: args.categoryId,
+                        subcategoryId: args.subcategoryId,
+                        procedureId: args.procedureId,
+                      ),
+                    );
                   case AppRoutes.procedureDetail:
                     final args = settings.arguments! as ProcedureRouteArgs;
                     return MaterialPageRoute(
@@ -266,10 +298,6 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                         featureTitle: 'your profile',
                         child: ProfileScreen(),
                       ),
-                    );
-                  case AppRoutes.auth:
-                    return MaterialPageRoute(
-                      builder: (_) => const AuthScreen(),
                     );
                   case AppRoutes.account:
                     return MaterialPageRoute(
@@ -362,15 +390,26 @@ class _EntryRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (decideStartupDestination(controller.startupState)) {
-      case StartupDestination.loading:
-        return StartupLoadingScreen(controller: controller);
-      case StartupDestination.error:
-        return StartupErrorScreen(controller: controller);
-      case StartupDestination.home:
-        return const LifeAdminHomeScreen();
-      case StartupDestination.onboarding:
-        return const OnboardingScreen();
-    }
+    final authController = AppScope.of(context).authController;
+    return AnimatedBuilder(
+      animation: Listenable.merge([controller, authController]),
+      builder: (context, _) {
+        switch (decideStartupDestination(
+          controller.startupState,
+          isAuthenticated: authController.isAuthenticated,
+        )) {
+          case StartupDestination.loading:
+            return StartupLoadingScreen(controller: controller);
+          case StartupDestination.error:
+            return StartupErrorScreen(controller: controller);
+          case StartupDestination.home:
+            return const LifeAdminHomeScreen();
+          case StartupDestination.onboarding:
+            return const OnboardingScreen();
+          case StartupDestination.auth:
+            return const AuthScreen();
+        }
+      },
+    );
   }
 }

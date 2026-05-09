@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../app/supabase_bootstrap.dart';
 import '../../admin_cms/domain/cms_models.dart';
 import '../domain/premium_config.dart';
+import '../domain/ufficio_catalog.dart';
 import '../domain/ufficcio_entitlement.dart';
 import 'local_analytics_service.dart';
 import 'ufficcio_supabase_readiness.dart';
@@ -462,6 +463,66 @@ class UfficioPremiumEntitlementService {
       ],
       singleUnlockPriceCents: allowSingleUnlock ? price : null,
       singleUnlockCurrency: currency,
+      requiresPremium: true,
+    );
+  }
+
+  Future<ContentAccessResult> canAccessCatalogProcedure(
+    UfficioProcedure procedure, {
+    bool adminPreview = false,
+  }) async {
+    if (!procedure.isPremiumOnly && !procedure.hasPremiumContent) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.freeContent,
+        message: 'This guide is available on the free plan.',
+      );
+    }
+
+    final entitlement = await getCurrentEntitlement();
+    if (adminPreview) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.adminPreview,
+        message: 'Admin preview override is active.',
+      );
+    }
+    if (entitlement.isProLike) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.premiumSubscription,
+        message: 'Included with Premium.',
+        alreadyUnlocked: true,
+      );
+    }
+
+    final unlocks = await getContentUnlocks();
+    final unlocked = unlocks.any(
+      (item) =>
+          item.categorySlug == procedure.categoryId &&
+          item.procedureSlug == procedure.id &&
+          item.isActive,
+    );
+    if (unlocked) {
+      return const ContentAccessResult(
+        allowed: true,
+        reason: ContentAccessReason.singleUnlock,
+        message: 'This guide was unlocked for your account.',
+        alreadyUnlocked: true,
+      );
+    }
+
+    return ContentAccessResult(
+      allowed: false,
+      reason: ContentAccessReason.locked,
+      message: 'Premium or a one-time unlock is required for this guide.',
+      unlockOptions: const <UnlockOption>[
+        UnlockOption.singlePurchase,
+        UnlockOption.premium,
+        UnlockOption.consultancy,
+      ],
+      singleUnlockPriceCents: 399,
+      singleUnlockCurrency: 'EUR',
       requiresPremium: true,
     );
   }

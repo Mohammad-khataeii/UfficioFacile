@@ -64,17 +64,23 @@ class AppStartupState {
   }
 }
 
-enum StartupDestination { loading, error, onboarding, home }
+enum StartupDestination { loading, error, onboarding, auth, home }
 
-StartupDestination decideStartupDestination(AppStartupState state) {
+StartupDestination decideStartupDestination(
+  AppStartupState state, {
+  required bool isAuthenticated,
+}) {
   if (state.isLoading) {
     return StartupDestination.loading;
   }
   if (!state.isReady) {
     return StartupDestination.error;
   }
+  if (isAuthenticated) {
+    return StartupDestination.home;
+  }
   return state.onboardingCompleted
-      ? StartupDestination.home
+      ? StartupDestination.auth
       : StartupDestination.onboarding;
 }
 
@@ -138,7 +144,7 @@ class AppStartupService {
     _log('Onboarding loaded: ${onboardingState.completed}');
     _log('Language loaded: $languageCode');
     _log(
-      'Initial route: ${onboardingState.completed ? '/life-admin' : '/life-admin/onboarding'}',
+      'Initial route hint: ${onboardingState.completed ? '/life-admin/auth or /life-admin' : '/life-admin/onboarding'}',
     );
     _log('Completed');
 

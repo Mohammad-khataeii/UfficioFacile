@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "generatedAt": "2026-05-08T15:06:21.620823Z",
+  "generatedAt": "2026-05-09T10:17:12.470763Z",
   "categories": [
     {
       "slug": "health_asl",
@@ -68094,6 +68094,11 @@
         "ar": "أجب عن بعض الأسئلة وشاهد أي مساعدات قد تناسب وضعك."
       },
       "metadata": {
+        "tool_type": "bonus_finder",
+        "is_interactive": true,
+        "implementation_status": "implemented",
+        "premium_required_for_full_results": true,
+        "preview_question_count": 4,
         "blocks": [
           {
             "block_type": "intro",
@@ -70809,6 +70814,11 @@
         "status": "active",
         "application_type": "comparison_tool",
         "warning": "Do not rank as best without verifying current terms and user profile.",
+        "tool_type": "loan_comparison",
+        "is_interactive": true,
+        "implementation_status": "implemented",
+        "premium_required_for_full_results": true,
+        "preview_question_count": 4,
         "blocks": [
           {
             "block_type": "warning",

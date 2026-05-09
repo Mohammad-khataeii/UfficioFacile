@@ -18,6 +18,7 @@ import '../../data/general_guidance_definitions.dart';
 import '../../data/health_asl_guidance_definitions.dart';
 import '../../data/housing_rent_guidance_definitions.dart';
 import '../../data/cms_content_repository.dart';
+import '../../data/catalog_premium_marker.dart';
 import '../../data/pack_generator.dart';
 import '../../data/public_office_comune_guidance_definitions.dart';
 import '../../data/procedure_validator.dart';
@@ -51,9 +52,11 @@ import '../../domain/request_status.dart';
 import '../../domain/service_intelligence.dart';
 import '../../domain/sync_models.dart';
 import '../../domain/rich_category_models.dart';
+import '../../domain/ufficio_catalog.dart';
 import '../../domain/utility_comparison.dart';
 import '../../domain/utility_offer.dart';
 import '../widgets/cms_interactive_tools.dart';
+import 'catalog_screens.dart';
 import 'life_admin_phase5_screens.dart';
 
 class ProcedureRouteArgs {
@@ -158,6 +161,7 @@ class LifeAdminHomeScreen extends StatefulWidget {
 
 class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   Future<List<HouseholdContract>>? _contractsFuture;
+  Future<UfficioCatalog>? _catalogFuture;
   final TextEditingController _heroSearchController = TextEditingController();
   List<ProblemMatchResult> _heroMatches = const [];
 
@@ -171,6 +175,9 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _contractsFuture ??= AppScope.of(context).contractsRepository.list();
+    _catalogFuture ??= AppScope.of(
+      context,
+    ).ufficioCatalogRepository.loadCatalog();
   }
 
   @override
@@ -178,11 +185,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
     final scope = AppScope.of(context);
     final requests = scope.requestController.requests;
     final profile = scope.profileController.profile;
-    final cmsCategories =
-        scope.cmsContentController.categories
-            .where((item) => item.isActive)
-            .toList()
-          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     final dueReminders = requests
         .expand((item) => item.reminders.map((reminder) => (item, reminder)))
         .where((tuple) => !tuple.$2.isDone)
@@ -213,6 +215,38 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
           IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
             icon: const Icon(Icons.workspace_premium_outlined),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              switch (value) {
+                case 'profile':
+                  Navigator.pushNamed(context, AppRoutes.profile);
+                  break;
+                case 'logout':
+                  await scope.authController.signOut();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.l10n.t('signed_out'))),
+                  );
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.auth,
+                    (route) => false,
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'profile',
+                child: Text(context.l10n.t('profile')),
+              ),
+              if (scope.authController.isAuthenticated)
+                PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Text(context.l10n.t('account_log_out')),
+                ),
+            ],
           ),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
@@ -302,12 +336,10 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             trailing: Text(match.confidence.name.toUpperCase()),
                             onTap: () {
                               if (match.procedureSlug != null) {
-                                Navigator.pushNamed(
+                                _openCatalogProcedureFromSlugs(
                                   context,
-                                  AppRoutes.cmsProcedureDetail,
-                                  arguments: CmsProcedureRouteArgs(
-                                    match.procedureSlug!,
-                                  ),
+                                  categorySlug: match.categorySlug,
+                                  procedureSlug: match.procedureSlug!,
                                 );
                                 return;
                               }
@@ -427,109 +459,91 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  if (cmsCategories.isNotEmpty)
-                    ...cmsCategories.map(
-                      (item) => _CategoryTile(
-                        _localizedCmsText(
-                          context,
-                          item.title,
-                          fallback: item.slug,
+              FutureBuilder<UfficioCatalog>(
+                future: _catalogFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return _SectionCard(
+                      title: context.l10n.t('browse_procedures'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(context.l10n.t('no_procedures_yet_body')),
+                          const SizedBox(height: 12),
+                          FilledButton(
+                            onPressed: () => setState(
+                              () => _catalogFuture = scope
+                                  .ufficioCatalogRepository
+                                  .loadCatalog(),
+                            ),
+                            child: Text(context.l10n.t('retry')),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  final marker = const CatalogPremiumMarker();
+                  final catalog = snapshot.data!;
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ...catalog.categories.map(
+                        (item) => _CategoryTile(
+                          ufficioLocalizedValue(
+                            item.title,
+                            context.l10n.languageCode,
+                            fallback: item.id,
+                          ),
+                          _iconForCategorySlug(item.id),
+                          () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.category,
+                            arguments: CatalogCategoryRouteArgs(item.id),
+                          ),
+                          subtitle: ufficioLocalizedValue(
+                            item.description,
+                            context.l10n.languageCode,
+                          ),
+                          trailing: marker.categoryHasPremiumContent(item)
+                              ? PremiumBadge(
+                                  label: context.l10n.t('premium_plan_label'),
+                                )
+                              : null,
+                          footer:
+                              '${item.procedureCount} ${context.l10n.t('browse_procedures').toLowerCase()}',
                         ),
-                        _iconForCategorySlug(item.slug),
-                        () => _openCategoryFromSlug(context, item.slug),
-                        trailing: item.isPremium
-                            ? PremiumBadge(
-                                label: context.l10n.t('premium_plan_label'),
-                              )
-                            : null,
                       ),
-                    )
-                  else ...[
-                    _CategoryTile(
-                      context.l10n.t('category_health_asl'),
-                      Icons.local_hospital_outlined,
-                      () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.cmsCategoryDetail,
-                        arguments: const CmsCategoryRouteArgs('health_asl'),
+                      _CategoryTile(
+                        context.l10n.t('document_vault'),
+                        Icons.folder_copy_outlined,
+                        () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.documentVault,
+                        ),
                       ),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_housing_rent'),
-                      Icons.home_work_outlined,
-                      () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.cmsCategoryDetail,
-                        arguments: const CmsCategoryRouteArgs('housing_rent'),
+                      _CategoryTile(
+                        context.l10n.t('contacts_directory'),
+                        Icons.contacts_outlined,
+                        () => Navigator.pushNamed(context, AppRoutes.contacts),
                       ),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_utilities'),
-                      Icons.receipt_long_outlined,
-                      () => _openCategoryFromSlug(
-                        context,
-                        'utilities_electricity_gas',
+                      _CategoryTile(
+                        context.l10n.t('official_links'),
+                        Icons.verified_outlined,
+                        () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.officialLinks,
+                        ),
                       ),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_canone_rai'),
-                      Icons.tv_outlined,
-                      () => _openCategoryFromSlug(context, 'canone_rai'),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_telecom'),
-                      Icons.wifi_tethering_outlined,
-                      () => _openCategoryFromSlug(
-                        context,
-                        'telecom_internet_mobile',
-                      ),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_public_office'),
-                      Icons.location_city_outlined,
-                      () => _openCategoryFromSlug(
-                        context,
-                        'public_office_comune',
-                      ),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_work_inps'),
-                      Icons.work_outline,
-                      () =>
-                          _openCategoryFromSlug(context, 'work_inps_patronato'),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_university'),
-                      Icons.school_outlined,
-                      () =>
-                          _openCategoryFromSlug(context, 'university_student'),
-                    ),
-                    _CategoryTile(
-                      context.l10n.t('category_general'),
-                      Icons.report_problem_outlined,
-                      () => _openCategoryFromSlug(context, 'general'),
-                    ),
-                  ],
-                  _CategoryTile(
-                    context.l10n.t('document_vault'),
-                    Icons.folder_copy_outlined,
-                    () => Navigator.pushNamed(context, AppRoutes.documentVault),
-                  ),
-                  _CategoryTile(
-                    context.l10n.t('contacts_directory'),
-                    Icons.contacts_outlined,
-                    () => Navigator.pushNamed(context, AppRoutes.contacts),
-                  ),
-                  _CategoryTile(
-                    context.l10n.t('official_links'),
-                    Icons.verified_outlined,
-                    () => Navigator.pushNamed(context, AppRoutes.officialLinks),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 16),
               _SectionCard(
@@ -573,146 +587,111 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _controller = PageController();
-  int _index = 0;
-  final _fullNameController = TextEditingController();
-  final _cfController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _emailController = TextEditingController();
+  bool _submitting = false;
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _fullNameController.dispose();
-    _cfController.dispose();
-    _cityController.dispose();
-    _emailController.dispose();
-    super.dispose();
+  Future<void> _finish(BuildContext context) async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    final scope = AppScope.of(context);
+    await scope.appController.completeOnboarding();
+    if (!context.mounted) return;
+    final target = scope.authController.isAuthenticated
+        ? AppRoutes.dashboard
+        : AppRoutes.auth;
+    Navigator.pushNamedAndRemoveUntil(context, target, (route) => false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final scope = AppScope.of(context);
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView(
-                controller: _controller,
-                onPageChanged: (index) => setState(() => _index = index),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _OnboardingPage(
-                    title: context.l10n.t('onboarding_title'),
-                    body: context.l10n.t('onboarding_subtitle'),
-                    icon: Icons.assistant_navigation,
+                  const Spacer(),
+                  Text(
+                    context.l10n.t('onboarding_demo_title'),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
-                  _OnboardingPage(
-                    title: context.l10n.t('onboarding_scope_title'),
-                    body: context.l10n.t('onboarding_scope_body'),
-                    icon: Icons.widgets_outlined,
+                  const SizedBox(height: 12),
+                  Text(
+                    context.l10n.t('onboarding_demo_subtitle'),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  _OnboardingPage(
-                    title: context.l10n.t('privacy_title'),
-                    body: context.l10n.t('privacy_body'),
-                    icon: Icons.shield_outlined,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: ListView(
-                      children: [
-                        Text(
-                          context.l10n.t('optional_profile_setup'),
-                          style: Theme.of(context).textTheme.headlineSmall,
+                  const SizedBox(height: 24),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final useColumn = constraints.maxWidth < 640;
+                      final cards = <Widget>[
+                        _OnboardingFeatureCard(
+                          title: context.l10n.t('onboarding_card_1_title'),
+                          body: context.l10n.t('onboarding_card_1_body'),
+                          icon: Icons.account_tree_outlined,
                         ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _fullNameController,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.t('full_name'),
-                          ),
+                        _OnboardingFeatureCard(
+                          title: context.l10n.t('onboarding_card_2_title'),
+                          body: context.l10n.t('onboarding_card_2_body'),
+                          icon: Icons.verified_user_outlined,
                         ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _cfController,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.t('codice_fiscale'),
-                          ),
+                        _OnboardingFeatureCard(
+                          title: context.l10n.t('onboarding_card_3_title'),
+                          body: context.l10n.t('onboarding_card_3_body'),
+                          icon: Icons.workspace_premium_outlined,
                         ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _cityController,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.t('city_label'),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.t('auth_email'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _OnboardingPage(
-                    title: 'Ready',
-                    body:
-                        'Start from your problem or browse procedures whenever you want. You can reopen onboarding from Help later.',
-                    icon: Icons.rocket_launch_outlined,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  TextButton(
-                    onPressed: () async {
-                      await scope.appController.completeOnboarding();
-                      if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.home);
+                      ];
+                      if (useColumn) {
+                        return Column(
+                          children: cards
+                              .map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: item,
+                                ),
+                              )
+                              .toList(),
+                        );
                       }
+                      return Row(
+                        children: cards
+                            .map(
+                              (item) => Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: item,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      );
                     },
-                    child: Text(context.l10n.t('skip')),
                   ),
                   const Spacer(),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_index < 4) {
-                        _controller.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOut,
-                        );
-                        return;
-                      }
-                      if (_fullNameController.text.trim().isNotEmpty) {
-                        await scope.profileController.save(
-                          AdminCopilotProfile(
-                            fullName: _fullNameController.text.trim(),
-                            codiceFiscale: _cfController.text.trim(),
-                            city: _cityController.text.trim(),
-                            email: _emailController.text.trim(),
-                          ),
-                        );
-                      }
-                      await scope.appController.completeOnboarding();
-                      if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.home);
-                      }
-                    },
-                    child: Text(
-                      _index == 4
-                          ? context.l10n.t('done')
-                          : context.l10n.t('next'),
-                    ),
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed: _submitting ? null : () => _finish(context),
+                        child: Text(context.l10n.t('skip')),
+                      ),
+                      const Spacer(),
+                      FilledButton(
+                        onPressed: _submitting ? null : () => _finish(context),
+                        child: Text(
+                          _submitting
+                              ? context.l10n.t('auth_wait')
+                              : context.l10n.t('next'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -807,12 +786,10 @@ class _ProblemIntakeScreenState extends State<ProblemIntakeScreen> {
                       trailing: Text(item.confidence.name.toUpperCase()),
                       onTap: () {
                         if (item.procedureSlug != null) {
-                          Navigator.pushNamed(
+                          _openCatalogProcedureFromSlugs(
                             context,
-                            AppRoutes.cmsProcedureDetail,
-                            arguments: CmsProcedureRouteArgs(
-                              item.procedureSlug!,
-                            ),
+                            categorySlug: item.categorySlug,
+                            procedureSlug: item.procedureSlug!,
                           );
                           return;
                         }
@@ -3032,12 +3009,14 @@ class _RichContactCard extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
                   onPressed: () {
-                    if (crossLinkRoute == AppRoutes.cmsCategoryDetail &&
+                    if (crossLinkRoute == AppRoutes.category &&
                         contact.categoryId != null) {
                       Navigator.pushNamed(
                         context,
                         crossLinkRoute,
-                        arguments: CmsCategoryRouteArgs(contact.categoryId!),
+                        arguments: CatalogCategoryRouteArgs(
+                          contact.categoryId!,
+                        ),
                       );
                       return;
                     }
@@ -3068,7 +3047,7 @@ String? _routeForCategoryLink(String? categoryId) {
     case 'general':
     case 'bonuses-benefits':
     case 'loans-credit':
-      return AppRoutes.cmsCategoryDetail;
+      return AppRoutes.category;
     default:
       return null;
   }
@@ -3106,8 +3085,25 @@ IconData _iconForCategorySlug(String slug) {
 void _openCategoryFromSlug(BuildContext context, String slug) {
   Navigator.pushNamed(
     context,
-    AppRoutes.cmsCategoryDetail,
-    arguments: CmsCategoryRouteArgs(slug),
+    AppRoutes.category,
+    arguments: CatalogCategoryRouteArgs(slug),
+  );
+}
+
+void _openCatalogProcedureFromSlugs(
+  BuildContext context, {
+  required String categorySlug,
+  required String procedureSlug,
+  String? subcategorySlug,
+}) {
+  Navigator.pushNamed(
+    context,
+    AppRoutes.catalogProcedure,
+    arguments: CatalogProcedureRouteArgs(
+      categoryId: categorySlug,
+      subcategoryId: subcategorySlug ?? procedureSlug,
+      procedureId: procedureSlug,
+    ),
   );
 }
 
@@ -4700,6 +4696,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () => Navigator.pushNamed(context, AppRoutes.privacy),
               child: Text(context.l10n.t('privacy_title')),
             ),
+            if (scope.authController.isAuthenticated) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await scope.authController.signOut();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.l10n.t('signed_out'))),
+                  );
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.auth,
+                    (route) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout),
+                label: Text(context.l10n.t('account_log_out')),
+              ),
+            ],
           ],
         ),
       ),
@@ -5648,10 +5663,12 @@ class _CmsProcedureCard extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(
+                    onPressed: () => _openCatalogProcedureFromSlugs(
                       context,
-                      AppRoutes.cmsProcedureDetail,
-                      arguments: CmsProcedureRouteArgs(procedure.slug),
+                      categorySlug: procedure.categorySlug,
+                      procedureSlug: procedure.slug,
+                      subcategorySlug:
+                          procedure.subcategorySlug ?? procedure.slug,
                     ),
                     child: Text(context.l10n.t('open')),
                   ),
@@ -6856,12 +6873,21 @@ class _PrimaryAction extends StatelessWidget {
 }
 
 class _CategoryTile extends StatelessWidget {
-  const _CategoryTile(this.label, this.icon, this.onTap, {this.trailing});
+  const _CategoryTile(
+    this.label,
+    this.icon,
+    this.onTap, {
+    this.trailing,
+    this.subtitle,
+    this.footer,
+  });
 
   final String label;
   final IconData icon;
   final VoidCallback onTap;
   final Widget? trailing;
+  final String? subtitle;
+  final String? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -6872,11 +6898,34 @@ class _CategoryTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(18),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon),
               const SizedBox(width: 12),
-              Expanded(child: Text(label)),
-              if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label),
+                    if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        subtitle!,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                    if (footer != null && footer!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        footer!,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+              const SizedBox(width: 8),
               const Icon(Icons.chevron_right),
             ],
           ),
@@ -6910,8 +6959,8 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _OnboardingPage extends StatelessWidget {
-  const _OnboardingPage({
+class _OnboardingFeatureCard extends StatelessWidget {
+  const _OnboardingFeatureCard({
     required this.title,
     required this.body,
     required this.icon,
@@ -6923,17 +6972,19 @@ class _OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64),
-          const SizedBox(height: 24),
-          Text(title, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 12),
-          Text(body, textAlign: TextAlign.center),
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon),
+            const SizedBox(height: 14),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(body),
+          ],
+        ),
       ),
     );
   }

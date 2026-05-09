@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/app_localizations.dart';
+import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -71,7 +72,15 @@ class _AuthScreenState extends State<AuthScreen>
                                   password: _passwordController.text,
                                 );
                                 if (ok && context.mounted) {
-                                  Navigator.pop(context);
+                                  await scope.profileController.load();
+                                  await scope.entitlementService
+                                      .getCurrentEntitlement();
+                                  if (!context.mounted) return;
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    AppRoutes.dashboard,
+                                    (route) => false,
+                                  );
                                 }
                               },
                               onSecondary: () async {
@@ -109,6 +118,18 @@ class _AuthScreenState extends State<AuthScreen>
                                   password: _passwordController.text,
                                 );
                                 if (ok && context.mounted) {
+                                  if (controller.isAuthenticated) {
+                                    await scope.profileController.load();
+                                    await scope.entitlementService
+                                        .getCurrentEntitlement();
+                                    if (!context.mounted) return;
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      AppRoutes.dashboard,
+                                      (route) => false,
+                                    );
+                                    return;
+                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
@@ -116,6 +137,7 @@ class _AuthScreenState extends State<AuthScreen>
                                       ),
                                     ),
                                   );
+                                  _tabController.animateTo(0);
                                 }
                               },
                             ),

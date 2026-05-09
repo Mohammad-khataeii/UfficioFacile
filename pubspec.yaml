@@ -27,6 +27,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/catalog/ufficio_catalog.v1.json
+    - assets/brand/ufficiofacile_logo.svg
+    - assets/brand/ufficiofacile_icon.svg
+    - assets/brand/app_icon_1024.png
     - apps/admin/data/seed/bonus_loans_categories.json
     - apps/admin/data/cms_bundled_content_export.json
     - docs/generated/cms_bundled_content_export.json

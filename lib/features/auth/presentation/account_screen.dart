@@ -45,9 +45,14 @@ class AccountScreen extends StatelessWidget {
                           : () async {
                               await scope.authController.signOut();
                               if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(context.l10n.t('signed_out')),
+                                  ),
+                                );
                                 Navigator.pushNamedAndRemoveUntil(
                                   context,
-                                  AppRoutes.home,
+                                  AppRoutes.auth,
                                   (route) => false,
                                 );
                               }
