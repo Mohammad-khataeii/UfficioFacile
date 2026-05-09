@@ -53,6 +53,9 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
     _runDeferredLoad('requests', scope.requestController.load);
     _runDeferredLoad('admin', scope.adminController.load);
     _runDeferredLoad('cms', scope.cmsContentController.load);
+    _runDeferredLoad('entitlement', () async {
+      await scope.entitlementService.getCurrentEntitlement();
+    });
   }
 
   void _runDeferredLoad(String label, Future<void> Function() action) {

@@ -7,6 +7,7 @@ void main() {
   final adminFile = File(
     '$root/apps/admin/data/cms_bundled_content_export.json',
   );
+  final migrationsDir = Directory('$root/supabase/migrations');
 
   final problems = <String>[];
 
@@ -15,6 +16,9 @@ void main() {
   }
   if (!adminFile.existsSync()) {
     problems.add('Missing apps/admin/data/cms_bundled_content_export.json');
+  }
+  if (!migrationsDir.existsSync()) {
+    problems.add('Missing supabase/migrations directory');
   }
 
   if (problems.isNotEmpty) {
@@ -43,6 +47,11 @@ void main() {
       (docsJson['cmsProcedures'] as List<dynamic>? ?? const []).cast<Map>();
   final adminProcedures =
       (adminJson['cmsProcedures'] as List<dynamic>? ?? const []).cast<Map>();
+  final migrationFiles = migrationsDir
+      .listSync()
+      .whereType<File>()
+      .map((file) => file.path.split(Platform.pathSeparator).last)
+      .toList();
 
   final docsSlugs = docsCategories.map((row) => '${row['slug']}').toSet();
   final adminSlugs = adminCategories.map((row) => '${row['slug']}').toSet();
@@ -100,6 +109,23 @@ void main() {
     problems.add('Canonical export must contain cmsContentBlocks arrays');
   }
 
+  final hasPremiumRuntimeMigration = migrationFiles.any(
+    (name) =>
+        name.contains('harden_premium_plan_tables') ||
+        name.contains('fix_premium_profile_runtime_schema'),
+  );
+  if (!hasPremiumRuntimeMigration) {
+    problems.add(
+      'Missing premium runtime migration for plan products and entitlements',
+    );
+  }
+  final hasProfileRuntimeMigration = migrationFiles.any(
+    (name) => name.contains('fix_premium_profile_runtime_schema'),
+  );
+  if (!hasProfileRuntimeMigration) {
+    problems.add('Missing canonical profile runtime migration');
+  }
+
   final duplicateCategorySlugs = <String>{};
   final seenCategorySlugs = <String>{};
   for (final row in docsCategories) {
@@ -149,6 +175,32 @@ void main() {
     }
   }
 
+  final procedureBySlug = <String, Map>{};
+  for (final row in docsProcedures) {
+    procedureBySlug['${row['category_slug']}::${row['slug']}'] = row;
+  }
+
+  void expectInteractiveTool(
+    String categorySlug,
+    String procedureSlug,
+    String toolType,
+  ) {
+    final row = procedureBySlug['$categorySlug::$procedureSlug'];
+    if (row == null) {
+      problems.add('Missing procedure `$categorySlug::$procedureSlug`');
+      return;
+    }
+    final metadata = row['metadata'];
+    if (metadata is! Map || metadata['tool_type'] != toolType) {
+      problems.add(
+        'Procedure `$categorySlug::$procedureSlug` must declare tool_type `$toolType`',
+      );
+    }
+  }
+
+  expectInteractiveTool('bonuses-benefits', 'bonus-finder', 'bonus_finder');
+  expectInteractiveTool('loans-credit', 'loan-comparison', 'loan_comparison');
+
   const forbiddenPublicPhrases = [
     'beta access active',
     'demo data',
@@ -174,6 +226,25 @@ void main() {
       }
       if ((row['premium_teaser'] as Map?) == null) {
         problems.add('Money category `$slug` is missing premium teaser');
+      }
+    }
+  }
+
+  for (final row in docsProcedures) {
+    final lower = jsonEncode(row).toLowerCase();
+    final metadata = row['metadata'];
+    if (lower.contains('answer a few questions') &&
+        (metadata is! Map || metadata['tool_type'] == null)) {
+      problems.add(
+        'Procedure `${row['category_slug']}::${row['slug']}` describes an interactive questionnaire without tool_type metadata',
+      );
+    }
+    if (row['is_premium'] == true) {
+      final teaser = row['premium_teaser'];
+      if (teaser is! Map || teaser.isEmpty) {
+        problems.add(
+          'Premium procedure `${row['category_slug']}::${row['slug']}` is missing premium teaser',
+        );
       }
     }
   }

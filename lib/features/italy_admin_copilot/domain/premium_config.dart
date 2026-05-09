@@ -1,11 +1,15 @@
 enum UfficioPlan {
   free,
+  plusMonthly,
+  plusYearly,
   pro,
   consultant,
   premiumMonthly,
   premiumYearly,
   consultancyOneShot,
   adminGrant,
+  lifetime,
+  trial,
 }
 
 enum EntitlementStatus { active, trialing, expired, cancelled, beta }
@@ -42,8 +46,8 @@ enum FeatureKey {
 
 class PremiumConfig {
   const PremiumConfig({
-    this.betaModeEnabled = true,
-    this.paywallEnabled = false,
+    this.betaModeEnabled = false,
+    this.paywallEnabled = true,
     this.showPremiumBadges = true,
     this.freePackLimit = 5,
     this.freeSavedRequestsLimit = 10,

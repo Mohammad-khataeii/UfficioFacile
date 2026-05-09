@@ -100,6 +100,7 @@ export async function updateEntitlement(formData: FormData) {
     premiumAccess: formData.get("premiumAccess") === "on",
     freePackLimit: formData.get("freePackLimit"),
     freePacksUsed: formData.get("freePacksUsed"),
+    periodDays: formData.get("periodDays"),
   });
 
   const { data: before } = await admin.supabase
@@ -108,15 +109,41 @@ export async function updateEntitlement(formData: FormData) {
     .eq("user_id", parsed.userId)
     .maybeSingle();
 
+  const premiumPlans = new Set([
+    "plus_monthly",
+    "plus_yearly",
+    "premium_monthly",
+    "premium_yearly",
+    "admin_grant",
+    "lifetime",
+    "trial",
+    "pro",
+    "consultant",
+  ]);
+  const isPremiumAccess =
+    parsed.premiumAccess || premiumPlans.has(parsed.plan) || parsed.status === "trialing";
+  const currentPeriodStart = new Date();
+  const currentPeriodEnd =
+    parsed.plan === "free" || parsed.status === "revoked" || parsed.status === "expired"
+      ? null
+      : new Date(
+          currentPeriodStart.getTime() + parsed.periodDays * 24 * 60 * 60 * 1000,
+        ).toISOString();
   const payload = {
     user_id: parsed.userId,
     plan: parsed.plan,
     status: parsed.status,
-    premium_access: parsed.premiumAccess,
+    premium_access: isPremiumAccess,
     source: "admin_grant",
+    current_period_start: currentPeriodStart.toISOString(),
+    current_period_end: currentPeriodEnd,
+    trial_end: parsed.status === "trialing" ? currentPeriodEnd : null,
+    cancelled_at: parsed.status === "cancelled" ? new Date().toISOString() : null,
+    revoked_at: parsed.status === "revoked" ? new Date().toISOString() : null,
     metadata: {
       free_pack_limit: parsed.freePackLimit,
       free_packs_used: parsed.freePacksUsed,
+      updated_by_role: admin.role,
     },
   };
 
@@ -144,6 +171,45 @@ export async function updateEntitlement(formData: FormData) {
   });
   revalidatePath("/premium");
   revalidatePath("/premium/users");
+  revalidatePath(`/premium/users/${parsed.userId}`);
+}
+
+export async function resetUsageCounters(formData: FormData) {
+  const admin = await requireAdmin("premium.manage");
+  const userId = String(formData.get("userId") ?? "");
+  if (!userId) throw new Error("User ID is required.");
+
+  const { data: before } = await admin.supabase
+    .from("ufficio_usage_counters")
+    .select("*")
+    .eq("user_id", userId);
+
+  const { error } = await admin.supabase
+    .from("ufficio_usage_counters")
+    .delete()
+    .eq("user_id", userId);
+  if (error) throw error;
+
+  await admin.supabase.from("ufficio_premium_events").insert({
+    user_id: userId,
+    actor_user_id: admin.userId,
+    event_type: "usage_counters_reset",
+    source: "admin_grant",
+    metadata: { userId },
+  });
+
+  await logAdminAction({
+    action: "premium.usage.reset",
+    targetTable: "ufficio_usage_counters",
+    targetId: userId,
+    targetUserId: userId,
+    beforeValue: before ?? [],
+    afterValue: [],
+  });
+
+  revalidatePath("/premium");
+  revalidatePath("/premium/users");
+  revalidatePath(`/premium/users/${userId}`);
 }
 
 export async function upsertPlanProduct(formData: FormData) {

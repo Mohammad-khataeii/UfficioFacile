@@ -11,17 +11,29 @@ export const entitlementSchema = z.object({
   userId: z.string().uuid(),
   plan: z.enum([
     "free",
+    "plus_monthly",
+    "plus_yearly",
     "premium_monthly",
     "premium_yearly",
     "consultancy_one_shot",
     "admin_grant",
+    "lifetime",
+    "trial",
     "pro",
     "consultant",
   ]),
-  status: z.string().min(1),
-  premiumAccess: z.boolean(),
+  status: z.enum([
+    "active",
+    "trialing",
+    "past_due",
+    "cancelled",
+    "expired",
+    "revoked",
+  ]),
+  premiumAccess: z.boolean().optional().default(false),
   freePackLimit: z.coerce.number().int().nonnegative(),
   freePacksUsed: z.coerce.number().int().nonnegative(),
+  periodDays: z.coerce.number().int().nonnegative().optional().default(30),
 });
 
 export const localizedValueSchema = z.record(

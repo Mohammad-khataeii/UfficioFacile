@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -51,6 +53,7 @@ import '../../domain/sync_models.dart';
 import '../../domain/rich_category_models.dart';
 import '../../domain/utility_comparison.dart';
 import '../../domain/utility_offer.dart';
+import '../widgets/cms_interactive_tools.dart';
 import 'life_admin_phase5_screens.dart';
 
 class ProcedureRouteArgs {
@@ -118,18 +121,21 @@ String _planLabel(BuildContext context, UfficioPlan plan) {
   switch (plan) {
     case UfficioPlan.free:
       return context.l10n.t('free_plan_label');
-    case UfficioPlan.premiumMonthly:
+    case UfficioPlan.plusMonthly:
+    case UfficioPlan.plusYearly:
       return context.l10n.t('plus_plan_label');
+    case UfficioPlan.premiumMonthly:
     case UfficioPlan.premiumYearly:
       return context.l10n.t('premium_plan_label');
     case UfficioPlan.consultancyOneShot:
       return context.l10n.t('one_shot_consultancy_label');
     case UfficioPlan.adminGrant:
+    case UfficioPlan.lifetime:
+    case UfficioPlan.trial:
       return context.l10n.t('admin_grant_label');
     case UfficioPlan.consultant:
-      return context.l10n.t('premium_plan_label');
     case UfficioPlan.pro:
-      return context.l10n.t('plus_plan_label');
+      return context.l10n.t('premium_plan_label');
   }
 }
 
@@ -1656,6 +1662,9 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
                 }
                 final access = accessSnapshot.data!;
                 final isLocked = !access.allowed;
+                final toolType =
+                    procedure!.metadata['tool_type'] as String? ??
+                    procedure.metadata['toolType'] as String?;
                 if (isLocked) {
                   sections.add(const SizedBox(height: 16));
                   sections.add(
@@ -1667,7 +1676,7 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
                           Text(
                             _localizedCmsText(
                               context,
-                              procedure!.premiumTeaser,
+                              procedure.premiumTeaser,
                               fallback: _localizedCmsText(
                                 context,
                                 procedure.summary,
@@ -1722,6 +1731,29 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
                   );
                 }
 
+                if (toolType == 'bonus_finder' ||
+                    toolType == 'loan_comparison') {
+                  sections.add(const SizedBox(height: 16));
+                  sections.add(
+                    _SectionCard(
+                      title: toolType == 'bonus_finder'
+                          ? _localizedCmsText(
+                              context,
+                              procedure.title,
+                              fallback: 'Bonus finder',
+                            )
+                          : _localizedCmsText(
+                              context,
+                              procedure.title,
+                              fallback: 'Loan comparison',
+                            ),
+                      child: toolType == 'bonus_finder'
+                          ? BonusFinderTool(fullAccess: !isLocked)
+                          : LoanComparisonTool(fullAccess: !isLocked),
+                    ),
+                  );
+                }
+
                 void addSection(String title, Map<String, dynamic> body) {
                   final text = _localizedCmsText(context, body).trim();
                   if (text.isEmpty) return;
@@ -1729,7 +1761,7 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
                   sections.add(_SectionCard(title: title, child: Text(text)));
                 }
 
-                addSection('What is it?', procedure!.whatIsIt);
+                addSection('What is it?', procedure.whatIsIt);
                 addSection('Why you might need it', procedure.whyYouNeedIt);
                 if (!isLocked) {
                   addSection('How to do it', procedure.howToDoIt);
@@ -4496,24 +4528,45 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _name = TextEditingController();
   final _cf = TextEditingController();
-  final _city = TextEditingController();
   final _email = TextEditingController();
+  bool _initializedFromProfile = false;
+  bool _isSaving = false;
+  String _city = 'Torino';
+  String _languageCode = 'en';
+
+  void _applyProfile(AppScope scope) {
+    final profile = scope.profileController.profile;
+    _name.text = profile.fullName ?? '';
+    _cf.text = profile.codiceFiscale ?? '';
+    _email.text = (profile.email ?? '').isEmpty
+        ? (scope.authController.user?.email ?? '')
+        : profile.email!;
+    _city = (profile.city ?? '').isEmpty ? 'Torino' : profile.city!;
+    _languageCode = LocalAppLanguageRepository.sanitize(
+      profile.preferredLanguage.isEmpty
+          ? scope.appController.languageCode
+          : profile.preferredLanguage,
+    );
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final profile = AppScope.of(context).profileController.profile;
-    _name.text = profile.fullName ?? '';
-    _cf.text = profile.codiceFiscale ?? '';
-    _city.text = profile.city ?? '';
-    _email.text = profile.email ?? '';
+    if (_initializedFromProfile) return;
+    final scope = AppScope.of(context);
+    _applyProfile(scope);
+    _initializedFromProfile = true;
+    unawaited(() async {
+      await scope.profileController.load();
+      if (!mounted) return;
+      setState(() => _applyProfile(scope));
+    }());
   }
 
   @override
   void dispose() {
     _name.dispose();
     _cf.dispose();
-    _city.dispose();
     _email.dispose();
     super.dispose();
   }
@@ -4529,77 +4582,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             TextField(
               controller: _name,
-              decoration: const InputDecoration(labelText: 'Full name'),
+              decoration: InputDecoration(
+                labelText: context.l10n.t('profile_full_name'),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _cf,
-              decoration: const InputDecoration(labelText: 'Codice fiscale'),
+              decoration: InputDecoration(
+                labelText: context.l10n.t('profile_codice_fiscale'),
+              ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _city,
-              decoration: const InputDecoration(labelText: 'City'),
+            DropdownButtonFormField<String>(
+              initialValue: _city,
+              items: const [
+                DropdownMenuItem(value: 'Torino', child: Text('Torino')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _city = value);
+              },
+              decoration: InputDecoration(
+                labelText: context.l10n.t('profile_city'),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _email,
-              decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(labelText: context.l10n.t('email')),
             ),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
-              initialValue: scope.appController.languageCode,
+              initialValue: _languageCode,
               items: const [
                 DropdownMenuItem(value: 'en', child: Text('English')),
                 DropdownMenuItem(value: 'it', child: Text('Italiano')),
+                DropdownMenuItem(value: 'fr', child: Text('Français')),
                 DropdownMenuItem(value: 'es', child: Text('Español')),
                 DropdownMenuItem(value: 'fa', child: Text('فارسی')),
                 DropdownMenuItem(value: 'ar', child: Text('العربية')),
               ],
               onChanged: (value) {
-                if (value != null) scope.appController.setLanguage(value);
+                if (value == null) return;
+                setState(() => _languageCode = value);
+                scope.appController.setLanguage(value);
               },
-              decoration: const InputDecoration(labelText: 'Language'),
+              decoration: InputDecoration(
+                labelText: context.l10n.t('profile_language'),
+              ),
             ),
             const SizedBox(height: 24),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Backend mode'),
+              title: Text(context.l10n.t('profile_backend_mode')),
               subtitle: Text(
                 scope.config.isSupabaseEnabled
-                    ? 'Supabase-ready'
-                    : 'Local-only mode',
+                    ? context.l10n.t('profile_backend_supabase')
+                    : context.l10n.t('profile_backend_local'),
               ),
             ),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () async {
-                await scope.profileController.save(
-                  AdminCopilotProfile(
-                    fullName: _name.text.trim(),
-                    codiceFiscale: _cf.text.trim(),
-                    city: _city.text.trim(),
-                    email: _email.text.trim(),
-                    preferredLanguage: scope.appController.languageCode,
-                  ),
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile saved')),
-                  );
-                }
-              },
-              child: const Text('Save profile'),
+              onPressed: _isSaving
+                  ? null
+                  : () async {
+                      setState(() => _isSaving = true);
+                      try {
+                        await scope.profileController.save(
+                          AdminCopilotProfile(
+                            fullName: _name.text.trim(),
+                            codiceFiscale: _cf.text.trim(),
+                            city: _city,
+                            email: _email.text.trim(),
+                            preferredLanguage: _languageCode,
+                          ),
+                        );
+                        await scope.profileController.load();
+                        await scope.appController.setLanguage(_languageCode);
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                context.l10n.t('profile_save_failed'),
+                              ),
+                            ),
+                          );
+                        }
+                        return;
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isSaving = false);
+                        }
+                      }
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(context.l10n.t('profile_saved')),
+                        ),
+                      );
+                    },
+              child: Text(
+                _isSaving
+                    ? context.l10n.t('profile_saving')
+                    : context.l10n.t('profile_save'),
+              ),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => Navigator.pushNamed(context, AppRoutes.sync),
-              child: const Text('Sync settings'),
+              child: Text(context.l10n.t('profile_sync_settings')),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => Navigator.pushNamed(context, AppRoutes.privacy),
-              child: const Text('Privacy Center'),
+              child: Text(context.l10n.t('privacy_title')),
             ),
           ],
         ),
@@ -5847,7 +5946,10 @@ Future<ProblemRequestRecord?> _showProblemRequestSheet(
                   items: const [
                     DropdownMenuItem(value: 'English', child: Text('English')),
                     DropdownMenuItem(value: 'Italian', child: Text('Italian')),
+                    DropdownMenuItem(value: 'French', child: Text('French')),
+                    DropdownMenuItem(value: 'Spanish', child: Text('Spanish')),
                     DropdownMenuItem(value: 'Persian', child: Text('Persian')),
+                    DropdownMenuItem(value: 'Arabic', child: Text('Arabic')),
                     DropdownMenuItem(value: 'Other', child: Text('Other')),
                   ],
                   onChanged: (value) =>

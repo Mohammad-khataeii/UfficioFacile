@@ -58,22 +58,13 @@ class AppScope extends InheritedWidget {
       languageRepository: LocalAppLanguageRepository(prefs),
     );
     procedureController = ProcedureController();
-    profileController = ProfileController(
-      LocalAdminCopilotProfileRepository(prefs),
-    );
+    localProfileRepository = LocalAdminCopilotProfileRepository(prefs);
     requestController = RequestController(
       LocalAdminCopilotRequestRepository(prefs),
       LocalDraftRepository(prefs),
       analytics,
     );
     utilityController = UtilityController();
-    adminController = AdminController(
-      LocalProcedureTemplateOverrideRepository(prefs),
-      analytics,
-      GeneratedPackQualityService(),
-      requestController,
-      profileController,
-    );
     documentsRepository = LocalDocumentsRepository.fromPrefs(prefs);
     contactsRepository = LocalContactsRepository.fromPrefs(prefs);
     contractsRepository = LocalContractsRepository.fromPrefs(prefs);
@@ -142,10 +133,25 @@ class AppScope extends InheritedWidget {
     repositoryFactory = UfficcioRepositoryFactory(
       config: config,
       authFacade: authFacade,
-      localProfileRepository: LocalAdminCopilotProfileRepository(prefs),
+      localProfileRepository: localProfileRepository,
       localRequestRepository: LocalAdminCopilotRequestRepository(prefs),
       localSettingsRepository: userSettingsRepository,
       localEntitlementRepository: entitlementRepository,
+    );
+    profileController = ProfileController(
+      MergedAdminCopilotProfileRepository(
+        factory: repositoryFactory,
+        settingsRepository: userSettingsRepository,
+        localRepository: localProfileRepository,
+        authFacade: authFacade,
+      ),
+    );
+    adminController = AdminController(
+      LocalProcedureTemplateOverrideRepository(prefs),
+      analytics,
+      GeneratedPackQualityService(),
+      requestController,
+      profileController,
     );
     mergedEntitlementRepository = MergedUfficcioEntitlementRepository(
       factory: repositoryFactory,
@@ -188,6 +194,7 @@ class AppScope extends InheritedWidget {
   late final AuthController authController;
   late final ItalyAdminCopilotController appController;
   late final ProcedureController procedureController;
+  late final LocalAdminCopilotProfileRepository localProfileRepository;
   late final ProfileController profileController;
   late final RequestController requestController;
   late final UtilityController utilityController;

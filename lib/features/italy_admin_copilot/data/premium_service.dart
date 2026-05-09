@@ -437,17 +437,19 @@ class UfficioPremiumEntitlementService {
 
     final metadata = procedure.metadata;
     final allowSingleUnlock =
-        metadata['allow_single_unlock'] as bool? ??
-        metadata['allowSingleUnlock'] as bool? ??
-        true;
+        procedure.allowSingleUnlock ||
+        (metadata['allow_single_unlock'] as bool? ?? false) ||
+        (metadata['allowSingleUnlock'] as bool? ?? false);
     final price =
+        procedure.singleUnlockPriceCents ??
         (metadata['single_unlock_price_cents'] as num?)?.toInt() ??
         (metadata['singleUnlockPriceCents'] as num?)?.toInt() ??
         399;
-    final currency =
-        metadata['single_unlock_currency'] as String? ??
-        metadata['singleUnlockCurrency'] as String? ??
-        'EUR';
+    final currency = procedure.singleUnlockCurrency.isEmpty
+        ? (metadata['single_unlock_currency'] as String? ??
+              metadata['singleUnlockCurrency'] as String? ??
+              'EUR')
+        : procedure.singleUnlockCurrency;
 
     return ContentAccessResult(
       allowed: false,

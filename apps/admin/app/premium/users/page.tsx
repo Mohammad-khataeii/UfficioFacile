@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AdminShell } from "@/components/admin-shell";
 import { DataTable } from "@/components/data-table";
 import { StatusBadge } from "@/components/status-badge";
@@ -31,7 +33,9 @@ export default async function PremiumUsersPage() {
               <DataTable
                 headers={["User", "Plan", "Status", "Premium", "Source", "Ends"]}
                 rows={entitlements.map((row: any) => [
-                  <code key="user" className="text-xs">{row.user_id}</code>,
+                  <Link key="user" href={`/premium/users/${row.user_id}`} className="font-mono text-xs text-slate-700 underline-offset-2 hover:underline">
+                    {row.user_id}
+                  </Link>,
                   <StatusBadge key="plan" value={row.plan} />,
                   <StatusBadge key="status" value={row.status} />,
                   row.premium_access ? "yes" : "no",
@@ -67,15 +71,26 @@ export default async function PremiumUsersPage() {
               <input name="userId" required placeholder="User ID" />
               <select name="plan" defaultValue="free">
                 <option value="free">free</option>
+                <option value="plus_monthly">plus_monthly</option>
+                <option value="plus_yearly">plus_yearly</option>
                 <option value="premium_monthly">premium_monthly</option>
                 <option value="premium_yearly">premium_yearly</option>
                 <option value="admin_grant">admin_grant</option>
+                <option value="lifetime">lifetime</option>
+                <option value="trial">trial</option>
               </select>
-              <input name="status" defaultValue="active" />
+              <select name="status" defaultValue="active">
+                <option value="active">active</option>
+                <option value="trialing">trialing</option>
+                <option value="cancelled">cancelled</option>
+                <option value="expired">expired</option>
+                <option value="revoked">revoked</option>
+              </select>
               <div className="grid gap-3 sm:grid-cols-2">
                 <input name="freePackLimit" defaultValue="3" />
                 <input name="freePacksUsed" defaultValue="0" />
               </div>
+              <input name="periodDays" defaultValue="30" />
               <label className="flex items-center gap-3">
                 <input name="premiumAccess" type="checkbox" className="h-4 w-4" />
                 <span>Premium access</span>

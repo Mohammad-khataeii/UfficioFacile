@@ -32,21 +32,45 @@ export default async function PremiumPage() {
         ) : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-            <p className="text-sm text-slate-500">Active premium</p>
+            <p className="text-sm text-slate-500">Total entitlements</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {entitlements.length}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm text-slate-500">Free users</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {countBy(entitlements, "plan", "free")}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm text-slate-500">Plus users</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {countBy(entitlements, "plan", "plus_monthly") + countBy(entitlements, "plan", "plus_yearly")}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm text-slate-500">Premium users</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {countBy(entitlements, "plan", "premium_monthly") +
+                countBy(entitlements, "plan", "premium_yearly") +
+                countBy(entitlements, "plan", "admin_grant") +
+                countBy(entitlements, "plan", "lifetime")}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm text-slate-500">Active access</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {countBy(entitlements, "premium_access", true)}
             </p>
           </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
             <p className="text-sm text-slate-500">Trialing</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {countBy(entitlements, "status", "trialing")}
-            </p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-            <p className="text-sm text-slate-500">Admin grants</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
-              {countBy(entitlements, "source", "admin_grant")}
             </p>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">

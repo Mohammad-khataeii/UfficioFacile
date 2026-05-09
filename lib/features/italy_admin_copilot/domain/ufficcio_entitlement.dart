@@ -25,11 +25,11 @@ class UfficcioEntitlement {
     this.costItemsCount = 0,
     this.householdMembersCount = 0,
     this.proofCasesCount = 0,
-    this.freePackLimit = 5,
-    this.savedRequestsLimit = 10,
+    this.freePackLimit = 3,
+    this.savedRequestsLimit = 5,
     this.remindersLimit = 5,
-    this.documentsLimit = 10,
-    this.contactsLimit = 10,
+    this.documentsLimit = 5,
+    this.contactsLimit = 5,
     this.costItemsLimit = 5,
     this.householdMembersLimit = 2,
     this.proofCasesLimit = 2,
@@ -91,11 +91,15 @@ class UfficcioEntitlement {
   bool get isProLike =>
       premiumAccess ||
       localDebugProEnabled ||
+      plan == UfficioPlan.plusMonthly ||
+      plan == UfficioPlan.plusYearly ||
       plan == UfficioPlan.pro ||
       plan == UfficioPlan.consultant ||
       plan == UfficioPlan.premiumMonthly ||
       plan == UfficioPlan.premiumYearly ||
-      plan == UfficioPlan.adminGrant;
+      plan == UfficioPlan.adminGrant ||
+      plan == UfficioPlan.lifetime ||
+      plan == UfficioPlan.trial;
 
   UfficcioEntitlement copyWith({
     String? id,
@@ -281,11 +285,11 @@ class UfficcioEntitlement {
       costItemsCount: json['costItemsCount'] as int? ?? 0,
       householdMembersCount: json['householdMembersCount'] as int? ?? 0,
       proofCasesCount: json['proofCasesCount'] as int? ?? 0,
-      freePackLimit: json['freePackLimit'] as int? ?? 5,
-      savedRequestsLimit: json['savedRequestsLimit'] as int? ?? 10,
+      freePackLimit: json['freePackLimit'] as int? ?? 3,
+      savedRequestsLimit: json['savedRequestsLimit'] as int? ?? 5,
       remindersLimit: json['remindersLimit'] as int? ?? 5,
-      documentsLimit: json['documentsLimit'] as int? ?? 10,
-      contactsLimit: json['contactsLimit'] as int? ?? 10,
+      documentsLimit: json['documentsLimit'] as int? ?? 5,
+      contactsLimit: json['contactsLimit'] as int? ?? 5,
       costItemsLimit: json['costItemsLimit'] as int? ?? 5,
       householdMembersLimit: json['householdMembersLimit'] as int? ?? 2,
       proofCasesLimit: json['proofCasesLimit'] as int? ?? 2,

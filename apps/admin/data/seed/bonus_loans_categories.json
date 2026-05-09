@@ -59,6 +59,13 @@
           "tags": ["finder", "eligibility", "isee", "bonus", "benefits"],
           "synonyms": ["which bonus can I get", "am I eligible", "bonus available", "ISEE bonus"],
           "searchable_keywords": ["bonus finder", "bonus eligibility", "which benefit", "find my bonus"],
+          "metadata": {
+            "tool_type": "bonus_finder",
+            "is_interactive": true,
+            "implementation_status": "implemented",
+            "premium_required_for_full_results": true,
+            "preview_question_count": 4
+          },
           "blocks": [
             {
               "block_type": "intro",
@@ -456,7 +463,16 @@
           "tags": ["comparison", "taeg", "tan", "risk", "loan"],
           "synonyms": ["compare loans", "best student loan", "prestito migliore", "TAEG", "TAN"],
           "searchable_keywords": ["loan comparison", "compare credit offers", "taeg tan meaning"],
-          "metadata": {"status": "active", "application_type": "comparison_tool", "warning": "Do not rank as best without verifying current terms and user profile."},
+          "metadata": {
+            "status": "active",
+            "application_type": "comparison_tool",
+            "warning": "Do not rank as best without verifying current terms and user profile.",
+            "tool_type": "loan_comparison",
+            "is_interactive": true,
+            "implementation_status": "implemented",
+            "premium_required_for_full_results": true,
+            "preview_question_count": 4
+          },
           "blocks": [
             {
               "block_type": "warning",

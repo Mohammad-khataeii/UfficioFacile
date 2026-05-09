@@ -41,6 +41,63 @@ String _statusFromDb(String value) {
           .join();
 }
 
+UfficioPlan _planFromDatabase(String? raw, {required bool premiumAccess}) {
+  switch (raw) {
+    case 'plus_monthly':
+      return UfficioPlan.plusMonthly;
+    case 'plus_yearly':
+      return UfficioPlan.plusYearly;
+    case 'premium_monthly':
+      return UfficioPlan.premiumMonthly;
+    case 'premium_yearly':
+      return UfficioPlan.premiumYearly;
+    case 'consultancy_one_shot':
+      return UfficioPlan.consultancyOneShot;
+    case 'admin_grant':
+    case 'admin':
+      return UfficioPlan.adminGrant;
+    case 'lifetime':
+      return UfficioPlan.lifetime;
+    case 'trial':
+      return UfficioPlan.trial;
+    case 'premium':
+      return premiumAccess ? UfficioPlan.premiumMonthly : UfficioPlan.pro;
+    case 'pro':
+      return UfficioPlan.pro;
+    case 'consultant':
+      return UfficioPlan.consultant;
+    default:
+      return UfficioPlan.free;
+  }
+}
+
+String _planToDatabase(UfficioPlan plan) {
+  switch (plan) {
+    case UfficioPlan.free:
+      return 'free';
+    case UfficioPlan.plusMonthly:
+      return 'plus_monthly';
+    case UfficioPlan.plusYearly:
+      return 'plus_yearly';
+    case UfficioPlan.pro:
+      return 'pro';
+    case UfficioPlan.consultant:
+      return 'consultant';
+    case UfficioPlan.premiumMonthly:
+      return 'premium_monthly';
+    case UfficioPlan.premiumYearly:
+      return 'premium_yearly';
+    case UfficioPlan.consultancyOneShot:
+      return 'consultancy_one_shot';
+    case UfficioPlan.adminGrant:
+      return 'admin_grant';
+    case UfficioPlan.lifetime:
+      return 'lifetime';
+    case UfficioPlan.trial:
+      return 'trial';
+  }
+}
+
 extension AdminCopilotProfileSupabaseMapper on AdminCopilotProfile {
   Map<String, dynamic> toSupabaseJson({required String userId}) => {
     'user_id': userId,
@@ -469,11 +526,13 @@ class UfficcioAuthState {
     required this.isConfigured,
     required this.isAuthenticated,
     this.userId,
+    this.email,
   });
 
   final bool isConfigured;
   final bool isAuthenticated;
   final String? userId;
+  final String? email;
 }
 
 class UfficcioAuthFacade {
@@ -494,6 +553,7 @@ class UfficcioAuthFacade {
       isConfigured: true,
       isAuthenticated: user != null,
       userId: user?.id,
+      email: user?.email,
     );
   }
 }
@@ -610,15 +670,26 @@ class SupabaseAdminCopilotProfileRepository
   final SupabaseClient _client;
   final String _userId;
 
+  Future<String> _tableName() async {
+    try {
+      await _client.from('ufficio_profiles').select('user_id').limit(1);
+      return 'ufficio_profiles';
+    } on PostgrestException {
+      return 'ufficcio_profiles';
+    }
+  }
+
   @override
   Future<void> clearProfile() async {
-    await _client.from('ufficcio_profiles').delete().eq('user_id', _userId);
+    final table = await _tableName();
+    await _client.from(table).delete().eq('user_id', _userId);
   }
 
   @override
   Future<AdminCopilotProfile?> getProfile() async {
+    final table = await _tableName();
     final row = await _client
-        .from('ufficcio_profiles')
+        .from(table)
         .select()
         .eq('user_id', _userId)
         .maybeSingle();
@@ -629,8 +700,9 @@ class SupabaseAdminCopilotProfileRepository
 
   @override
   Future<AdminCopilotProfile> saveProfile(AdminCopilotProfile profile) async {
+    final table = await _tableName();
     final row = await _client
-        .from('ufficcio_profiles')
+        .from(table)
         .upsert(profile.toSupabaseJson(userId: _userId))
         .select()
         .single();
@@ -955,26 +1027,46 @@ class SupabaseUfficcioEntitlementRepository
     if (row == null) {
       return UfficcioEntitlement(
         userId: _userId,
-        plan: isAdmin ? UfficioPlan.pro : UfficioPlan.free,
+        plan: isAdmin ? UfficioPlan.adminGrant : UfficioPlan.free,
         premiumAccess: isAdmin,
       );
     }
     final planName = row['plan'] as String? ?? 'free';
+    final statusName = row['status'] as String? ?? 'active';
+    final premiumAccess =
+        row['premium_access'] as bool? ??
+        (statusName == 'active' || statusName == 'trialing') &&
+            <String>{
+              'plus_monthly',
+              'plus_yearly',
+              'premium_monthly',
+              'premium_yearly',
+              'admin_grant',
+              'lifetime',
+              'trial',
+              'pro',
+              'admin',
+            }.contains(planName);
     return UfficcioEntitlement.fromJson({
       'id': row['id'],
       'userId': row['user_id'],
-      'plan': planName == 'premium' ? 'pro' : planName,
-      'status': row['status'],
-      'premiumAccess':
-          row['status'] == 'active' &&
-          (planName == 'premium' ||
-              planName == 'pro' ||
-              planName == 'admin_grant' ||
-              isAdmin),
+      'plan': _planFromDatabase(
+        isAdmin && planName == 'free' ? 'admin_grant' : planName,
+        premiumAccess: premiumAccess || isAdmin,
+      ).name,
+      'status': _statusFromDb(statusName),
+      'premiumAccess': premiumAccess || isAdmin,
+      'source': row['source'],
+      'currentPeriodStart': row['current_period_start'],
       'currentPeriodEnd': row['current_period_end'],
-      'provider': row['source'],
-      'providerCustomerId': row['stripe_customer_id'],
-      'providerSubscriptionId': row['stripe_subscription_id'],
+      'trialEnd': row['trial_end'],
+      'cancelledAt': row['cancelled_at'],
+      'revokedAt': row['revoked_at'],
+      'provider': row['provider'] ?? row['source'],
+      'providerCustomerId':
+          row['provider_customer_id'] ?? row['stripe_customer_id'],
+      'providerSubscriptionId':
+          row['provider_subscription_id'] ?? row['stripe_subscription_id'],
       'createdAt': row['created_at'],
       'updatedAt': row['updated_at'],
     });
@@ -985,19 +1077,25 @@ class SupabaseUfficcioEntitlementRepository
     UfficcioEntitlement entitlement,
   ) async {
     try {
-      final plan = entitlement.plan == UfficioPlan.pro
-          ? 'premium'
-          : entitlement.plan.name;
+      final plan = _planToDatabase(entitlement.plan);
       final row = await _client
           .from('ufficio_user_entitlements')
           .upsert({
             'user_id': _userId,
             'plan': plan,
             'status': entitlement.status.name,
-            'source': entitlement.provider ?? 'client_cache',
+            'source': entitlement.source,
+            'premium_access': entitlement.premiumAccess,
+            'current_period_start': entitlement.currentPeriodStart
+                ?.toIso8601String(),
             'current_period_end': entitlement.currentPeriodEnd
                 ?.toIso8601String(),
-            'premium_since': entitlement.currentPeriodStart?.toIso8601String(),
+            'trial_end': entitlement.trialEnd?.toIso8601String(),
+            'cancelled_at': entitlement.cancelledAt?.toIso8601String(),
+            'revoked_at': entitlement.revokedAt?.toIso8601String(),
+            'provider': entitlement.provider,
+            'provider_customer_id': entitlement.providerCustomerId,
+            'provider_subscription_id': entitlement.providerSubscriptionId,
             'metadata': {
               'generatedPacksUsedThisMonth':
                   entitlement.generatedPacksUsedThisMonth,
@@ -1008,11 +1106,21 @@ class SupabaseUfficcioEntitlementRepository
       return UfficcioEntitlement.fromJson({
         'id': row['id'],
         'userId': row['user_id'],
-        'plan': plan,
-        'status': row['status'],
-        'premiumAccess': row['status'] == 'active' && plan != 'free',
+        'plan': _planFromDatabase(
+          row['plan'] as String? ?? plan,
+          premiumAccess: row['premium_access'] as bool? ?? plan != 'free',
+        ).name,
+        'status': _statusFromDb(row['status'] as String? ?? 'active'),
+        'premiumAccess': row['premium_access'] as bool? ?? plan != 'free',
+        'source': row['source'],
+        'currentPeriodStart': row['current_period_start'],
         'currentPeriodEnd': row['current_period_end'],
-        'provider': row['source'],
+        'trialEnd': row['trial_end'],
+        'cancelledAt': row['cancelled_at'],
+        'revokedAt': row['revoked_at'],
+        'provider': row['provider'] ?? row['source'],
+        'providerCustomerId': row['provider_customer_id'],
+        'providerSubscriptionId': row['provider_subscription_id'],
         'createdAt': row['created_at'],
         'updatedAt': row['updated_at'],
       });
@@ -1099,10 +1207,7 @@ class UfficcioRepositoryFactory {
 
   bool shouldUseSupabase({required bool syncEnabled}) {
     final auth = authFacade.state;
-    return config.isSupabaseEnabled &&
-        syncEnabled &&
-        auth.isAuthenticated &&
-        client != null;
+    return config.isSupabaseEnabled && auth.isAuthenticated && client != null;
   }
 
   AdminCopilotProfileRepository profileRepository({required bool syncEnabled}) {
@@ -1142,6 +1247,84 @@ class UfficcioRepositoryFactory {
   }
 }
 
+class MergedAdminCopilotProfileRepository
+    implements AdminCopilotProfileRepository {
+  MergedAdminCopilotProfileRepository({
+    required this.factory,
+    required this.settingsRepository,
+    required this.localRepository,
+    required this.authFacade,
+  });
+
+  final UfficcioRepositoryFactory factory;
+  final UfficcioUserSettingsRepository settingsRepository;
+  final AdminCopilotProfileRepository localRepository;
+  final UfficcioAuthFacade authFacade;
+
+  @override
+  Future<void> clearProfile() async {
+    await localRepository.clearProfile();
+    final settings = await settingsRepository.getSettings();
+    final remoteRepository = factory.profileRepository(
+      syncEnabled: settings.syncEnabled,
+    );
+    if (!identical(remoteRepository, localRepository)) {
+      try {
+        await remoteRepository.clearProfile();
+      } catch (_) {}
+    }
+  }
+
+  @override
+  Future<AdminCopilotProfile?> getProfile() async {
+    final local = await localRepository.getProfile();
+    final settings = await settingsRepository.getSettings();
+    final remoteRepository = factory.profileRepository(
+      syncEnabled: settings.syncEnabled,
+    );
+    if (identical(remoteRepository, localRepository)) {
+      return local;
+    }
+    try {
+      final remote = await remoteRepository.getProfile();
+      if (remote != null) {
+        await localRepository.saveProfile(remote);
+        return _withAuthDefaults(remote);
+      }
+    } catch (_) {}
+    return _withAuthDefaults(local);
+  }
+
+  @override
+  Future<AdminCopilotProfile> saveProfile(AdminCopilotProfile profile) async {
+    final normalized = _withAuthDefaults(profile);
+    final localSaved = await localRepository.saveProfile(normalized);
+    final settings = await settingsRepository.getSettings();
+    final remoteRepository = factory.profileRepository(
+      syncEnabled: settings.syncEnabled,
+    );
+    if (identical(remoteRepository, localRepository)) {
+      return localSaved;
+    }
+    try {
+      final remoteSaved = await remoteRepository.saveProfile(normalized);
+      await localRepository.saveProfile(remoteSaved);
+      return remoteSaved;
+    } catch (_) {
+      return localSaved;
+    }
+  }
+
+  AdminCopilotProfile _withAuthDefaults(AdminCopilotProfile? profile) {
+    final auth = authFacade.state;
+    final next = profile ?? const AdminCopilotProfile();
+    if ((next.email ?? '').trim().isNotEmpty || !auth.isAuthenticated) {
+      return next;
+    }
+    return next.copyWith(email: auth.email);
+  }
+}
+
 class MergedUfficcioEntitlementRepository
     implements UfficcioEntitlementRepository {
   MergedUfficcioEntitlementRepository({
@@ -1166,16 +1349,22 @@ class MergedUfficcioEntitlementRepository
     }
     try {
       final remote = await remoteRepository.getEntitlement();
-      return local.copyWith(
+      final merged = local.copyWith(
         plan: remote.plan,
         status: remote.status,
         premiumAccess: remote.premiumAccess,
+        source: remote.source,
         provider: remote.provider,
         providerCustomerId: remote.providerCustomerId,
         providerSubscriptionId: remote.providerSubscriptionId,
         currentPeriodStart: remote.currentPeriodStart,
         currentPeriodEnd: remote.currentPeriodEnd,
+        trialEnd: remote.trialEnd,
+        cancelledAt: remote.cancelledAt,
+        revokedAt: remote.revokedAt,
       );
+      await localRepository.saveEntitlement(merged);
+      return merged;
     } catch (_) {
       return local;
     }

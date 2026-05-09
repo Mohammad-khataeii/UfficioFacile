@@ -99,6 +99,54 @@ export async function safeCountRows(
   return { data: count ?? 0 };
 }
 
+export async function safeSelectRowsWithFallback(
+  supabase: any,
+  tables: string[],
+  build?: (query: any) => any,
+): Promise<SafeQueryResult<any[]>> {
+  const warnings: string[] = [];
+  for (const table of tables) {
+    const result = await safeSelectRows(supabase, table, build);
+    if (!result.warning) {
+      return { data: result.data, warning: warnings[0] };
+    }
+    warnings.push(result.warning);
+  }
+  return { data: [], warning: warnings[0] };
+}
+
+export async function safeMaybeSingleWithFallback(
+  supabase: any,
+  tables: string[],
+  build?: (query: any) => any,
+): Promise<SafeQueryResult<any | null>> {
+  const warnings: string[] = [];
+  for (const table of tables) {
+    const result = await safeMaybeSingle(supabase, table, build);
+    if (!result.warning) {
+      return { data: result.data, warning: warnings[0] };
+    }
+    warnings.push(result.warning);
+  }
+  return { data: null, warning: warnings[0] };
+}
+
+export async function safeCountRowsWithFallback(
+  supabase: any,
+  tables: string[],
+  filter?: { column: string; value: string | boolean },
+): Promise<SafeQueryResult<number>> {
+  const warnings: string[] = [];
+  for (const table of tables) {
+    const result = await safeCountRows(supabase, table, filter);
+    if (!result.warning) {
+      return { data: result.data, warning: warnings[0] };
+    }
+    warnings.push(result.warning);
+  }
+  return { data: 0, warning: warnings[0] };
+}
+
 export async function getDashboardMetrics(supabase: any) {
   const [
     userCount,
@@ -111,7 +159,7 @@ export async function getDashboardMetrics(supabase: any) {
     blockCount,
     planCount,
   ] = await Promise.all([
-    safeCountRows(supabase, "ufficcio_profiles"),
+    safeCountRowsWithFallback(supabase, ["ufficio_profiles", "ufficcio_profiles"]),
     safeCountRows(supabase, "ufficio_user_entitlements", {
       column: "premium_access",
       value: true,
@@ -204,7 +252,7 @@ export async function getUserBundle(supabase: any, userId: string) {
     unlocks,
     paymentEvents,
   ] = await Promise.all([
-    safeMaybeSingle(supabase, "ufficcio_profiles", (query) =>
+    safeMaybeSingleWithFallback(supabase, ["ufficio_profiles", "ufficcio_profiles"], (query) =>
       query.eq("user_id", userId),
     ),
     safeMaybeSingle(supabase, "ufficio_user_entitlements", (query) =>

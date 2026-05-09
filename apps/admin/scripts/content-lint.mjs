@@ -7,6 +7,9 @@ const forbidden = [
   "do not show",
   "internal note",
   "for codex",
+  "beta access active",
+  "demo data",
+  "pro feature",
 ];
 
 const filePath = path.join(
@@ -48,6 +51,52 @@ for (const procedure of procedures) {
       process.exit(1);
     }
   }
+}
+
+for (const category of categories.filter((item) =>
+  item.slug === "bonuses-benefits" || item.slug === "loans-credit"
+)) {
+  if (category.is_premium !== true) {
+    console.error(`Money category ${category.slug} must be premium.`);
+    process.exit(1);
+  }
+  if (!category.premium_teaser || !Object.keys(category.premium_teaser).length) {
+    console.error(`Money category ${category.slug} must include premium teaser text.`);
+    process.exit(1);
+  }
+}
+
+for (const procedure of procedures) {
+  const encoded = JSON.stringify(procedure).toLowerCase();
+  if (
+    encoded.includes("answer a few questions") &&
+    procedure.metadata?.tool_type == null
+  ) {
+    console.error(`Interactive copy without tool_type on ${procedure.category_slug}::${procedure.slug}`);
+    process.exit(1);
+  }
+  if (procedure.is_premium === true) {
+    if (!procedure.premium_teaser || !Object.keys(procedure.premium_teaser).length) {
+      console.error(`Premium procedure ${procedure.category_slug}::${procedure.slug} is missing premium teaser text.`);
+      process.exit(1);
+    }
+  }
+}
+
+const bonusFinder = procedures.find(
+  (item) => item.category_slug === "bonuses-benefits" && item.slug === "bonus-finder",
+);
+if (bonusFinder?.metadata?.tool_type !== "bonus_finder") {
+  console.error("Bonus finder must declare metadata.tool_type = bonus_finder.");
+  process.exit(1);
+}
+
+const loanComparison = procedures.find(
+  (item) => item.category_slug === "loans-credit" && item.slug === "loan-comparison",
+);
+if (loanComparison?.metadata?.tool_type !== "loan_comparison") {
+  console.error("Loan comparison must declare metadata.tool_type = loan_comparison.");
+  process.exit(1);
 }
 
 for (const procedure of procedures.filter((item) => item.category_slug === "loans-credit")) {
