@@ -11,6 +11,8 @@ fi
 
 flutter --version
 flutter pub get
+/usr/local/share/flutter/bin/dart run tool/export_cms_seed.dart
+/usr/local/share/flutter/bin/dart run tool/validate_catalog.dart
 
 flutter build web --release \
   --dart-define=UFFICCIOFACILE_BACKEND_MODE="${UFFICCIOFACILE_BACKEND_MODE:-supabase}" \
@@ -19,5 +21,6 @@ flutter build web --release \
   --dart-define=UFFICCIOFACILE_ENABLE_SYNC="${UFFICCIOFACILE_ENABLE_SYNC:-true}" \
   --dart-define=UFFICCIOFACILE_ENABLE_ADMIN_DEBUG="${UFFICCIOFACILE_ENABLE_ADMIN_DEBUG:-false}" \
   --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE="${UFFICCIOFACILE_ENABLE_BETA_MODE:-true}" \
+  --dart-define=UFFICCIOFACILE_ALLOW_LEGACY_CATALOG_FALLBACK=false \
   --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL="${UFFICCIOFACILE_ENABLE_PAYWALL:-true}" \
   --dart-define=UFFICCIOFACILE_ENABLE_ANALYTICS="${UFFICCIOFACILE_ENABLE_ANALYTICS:-true}"

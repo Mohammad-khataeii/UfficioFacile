@@ -125,6 +125,8 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
                             subcategory.description,
                             context.l10n.languageCode,
                           ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -269,6 +271,8 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                 procedure.shortDescription,
                                 context.l10n.languageCode,
                               ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -690,7 +694,7 @@ class _CatalogErrorState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              context.l10n.t('no_procedures_yet_body'),
+              context.l10n.t('catalog_load_error'),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),

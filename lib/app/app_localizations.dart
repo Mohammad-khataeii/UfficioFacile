@@ -238,6 +238,8 @@ class AppLocalizations {
       'free_plan_label': 'Free',
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
+      'catalog_load_error':
+          'Catalog could not be loaded. Please update the app.',
       'retry': 'Retry',
       'not_found': 'We could not find that page.',
       'back_to_dashboard': 'Back to dashboard',
@@ -463,6 +465,8 @@ class AppLocalizations {
       'free_plan_label': 'Free',
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
+      'catalog_load_error':
+          'Il catalogo non può essere caricato. Aggiorna l’app.',
       'retry': 'Riprova',
       'not_found': 'Non abbiamo trovato questa pagina.',
       'back_to_dashboard': 'Torna alla dashboard',
@@ -682,6 +686,8 @@ class AppLocalizations {
       'free_plan_label': 'رایگان',
       'plus_plan_label': 'پلاس',
       'premium_plan_label': 'پریمیوم',
+      'catalog_load_error':
+          'کاتالوگ بارگذاری نشد. لطفاً برنامه را به‌روزرسانی کن.',
       'retry': 'تلاش دوباره',
       'signed_out': 'از حساب خارج شدی',
       'not_found': 'این صفحه پیدا نشد.',
@@ -909,6 +915,8 @@ class AppLocalizations {
       'free_plan_label': 'Gratuit',
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
+      'catalog_load_error':
+          'Le catalogue ne peut pas être chargé. Veuillez mettre l’application à jour.',
       'retry': 'Réessayer',
       'not_found': 'Cette page est introuvable.',
       'back_to_dashboard': 'Retour au tableau de bord',
@@ -1024,6 +1032,8 @@ class AppLocalizations {
       'free_plan_label': 'Gratis',
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
+      'catalog_load_error':
+          'No se pudo cargar el catálogo. Actualiza la aplicación.',
       'retry': 'Reintentar',
       'signed_out': 'Sesión cerrada',
       'not_found': 'No pudimos encontrar esa página.',
@@ -1135,6 +1145,7 @@ class AppLocalizations {
       'free_plan_label': 'مجاني',
       'plus_plan_label': 'Plus',
       'premium_plan_label': 'Premium',
+      'catalog_load_error': 'تعذر تحميل الكتالوج. يرجى تحديث التطبيق.',
       'retry': 'إعادة المحاولة',
       'signed_out': 'تم تسجيل الخروج',
       'not_found': 'تعذر العثور على هذه الصفحة.',

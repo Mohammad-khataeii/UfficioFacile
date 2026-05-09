@@ -19,6 +19,12 @@ class UfficioCatalogRepository {
     'docs/generated/cms_bundled_content_export.json',
   ];
   static const _remoteTimeout = Duration(seconds: 3);
+  static const _legacyFallbackFromEnv = bool.fromEnvironment(
+    'UFFICIOFACILE_ALLOW_LEGACY_CATALOG_FALLBACK',
+    defaultValue: false,
+  );
+
+  bool get _allowLegacyFallback => _legacyFallbackFromEnv || !kReleaseMode;
 
   Future<UfficioCatalog> loadCatalog() async {
     final bundled = await _loadBundledCatalog();
@@ -96,6 +102,12 @@ class UfficioCatalogRepository {
         );
         return true;
       }());
+      if (!_allowLegacyFallback) {
+        throw FlutterError(
+          'Catalog could not be loaded. The canonical asset '
+          '"assets/catalog/ufficio_catalog.v1.json" is missing or unreadable.',
+        );
+      }
     }
 
     for (final assetPath in _legacyBundledAssetPaths) {
@@ -201,13 +213,6 @@ class UfficioCatalogRepository {
         nextSubcategories.add(_mergeSubcategory(subcategory, remoteGroup));
       }
       seen.add(subcategory.id);
-    }
-
-    for (final entry in grouped.entries) {
-      if (seen.contains(entry.key)) continue;
-      nextSubcategories.add(
-        _subcategoryFromRemoteGroup(bundled.id, entry.key, entry.value),
-      );
     }
 
     nextSubcategories.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));

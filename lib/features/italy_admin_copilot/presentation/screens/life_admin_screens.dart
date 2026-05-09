@@ -474,7 +474,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(context.l10n.t('no_procedures_yet_body')),
+                          Text(context.l10n.t('catalog_load_error')),
                           const SizedBox(height: 12),
                           FilledButton(
                             onPressed: () => setState(
