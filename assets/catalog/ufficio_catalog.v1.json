@@ -1776,7 +1776,7 @@
           "id": "asl_problems",
           "categoryId": "health_asl",
           "sortOrder": 60,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "ASL problems and rejected requests",
@@ -2059,7 +2059,7 @@
           "id": "student_insurance",
           "categoryId": "health_asl",
           "sortOrder": 70,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Student insurance",
@@ -3499,7 +3499,7 @@
           "id": "rent_delay_eviction",
           "categoryId": "housing_rent",
           "sortOrder": 90,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Rent delay and eviction risk",
@@ -3621,7 +3621,7 @@
           "id": "emergency_housing",
           "categoryId": "housing_rent",
           "sortOrder": 100,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Emergency housing support",
@@ -3895,7 +3895,7 @@
           "id": "tenant_union_support",
           "categoryId": "housing_rent",
           "sortOrder": 120,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Tenant unions and formal help",
@@ -4759,7 +4759,7 @@
           "id": "compare_switch_offers",
           "categoryId": "utilities_electricity_gas",
           "sortOrder": 40,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Compare and switch offers",
@@ -4977,7 +4977,7 @@
           "id": "wrong_high_bill",
           "categoryId": "utilities_electricity_gas",
           "sortOrder": 50,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "High bill or wrong bill",
@@ -5578,7 +5578,7 @@
           "id": "complaints_arera",
           "categoryId": "utilities_electricity_gas",
           "sortOrder": 90,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Complaints and ARERA",
@@ -5728,7 +5728,7 @@
           "id": "bonus_sociale_bills",
           "categoryId": "utilities_electricity_gas",
           "sortOrder": 100,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Bonus sociale and bill discounts",
@@ -6668,7 +6668,7 @@
           "id": "refund_wrong_charge",
           "categoryId": "canone_rai",
           "sortOrder": 60,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Refunds and wrong charges",
@@ -7018,7 +7018,7 @@
           "id": "choose_right_form",
           "categoryId": "canone_rai",
           "sortOrder": 80,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Choose the right form",
@@ -7337,7 +7337,7 @@
           "id": "choose_best_operator",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 20,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Choose the best operator",
@@ -7877,7 +7877,7 @@
           "id": "wrong_bill_refunds",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 80,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Wrong bill and refunds",
@@ -8018,7 +8018,7 @@
           "id": "slow_internet_speed",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 100,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Slow internet speed",
@@ -8115,8 +8115,8 @@
           "id": "contract_not_requested",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 110,
-          "isPremiumOnly": true,
-          "hasPremiumContent": true,
+          "isPremiumOnly": false,
+          "hasPremiumContent": false,
           "title": {
             "en": "Contract not requested",
             "it": "Contratto non richiesto"
@@ -8190,7 +8190,7 @@
           "id": "complaints_conciliaweb",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 120,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Complaints and ConciliaWeb",
@@ -9455,7 +9455,7 @@
           "id": "rejected_stuck_requests",
           "categoryId": "public_office_comune",
           "sortOrder": 80,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Rejected or stuck requests",
@@ -10364,7 +10364,7 @@
           "id": "salary_payslip_tfr",
           "categoryId": "work_inps_patronato",
           "sortOrder": 60,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Salary, payslip, and TFR",
@@ -10485,7 +10485,7 @@
           "id": "inps_requests_followup",
           "categoryId": "work_inps_patronato",
           "sortOrder": 70,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "INPS requests and follow-up",
@@ -10721,7 +10721,7 @@
           "id": "partita_iva_freelance",
           "categoryId": "work_inps_patronato",
           "sortOrder": 90,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Partita IVA and freelance work",
@@ -11050,7 +11050,7 @@
           "id": "contributions_tax_basics",
           "categoryId": "work_inps_patronato",
           "sortOrder": 100,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Contributions and tax basics",
@@ -12091,7 +12091,7 @@
           "id": "edisu_scholarships_housing",
           "categoryId": "university_student",
           "sortOrder": 60,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "EDISU scholarships and housing",
@@ -12230,7 +12230,7 @@
           "id": "tuition_isee_fees",
           "categoryId": "university_student",
           "sortOrder": 70,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Tuition, ISEE, and fees",
@@ -12722,7 +12722,7 @@
           "id": "student_health_insurance",
           "categoryId": "university_student",
           "sortOrder": 110,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Health insurance and ASL",
@@ -12989,7 +12989,7 @@
           "id": "student_tickets_formal_requests",
           "categoryId": "university_student",
           "sortOrder": 130,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Tickets, emails, and rejected requests",
@@ -14222,7 +14222,7 @@
           "id": "unknown_problem_private_help",
           "categoryId": "general",
           "sortOrder": 90,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Can’t find your problem?",
@@ -14415,7 +14415,7 @@
           "id": "bonus_finder",
           "categoryId": "bonuses-benefits",
           "sortOrder": 10,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Bonus finder",
@@ -15762,7 +15762,7 @@
           "id": "bonus_application_problems",
           "categoryId": "bonuses-benefits",
           "sortOrder": 100,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Application problems",
@@ -16760,7 +16760,7 @@
           "id": "compare_loans_safely",
           "categoryId": "loans-credit",
           "sortOrder": 70,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Compare loans safely",
@@ -16864,7 +16864,7 @@
           "id": "credit_problems_rejections",
           "categoryId": "loans-credit",
           "sortOrder": 80,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Credit problems and rejected applications",
@@ -16973,7 +16973,7 @@
           "id": "before_signing_credit",
           "categoryId": "loans-credit",
           "sortOrder": 90,
-          "isPremiumOnly": true,
+          "isPremiumOnly": false,
           "hasPremiumContent": true,
           "title": {
             "en": "Before signing credit",
