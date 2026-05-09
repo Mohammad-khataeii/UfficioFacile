@@ -818,42 +818,20 @@ class _ProcedureSelectionScreenState extends State<ProcedureSelectionScreen> {
   String query = '';
   ProcedureCategory? category;
   String? cmsCategorySlug;
+  Future<UfficioCatalog>? _catalogFuture;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _catalogFuture ??= AppScope.of(
+      context,
+    ).ufficioCatalogRepository.loadCatalog();
+  }
 
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     final controller = scope.procedureController;
-    final cmsCategories =
-        scope.cmsContentController.categories
-            .where((item) => item.isActive)
-            .toList()
-          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final cmsProcedures =
-        scope.cmsContentController.procedures
-            .where((item) => item.isActive)
-            .where(
-              (item) =>
-                  cmsCategorySlug == null ||
-                  item.categorySlug == cmsCategorySlug,
-            )
-            .where((item) {
-              if (query.trim().isEmpty) return true;
-              final normalized = query.toLowerCase();
-              final haystacks = <String>[
-                _localizedCmsText(context, item.title),
-                _localizedCmsText(context, item.summary),
-                ...item.tags,
-                ...item.synonyms,
-                ...item.searchableKeywords,
-              ].join(' ').toLowerCase();
-              return haystacks.contains(normalized);
-            })
-            .toList()
-          ..sort((a, b) {
-            final categoryCompare = a.categorySlug.compareTo(b.categorySlug);
-            if (categoryCompare != 0) return categoryCompare;
-            return a.sortOrder.compareTo(b.sortOrder);
-          });
     final items = controller.search(query: query, category: category);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.t('browse_procedures'))),
@@ -870,121 +848,146 @@ class _ProcedureSelectionScreenState extends State<ProcedureSelectionScreen> {
                 onChanged: (value) => setState(() => query = value),
               ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  if (cmsCategories.isNotEmpty) ...[
-                    ChoiceChip(
-                      label: Text(context.l10n.t('all_label')),
-                      selected: cmsCategorySlug == null,
-                      onSelected: (_) => setState(() => cmsCategorySlug = null),
-                    ),
-                    const SizedBox(width: 8),
-                    ...cmsCategories.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(
-                            _localizedCmsText(
-                              context,
-                              item.title,
-                              fallback: item.slug,
-                            ),
-                          ),
-                          selected: cmsCategorySlug == item.slug,
-                          onSelected: (_) =>
-                              setState(() => cmsCategorySlug = item.slug),
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    ChoiceChip(
-                      label: Text(context.l10n.t('all_label')),
-                      selected: category == null,
-                      onSelected: (_) => setState(() => category = null),
-                    ),
-                    const SizedBox(width: 8),
-                    ...ProcedureCategory.values.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(item.label),
-                          selected: category == item,
-                          onSelected: (_) => setState(() => category = item),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
             Expanded(
-              child: cmsCategories.isNotEmpty
-                  ? ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FutureBuilder<UfficioCatalog>(
+                future: _catalogFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final catalogData = snapshot.data;
+                  if (catalogData != null) {
+                    final categories = List<UfficioCategory>.from(
+                      catalogData.categories,
+                    )..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+                    final procedures = _visibleCatalogProcedures(
+                      context,
+                      catalogData,
+                      query: query,
+                      categoryId: cmsCategorySlug,
+                    );
+                    return Column(
                       children: [
-                        ...cmsCategories.map(
-                          (item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _CategoryTile(
-                              _localizedCmsText(
-                                context,
-                                item.title,
-                                fallback: item.slug,
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            children: [
+                              ChoiceChip(
+                                label: Text(context.l10n.t('all_label')),
+                                selected: cmsCategorySlug == null,
+                                onSelected: (_) =>
+                                    setState(() => cmsCategorySlug = null),
                               ),
-                              _iconForCategorySlug(item.slug),
-                              () => _openCategoryFromSlug(context, item.slug),
-                              trailing: item.isPremium
-                                  ? PremiumBadge(
-                                      label: context.l10n.t(
-                                        'premium_plan_label',
+                              const SizedBox(width: 8),
+                              ...categories.map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ChoiceChip(
+                                    label: Text(
+                                      _localizedCatalogText(
+                                        context,
+                                        item.title,
+                                        fallback: _humanReadableLabel(item.id),
                                       ),
-                                    )
-                                  : null,
-                            ),
+                                    ),
+                                    selected: cmsCategorySlug == item.id,
+                                    onSelected: (_) => setState(
+                                      () => cmsCategorySlug = item.id,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        ...cmsProcedures.map(
-                          (procedure) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _CmsProcedureCard(procedure: procedure),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            children: [
+                              ...categories.map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: _CategoryTile(
+                                    _localizedCatalogText(
+                                      context,
+                                      item.title,
+                                      fallback: _humanReadableLabel(item.id),
+                                    ),
+                                    _iconForCategorySlug(item.id),
+                                    () =>
+                                        _openCategoryFromSlug(context, item.id),
+                                    trailing: item.hasPremiumContent
+                                        ? PremiumBadge(
+                                            label: context.l10n.t(
+                                              'premium_plan_label',
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                              ...procedures.map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: _CatalogProcedureCard(
+                                    procedure: item.procedure,
+                                    categoryTitle: _localizedCatalogText(
+                                      context,
+                                      item.category.title,
+                                      fallback: _humanReadableLabel(
+                                        item.category.id,
+                                      ),
+                                    ),
+                                    subcategoryTitle: _localizedCatalogText(
+                                      context,
+                                      item.subcategory.title,
+                                      fallback: _humanReadableLabel(
+                                        item.subcategory.id,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final procedure = items[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            title: Row(
-                              children: [
-                                Expanded(child: Text(procedure.title)),
-                                if (procedure.isPremium)
-                                  PremiumBadge(
-                                    label: context.l10n.t('premium_plan_label'),
-                                  ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              '${procedure.category.label} • ${procedure.subcategory} • ${procedure.estimatedMinutes} min',
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.procedureDetail,
-                              arguments: ProcedureRouteArgs(procedure),
-                            ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final procedure = items[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          title: Row(
+                            children: [
+                              Expanded(child: Text(procedure.title)),
+                              if (procedure.isPremium)
+                                PremiumBadge(
+                                  label: context.l10n.t('premium_plan_label'),
+                                ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                          subtitle: Text(
+                            '${procedure.category.label} • ${procedure.subcategory} • ${procedure.estimatedMinutes} min',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.procedureDetail,
+                            arguments: ProcedureRouteArgs(procedure),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -3138,23 +3141,10 @@ HealthAslUserFlow? _resolveHealthFlow(
       }
     }
   }
-
-  if (answers['main_role'] == 'student' &&
-      answers['citizenship_status'] == 'italian' &&
-      answers['torino_status'] == 'domiciled') {
-    return guidance.userFlows.firstWhere(
-      (item) => item.id == 'italian_student_domiciled_torino',
-      orElse: () => guidance.userFlows.first,
-    );
+  if (guidance.userFlows.isEmpty) {
+    return null;
   }
-  if (answers['citizenship_status'] == 'italian' &&
-      answers['torino_status'] == 'resident') {
-    return guidance.userFlows.firstWhere(
-      (item) => item.id == 'italian_resident_torino',
-      orElse: () => guidance.userFlows.first,
-    );
-  }
-  return null;
+  return guidance.userFlows.first;
 }
 
 HealthAslChannelRule? _findHealthChannel(
@@ -5669,6 +5659,151 @@ class _CmsProcedureCard extends StatelessWidget {
                       procedureSlug: procedure.slug,
                       subcategorySlug:
                           procedure.subcategorySlug ?? procedure.slug,
+                    ),
+                    child: Text(context.l10n.t('open')),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+List<_CatalogProcedurePreview> _visibleCatalogProcedures(
+  BuildContext context,
+  UfficioCatalog catalog, {
+  required String query,
+  String? categoryId,
+}) {
+  final normalizedQuery = query.trim().toLowerCase();
+  final matches = <_CatalogProcedurePreview>[];
+  for (final category in catalog.categories) {
+    if (categoryId != null && category.id != categoryId) continue;
+    for (final subcategory in category.subcategories) {
+      for (final procedure in subcategory.procedures) {
+        if (normalizedQuery.isNotEmpty) {
+          final haystack = <String>[
+            _localizedCatalogText(
+              context,
+              procedure.title,
+              fallback: _humanReadableLabel(procedure.id),
+            ),
+            _localizedCatalogText(context, procedure.shortDescription),
+            _localizedCatalogText(context, subcategory.title),
+            ...procedure.tags,
+          ].join(' ').toLowerCase();
+          if (!haystack.contains(normalizedQuery)) continue;
+        }
+        matches.add(
+          _CatalogProcedurePreview(
+            category: category,
+            subcategory: subcategory,
+            procedure: procedure,
+          ),
+        );
+      }
+    }
+  }
+  return matches;
+}
+
+String _humanReadableLabel(String raw) {
+  final cleaned = raw.replaceAll(RegExp(r'[-_]+'), ' ').trim();
+  if (cleaned.isEmpty) return raw;
+  return cleaned
+      .split(RegExp(r'\s+'))
+      .map((word) {
+        if (word.isEmpty) return word;
+        return '${word[0].toUpperCase()}${word.substring(1)}';
+      })
+      .join(' ');
+}
+
+class _CatalogProcedurePreview {
+  const _CatalogProcedurePreview({
+    required this.category,
+    required this.subcategory,
+    required this.procedure,
+  });
+
+  final UfficioCategory category;
+  final UfficioSubcategory subcategory;
+  final UfficioProcedure procedure;
+}
+
+class _CatalogProcedureCard extends StatelessWidget {
+  const _CatalogProcedureCard({
+    required this.procedure,
+    required this.categoryTitle,
+    required this.subcategoryTitle,
+  });
+
+  final UfficioProcedure procedure;
+  final String categoryTitle;
+  final String subcategoryTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = AppScope.of(context);
+    final description = _localizedCatalogText(
+      context,
+      procedure.shortDescription,
+    );
+    return FutureBuilder(
+      future: scope.entitlementService.canAccessCatalogProcedure(procedure),
+      builder: (context, snapshot) {
+        final access = snapshot.data;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _localizedCatalogText(
+                          context,
+                          procedure.title,
+                          fallback: _humanReadableLabel(procedure.id),
+                        ),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    if (procedure.isPremiumOnly || procedure.hasPremiumContent)
+                      PremiumBadge(
+                        label: access?.alreadyUnlocked == true
+                            ? context.l10n.t('already_unlocked')
+                            : context.l10n.t('premium_plan_label'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '$categoryTitle • $subcategoryTitle',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: () => _openCatalogProcedureFromSlugs(
+                      context,
+                      categorySlug: procedure.categoryId,
+                      procedureSlug: procedure.id,
+                      subcategorySlug: procedure.subcategoryId,
                     ),
                     child: Text(context.l10n.t('open')),
                   ),

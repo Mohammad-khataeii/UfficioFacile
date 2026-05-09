@@ -91,6 +91,31 @@ class UfficioCatalog {
     }
     return null;
   }
+
+  UfficioProcedure? findProcedureInCategory(
+    String categoryId,
+    String procedureId,
+  ) {
+    final category = findCategory(categoryId);
+    if (category == null) return null;
+    for (final subcategory in category.subcategories) {
+      for (final procedure in subcategory.procedures) {
+        if (procedure.id == procedureId) return procedure;
+      }
+    }
+    return null;
+  }
+
+  String? findSubcategoryIdForProcedure(String categoryId, String procedureId) {
+    final category = findCategory(categoryId);
+    if (category == null) return null;
+    for (final subcategory in category.subcategories) {
+      for (final procedure in subcategory.procedures) {
+        if (procedure.id == procedureId) return subcategory.id;
+      }
+    }
+    return null;
+  }
 }
 
 class UfficioCategory {

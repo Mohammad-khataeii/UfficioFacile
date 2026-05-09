@@ -11,7 +11,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
   shortDescription:
       'Understand how to register with the Italian public healthcare system in Torino, receive or use the Tessera Sanitaria, and know whether to go in person, use PEC, send email, or contact Centro ISI.',
   whatIsIt:
-      'This page helps users understand how to access the Italian Servizio Sanitario Nazionale in Torino. In most cases, the first step is not simply asking for the plastic Tessera Sanitaria, but registering or updating the user’s position with the SSN/ASL. Once the user is correctly registered, they can choose a family doctor, use public healthcare services, receive prescriptions, book exams, and receive or renew the Tessera Sanitaria.',
+      'Use this guide to understand healthcare access in Torino. In many cases, the first step is not simply asking for the plastic Tessera Sanitaria, but registering or updating the healthcare position with the SSN/ASL. Once registration is correct, the person can choose a family doctor, use public healthcare services, receive prescriptions, book exams, and receive or renew the Tessera Sanitaria.',
   mainUserQuestion:
       'How do I get the Tessera Sanitaria in Torino? Should I go in person, send PEC, send normal email, use an online service, or contact another office?',
   topAnswer: HealthAslTopAnswer(
@@ -410,7 +410,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
   ],
   userFlows: [
     HealthAslUserFlow(
-      id: 'italian_resident_torino',
+      id: 'register_with_ssn_resident_path',
       label: 'Italian citizen resident in Torino',
       labelIt: 'Cittadino italiano residente a Torino',
       summary:
@@ -429,12 +429,12 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       extraDocuments: ['SPID/CIE/CNS if using online services'],
       warnings: [
         'This flow is usually not about first receiving a codice fiscale card; it is about local ASL position and doctor choice.',
-        'If the user only needs duplicate/renewal, route to duplicate_or_renew_tessera_sanitaria.',
+        'If the request is only about replacing or renewing the health card, open the duplicate or renewal path.',
       ],
       outputs: ['in_person_checklist', 'normal_email_information_request'],
     ),
     HealthAslUserFlow(
-      id: 'italian_student_domiciled_torino',
+      id: 'register_with_ssn_student_domicile_path',
       label: 'Italian student living in Torino but resident elsewhere',
       labelIt: 'Studente italiano domiciliato a Torino ma residente altrove',
       summary:
@@ -468,7 +468,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'eu_student_torino',
+      id: 'register_with_ssn_eu_student_path',
       label: 'EU student in Torino',
       labelIt: 'Studente UE a Torino',
       summary:
@@ -500,7 +500,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'non_eu_student_torino',
+      id: 'voluntary_ssn_registration_student_path',
       label: 'Non-EU student in Torino',
       labelIt: 'Studente extra-UE a Torino',
       summary:
@@ -539,7 +539,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'non_eu_worker_torino',
+      id: 'mandatory_ssn_registration_worker_path',
       label: 'Non-EU worker in Torino',
       labelIt: 'Lavoratore extra-UE a Torino',
       summary:
@@ -563,7 +563,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
         'Doctor choice form if choosing doctor at the same time',
       ],
       warnings: [
-        'Do not route this user to voluntary SSN payment unless ASL says they are not eligible for mandatory registration.',
+        'Use voluntary SSN payment only when ASL confirms the person is not eligible for mandatory registration.',
         'If the ASL rejected the request for missing work proof, generate a PEC follow-up with the work contract attached.',
       ],
       outputs: [
@@ -573,7 +573,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'unemployed_torino',
+      id: 'register_with_ssn_unemployed_path',
       label: 'Unemployed person in Torino',
       labelIt: 'Persona disoccupata a Torino',
       summary:
@@ -608,7 +608,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'non_resident_worker_or_student_torino',
+      id: 'temporary_ssn_non_resident_path',
       label: 'Non-resident worker or student living in Torino',
       labelIt: 'Lavoratore o studente non residente ma domiciliato a Torino',
       summary:
@@ -641,7 +641,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'no_valid_permesso_stp',
+      id: 'stp_eni_access_path',
       label: 'Person without valid permesso di soggiorno',
       labelIt: 'Persona senza permesso di soggiorno valido',
       summary:
@@ -661,13 +661,13 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       warnings: [
         'STP is not the same as normal Tessera Sanitaria.',
         'STP is a temporary healthcare code for necessary healthcare access.',
-        'Do not route this user to normal voluntary SSN registration unless their legal status changes or ASL says so.',
+        'Use normal voluntary SSN registration only if the legal status changes or ASL confirms that path.',
       ],
       usefulContacts: ['centroIsi'],
       outputs: ['centro_isi_contact_message', 'stp_checklist'],
     ),
     HealthAslUserFlow(
-      id: 'eu_without_team_or_coverage',
+      id: 'stp_eni_access_eu_no_coverage_path',
       label: 'EU citizen without Italian SSN or usable TEAM coverage',
       labelIt: 'Cittadino UE senza SSN italiano o TEAM utilizzabile',
       summary:
@@ -700,7 +700,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       ],
     ),
     HealthAslUserFlow(
-      id: 'duplicate_or_renew_tessera_sanitaria',
+      id: 'request_duplicate_tessera_sanitaria_path',
       label: 'Duplicate, lost, expired, or damaged Tessera Sanitaria',
       labelIt:
           'Duplicato, smarrimento, scadenza o danneggiamento Tessera Sanitaria',
@@ -804,7 +804,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       title: 'Voluntary SSN registration checklist',
       titleIt: 'Checklist iscrizione volontaria SSN',
       outputType: 'checklist',
-      appliesTo: ['non_eu_student_torino'],
+      appliesTo: ['voluntary_ssn_registration_student_path'],
       items: [
         'Passport',
         'Codice fiscale',
@@ -825,8 +825,8 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       titleIt: 'Checklist domiciliazione sanitaria',
       outputType: 'checklist',
       appliesTo: [
-        'italian_student_domiciled_torino',
-        'non_resident_worker_or_student_torino',
+        'register_with_ssn_student_domicile_path',
+        'temporary_ssn_non_resident_path',
       ],
       items: [
         'Identity document',
@@ -843,7 +843,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       title: 'STP checklist',
       titleIt: 'Checklist STP',
       outputType: 'checklist',
-      appliesTo: ['no_valid_permesso_stp'],
+      appliesTo: ['stp_eni_access_path'],
       items: [
         'Identity document if available',
         'Personal data',
@@ -859,7 +859,7 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
       title: 'Duplicate or renewal Tessera Sanitaria checklist',
       titleIt: 'Checklist duplicato o rinnovo Tessera Sanitaria',
       outputType: 'checklist',
-      appliesTo: ['duplicate_or_renew_tessera_sanitaria'],
+      appliesTo: ['request_duplicate_tessera_sanitaria_path'],
       items: [
         'Identity document',
         'Codice fiscale',
@@ -874,18 +874,18 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
   routingRules: [
     HealthAslRoutingRule(
       conditions: {'main_role': 'duplicate_only'},
-      routeTo: 'duplicate_or_renew_tessera_sanitaria',
+      routeTo: 'request_duplicate_tessera_sanitaria_path',
       note:
           'This user does not need the first registration page unless their ASL/SSN position is missing or blocked.',
     ),
     HealthAslRoutingRule(
       conditions: {'citizenship_status': 'non_eu', 'main_role': 'student'},
-      routeTo: 'non_eu_student_torino',
+      routeTo: 'voluntary_ssn_registration_student_path',
       recommendedChannel: 'in_person_asl_administrative_office',
     ),
     HealthAslRoutingRule(
       conditions: {'citizenship_status': 'non_eu', 'main_role': 'worker'},
-      routeTo: 'non_eu_worker_torino',
+      routeTo: 'mandatory_ssn_registration_worker_path',
       recommendedChannel: 'in_person_asl_administrative_office',
     ),
     HealthAslRoutingRule(
@@ -893,22 +893,22 @@ const healthAslGetTesseraSanitariaTorino = HealthAslGuidance(
         'citizenship_status': 'non_eu',
         'main_role': 'no_valid_permit',
       },
-      routeTo: 'no_valid_permesso_stp',
+      routeTo: 'stp_eni_access_path',
       recommendedChannel: 'centro_isi',
     ),
     HealthAslRoutingRule(
       conditions: {'citizenship_status': 'eu', 'main_role': 'student'},
-      routeTo: 'eu_student_torino',
+      routeTo: 'register_with_ssn_eu_student_path',
       recommendedChannel: 'edisu_or_in_person_asl',
     ),
     HealthAslRoutingRule(
       conditions: {'torino_status': 'domiciled'},
-      routeTo: 'non_resident_worker_or_student_torino',
+      routeTo: 'temporary_ssn_non_resident_path',
       recommendedChannel: 'in_person_asl_administrative_office',
     ),
     HealthAslRoutingRule(
       conditions: {'main_role': 'unemployed'},
-      routeTo: 'unemployed_torino',
+      routeTo: 'register_with_ssn_unemployed_path',
       recommendedChannel: 'in_person_asl_administrative_office',
     ),
     HealthAslRoutingRule(

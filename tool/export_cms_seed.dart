@@ -2,13 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ufficiofacile/features/italy_admin_copilot/content/cms_seed_exporter.dart';
-import 'package:ufficiofacile/features/italy_admin_copilot/content/ufficio_catalog_exporter.dart';
 
 const _outputPaths = [
   'docs/generated/cms_bundled_content_export.json',
   'apps/admin/data/cms_bundled_content_export.json',
 ];
-const _catalogOutputPath = 'assets/catalog/ufficio_catalog.v1.json';
 
 void main() {
   final bundle = buildCmsSeedBundle(
@@ -25,12 +23,7 @@ void main() {
     file.writeAsStringSync(encoded);
     stdout.writeln('Wrote $outputPath');
   }
-
-  final catalogBundle = buildUfficioCatalogBundleFromCmsSeed(bundle);
-  final catalogFile = File(_catalogOutputPath);
-  catalogFile.parent.createSync(recursive: true);
-  catalogFile.writeAsStringSync(
-    const JsonEncoder.withIndent('  ').convert(catalogBundle),
+  stdout.writeln(
+    'Preserved assets/catalog/ufficio_catalog.v1.json as the canonical source.',
   );
-  stdout.writeln('Wrote $_catalogOutputPath');
 }

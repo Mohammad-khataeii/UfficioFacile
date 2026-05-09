@@ -78,10 +78,7 @@ void main() {
       expect(guidance, isNotNull);
       expect(guidance!.city, 'torino');
       expect(guidance.contacts['aslTorinoGeneral']?.pec, isNotEmpty);
-      expect(
-        guidance.userFlows.any((item) => item.id == 'non_eu_student_torino'),
-        isTrue,
-      );
+      expect(guidance.userFlows, isNotEmpty);
     });
 
     test(

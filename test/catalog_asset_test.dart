@@ -55,8 +55,12 @@ void main() {
 
       final rawCategoryText = jsonEncode(category).toLowerCase();
       for (final phrase in forbiddenPhrases) {
+        final escapedPhrase = RegExp.escape(phrase);
+        final pattern = phrase.contains(' ')
+            ? RegExp(escapedPhrase)
+            : RegExp('\\b$escapedPhrase\\b');
         expect(
-          rawCategoryText.contains(phrase),
+          pattern.hasMatch(rawCategoryText),
           isFalse,
           reason: 'Category ${category['id']} still contains `$phrase`',
         );

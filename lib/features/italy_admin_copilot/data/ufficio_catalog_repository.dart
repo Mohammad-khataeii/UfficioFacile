@@ -58,11 +58,13 @@ class UfficioCatalogRepository {
     required String procedureId,
   }) async {
     final catalog = await loadCatalog();
-    final bundledProcedure = catalog.findProcedure(
-      categoryId,
-      subcategoryId,
-      procedureId,
-    );
+    final bundledProcedure =
+        catalog.findProcedure(categoryId, subcategoryId, procedureId) ??
+        catalog.findProcedureInCategory(categoryId, procedureId);
+    final resolvedSubcategoryId =
+        bundledProcedure?.subcategoryId.isNotEmpty == true
+        ? bundledProcedure!.subcategoryId
+        : subcategoryId;
     try {
       final procedures = await _cmsRepository
           .listProcedures(categorySlug: categoryId)
@@ -84,7 +86,7 @@ class UfficioCatalogRepository {
         bundledProcedure,
         remoteProcedure,
         blocks,
-        subcategoryId: subcategoryId,
+        subcategoryId: resolvedSubcategoryId,
       );
     } catch (_) {
       return bundledProcedure;
@@ -375,18 +377,23 @@ class UfficioCatalogRepository {
     List<CmsContentBlock> remoteBlocks, {
     required String subcategoryId,
   }) {
-    final sections = <UfficioContentSection>[
+    final bundledSections = _dedupeSections(<UfficioContentSection>[
       ...?bundled?.sections.where(
         (section) => !section.key.startsWith('remote_block_'),
       ),
-    ];
-    if (sections.isEmpty) {
-      sections.addAll(_coreSectionsFromRemote(remote));
-    }
-    if (remoteBlocks.isNotEmpty) {
-      sections.removeWhere((item) => item.key.startsWith('remote_block_'));
-      sections.addAll(_blockSectionsFromRemote(remote, remoteBlocks));
-    }
+    ]);
+    final remoteSections = remoteBlocks.isNotEmpty
+        ? _blockSectionsFromRemote(remote, remoteBlocks)
+        : _coreSectionsFromRemote(remote);
+    final sections = bundledSections.isNotEmpty
+        ? bundledSections
+        : _dedupeSections(remoteSections);
+    final officialLinks = bundled?.officialLinks.isNotEmpty == true
+        ? bundled!.officialLinks
+        : _officialLinksFromRemote(remote);
+    final contacts = bundled?.contacts.isNotEmpty == true
+        ? bundled!.contacts
+        : _contactsFromRemote(remote);
     return UfficioProcedure(
       id: remote.slug,
       categoryId: remote.categorySlug,
@@ -404,8 +411,8 @@ class UfficioCatalogRepository {
       ),
       tags: remote.tags,
       sections: sections,
-      officialLinks: bundled?.officialLinks ?? const <UfficioOfficialLink>[],
-      contacts: bundled?.contacts ?? const <UfficioContact>[],
+      officialLinks: officialLinks,
+      contacts: contacts,
       warnings: remote.warnings.isNotEmpty
           ? Map<String, String>.from(
               remote.warnings.map(
@@ -507,5 +514,80 @@ class UfficioCatalogRepository {
 
   Map<String, String> _stringMap(Map<String, dynamic> raw) {
     return raw.map((key, value) => MapEntry(key, value.toString()));
+  }
+
+  List<UfficioContentSection> _dedupeSections(
+    Iterable<UfficioContentSection> sections,
+  ) {
+    final result = <UfficioContentSection>[];
+    final seenKeys = <String>{};
+    final seenContent = <String>{};
+    for (final section in sections) {
+      final keyFingerprint = _normalizedSectionKey(section);
+      final contentFingerprint = _sectionContentFingerprint(section);
+      final duplicateByKey = keyFingerprint.isNotEmpty
+          ? seenKeys.contains(keyFingerprint)
+          : false;
+      final duplicateByContent = seenContent.contains(contentFingerprint);
+      if (duplicateByKey || duplicateByContent) {
+        continue;
+      }
+      if (keyFingerprint.isNotEmpty) {
+        seenKeys.add(keyFingerprint);
+      }
+      seenContent.add(contentFingerprint);
+      result.add(section);
+    }
+    return result;
+  }
+
+  String _normalizedSectionKey(UfficioContentSection section) =>
+      _normalizeToken(section.key);
+
+  String _sectionContentFingerprint(UfficioContentSection section) =>
+      '${_normalizeToken(section.type)}|${_normalizedLocalizedText(section.title)}'
+      '|${_normalizedLocalizedText(section.body)}|${_normalizedSectionItems(section.items)}';
+
+  String _normalizedLocalizedText(Map<String, String> value) {
+    final entries = value.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    return entries
+        .map(
+          (entry) =>
+              '${_normalizeToken(entry.key)}:${_normalizeToken(entry.value)}',
+        )
+        .join('|');
+  }
+
+  String _normalizedSectionItems(Map<String, List<String>> items) {
+    final entries = items.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    return entries
+        .map(
+          (entry) =>
+              '${_normalizeToken(entry.key)}:${entry.value.map(_normalizeToken).join(',')}',
+        )
+        .join('|');
+  }
+
+  String _normalizeToken(String value) =>
+      value.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  List<UfficioOfficialLink> _officialLinksFromRemote(CmsProcedure remote) {
+    return remote.officialLinks
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .map(UfficioOfficialLink.fromJson)
+        .where((item) => item.url.trim().isNotEmpty)
+        .toList();
+  }
+
+  List<UfficioContact> _contactsFromRemote(CmsProcedure remote) {
+    return remote.officialContacts
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .map(UfficioContact.fromJson)
+        .where((item) => item.value.trim().isNotEmpty)
+        .toList();
   }
 }

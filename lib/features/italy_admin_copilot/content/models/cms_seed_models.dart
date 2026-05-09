@@ -423,6 +423,11 @@ class CmsCategorySeed {
       ),
       metadata: _map(map['metadata']),
       procedures: procedures,
+      richCategorySnapshot: map['rich_category_snapshot'] is Map
+          ? Map<String, dynamic>.from(
+              map['rich_category_snapshot'] as Map<dynamic, dynamic>,
+            )
+          : null,
     );
   }
 
