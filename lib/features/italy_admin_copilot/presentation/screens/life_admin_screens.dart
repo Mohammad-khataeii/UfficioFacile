@@ -20,6 +20,7 @@ import '../../data/housing_rent_guidance_definitions.dart';
 import '../../data/cms_content_repository.dart';
 import '../../data/catalog_premium_marker.dart';
 import '../../data/pack_generator.dart';
+import '../../data/premium_service.dart';
 import '../../data/public_office_comune_guidance_definitions.dart';
 import '../../data/procedure_validator.dart';
 import '../../data/red_flag_service.dart';
@@ -7843,12 +7844,12 @@ class PlanScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _SectionCard(
                     title:
-                        '${_localizedCatalogText(context, plan.title, fallback: plan.productKey)} — ${_planPriceLabel(plan)}',
+                        '${_localizedCmsText(context, plan.title, fallback: plan.productKey)} — ${_planPriceLabel(plan)}',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _localizedCatalogText(
+                          _localizedCmsText(
                             context,
                             plan.description,
                             fallback: plan.productKey,

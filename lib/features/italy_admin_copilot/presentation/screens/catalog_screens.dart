@@ -499,7 +499,7 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text(access.message),
+                              Text(access.reason),
                               const SizedBox(height: 12),
                               Wrap(
                                 spacing: 8,
@@ -536,7 +536,7 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                       context,
                                       decision: EntitlementDecision(
                                         allowed: false,
-                                        reason: access.message,
+                                        reason: access.reason,
                                         upgradeTitle: context.l10n.t(
                                           'cta_consultancy_title',
                                         ),
