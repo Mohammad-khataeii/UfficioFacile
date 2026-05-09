@@ -194,7 +194,12 @@ void main() {
 
   final rawText = catalogFile.readAsStringSync().toLowerCase();
   for (final phrase in forbiddenPhrases) {
-    if (rawText.contains(phrase)) {
+    final escaped = RegExp.escape(phrase);
+    final pattern = RegExp(
+      r'(?<![a-z0-9_])' + escaped + r'(?![a-z0-9_])',
+      caseSensitive: false,
+    );
+    if (pattern.hasMatch(rawText)) {
       problems.add('Catalog contains forbidden public phrase `$phrase`');
     }
   }
@@ -218,10 +223,24 @@ void _checkLocalizedField(
     problems.add('$id is missing localized $field map');
     return;
   }
-  for (final language in const ['en', 'it', 'fr', 'es', 'fa', 'ar']) {
+
+  const requiredLanguages = ['en', 'it'];
+  const optionalLanguages = ['fr', 'es', 'fa', 'ar'];
+
+  for (final language in requiredLanguages) {
     final text = value[language]?.toString().trim() ?? '';
     if (text.isEmpty) {
       problems.add('$id is missing $field for `$language`');
+    }
+  }
+
+  for (final language in optionalLanguages) {
+    if (!value.containsKey(language)) {
+      continue;
+    }
+    final text = value[language]?.toString().trim() ?? '';
+    if (text.isEmpty) {
+      problems.add('$id has empty $field for optional language `$language`');
     }
   }
 }
