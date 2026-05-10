@@ -9,14 +9,14 @@ import { upsertCmsProcedure } from "@/lib/db/mutations";
 export default async function ContentProcedureDetailPage({
   params,
 }: {
-  params: Promise<{ categorySlug: string; slug: string }>;
+  params: Promise<{ categorySlug: string; procedureSlug: string }>;
 }) {
   const admin = await requireAdmin("content.read");
-  const { categorySlug, slug } = await params;
+  const { categorySlug, procedureSlug } = await params;
   const procedure = await getAdminProcedureByCategoryAndSlug(
     admin.supabase,
     categorySlug,
-    slug,
+    procedureSlug,
     {
       bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
     },
@@ -28,7 +28,7 @@ export default async function ContentProcedureDetailPage({
       <section className="space-y-6">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
           <h2 className="text-xl font-semibold text-slate-900">
-            Procedure editor: {categorySlug} / {slug}
+            Procedure editor: {categorySlug} / {procedureSlug}
           </h2>
           {procedure.source === "bundled" ? (
             <div className="mt-4 rounded-2xl bg-amber-50 p-3 text-sm text-amber-900">

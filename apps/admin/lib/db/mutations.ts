@@ -553,11 +553,12 @@ export async function upsertCmsProcedure(formData: FormData) {
   const { data: before } = await admin.supabase
     .from("ufficio_cms_procedures")
     .select("*")
+    .eq("category_slug", parsed.categorySlug)
     .eq("slug", parsed.slug)
     .maybeSingle();
   const { error } = await admin.supabase
     .from("ufficio_cms_procedures")
-    .upsert(payload);
+    .upsert(payload, { onConflict: "category_slug,slug" });
   if (error) throw error;
 
   await logAdminAction({

@@ -151,9 +151,7 @@ void main() {
 
   if (duplicateCategoryIds.isNotEmpty) {
     final sortedDuplicateCategoryIds = duplicateCategoryIds.toList()..sort();
-    problems.add(
-      'Duplicate category ids: $sortedDuplicateCategoryIds',
-    );
+    problems.add('Duplicate category ids: $sortedDuplicateCategoryIds');
   }
 
   if (subcategoryCount > 0 &&

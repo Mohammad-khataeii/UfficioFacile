@@ -1,7 +1,11 @@
+import "server-only";
+
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+
+import { getPublicSupabaseEnv, getServiceRoleEnv } from "@/lib/env";
 
 type CookieToSet = {
   name: string;
@@ -9,20 +13,13 @@ type CookieToSet = {
   options?: CookieOptions;
 };
 
-function getEnv(name: string) {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing environment variable: ${name}`);
-  }
-  return value;
-}
-
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
+  const env = getPublicSupabaseEnv();
 
   return createServerClient(
-    getEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -39,9 +36,10 @@ export async function createSupabaseServerClient() {
 }
 
 export function createServiceRoleClient() {
+  const env = getServiceRoleEnv();
   return createClient(
-    getEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    getEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY,
     {
       auth: {
         persistSession: false,

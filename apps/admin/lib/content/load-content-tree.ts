@@ -109,6 +109,11 @@ export type AdminContentTree = {
   procedures: AdminProcedureRecord[];
 };
 
+export type LegacyProcedureSlugMatch = {
+  slug: string;
+  matches: AdminProcedureRecord[];
+};
+
 function getProcedureCategorySlug(procedure: AdminProcedureRecord): string {
   return String(procedure.category_slug ?? "").trim();
 }
@@ -127,15 +132,63 @@ function getProcedureSlug(procedure: AdminProcedureRecord): string {
   return String(procedure.slug ?? "").trim();
 }
 
-function getProcedureCanonicalKey(procedure: AdminProcedureRecord): string {
+function getProcedureRawId(procedure: AdminProcedureRecord): string | null {
+  const rawId =
+    typeof procedure.id === "string"
+      ? procedure.id.trim()
+      : String(procedure.id ?? "").trim();
+  return rawId.length > 0 ? rawId : null;
+}
+
+function getProcedurePublicIdentity(procedure: AdminProcedureRecord): string | null {
   const slug = getProcedureSlug(procedure);
   const categorySlug = getProcedureCategorySlug(procedure);
-  const rawId =
-    typeof procedure.id === "string" ? procedure.id.trim() : String(procedure.id ?? "").trim();
-  if (rawId.length > 0) {
+  if (categorySlug.length > 0 && slug.length > 0) {
+    return `path:${categorySlug}::${slug}`;
+  }
+  return null;
+}
+
+function formatProcedureDebugLabel(procedure: AdminProcedureRecord): string {
+  return JSON.stringify({
+    category_slug: getProcedureCategorySlug(procedure) || null,
+    slug: getProcedureSlug(procedure) || null,
+    source: procedure.source,
+    id: getProcedureRawId(procedure),
+    status: procedure.status,
+    title_en: procedure.title?.en ?? null,
+  });
+}
+
+function getProcedureCanonicalKey(procedure: AdminProcedureRecord): string {
+  const publicIdentity = getProcedurePublicIdentity(procedure);
+  if (publicIdentity) {
+    return publicIdentity;
+  }
+  const rawId = getProcedureRawId(procedure);
+  if (rawId) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[content] Procedure missing category_slug or slug; falling back to database id identity ${formatProcedureDebugLabel(
+          procedure,
+        )}`,
+      );
+    }
     return `id:${rawId}`;
   }
-  return `path:${categorySlug}::${slug}`;
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(
+      `[content] Procedure missing both public identity and database id ${formatProcedureDebugLabel(
+        procedure,
+      )}`,
+    );
+  }
+  return `missing:${JSON.stringify({
+    category_slug: getProcedureCategorySlug(procedure),
+    slug: getProcedureSlug(procedure),
+    sort_order: procedure.sort_order,
+    source: procedure.source,
+  })}`;
 }
 
 function getProcedureRoutePath(procedure: AdminProcedureRecord): string {
@@ -163,10 +216,25 @@ function getProcedureRichnessScore(procedure: AdminProcedureRecord): number {
   ].reduce((sum, item) => sum + item, 0);
 }
 
+function getProcedureStatusRank(procedure: AdminProcedureRecord): number {
+  const normalizedStatus = String(procedure.status ?? "").trim().toLowerCase();
+  if (procedure.is_active && normalizedStatus === "published") return 5;
+  if (procedure.is_active && normalizedStatus === "active") return 4;
+  if (procedure.is_active) return 3;
+  if (normalizedStatus === "draft") return 2;
+  if (normalizedStatus === "archived") return 1;
+  return 0;
+}
+
 function choosePreferredProcedure(
   current: AdminProcedureRecord,
   candidate: AdminProcedureRecord,
 ): AdminProcedureRecord {
+  const currentStatusRank = getProcedureStatusRank(current);
+  const candidateStatusRank = getProcedureStatusRank(candidate);
+  if (candidateStatusRank !== currentStatusRank) {
+    return candidateStatusRank > currentStatusRank ? candidate : current;
+  }
   const currentScore = getProcedureRichnessScore(current);
   const candidateScore = getProcedureRichnessScore(candidate);
   if (candidateScore != currentScore) {
@@ -199,12 +267,12 @@ function dedupeProcedures(
 
   if (duplicates.size > 0 && process.env.NODE_ENV !== "production") {
     for (const [key, droppedRows] of duplicates.entries()) {
+      const kept = deduped.get(key);
       console.warn(
-        `[content] Deduped procedure ${key}; kept one row and dropped ${droppedRows.length} duplicate(s): ${droppedRows
-          .map(
-            (row) =>
-              `${getProcedureCategorySlug(row)}/${getProcedureSubcategorySlug(row) ?? "no-subcategory"}/${getProcedureSlug(row)}`,
-          )
+        `[content] Deduped procedure ${key}; kept ${
+          kept ? formatProcedureDebugLabel(kept) : "unknown"
+        } and dropped ${droppedRows.length} duplicate(s): ${droppedRows
+          .map((row) => formatProcedureDebugLabel(row))
           .join(", ")}`,
       );
     }
@@ -695,9 +763,23 @@ export async function getAdminProcedureBySlug(
   slug: string,
   options?: { bootstrapIfEmpty?: boolean },
 ) {
+  // Legacy helper: slug-only lookup is ambiguous if the same procedure slug exists
+  // under multiple categories. Prefer getAdminProcedureByCategoryAndSlug.
   const tree = await getAdminContentTree(supabase, options);
   const matches = tree.procedures.filter((procedure) => procedure.slug === slug);
-  return matches.length === 1 ? matches[0] : matches[0] ?? null;
+  return matches.length === 1 ? matches[0] : null;
+}
+
+export async function findAdminProceduresBySlug(
+  supabase: any,
+  slug: string,
+  options?: { bootstrapIfEmpty?: boolean },
+): Promise<LegacyProcedureSlugMatch> {
+  const tree = await getAdminContentTree(supabase, options);
+  return {
+    slug,
+    matches: tree.procedures.filter((procedure) => getProcedureSlug(procedure) === slug),
+  };
 }
 
 export async function getAdminProcedureByCategoryAndSlug(

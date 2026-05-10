@@ -12,7 +12,8 @@ Map<String, dynamic> _runtimeSignature(Map<String, dynamic> category) {
           .map((item) => Map<String, dynamic>.from(item))
           .map((subcategory) {
             final procedures =
-                (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[])
+                (subcategory['procedures'] as List<dynamic>? ??
+                        const <dynamic>[])
                     .whereType<Map>()
                     .map((item) => Map<String, dynamic>.from(item))
                     .map(
@@ -44,7 +45,9 @@ Map<String, dynamic> _runtimeSignature(Map<String, dynamic> category) {
 
 void main() {
   test('runtime catalog navigation matches canonical catalog asset', () {
-    final raw = File('assets/catalog/ufficio_catalog.v1.json').readAsStringSync();
+    final raw = File(
+      'assets/catalog/ufficio_catalog.v1.json',
+    ).readAsStringSync();
     final canonical = jsonDecode(raw) as Map<String, dynamic>;
     final canonicalCategories =
         (canonical['categories'] as List<dynamic>? ?? const <dynamic>[])
@@ -108,8 +111,9 @@ void main() {
     final health = runtimeCategories.firstWhere(
       (item) => item['id'] == 'health_asl',
     );
-    final subcategories =
-        (health['subcategories'] as List<dynamic>).whereType<Map>().toList();
+    final subcategories = (health['subcategories'] as List<dynamic>)
+        .whereType<Map>()
+        .toList();
     expect(subcategories.length, 7);
 
     final expectedCounts = <String, int>{
@@ -122,7 +126,9 @@ void main() {
       'student_insurance': 1,
     };
     for (final entry in expectedCounts.entries) {
-      final subcategory = subcategories.firstWhere((item) => item['id'] == entry.key);
+      final subcategory = subcategories.firstWhere(
+        (item) => item['id'] == entry.key,
+      );
       final procedures =
           (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[]);
       expect(procedures.length, entry.value, reason: entry.key);

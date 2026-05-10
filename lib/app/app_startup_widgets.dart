@@ -37,6 +37,7 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     final state = widget.controller.startupState;
+    final canFallback = widget.controller.canContinueWithFallbackLocalMode;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -50,16 +51,37 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
                 const Text('Starting UfficioFacile...'),
                 const SizedBox(height: 8),
                 Text('Backend mode: ${state.backendMode}'),
+                Text('Flavor: ${state.flavor}'),
                 if (state.usedFallbackLocalMode) ...[
                   const SizedBox(height: 8),
                   const Text('Continuing in local mode.'),
                 ],
+                if (kDebugMode) ...[
+                  const SizedBox(height: 16),
+                  ExpansionTile(
+                    title: const Text('Startup diagnostics'),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          'supabaseConfigured=${state.supabaseConfigured}\n'
+                          'supabaseInitialized=${state.supabaseInitialized}\n'
+                          'language=${state.languageCode}\n'
+                          'remoteCatalogAvailable=${state.remoteCatalogAvailable}\n'
+                          'canFallbackToLocalMode=${state.canFallbackToLocalMode}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (_showFallback) ...[
                   const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: widget.controller.continueWithFallbackLocalMode,
-                    child: const Text('Continue in local mode'),
-                  ),
+                  if (canFallback)
+                    ElevatedButton(
+                      onPressed:
+                          widget.controller.continueWithFallbackLocalMode,
+                      child: const Text('Continue in local mode'),
+                    ),
                   const SizedBox(height: 8),
                   OutlinedButton(
                     onPressed: widget.controller.retryStartup,
@@ -88,6 +110,7 @@ class StartupErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = controller.startupState;
+    final canFallback = controller.canContinueWithFallbackLocalMode;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -110,11 +133,19 @@ class StartupErrorScreen extends StatelessWidget {
                 if (kDebugMode && state.debugDetails != null) ...[
                   const SizedBox(height: 16),
                   ExpansionTile(
-                    title: const Text('Debug details'),
+                    title: const Text('Startup diagnostics'),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Text(state.debugDetails!),
+                        child: Text(
+                          'backend=${state.backendMode}\n'
+                          'flavor=${state.flavor}\n'
+                          'supabaseConfigured=${state.supabaseConfigured}\n'
+                          'supabaseInitialized=${state.supabaseInitialized}\n'
+                          'language=${state.languageCode}\n'
+                          'remoteCatalogAvailable=${state.remoteCatalogAvailable}\n\n'
+                          '${state.debugDetails!}',
+                        ),
                       ),
                     ],
                   ),
@@ -125,11 +156,13 @@ class StartupErrorScreen extends StatelessWidget {
                   child: const Text('Retry'),
                 ),
                 const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: controller.continueWithFallbackLocalMode,
-                  child: const Text('Continue local-only'),
-                ),
-                const SizedBox(height: 8),
+                if (canFallback) ...[
+                  OutlinedButton(
+                    onPressed: controller.continueWithFallbackLocalMode,
+                    child: const Text('Continue local-only'),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 OutlinedButton(
                   onPressed: controller.resetStartupData,
                   child: const Text('Reset startup data'),

@@ -27,6 +27,7 @@ Validate the generated export with:
 
 ```bash
 dart run tool/content_doctor.dart
+dart run tool/localization_doctor.dart
 ```
 
 This writes both:
@@ -50,6 +51,7 @@ flutter analyze
 flutter test
 /usr/local/share/flutter/bin/dart run tool/export_cms_seed.dart
 dart run tool/content_doctor.dart
+dart run tool/localization_doctor.dart
 ```
 
 For the admin app:
@@ -61,6 +63,27 @@ npm run build
 npm run lint
 npm run content:lint
 ```
+
+## Production Flutter Build
+
+```bash
+flutter build web \
+  --release \
+  --dart-define=UFFICCIOFACILE_BACKEND_MODE=supabase \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```
+
+Production notes:
+
+- Production Supabase builds fail loud if `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing.
+- Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only.
+- Do not enable `UFFICCIOFACILE_ALLOW_LOCAL_FALLBACK` for production builds.
+
+See `docs/deployment_production.md` for the full deployment checklist.
 
 If the Next.js dev cache is corrupted and `.next/routes-manifest.json` is
 missing:

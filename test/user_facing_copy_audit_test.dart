@@ -31,18 +31,12 @@ void main() {
         'the user should',
         RegExp(r'the user should', caseSensitive: false),
       ),
-      MapEntry(
-        'Do not route',
-        RegExp(r'do not route', caseSensitive: false),
-      ),
+      MapEntry('Do not route', RegExp(r'do not route', caseSensitive: false)),
       MapEntry(
         'TODO',
         RegExp(r'(^|[^a-z])todo([^a-z]|$)', caseSensitive: false),
       ),
-      MapEntry(
-        'placeholder',
-        RegExp(r'\bplaceholder\b', caseSensitive: false),
-      ),
+      MapEntry('placeholder', RegExp(r'\bplaceholder\b', caseSensitive: false)),
     ];
 
     for (final target in _auditPaths) {

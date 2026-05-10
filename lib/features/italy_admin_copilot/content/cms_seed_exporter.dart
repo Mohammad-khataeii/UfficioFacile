@@ -171,6 +171,12 @@ Map<String, dynamic> _canonicalCategoryToCmsSeedJson(
     }
   }
 
+  final categorySlug = category['id']?.toString() ?? '';
+  final categoryIsPremium =
+      ((category['isPremiumOnly'] as bool?) ?? false) ||
+      categorySlug == 'bonuses-benefits' ||
+      categorySlug == 'loans-credit';
+
   return <String, dynamic>{
     'slug': category['id'],
     'title': _localeMap(category['title']),
@@ -179,14 +185,12 @@ Map<String, dynamic> _canonicalCategoryToCmsSeedJson(
     'sort_order': (category['sortOrder'] as num?)?.toInt() ?? 0,
     'icon': category['icon']?.toString(),
     'is_active': true,
-    'is_premium': category['isPremiumOnly'] as bool? ?? false,
+    'is_premium': categoryIsPremium,
     'verification_status': 'canonical',
     'tags': const <String>[],
     'synonyms': const <String>[],
     'searchable_keywords': const <String>[],
-    'monetization_type': (category['isPremiumOnly'] as bool? ?? false)
-        ? 'premium_money_value'
-        : 'free',
+    'monetization_type': categoryIsPremium ? 'premium_money_value' : 'free',
     'allow_single_unlock': true,
     'single_unlock_currency': 'EUR',
     'premium_reason': const <String, String>{},
@@ -245,6 +249,21 @@ Map<String, dynamic> _canonicalProcedureToCmsSeedJson({
     _sectionLocalizedBody(sections, 'premium_template'),
     summary,
   ]);
+  final procedureSlug = procedure['id']?.toString() ?? '';
+  final canonicalSubcategoryId = subcategory['id']?.toString() ?? '';
+  final derivedToolType =
+      switch (procedureSlug) {
+        'bonus_finder' => 'bonus_finder',
+        'which_bonus_to_check' => 'bonus_finder',
+        'loan_comparison' => 'loan_comparison',
+        'loan_comparison_checklist' => 'loan_comparison',
+        _ => null,
+      } ??
+      switch (canonicalSubcategoryId) {
+        'bonus_finder' => 'bonus_finder',
+        'compare_loans_safely' => 'loan_comparison',
+        _ => null,
+      };
 
   return <String, dynamic>{
     'slug': procedure['id'],
@@ -295,6 +314,7 @@ Map<String, dynamic> _canonicalProcedureToCmsSeedJson({
       'canonical_subcategory_has_premium_content':
           subcategory['hasPremiumContent'] as bool? ?? false,
       'blocks': sections.map(_canonicalSectionToBlock).toList(),
+      ...?derivedToolType == null ? null : {'tool_type': derivedToolType},
     },
     'blocks': sections.map(_canonicalSectionToBlock).toList(),
   };

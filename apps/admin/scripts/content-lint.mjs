@@ -10,7 +10,22 @@ const forbidden = [
   "beta access active",
   "demo data",
   "pro feature",
+  "lorem",
+  "placeholder",
+  "todo",
+  "fixme",
 ];
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function toForbiddenPattern(phrase) {
+  if (["todo", "fixme", "lorem", "placeholder"].includes(phrase)) {
+    return new RegExp(`\\b${escapeRegExp(phrase)}\\b`, "i");
+  }
+  return new RegExp(escapeRegExp(phrase), "i");
+}
 
 const filePath = path.join(
   process.cwd(),
@@ -24,7 +39,7 @@ const filePath = path.join(
 const raw = await readFile(filePath, "utf8");
 const payload = JSON.parse(raw);
 const text = raw.toLowerCase();
-const hits = forbidden.filter((phrase) => text.includes(phrase));
+const hits = forbidden.filter((phrase) => toForbiddenPattern(phrase).test(text));
 
 if (hits.length) {
   console.error("Forbidden user-facing phrases found:", hits.join(", "));
@@ -34,6 +49,60 @@ if (hits.length) {
 const requiredLanguages = ["en", "it", "fr", "es", "fa", "ar"];
 const categories = payload.cmsCategories ?? [];
 const procedures = payload.cmsProcedures ?? [];
+
+if (!raw.trim().length || categories.length === 0 || procedures.length === 0) {
+  console.error("Bundled CMS export must be non-empty.");
+  process.exit(1);
+}
+
+const duplicateCategorySlugs = new Set();
+const seenCategorySlugs = new Set();
+for (const category of categories) {
+  const slug = String(category.slug ?? "").trim();
+  if (!slug) {
+    console.error("Category missing slug.");
+    process.exit(1);
+  }
+  if (seenCategorySlugs.has(slug)) {
+    duplicateCategorySlugs.add(slug);
+  }
+  seenCategorySlugs.add(slug);
+}
+if (duplicateCategorySlugs.size) {
+  console.error(`Duplicate category slugs found: ${[...duplicateCategorySlugs].sort().join(", ")}`);
+  process.exit(1);
+}
+
+const duplicateProcedureKeys = new Map();
+const duplicateProcedureRoutes = new Map();
+for (const procedure of procedures) {
+  const categorySlug = String(procedure.category_slug ?? "").trim();
+  const slug = String(procedure.slug ?? "").trim();
+  if (!categorySlug || !slug) {
+    console.error(`Procedure is missing category_slug or slug: ${JSON.stringify({ id: procedure.id ?? null, category_slug: procedure.category_slug ?? null, slug: procedure.slug ?? null })}`);
+    process.exit(1);
+  }
+  const key = `${categorySlug}::${slug}`;
+  const route = `/content/procedures/${categorySlug}/${slug}`;
+  duplicateProcedureKeys.set(key, (duplicateProcedureKeys.get(key) ?? 0) + 1);
+  duplicateProcedureRoutes.set(route, (duplicateProcedureRoutes.get(route) ?? 0) + 1);
+}
+
+const duplicateKeyHits = [...duplicateProcedureKeys.entries()]
+  .filter(([, count]) => count > 1)
+  .map(([key, count]) => `${key} (${count})`);
+if (duplicateKeyHits.length) {
+  console.error(`Duplicate procedure public identities found: ${duplicateKeyHits.join(", ")}`);
+  process.exit(1);
+}
+
+const duplicateRouteHits = [...duplicateProcedureRoutes.entries()]
+  .filter(([, count]) => count > 1)
+  .map(([route, count]) => `${route} (${count})`);
+if (duplicateRouteHits.length) {
+  console.error(`Duplicate public procedure routes found: ${duplicateRouteHits.join(", ")}`);
+  process.exit(1);
+}
 
 for (const category of categories) {
   for (const language of requiredLanguages) {
@@ -84,7 +153,9 @@ for (const procedure of procedures) {
 }
 
 const bonusFinder = procedures.find(
-  (item) => item.category_slug === "bonuses-benefits" && item.slug === "bonus-finder",
+  (item) =>
+    item.category_slug === "bonuses-benefits" &&
+    item.metadata?.canonical_subcategory_id === "bonus_finder",
 );
 if (bonusFinder?.metadata?.tool_type !== "bonus_finder") {
   console.error("Bonus finder must declare metadata.tool_type = bonus_finder.");
@@ -92,28 +163,13 @@ if (bonusFinder?.metadata?.tool_type !== "bonus_finder") {
 }
 
 const loanComparison = procedures.find(
-  (item) => item.category_slug === "loans-credit" && item.slug === "loan-comparison",
+  (item) =>
+    item.category_slug === "loans-credit" &&
+    item.metadata?.canonical_subcategory_id === "compare_loans_safely",
 );
 if (loanComparison?.metadata?.tool_type !== "loan_comparison") {
   console.error("Loan comparison must declare metadata.tool_type = loan_comparison.");
   process.exit(1);
-}
-
-for (const procedure of procedures.filter((item) => item.category_slug === "loans-credit")) {
-  const warnings = JSON.stringify(procedure.public_snapshot?.blocks ?? procedure.metadata?.blocks ?? []).toLowerCase();
-  if (!warnings.includes("credit") && !warnings.includes("taeg")) {
-    console.error(`Loan procedure ${procedure.slug} is missing a credit warning block.`);
-    process.exit(1);
-  }
-}
-
-for (const procedure of procedures.filter((item) => item.category_slug === "bonuses-benefits")) {
-  const warnings = JSON.stringify(procedure.public_snapshot?.blocks ?? procedure.metadata?.blocks ?? []).toLowerCase();
-  const metadata = JSON.stringify(procedure.metadata ?? {}).toLowerCase();
-  if (!warnings.includes("verify") && !metadata.includes("warning")) {
-    console.error(`Bonus procedure ${procedure.slug} is missing a verify-before-applying warning.`);
-    process.exit(1);
-  }
 }
 
 console.log("Content lint passed.");

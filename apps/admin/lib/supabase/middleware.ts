@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 
+import { readOptionalPublicSupabaseEnv } from "@/lib/env";
+
 type CookieToSet = {
   name: string;
   value: string;
@@ -9,6 +11,20 @@ type CookieToSet = {
 };
 
 export async function updateSession(request: NextRequest) {
+  const env = readOptionalPublicSupabaseEnv();
+  if (!env.ok) {
+    const response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+    response.headers.set("x-ufficio-admin-env-error", env.error);
+    if (process.env.NODE_ENV !== "production") {
+      console.error(`[admin middleware] ${env.error}`);
+    }
+    return response;
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -16,8 +32,8 @@ export async function updateSession(request: NextRequest) {
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+    env.data.NEXT_PUBLIC_SUPABASE_URL,
+    env.data.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {

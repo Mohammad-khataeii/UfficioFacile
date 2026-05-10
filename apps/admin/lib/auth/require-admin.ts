@@ -1,3 +1,5 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
 
 import { hasPermission, type AdminRole, type Permission } from "@/lib/auth/permissions";

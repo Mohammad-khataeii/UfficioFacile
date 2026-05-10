@@ -140,6 +140,54 @@ void main() {
     );
   }
 
+  if (docsFile.lengthSync() == 0 || adminFile.lengthSync() == 0) {
+    problems.add('Generated CMS export files must not be empty');
+  }
+  if (docsCategories.isEmpty || docsProcedures.isEmpty) {
+    problems.add(
+      'Generated CMS exports must include non-empty cmsCategories and cmsProcedures',
+    );
+  }
+
+  final duplicateProcedureKeys = <String, int>{};
+  final duplicateRoutes = <String, int>{};
+  for (final row in docsProcedures) {
+    final categorySlug = '${row['category_slug']}'.trim();
+    final slug = '${row['slug']}'.trim();
+    if (categorySlug.isEmpty || slug.isEmpty) {
+      problems.add(
+        'Procedure is missing category_slug or slug: ${jsonEncode({'category_slug': row['category_slug'], 'slug': row['slug'], 'id': row['id']})}',
+      );
+      continue;
+    }
+    final key = '$categorySlug::$slug';
+    duplicateProcedureKeys[key] = (duplicateProcedureKeys[key] ?? 0) + 1;
+    final route = '/content/procedures/$categorySlug/$slug';
+    duplicateRoutes[route] = (duplicateRoutes[route] ?? 0) + 1;
+  }
+  final duplicateProcedureEntries =
+      duplicateProcedureKeys.entries
+          .where((entry) => entry.value > 1)
+          .map((entry) => '${entry.key} (${entry.value})')
+          .toList()
+        ..sort();
+  if (duplicateProcedureEntries.isNotEmpty) {
+    problems.add(
+      'Duplicate procedure public identities found: $duplicateProcedureEntries',
+    );
+  }
+  final duplicateRouteEntries =
+      duplicateRoutes.entries
+          .where((entry) => entry.value > 1)
+          .map((entry) => '${entry.key} (${entry.value})')
+          .toList()
+        ..sort();
+  if (duplicateRouteEntries.isNotEmpty) {
+    problems.add(
+      'Duplicate public procedure routes found: $duplicateRouteEntries',
+    );
+  }
+
   const requiredLanguages = ['en', 'it', 'fr', 'es', 'fa', 'ar'];
   for (final row in docsCategories) {
     final title = row['title'];
@@ -180,38 +228,72 @@ void main() {
     procedureBySlug['${row['category_slug']}::${row['slug']}'] = row;
   }
 
-  void expectInteractiveTool(
+  Map? findProcedureByCanonicalSubcategory(
     String categorySlug,
-    String procedureSlug,
+    String canonicalSubcategoryId,
+  ) {
+    for (final row in docsProcedures) {
+      if ('${row['category_slug']}' != categorySlug) continue;
+      final metadata = row['metadata'];
+      if (metadata is Map &&
+          metadata['canonical_subcategory_id'] == canonicalSubcategoryId) {
+        return row;
+      }
+    }
+    return null;
+  }
+
+  void expectInteractiveToolByCanonicalSubcategory(
+    String categorySlug,
+    String canonicalSubcategoryId,
     String toolType,
   ) {
-    final row = procedureBySlug['$categorySlug::$procedureSlug'];
+    final row = findProcedureByCanonicalSubcategory(
+      categorySlug,
+      canonicalSubcategoryId,
+    );
     if (row == null) {
-      problems.add('Missing procedure `$categorySlug::$procedureSlug`');
+      problems.add(
+        'Missing interactive procedure for `$categorySlug::$canonicalSubcategoryId`',
+      );
       return;
     }
     final metadata = row['metadata'];
     if (metadata is! Map || metadata['tool_type'] != toolType) {
       problems.add(
-        'Procedure `$categorySlug::$procedureSlug` must declare tool_type `$toolType`',
+        'Procedure `${row['category_slug']}::${row['slug']}` must declare tool_type `$toolType`',
       );
     }
   }
 
-  expectInteractiveTool('bonuses-benefits', 'bonus-finder', 'bonus_finder');
-  expectInteractiveTool('loans-credit', 'loan-comparison', 'loan_comparison');
+  expectInteractiveToolByCanonicalSubcategory(
+    'bonuses-benefits',
+    'bonus_finder',
+    'bonus_finder',
+  );
+  expectInteractiveToolByCanonicalSubcategory(
+    'loans-credit',
+    'compare_loans_safely',
+    'loan_comparison',
+  );
 
   const forbiddenPublicPhrases = [
+    'to help the user',
+    'the user should',
     'beta access active',
     'demo data',
     'for codex',
     'do not show',
     'internal note',
     'pro feature',
+    'lorem',
+    'placeholder',
+    'todo',
+    'fixme',
   ];
   final docsText = docsFile.readAsStringSync().toLowerCase();
   for (final phrase in forbiddenPublicPhrases) {
-    if (docsText.contains(phrase)) {
+    if (_forbiddenPattern(phrase).hasMatch(docsText)) {
       problems.add(
         'Public bundled export still contains forbidden phrase `$phrase`',
       );
@@ -264,4 +346,11 @@ void main() {
   stdout.writeln(
     'Verified required categories: ${requiredCategories.toList()..sort()}',
   );
+}
+
+RegExp _forbiddenPattern(String phrase) {
+  if (const {'todo', 'fixme', 'lorem', 'placeholder'}.contains(phrase)) {
+    return RegExp('\\b${RegExp.escape(phrase)}\\b', caseSensitive: false);
+  }
+  return RegExp(RegExp.escape(phrase), caseSensitive: false);
 }

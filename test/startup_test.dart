@@ -20,6 +20,7 @@ import 'package:ufficiofacile/features/italy_admin_copilot/domain/onboarding_sta
 
 const _localConfig = UfficcioFacileConfig(
   appName: UfficcioFacileConfig.appNameValue,
+  flavor: UfficioFacileFlavor.development,
   backendMode: AppBackendMode.local,
   supabaseUrl: '',
   supabaseAnonKey: '',
@@ -28,6 +29,7 @@ const _localConfig = UfficcioFacileConfig(
   betaModeEnabled: true,
   paywallEnabled: false,
   analyticsEnabledByDefault: true,
+  allowLocalFallback: true,
 );
 
 void main() {
@@ -51,6 +53,7 @@ void main() {
       expect(result.onboardingState.completed, isFalse);
       expect(result.languageCode, 'en');
       expect(result.usedFallbackLocalMode, isFalse);
+      expect(result.supabaseConfigured, isFalse);
     });
 
     test('StartupService does not require Supabase in local mode', () async {
@@ -152,8 +155,13 @@ void main() {
             isReady: true,
             onboardingCompleted: false,
             backendMode: 'local',
+            flavor: 'development',
             languageCode: 'en',
             usedFallbackLocalMode: false,
+            canFallbackToLocalMode: false,
+            supabaseConfigured: false,
+            supabaseInitialized: false,
+            remoteCatalogAvailable: false,
           ),
           isAuthenticated: false,
         ),
@@ -169,8 +177,13 @@ void main() {
             isReady: true,
             onboardingCompleted: true,
             backendMode: 'local',
+            flavor: 'development',
             languageCode: 'en',
             usedFallbackLocalMode: false,
+            canFallbackToLocalMode: false,
+            supabaseConfigured: false,
+            supabaseInitialized: false,
+            remoteCatalogAvailable: false,
           ),
           isAuthenticated: false,
         ),
@@ -186,8 +199,13 @@ void main() {
             isReady: true,
             onboardingCompleted: false,
             backendMode: 'local',
+            flavor: 'development',
             languageCode: 'en',
             usedFallbackLocalMode: false,
+            canFallbackToLocalMode: false,
+            supabaseConfigured: false,
+            supabaseInitialized: false,
+            remoteCatalogAvailable: false,
           ),
           isAuthenticated: true,
         ),

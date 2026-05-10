@@ -1,8 +1,11 @@
 enum AppBackendMode { local, supabase }
 
+enum UfficioFacileFlavor { development, staging, production }
+
 class UfficcioFacileConfig {
   const UfficcioFacileConfig({
     required this.appName,
+    this.flavor = UfficioFacileFlavor.development,
     required this.backendMode,
     required this.supabaseUrl,
     required this.supabaseAnonKey,
@@ -11,12 +14,14 @@ class UfficcioFacileConfig {
     required this.betaModeEnabled,
     required this.paywallEnabled,
     required this.analyticsEnabledByDefault,
+    this.allowLocalFallback = false,
   });
 
   static const appNameValue = 'UfficioFacile';
 
   static const fromEnv = UfficcioFacileConfig(
     appName: appNameValue,
+    flavor: _flavor,
     backendMode: _backendMode,
     supabaseUrl: _supabaseUrl,
     supabaseAnonKey: _supabaseAnonKey,
@@ -25,9 +30,11 @@ class UfficcioFacileConfig {
     betaModeEnabled: _betaModeEnabled,
     paywallEnabled: _paywallEnabled,
     analyticsEnabledByDefault: _analyticsEnabled,
+    allowLocalFallback: _allowLocalFallback,
   );
 
   final String appName;
+  final UfficioFacileFlavor flavor;
   final AppBackendMode backendMode;
   final String supabaseUrl;
   final String supabaseAnonKey;
@@ -36,6 +43,11 @@ class UfficcioFacileConfig {
   final bool betaModeEnabled;
   final bool paywallEnabled;
   final bool analyticsEnabledByDefault;
+  final bool allowLocalFallback;
+
+  bool get isProduction => flavor == UfficioFacileFlavor.production;
+  bool get isStaging => flavor == UfficioFacileFlavor.staging;
+  bool get isDevelopment => flavor == UfficioFacileFlavor.development;
 
   bool get hasSupabaseCredentials =>
       supabaseUrl.trim().isNotEmpty && supabaseAnonKey.trim().isNotEmpty;
@@ -44,6 +56,19 @@ class UfficcioFacileConfig {
       backendMode == AppBackendMode.supabase && hasSupabaseCredentials;
 
   String get backendLabel => isSupabaseEnabled ? 'supabase' : 'local';
+
+  String get flavorLabel => switch (flavor) {
+    UfficioFacileFlavor.development => 'development',
+    UfficioFacileFlavor.staging => 'staging',
+    UfficioFacileFlavor.production => 'production',
+  };
+
+  bool get mustFailLoudOnMissingSupabase =>
+      backendMode == AppBackendMode.supabase && isProduction;
+
+  bool get canFallbackToLocalMode =>
+      backendMode == AppBackendMode.local ||
+      (!isProduction && allowLocalFallback);
 
   static const _backendModeString = String.fromEnvironment(
     'UFFICCIOFACILE_BACKEND_MODE',
@@ -59,6 +84,16 @@ class UfficcioFacileConfig {
   static const _backendMode = _backendModeString == 'supabase'
       ? AppBackendMode.supabase
       : AppBackendMode.local;
+
+  static const _flavorString = String.fromEnvironment(
+    'UFFICCIOFACILE_FLAVOR',
+    defaultValue: 'development',
+  );
+  static const _flavor = _flavorString == 'production'
+      ? UfficioFacileFlavor.production
+      : _flavorString == 'staging'
+      ? UfficioFacileFlavor.staging
+      : UfficioFacileFlavor.development;
 
   static const _supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
@@ -87,5 +122,9 @@ class UfficcioFacileConfig {
   static const _analyticsEnabled = bool.fromEnvironment(
     'UFFICCIOFACILE_ENABLE_ANALYTICS',
     defaultValue: true,
+  );
+  static const _allowLocalFallback = bool.fromEnvironment(
+    'UFFICCIOFACILE_ALLOW_LOCAL_FALLBACK',
+    defaultValue: false,
   );
 }

@@ -35,6 +35,9 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   bool _initializing = false;
   AppStartupState startupState = const AppStartupState.initial();
 
+  bool get canContinueWithFallbackLocalMode =>
+      _appConfig.canFallbackToLocalMode;
+
   Future<void> initialize() async {
     if (_initializing) return;
     _initializing = true;
@@ -43,11 +46,16 @@ class ItalyAdminCopilotController extends ChangeNotifier {
       isLoading: true,
       isReady: false,
       backendMode: _appConfig.backendLabel,
+      flavor: _appConfig.flavorLabel,
       errorMessage: null,
       debugDetails: null,
       usedFallbackLocalMode:
           _appConfig.backendMode == AppBackendMode.supabase &&
           !_appConfig.hasSupabaseCredentials,
+      canFallbackToLocalMode: _appConfig.canFallbackToLocalMode,
+      supabaseConfigured: _appConfig.hasSupabaseCredentials,
+      supabaseInitialized: _appConfig.isSupabaseEnabled,
+      remoteCatalogAvailable: _appConfig.isSupabaseEnabled,
     );
     notifyListeners();
 
@@ -67,8 +75,13 @@ class ItalyAdminCopilotController extends ChangeNotifier {
         isReady: true,
         onboardingCompleted: onboardingState.completed,
         backendMode: _appConfig.backendLabel,
+        flavor: _appConfig.flavorLabel,
         languageCode: languageCode,
         usedFallbackLocalMode: result.usedFallbackLocalMode,
+        canFallbackToLocalMode: _appConfig.canFallbackToLocalMode,
+        supabaseConfigured: result.supabaseConfigured,
+        supabaseInitialized: result.supabaseInitialized,
+        remoteCatalogAvailable: result.remoteCatalogAvailable,
         errorMessage: result.errorMessage,
         debugDetails: result.debugDetails,
       );
@@ -78,8 +91,13 @@ class ItalyAdminCopilotController extends ChangeNotifier {
         isReady: false,
         onboardingCompleted: false,
         backendMode: _appConfig.backendLabel,
+        flavor: _appConfig.flavorLabel,
         languageCode: 'en',
-        usedFallbackLocalMode: true,
+        usedFallbackLocalMode: false,
+        canFallbackToLocalMode: _appConfig.canFallbackToLocalMode,
+        supabaseConfigured: _appConfig.hasSupabaseCredentials,
+        supabaseInitialized: false,
+        remoteCatalogAvailable: false,
         errorMessage: 'Startup timed out or failed.',
         debugDetails: '$error\n$stackTrace',
       );
@@ -117,14 +135,28 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   Future<void> retryStartup() => initialize();
 
   Future<void> continueWithFallbackLocalMode() async {
+    if (!_appConfig.canFallbackToLocalMode) {
+      startupState = startupState.copyWith(
+        isLoading: false,
+        isReady: false,
+        errorMessage: 'This build cannot continue in local-only mode.',
+      );
+      notifyListeners();
+      return;
+    }
     languageCode = LocalAppLanguageRepository.sanitize(languageCode);
     startupState = AppStartupState(
       isLoading: false,
       isReady: true,
       onboardingCompleted: onboardingState.completed,
       backendMode: 'local',
+      flavor: _appConfig.flavorLabel,
       languageCode: languageCode,
       usedFallbackLocalMode: true,
+      canFallbackToLocalMode: true,
+      supabaseConfigured: _appConfig.hasSupabaseCredentials,
+      supabaseInitialized: false,
+      remoteCatalogAvailable: false,
     );
     initialized = true;
     notifyListeners();

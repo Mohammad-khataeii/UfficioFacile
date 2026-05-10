@@ -69,6 +69,19 @@ class _BootstrapAppState extends State<_BootstrapApp> {
         );
       }
 
+      if (widget.config.mustFailLoudOnMissingSupabase &&
+          !widget.config.hasSupabaseCredentials) {
+        throw StateError(
+          'This production build is missing required Supabase configuration.',
+        );
+      }
+      if (widget.config.mustFailLoudOnMissingSupabase &&
+          !bootstrapResult.initialized) {
+        throw StateError(
+          'This production build could not connect to its configured backend.',
+        );
+      }
+
       if (!mounted) {
         return;
       }
@@ -120,12 +133,14 @@ class _BootstrapAppState extends State<_BootstrapApp> {
                     const Icon(Icons.error_outline, size: 56),
                     const SizedBox(height: 16),
                     const Text(
-                      'UfficioFacile could not initialize local startup services.',
+                      'UfficioFacile could not start safely.',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Please retry. If the problem continues, reset browser or app storage.',
+                      widget.config.mustFailLoudOnMissingSupabase
+                          ? 'This build is not correctly configured for production. Please contact support.'
+                          : 'Please retry. If the problem continues, reset browser or app storage.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
