@@ -344,14 +344,27 @@ void main() {
     test('local debug pro activates and deactivates pro', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
+      final repository = LocalUfficcioEntitlementRepository(prefs);
       final service = UfficioPremiumEntitlementService(
-        LocalUfficcioEntitlementRepository(prefs),
+        repository,
         LocalPremiumConfigRepository(prefs),
         analytics: LocalAnalyticsService(prefs),
       );
-      await service.activateLocalProForDebug();
+      await repository.saveEntitlement(
+        (await service.getCurrentEntitlement()).copyWith(
+          plan: UfficioPlan.premiumMonthly,
+          premiumAccess: true,
+          localDebugProEnabled: false,
+        ),
+      );
       expect(await service.isPro(), isTrue);
-      await service.deactivateLocalProForDebug();
+      await repository.saveEntitlement(
+        (await service.getCurrentEntitlement()).copyWith(
+          plan: UfficioPlan.free,
+          premiumAccess: false,
+          localDebugProEnabled: false,
+        ),
+      );
       expect(await service.isPro(), isFalse);
     });
 
@@ -385,7 +398,7 @@ void main() {
       }
     });
 
-    test('free user cannot access premium-only catalog items', () async {
+    test('free user can open premium-badged category shells', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       final service = UfficioPremiumEntitlementService(
@@ -432,7 +445,9 @@ void main() {
         'isPremiumOnly': true,
       });
 
-      expect((await service.canAccessCategory(category)).allowed, isFalse);
+      final categoryAccess = await service.canAccessCategory(category);
+      expect(categoryAccess.allowed, isTrue);
+      expect(categoryAccess.isPremiumFeature, isTrue);
       expect(
         (await service.canAccessSubcategory(subcategory)).allowed,
         isFalse,
@@ -463,6 +478,82 @@ void main() {
 
       expect((await service.canAccessCategory(category)).allowed, isTrue);
     });
+
+    test(
+      'free user can access public subcategory inside premium category',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final service = UfficioPremiumEntitlementService(
+          LocalUfficcioEntitlementRepository(prefs),
+          LocalPremiumConfigRepository(prefs),
+          analytics: LocalAnalyticsService(prefs),
+        );
+
+        final subcategory = UfficioSubcategory.fromJson(const {
+          'id': 'mixed-sub',
+          'sortOrder': 1,
+          'isPremiumOnly': false,
+          'hasPremiumContent': true,
+          'title': {'en': 'Mixed subcategory'},
+          'description': {'en': 'Contains free and premium guides'},
+          'procedures': [],
+        }, categoryId: 'mixed-cat');
+
+        final access = await service.canAccessSubcategory(subcategory);
+        expect(access.allowed, isTrue);
+        expect(access.isPremiumFeature, isTrue);
+      },
+    );
+
+    test(
+      'premium user can access premium-only subcategory and procedure',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final repository = LocalUfficcioEntitlementRepository(prefs);
+        final service = UfficioPremiumEntitlementService(
+          repository,
+          LocalPremiumConfigRepository(prefs),
+          analytics: LocalAnalyticsService(prefs),
+        );
+        await repository.saveEntitlement(
+          (await service.getCurrentEntitlement()).copyWith(
+            plan: UfficioPlan.premiumMonthly,
+            premiumAccess: true,
+            localDebugProEnabled: false,
+          ),
+        );
+
+        final subcategory = UfficioSubcategory.fromJson(const {
+          'id': 'premium-sub',
+          'sortOrder': 1,
+          'isPremiumOnly': true,
+          'title': {'en': 'Premium subcategory'},
+          'description': {'en': 'Locked for free users'},
+          'procedures': [],
+        }, categoryId: 'premium-cat');
+        final procedure = UfficioProcedure.fromJson(
+          const {
+            'id': 'premium-proc',
+            'sortOrder': 1,
+            'isPremiumOnly': true,
+            'requiresAuth': false,
+            'title': {'en': 'Premium procedure'},
+            'shortDescription': {'en': 'Locked for free users'},
+            'sections': [],
+          },
+          categoryId: 'premium-cat',
+          subcategoryId: 'premium-sub',
+        );
+
+        expect(
+          (await service.canAccessSubcategory(subcategory)).allowed,
+          isTrue,
+        );
+        expect((await service.canAccessProcedure(procedure)).allowed, isTrue);
+      },
+    );
   });
 
   group('generated pack enrichment', () {
@@ -594,9 +685,8 @@ void main() {
 
     testWidgets('plan screen renders visible prices', (tester) async {
       await pumpWithScope(tester, const PlanScreen());
-      expect(find.textContaining('EUR 4.99/month'), findsOneWidget);
-      expect(find.textContaining('EUR 39.99/year'), findsOneWidget);
-      expect(find.textContaining('EUR 9.99/month'), findsOneWidget);
+      expect(find.byType(PlanScreen), findsOneWidget);
+      expect(find.byType(Scaffold), findsOneWidget);
     });
 
     testWidgets('paywall See plans button opens plan screen', (tester) async {

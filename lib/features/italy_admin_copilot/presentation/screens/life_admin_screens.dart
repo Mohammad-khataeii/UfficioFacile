@@ -121,6 +121,33 @@ String _formatCurrencyCents(int cents, [String currency = 'EUR']) {
   return '${currency.toUpperCase()} ${amount.toStringAsFixed(2)}';
 }
 
+String _planProductKeyForPlan(UfficioPlan plan) {
+  switch (plan) {
+    case UfficioPlan.free:
+      return 'free';
+    case UfficioPlan.plusMonthly:
+      return 'plus_monthly';
+    case UfficioPlan.plusYearly:
+      return 'plus_yearly';
+    case UfficioPlan.premiumMonthly:
+      return 'premium_monthly';
+    case UfficioPlan.premiumYearly:
+      return 'premium_yearly';
+    case UfficioPlan.consultancyOneShot:
+      return 'consultancy_one_shot';
+    case UfficioPlan.adminGrant:
+      return 'admin_grant';
+    case UfficioPlan.lifetime:
+      return 'lifetime';
+    case UfficioPlan.trial:
+      return 'trial';
+    case UfficioPlan.consultant:
+      return 'consultant';
+    case UfficioPlan.pro:
+      return 'pro';
+  }
+}
+
 String _planPriceLabel(PlanProduct product) {
   final amount = _formatCurrencyCents(product.amountCents, product.currency);
   switch (product.billingInterval) {
@@ -652,93 +679,130 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Spacer(),
-                  Text(
-                    context.l10n.t('onboarding_demo_title'),
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    context.l10n.t('onboarding_demo_subtitle'),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 24),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final useColumn = constraints.maxWidth < 640;
-                      final cards = <Widget>[
-                        _OnboardingFeatureCard(
-                          title: context.l10n.t('onboarding_card_1_title'),
-                          body: context.l10n.t('onboarding_card_1_body'),
-                          icon: Icons.account_tree_outlined,
+        child: LayoutBuilder(
+          builder: (context, viewportConstraints) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: (viewportConstraints.maxHeight - 48).clamp(
+                        0,
+                        double.infinity,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 24),
+                        Text(
+                          context.l10n.t('onboarding_demo_title'),
+                          style: Theme.of(context).textTheme.displaySmall,
                         ),
-                        _OnboardingFeatureCard(
-                          title: context.l10n.t('onboarding_card_2_title'),
-                          body: context.l10n.t('onboarding_card_2_body'),
-                          icon: Icons.verified_user_outlined,
+                        const SizedBox(height: 12),
+                        Text(
+                          context.l10n.t('onboarding_demo_subtitle'),
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        _OnboardingFeatureCard(
-                          title: context.l10n.t('onboarding_card_3_title'),
-                          body: context.l10n.t('onboarding_card_3_body'),
-                          icon: Icons.workspace_premium_outlined,
-                        ),
-                      ];
-                      if (useColumn) {
-                        return Column(
-                          children: cards
-                              .map(
-                                (item) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: item,
+                        const SizedBox(height: 24),
+                        LayoutBuilder(
+                          builder: (context, contentConstraints) {
+                            final stackCards =
+                                contentConstraints.maxWidth < 640 ||
+                                viewportConstraints.maxHeight < 760;
+                            final cards = <Widget>[
+                              _OnboardingFeatureCard(
+                                title: context.l10n.t(
+                                  'onboarding_card_1_title',
                                 ),
-                              )
-                              .toList(),
-                        );
-                      }
-                      return Row(
-                        children: cards
-                            .map(
-                              (item) => Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 12),
-                                  child: item,
-                                ),
+                                body: context.l10n.t('onboarding_card_1_body'),
+                                icon: Icons.account_tree_outlined,
                               ),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: _submitting ? null : () => _finish(context),
-                        child: Text(context.l10n.t('skip')),
-                      ),
-                      const Spacer(),
-                      FilledButton(
-                        onPressed: _submitting ? null : () => _finish(context),
-                        child: Text(
-                          _submitting
-                              ? context.l10n.t('auth_wait')
-                              : context.l10n.t('next'),
+                              _OnboardingFeatureCard(
+                                title: context.l10n.t(
+                                  'onboarding_card_2_title',
+                                ),
+                                body: context.l10n.t('onboarding_card_2_body'),
+                                icon: Icons.verified_user_outlined,
+                              ),
+                              _OnboardingFeatureCard(
+                                title: context.l10n.t(
+                                  'onboarding_card_3_title',
+                                ),
+                                body: context.l10n.t('onboarding_card_3_body'),
+                                icon: Icons.workspace_premium_outlined,
+                              ),
+                            ];
+                            if (stackCards) {
+                              return Column(
+                                children: [
+                                  for (
+                                    var index = 0;
+                                    index < cards.length;
+                                    index++
+                                  )
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: index == cards.length - 1
+                                            ? 0
+                                            : 12,
+                                      ),
+                                      child: cards[index],
+                                    ),
+                                ],
+                              );
+                            }
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (
+                                  var index = 0;
+                                  index < cards.length;
+                                  index++
+                                ) ...[
+                                  Expanded(child: cards[index]),
+                                  if (index != cards.length - 1)
+                                    const SizedBox(width: 12),
+                                ],
+                              ],
+                            );
+                          },
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 32),
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            TextButton(
+                              onPressed: _submitting
+                                  ? null
+                                  : () => _finish(context),
+                              child: Text(context.l10n.t('skip')),
+                            ),
+                            FilledButton(
+                              onPressed: _submitting
+                                  ? null
+                                  : () => _finish(context),
+                              child: Text(
+                                _submitting
+                                    ? context.l10n.t('auth_wait')
+                                    : context.l10n.t('next'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -4630,151 +4694,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: const Text('Current authenticated email'),
                   subtitle: Text(scope.authController.user!.email),
                 ),
-            TextField(
-              controller: _name,
-              decoration: InputDecoration(
-                labelText: context.l10n.t('profile_full_name'),
+              TextField(
+                controller: _name,
+                decoration: InputDecoration(
+                  labelText: context.l10n.t('profile_full_name'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _cf,
-              decoration: InputDecoration(
-                labelText: context.l10n.t('profile_codice_fiscale'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _cf,
+                decoration: InputDecoration(
+                  labelText: context.l10n.t('profile_codice_fiscale'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _city,
-              items: const [
-                DropdownMenuItem(value: 'Torino', child: Text('Torino')),
-              ],
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() => _city = value);
-              },
-              decoration: InputDecoration(
-                labelText: context.l10n.t('profile_city'),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _city,
+                items: const [
+                  DropdownMenuItem(value: 'Torino', child: Text('Torino')),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() => _city = value);
+                },
+                decoration: InputDecoration(
+                  labelText: context.l10n.t('profile_city'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(labelText: context.l10n.t('email')),
-            ),
-            const SizedBox(height: 24),
-            DropdownButtonFormField<String>(
-              value: currentLanguage,
-              items: const [
-                DropdownMenuItem(value: 'en', child: Text('English')),
-                DropdownMenuItem(value: 'it', child: Text('Italiano')),
-                DropdownMenuItem(value: 'fr', child: Text('Français')),
-                DropdownMenuItem(value: 'es', child: Text('Español')),
-                DropdownMenuItem(value: 'fa', child: Text('فارسی')),
-                DropdownMenuItem(value: 'ar', child: Text('العربية')),
-              ],
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() => _languageCode = value);
-                unawaited(scope.appController.setLanguage(value));
-              },
-              decoration: InputDecoration(
-                labelText: context.l10n.t('profile_language'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(labelText: context.l10n.t('email')),
               ),
-            ),
-            const SizedBox(height: 24),
-            OutlinedButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, AppRoutes.changePassword),
-              child: const Text('Change password'),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(context.l10n.t('profile_backend_mode')),
-              subtitle: Text(
-                scope.config.isSupabaseEnabled
-                    ? context.l10n.t('profile_backend_supabase')
-                    : context.l10n.t('profile_backend_local'),
+              const SizedBox(height: 24),
+              DropdownButtonFormField<String>(
+                initialValue: currentLanguage,
+                items: const [
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                  DropdownMenuItem(value: 'it', child: Text('Italiano')),
+                  DropdownMenuItem(value: 'fr', child: Text('Français')),
+                  DropdownMenuItem(value: 'es', child: Text('Español')),
+                  DropdownMenuItem(value: 'fa', child: Text('فارسی')),
+                  DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() => _languageCode = value);
+                  unawaited(scope.appController.setLanguage(value));
+                },
+                decoration: InputDecoration(
+                  labelText: context.l10n.t('profile_language'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _isSaving
-                  ? null
-                  : () async {
-                      setState(() => _isSaving = true);
-                      try {
-                        await scope.profileController.save(
-                          AdminCopilotProfile(
-                            fullName: _name.text.trim(),
-                            codiceFiscale: _cf.text.trim(),
-                            city: _city,
-                            email: _email.text.trim(),
-                            preferredLanguage: _languageCode,
-                          ),
-                        );
-                        await scope.profileController.load();
-                        await scope.appController.setLanguage(_languageCode);
-                      } catch (_) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                context.l10n.t('profile_save_failed'),
-                              ),
+              const SizedBox(height: 24),
+              OutlinedButton(
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.changePassword),
+                child: const Text('Change password'),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(context.l10n.t('profile_backend_mode')),
+                subtitle: Text(
+                  scope.config.isSupabaseEnabled
+                      ? context.l10n.t('profile_backend_supabase')
+                      : context.l10n.t('profile_backend_local'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _isSaving
+                    ? null
+                    : () async {
+                        setState(() => _isSaving = true);
+                        try {
+                          await scope.profileController.save(
+                            AdminCopilotProfile(
+                              fullName: _name.text.trim(),
+                              codiceFiscale: _cf.text.trim(),
+                              city: _city,
+                              email: _email.text.trim(),
+                              preferredLanguage: _languageCode,
                             ),
                           );
+                          await scope.profileController.load();
+                          await scope.appController.setLanguage(_languageCode);
+                        } catch (_) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  context.l10n.t('profile_save_failed'),
+                                ),
+                              ),
+                            );
+                          }
+                          return;
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isSaving = false);
+                          }
                         }
-                        return;
-                      } finally {
-                        if (mounted) {
-                          setState(() => _isSaving = false);
-                        }
-                      }
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(context.l10n.t('profile_saved')),
-                        ),
-                      );
-                    },
-              child: Text(
-                _isSaving
-                    ? context.l10n.t('profile_saving')
-                    : context.l10n.t('profile_save'),
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(context.l10n.t('profile_saved')),
+                          ),
+                        );
+                      },
+                child: Text(
+                  _isSaving
+                      ? context.l10n.t('profile_saving')
+                      : context.l10n.t('profile_save'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.sync),
-              child: Text(context.l10n.t('profile_sync_settings')),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.privacy),
-              child: Text(context.l10n.t('privacy_title')),
-            ),
-            if (scope.authController.isAuthenticated) ...[
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  await scope.authController.signOut();
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.t('signed_out'))),
-                  );
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    AppRoutes.auth,
-                    (route) => false,
-                  );
-                },
-                icon: const Icon(Icons.logout),
-                label: Text(context.l10n.t('account_log_out')),
+              OutlinedButton(
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.sync),
+                child: Text(context.l10n.t('profile_sync_settings')),
               ),
-            ],
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.privacy),
+                child: Text(context.l10n.t('privacy_title')),
+              ),
+              if (scope.authController.isAuthenticated) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await scope.authController.signOut();
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(context.l10n.t('signed_out'))),
+                    );
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.auth,
+                      (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: Text(context.l10n.t('account_log_out')),
+                ),
+              ],
             ],
           ),
         ),
@@ -7810,10 +7875,11 @@ class PlanScreen extends StatelessWidget {
           final values = snapshot.data!;
           final entitlement = values[0] as dynamic;
           final usage = values[1] as List<UsageSummaryItem>;
-          final plans = (values[2] as List<PlanProduct>)
-              .where(_isPubliclyVisiblePlan)
-              .toList()
-            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+          final plans =
+              (values[2] as List<PlanProduct>)
+                  .where(_isPubliclyVisiblePlan)
+                  .toList()
+                ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -7856,7 +7922,8 @@ class PlanScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        if (entitlement.plan.name == plan.productKey ||
+                        if (_planProductKeyForPlan(entitlement.plan) ==
+                                plan.productKey ||
                             (plan.productKey == 'free' &&
                                 entitlement.plan == UfficioPlan.free))
                           const Padding(
@@ -7878,28 +7945,30 @@ class PlanScreen extends StatelessWidget {
                               )
                             else if (plan.productKey == 'consultancy_one_shot')
                               FilledButton(
-                                onPressed: () => ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.l10n.t('payment_not_active_yet'),
+                                onPressed: () =>
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          context.l10n.t(
+                                            'payment_not_active_yet',
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
                                 child: const Text('Request consultancy'),
                               )
                             else
                               FilledButton(
-                                onPressed: () => ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.l10n.t('payment_not_active_yet'),
+                                onPressed: () =>
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          context.l10n.t(
+                                            'payment_not_active_yet',
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
                                 child: const Text('Choose plan'),
                               ),
                           ],

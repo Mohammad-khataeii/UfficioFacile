@@ -71,7 +71,7 @@ void main() {
     await _pumpWithScope(tester, const ChangePasswordScreen());
     await tester.enterText(find.byType(TextField).at(0), 'password123');
     await tester.enterText(find.byType(TextField).at(1), 'password999');
-    await tester.tap(find.text('Change password'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Change password'));
     await tester.pumpAndSettle();
     expect(find.text('The passwords do not match.'), findsOneWidget);
   });

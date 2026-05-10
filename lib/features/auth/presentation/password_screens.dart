@@ -5,7 +5,8 @@ import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
 
 String buildPasswordResetRedirectUri() {
-  final origin = Uri.base.hasScheme ? Uri.base.origin : '';
+  final scheme = Uri.base.scheme;
+  final origin = scheme == 'http' || scheme == 'https' ? Uri.base.origin : '';
   if (origin.isNotEmpty) {
     return '$origin${AppRoutes.resetPassword}';
   }
@@ -81,7 +82,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         redirectTo:
                                             buildPasswordResetRedirectUri(),
                                       );
-                                  if (!mounted || !ok) return;
+                                  if (!context.mounted || !ok) return;
                                   _emailController.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -214,7 +215,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   final ok = await controller.updatePassword(
                                     newPassword,
                                   );
-                                  if (!mounted || !ok) return;
+                                  if (!context.mounted || !ok) return;
                                   _newPasswordController.clear();
                                   _confirmPasswordController.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -355,7 +356,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   final ok = await controller.updatePassword(
                                     newPassword,
                                   );
-                                  if (!mounted || !ok) return;
+                                  if (!context.mounted || !ok) return;
                                   _newPasswordController.clear();
                                   _confirmPasswordController.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(

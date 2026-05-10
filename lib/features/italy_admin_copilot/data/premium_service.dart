@@ -540,15 +540,12 @@ class UfficioPremiumEntitlementService {
   Future<EntitlementDecision> canAccessCategory(
     UfficioCategory category,
   ) async {
-    if (!category.isPremiumOnly) {
-      return _allowedDecision(
-        reason: category.hasPremiumContent
-            ? 'Free category with some Premium content inside.'
-            : 'Free category.',
-        isPremiumFeature: category.hasPremiumContent,
-      );
-    }
-    return _catalogLockedDecision();
+    return _allowedDecision(
+      reason: category.hasPremiumContent || category.isPremiumOnly
+          ? 'This category contains Premium content.'
+          : 'Free category.',
+      isPremiumFeature: category.hasPremiumContent || category.isPremiumOnly,
+    );
   }
 
   Future<EntitlementDecision> canAccessSubcategory(
@@ -926,11 +923,11 @@ class UfficioPremiumEntitlementService {
         isPremiumFeature: true,
       );
     }
+
     return const EntitlementDecision(
       allowed: false,
       isPremiumFeature: true,
-      reason:
-          'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+      reason: 'This guide is part of UfficioFacile Premium.',
       upgradeTitle: 'Premium feature',
       upgradeMessage:
           'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',

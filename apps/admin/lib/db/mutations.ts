@@ -569,6 +569,7 @@ export async function upsertCmsProcedure(formData: FormData) {
   });
   revalidatePath("/content/procedures");
   revalidatePath(`/content/procedures/${parsed.slug}`);
+  revalidatePath(`/content/procedures/${parsed.categorySlug}/${parsed.slug}`);
 }
 
 export async function updatePublicConfig(

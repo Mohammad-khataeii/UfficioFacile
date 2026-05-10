@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import {
   getAdminCategoryBySlug,
   getAdminProceduresByCategorySlug,
+  getProcedureRoutePath,
 } from "@/lib/content/load-content-tree";
 import { upsertCmsCategory } from "@/lib/db/mutations";
 
@@ -85,16 +86,23 @@ export default async function ContentCategoryDetailPage({
         <div className="mt-4 grid gap-3">
           {procedures.map((procedure) => (
             <div
-              key={procedure.slug}
+              key={getProcedureRoutePath(procedure)}
               className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3"
             >
               <div>
                 <div className="font-medium text-slate-900">
                   {procedure.title?.en || procedure.slug}
                 </div>
-                <div className="text-sm text-slate-500">{procedure.slug}</div>
+                <div className="text-sm text-slate-500">
+                  {procedure.subcategory_slug
+                    ? `${procedure.subcategory_slug} • ${procedure.slug}`
+                    : procedure.slug}
+                </div>
               </div>
-              <Link className="text-sm font-medium text-slate-900" href={`/content/procedures/${procedure.slug}`}>
+              <Link
+                className="text-sm font-medium text-slate-900"
+                href={getProcedureRoutePath(procedure)}
+              >
                 Open
               </Link>
             </div>

@@ -67,8 +67,10 @@ export type AdminCategoryRecord = {
 };
 
 export type AdminProcedureRecord = {
+  id?: string;
   slug: string;
   category_slug: string;
+  subcategory_slug?: string | null;
   title: LocalizedText;
   subtitle?: LocalizedText;
   summary: LocalizedText;
@@ -107,6 +109,117 @@ export type AdminContentTree = {
   procedures: AdminProcedureRecord[];
 };
 
+function getProcedureCategorySlug(procedure: AdminProcedureRecord): string {
+  return String(procedure.category_slug ?? "").trim();
+}
+
+function getProcedureSubcategorySlug(
+  procedure: AdminProcedureRecord,
+): string | null {
+  const value =
+    typeof procedure.subcategory_slug === "string"
+      ? procedure.subcategory_slug.trim()
+      : "";
+  return value.length > 0 ? value : null;
+}
+
+function getProcedureSlug(procedure: AdminProcedureRecord): string {
+  return String(procedure.slug ?? "").trim();
+}
+
+function getProcedureCanonicalKey(procedure: AdminProcedureRecord): string {
+  const slug = getProcedureSlug(procedure);
+  const categorySlug = getProcedureCategorySlug(procedure);
+  const rawId =
+    typeof procedure.id === "string" ? procedure.id.trim() : String(procedure.id ?? "").trim();
+  if (rawId.length > 0) {
+    return `id:${rawId}`;
+  }
+  return `path:${categorySlug}::${slug}`;
+}
+
+function getProcedureRoutePath(procedure: AdminProcedureRecord): string {
+  return `/content/procedures/${getProcedureCategorySlug(procedure)}/${getProcedureSlug(procedure)}`;
+}
+
+function getProcedureRichnessScore(procedure: AdminProcedureRecord): number {
+  return [
+    Object.keys(procedure.title ?? {}).length,
+    Object.keys(procedure.subtitle ?? {}).length,
+    Object.keys(procedure.summary ?? {}).length,
+    Object.keys(procedure.what_is_it ?? {}).length,
+    procedure.why_you_may_need_it.length,
+    procedure.how_to_do_it.length,
+    procedure.required_documents.length,
+    procedure.optional_documents.length,
+    procedure.warnings.length,
+    procedure.common_mistakes.length,
+    procedure.proof_to_keep.length,
+    procedure.faq.length,
+    procedure.official_links.length,
+    procedure.tags?.length ?? 0,
+    procedure.synonyms?.length ?? 0,
+    procedure.searchable_keywords?.length ?? 0,
+  ].reduce((sum, item) => sum + item, 0);
+}
+
+function choosePreferredProcedure(
+  current: AdminProcedureRecord,
+  candidate: AdminProcedureRecord,
+): AdminProcedureRecord {
+  const currentScore = getProcedureRichnessScore(current);
+  const candidateScore = getProcedureRichnessScore(candidate);
+  if (candidateScore != currentScore) {
+    return candidateScore > currentScore ? candidate : current;
+  }
+  if (candidate.source !== current.source) {
+    return candidate.source === "supabase" ? candidate : current;
+  }
+  return candidate.sort_order < current.sort_order ? candidate : current;
+}
+
+function dedupeProcedures(
+  procedures: AdminProcedureRecord[],
+): AdminProcedureRecord[] {
+  const deduped = new Map<string, AdminProcedureRecord>();
+  const duplicates = new Map<string, AdminProcedureRecord[]>();
+
+  for (const procedure of procedures) {
+    const key = getProcedureCanonicalKey(procedure);
+    const existing = deduped.get(key);
+    if (!existing) {
+      deduped.set(key, procedure);
+      continue;
+    }
+    const preferred = choosePreferredProcedure(existing, procedure);
+    const dropped = preferred === existing ? procedure : existing;
+    deduped.set(key, preferred);
+    duplicates.set(key, [...(duplicates.get(key) ?? []), dropped]);
+  }
+
+  if (duplicates.size > 0 && process.env.NODE_ENV !== "production") {
+    for (const [key, droppedRows] of duplicates.entries()) {
+      console.warn(
+        `[content] Deduped procedure ${key}; kept one row and dropped ${droppedRows.length} duplicate(s): ${droppedRows
+          .map(
+            (row) =>
+              `${getProcedureCategorySlug(row)}/${getProcedureSubcategorySlug(row) ?? "no-subcategory"}/${getProcedureSlug(row)}`,
+          )
+          .join(", ")}`,
+      );
+    }
+  }
+
+  return [...deduped.values()].sort((a, b) => {
+    const categoryCompare = getProcedureCategorySlug(a).localeCompare(
+      getProcedureCategorySlug(b),
+    );
+    if (categoryCompare !== 0) return categoryCompare;
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+    return getProcedureSlug(a).localeCompare(getProcedureSlug(b));
+  });
+}
+
 const bundledExportPath = path.join(
   process.cwd(),
   "..",
@@ -131,7 +244,9 @@ async function getProceduresFromSupabase(supabase: any): Promise<AdminProcedureR
     .select("*")
     .order("sort_order", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((row: any) => ({ ...row, source: "supabase" as const }));
+  return dedupeProcedures(
+    (data ?? []).map((row: any) => ({ ...row, source: "supabase" as const })),
+  );
 }
 
 async function getBundledCmsExport(): Promise<BundledExport> {
@@ -259,8 +374,12 @@ function normalizeBundledCmsProcedures(exported: BundledExport): AdminProcedureR
       ? canonicalProcedureRowsFromTree(exported)
       : (exported.cmsProcedures ?? []);
   return sourceRows.map((row: any, index) => ({
+    id: row.id ? String(row.id) : undefined,
     slug: String(row.slug ?? `procedure_${index}`),
     category_slug: String(row.category_slug ?? ""),
+    subcategory_slug: row.subcategory_slug
+      ? String(row.subcategory_slug)
+      : null,
     title: (row.title ?? {}) as LocalizedText,
     subtitle: (row.subtitle ?? {}) as LocalizedText,
     summary: (row.summary ?? {}) as LocalizedText,
@@ -383,7 +502,7 @@ async function getBundledContentTree(): Promise<AdminContentTree> {
     return {
       source: "bundled",
       categories: normalizedCategories,
-      procedures: normalizedProcedures,
+      procedures: dedupeProcedures(normalizedProcedures),
     };
   }
   const bundledCategories = getBundledCategories(exported);
@@ -401,7 +520,7 @@ async function getBundledContentTree(): Promise<AdminContentTree> {
   return {
     source: "bundled",
     categories,
-    procedures,
+    procedures: dedupeProcedures(procedures),
   };
 }
 
@@ -577,5 +696,29 @@ export async function getAdminProcedureBySlug(
   options?: { bootstrapIfEmpty?: boolean },
 ) {
   const tree = await getAdminContentTree(supabase, options);
-  return tree.procedures.find((procedure) => procedure.slug === slug) ?? null;
+  const matches = tree.procedures.filter((procedure) => procedure.slug === slug);
+  return matches.length === 1 ? matches[0] : matches[0] ?? null;
 }
+
+export async function getAdminProcedureByCategoryAndSlug(
+  supabase: any,
+  categorySlug: string,
+  slug: string,
+  options?: { bootstrapIfEmpty?: boolean },
+) {
+  const tree = await getAdminContentTree(supabase, options);
+  return (
+    tree.procedures.find(
+      (procedure) =>
+        getProcedureCategorySlug(procedure) === categorySlug &&
+        getProcedureSlug(procedure) === slug,
+    ) ?? null
+  );
+}
+
+export {
+  getProcedureCategorySlug,
+  getProcedureRoutePath,
+  getProcedureSlug,
+  getProcedureSubcategorySlug,
+};

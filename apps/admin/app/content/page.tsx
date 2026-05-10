@@ -3,7 +3,10 @@ import Link from "next/link";
 import { AdminShell } from "@/components/admin-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { getAdminContentTree } from "@/lib/content/load-content-tree";
+import {
+  getAdminContentTree,
+  getProcedureRoutePath,
+} from "@/lib/content/load-content-tree";
 
 export default async function ContentPage() {
   const admin = await requireAdmin("content.read");
@@ -23,7 +26,7 @@ export default async function ContentPage() {
             </div>
           </div>
           <div className="mt-5 space-y-3">
-            {tree.categories.map((category: any) => (
+            {tree.categories.map((category) => (
               <Link
                 key={category.slug}
                 href={`/content/categories/${category.slug}`}
@@ -47,10 +50,10 @@ export default async function ContentPage() {
             <Link href="/content/procedures" className="text-sm">Open manager</Link>
           </div>
           <div className="mt-5 space-y-3">
-            {tree.procedures.map((procedure: any) => (
+            {tree.procedures.map((procedure) => (
               <Link
-                key={`${procedure.category_slug ?? procedure.categorySlug ?? "unknown"}-${procedure.slug}-${procedure.id ?? ""}`}
-                href={`/content/procedures/${procedure.slug}`}
+                key={getProcedureRoutePath(procedure)}
+                href={getProcedureRoutePath(procedure)}
                 className="flex items-center justify-between rounded-2xl border border-slate-100 p-4 hover:bg-slate-50"
               >
                 <div>
@@ -58,7 +61,10 @@ export default async function ContentPage() {
                     {procedure.title?.en || procedure.slug}
                   </p>
                   <p className="text-sm text-slate-500">
-                    {procedure.category_slug} • {procedure.slug}
+                    {procedure.category_slug}
+                    {procedure.subcategory_slug ? ` / ${procedure.subcategory_slug}` : ""}
+                    {" • "}
+                    {procedure.slug}
                   </p>
                 </div>
                 <StatusBadge value={procedure.status} />

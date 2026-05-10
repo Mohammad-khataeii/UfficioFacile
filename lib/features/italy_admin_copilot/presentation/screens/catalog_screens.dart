@@ -161,22 +161,40 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
                               ],
                             ),
                             onTap: () async {
+                              final featureLabel = ufficioLocalizedValue(
+                                subcategory.title,
+                                context.l10n.languageCode,
+                                fallback: subcategory.id,
+                              );
+
                               final subcategoryAccess =
                                   await AppScope.of(context).entitlementService
                                       .canAccessSubcategory(subcategory);
+
                               if (!context.mounted) return;
-                              if (!subcategoryAccess.allowed) {
+
+                              final mustLock =
+                                  subcategory.isPremiumOnly &&
+                                  !subcategoryAccess.allowed;
+
+                              if (mustLock) {
                                 await showPremiumPaywallSheet(
                                   context,
-                                  decision: subcategoryAccess,
-                                  featureLabel: ufficioLocalizedValue(
-                                    subcategory.title,
-                                    context.l10n.languageCode,
-                                    fallback: subcategory.id,
+                                  decision: const EntitlementDecision(
+                                    allowed: false,
+                                    isPremiumFeature: true,
+                                    reason:
+                                        'This guide is part of UfficioFacile Premium.',
+                                    upgradeTitle: 'Premium feature',
+                                    upgradeMessage:
+                                        'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+                                    recommendedPlan: UfficioPlan.premiumMonthly,
                                   ),
+                                  featureLabel: featureLabel,
                                 );
                                 return;
                               }
+
                               Navigator.pushNamed(
                                 context,
                                 AppRoutes.subcategory,
@@ -345,20 +363,38 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                   ],
                                 ),
                                 onTap: () async {
+                                  final featureLabel = ufficioLocalizedValue(
+                                    procedure.title,
+                                    context.l10n.languageCode,
+                                    fallback: procedure.id,
+                                  );
+
                                   final procedureAccess =
                                       await AppScope.of(context)
                                           .entitlementService
                                           .canAccessProcedure(procedure);
+
                                   if (!context.mounted) return;
-                                  if (!procedureAccess.allowed) {
+
+                                  final mustLock =
+                                      procedure.isPremiumOnly &&
+                                      !procedureAccess.allowed;
+
+                                  if (mustLock) {
                                     await showPremiumPaywallSheet(
                                       context,
-                                      decision: procedureAccess,
-                                      featureLabel: ufficioLocalizedValue(
-                                        procedure.title,
-                                        context.l10n.languageCode,
-                                        fallback: procedure.id,
+                                      decision: const EntitlementDecision(
+                                        allowed: false,
+                                        isPremiumFeature: true,
+                                        reason:
+                                            'This guide is part of UfficioFacile Premium.',
+                                        upgradeTitle: 'Premium feature',
+                                        upgradeMessage:
+                                            'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+                                        recommendedPlan:
+                                            UfficioPlan.premiumMonthly,
                                       ),
+                                      featureLabel: featureLabel,
                                       teaser: ufficioLocalizedValue(
                                         procedure.premiumTeaser.isNotEmpty
                                             ? procedure.premiumTeaser
@@ -368,6 +404,7 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                     );
                                     return;
                                   }
+
                                   Navigator.pushNamed(
                                     context,
                                     AppRoutes.catalogProcedure,
@@ -460,6 +497,8 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                   return const _CatalogLoadingState();
                 }
                 final access = accessSnapshot.data!;
+                final showLockedPremiumShell =
+                    procedure.isPremiumOnly && !access.allowed;
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -477,7 +516,7 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                           ? context.l10n.t('premium_plan_label')
                           : null,
                     ),
-                    if (procedure.isPremiumOnly && !access.allowed) ...[
+                    if (showLockedPremiumShell) ...[
                       const SizedBox(height: 12),
                       Card(
                         child: Padding(
@@ -560,55 +599,67 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 12),
-                    ...procedure.sections.map(
-                      (section) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: section.isPremiumOnly && !access.allowed
-                            ? _CatalogLockedSectionCard(
-                                title: ufficioLocalizedValue(
-                                  section.title,
-                                  context.l10n.languageCode,
-                                  fallback: section.key,
-                                ),
-                              )
-                            : _CatalogSectionCard(
-                                title: ufficioLocalizedValue(
-                                  section.title,
-                                  context.l10n.languageCode,
-                                  fallback: section.key,
-                                ),
-                                child: _CatalogSectionBody(section: section),
-                              ),
-                      ),
-                    ),
-                    if (procedure.officialLinks.isNotEmpty) ...[
+                    if (!showLockedPremiumShell) ...[
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _CatalogSectionCard(
-                          title: context.l10n.t('official_links'),
-                          child: Column(
-                            children: procedure.officialLinks
-                                .where((item) => item.url.trim().isNotEmpty)
-                                .map(
-                                  (item) => ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    title: Text(
-                                      ufficioLocalizedValue(
-                                        item.label,
-                                        context.l10n.languageCode,
-                                        fallback: item.url,
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Column(
+                          children: [
+                            ...procedure.sections.map(
+                              (section) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: section.isPremiumOnly && !access.allowed
+                                    ? _CatalogLockedSectionCard(
+                                        title: ufficioLocalizedValue(
+                                          section.title,
+                                          context.l10n.languageCode,
+                                          fallback: section.key,
+                                        ),
+                                      )
+                                    : _CatalogSectionCard(
+                                        title: ufficioLocalizedValue(
+                                          section.title,
+                                          context.l10n.languageCode,
+                                          fallback: section.key,
+                                        ),
+                                        child: _CatalogSectionBody(
+                                          section: section,
+                                        ),
                                       ),
-                                    ),
-                                    subtitle: Text(item.url),
+                              ),
+                            ),
+                            if (procedure.officialLinks.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _CatalogSectionCard(
+                                  title: context.l10n.t('official_links'),
+                                  child: Column(
+                                    children: procedure.officialLinks
+                                        .where(
+                                          (item) => item.url.trim().isNotEmpty,
+                                        )
+                                        .map(
+                                          (item) => ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text(
+                                              ufficioLocalizedValue(
+                                                item.label,
+                                                context.l10n.languageCode,
+                                                fallback: item.url,
+                                              ),
+                                            ),
+                                            subtitle: Text(item.url),
+                                          ),
+                                        )
+                                        .toList(),
                                   ),
-                                )
-                                .toList(),
-                          ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
-                    if (procedure.contacts.isNotEmpty) ...[
+                    if (!showLockedPremiumShell &&
+                        procedure.contacts.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: _CatalogSectionCard(
