@@ -11,6 +11,7 @@ import 'life_admin_screens.dart'
         GlobalProblemRequestCard,
         PremiumBadge,
         PrivateConsultancyCard,
+        startCheckoutFlow,
         showPremiumPaywallSheet;
 
 class CatalogCategoryRouteArgs {
@@ -545,18 +546,12 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                 runSpacing: 8,
                                 children: [
                                   OutlinedButton(
-                                    onPressed: () =>
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              context.l10n.t(
-                                                'payment_not_active_yet',
-                                              ),
-                                            ),
-                                          ),
-                                        ),
+                                    onPressed: () => startCheckoutFlow(
+                                      context,
+                                      productKey: 'subcategory_unlock',
+                                      categorySlug: procedure.categoryId,
+                                      procedureSlug: procedure.id,
+                                    ),
                                     child: Text(
                                       context.l10n.t('unlock_this_guide_only'),
                                     ),
@@ -785,11 +780,12 @@ class _CatalogLockedState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const genericLockedReason = 'This guide is part of UfficioFacile Premium.';
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _CatalogHeaderCard(
-          title: 'Premium feature',
+          title: context.l10n.t('premium_feature'),
           description: description,
           badge: context.l10n.t('premium_plan_label'),
         ),
@@ -800,21 +796,22 @@ class _CatalogLockedState extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
-                ),
+                Text(context.l10n.t('paywall_premium_body')),
                 const SizedBox(height: 12),
                 FilledButton(
                   onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
-                  child: const Text('See plans'),
+                  child: Text(context.l10n.t('paywall_open_plan')),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Not now'),
+                  child: Text(context.l10n.t('paywall_maybe_later')),
                 ),
-                const SizedBox(height: 8),
-                Text(decision.reason),
+                if (decision.reason.trim().isNotEmpty &&
+                    decision.reason.trim() != genericLockedReason) ...[
+                  const SizedBox(height: 8),
+                  Text(decision.reason),
+                ],
               ],
             ),
           ),
@@ -836,11 +833,11 @@ class _CatalogLockedSectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('This section is part of UfficioFacile Premium.'),
+          Text(context.l10n.t('paywall_section_locked_body')),
           const SizedBox(height: 12),
           FilledButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
-            child: const Text('See plans'),
+            child: Text(context.l10n.t('paywall_open_plan')),
           ),
         ],
       ),

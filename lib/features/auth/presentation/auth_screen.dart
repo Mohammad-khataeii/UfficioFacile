@@ -93,7 +93,9 @@ class _AuthScreenState extends State<AuthScreen>
                                   AppRoutes.forgotPassword,
                                 );
                               },
-                              secondaryLabel: 'Forgot password?',
+                              secondaryLabel: context.l10n.t(
+                                'forgot_password_title',
+                              ),
                             ),
                             _AuthFormCard(
                               title: context.l10n.t('auth_create_account'),
@@ -124,9 +126,11 @@ class _AuthScreenState extends State<AuthScreen>
                                     return;
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
-                                        'Check your email to confirm your account.',
+                                        context.l10n.t(
+                                          'auth_confirm_email_message',
+                                        ),
                                       ),
                                     ),
                                   );

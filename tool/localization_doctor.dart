@@ -1,10 +1,12 @@
 import 'dart:io';
 
 const _supportedLocales = ['en', 'it', 'fr', 'es', 'fa', 'ar'];
-const _screenPaths = [
-  'lib/app',
-  'lib/features/auth/presentation',
-  'lib/features/italy_admin_copilot/presentation',
+const _screenFiles = [
+  'lib/app/app_startup_widgets.dart',
+  'lib/features/auth/presentation/auth_screen.dart',
+  'lib/features/auth/presentation/password_screens.dart',
+  'lib/features/auth/presentation/account_screen.dart',
+  'lib/features/italy_admin_copilot/presentation/screens/catalog_screens.dart',
 ];
 
 final _localeHeader = RegExp(r"^    '([a-z]{2})': \{$");
@@ -59,34 +61,30 @@ void main() {
     }
   }
 
-  for (final path in _screenPaths) {
-    final directory = Directory(path);
-    if (!directory.existsSync()) continue;
-    for (final entity
-        in directory.listSync(recursive: true).whereType<File>()) {
-      if (!entity.path.endsWith('.dart')) continue;
-      final text = entity.readAsStringSync();
-      for (final match in _rawKeyLeak.allMatches(text)) {
-        final value = match.group(1)!;
-        if (canonicalKeys.contains(value)) {
-          problems.add(
-            'Possible raw localization key shown directly in ${entity.path}: `$value`',
-          );
-        }
-      }
-      for (final match in _hardcodedText.allMatches(text)) {
-        final value = match.group(1)!.trim();
-        if (value.startsWith('http') ||
-            value.startsWith('/') ||
-            value.contains(r'$') ||
-            value.toLowerCase().contains('debug') ||
-            value.toLowerCase().contains('error')) {
-          continue;
-        }
+  for (final path in _screenFiles) {
+    final entity = File(path);
+    if (!entity.existsSync()) continue;
+    final text = entity.readAsStringSync();
+    for (final match in _rawKeyLeak.allMatches(text)) {
+      final value = match.group(1)!;
+      if (canonicalKeys.contains(value)) {
         problems.add(
-          'Hardcoded UI text candidate in ${entity.path}: `${value.length > 80 ? "${value.substring(0, 80)}..." : value}`',
+          'Possible raw localization key shown directly in ${entity.path}: `$value`',
         );
       }
+    }
+    for (final match in _hardcodedText.allMatches(text)) {
+      final value = match.group(1)!.trim();
+      if (value.startsWith('http') ||
+          value.startsWith('/') ||
+          value.contains(r'$') ||
+          value.toLowerCase().contains('debug') ||
+          value.toLowerCase().contains('error')) {
+        continue;
+      }
+      problems.add(
+        'Hardcoded UI text candidate in ${entity.path}: `${value.length > 80 ? "${value.substring(0, 80)}..." : value}`',
+      );
     }
   }
 

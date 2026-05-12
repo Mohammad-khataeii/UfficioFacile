@@ -37,7 +37,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       builder: (context, _) {
         final controller = scope.authController;
         return Scaffold(
-          appBar: AppBar(title: const Text('Forgot password?')),
+          appBar: AppBar(title: Text(context.l10n.t('forgot_password_title'))),
           body: SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -50,9 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Enter your email and we will send a reset link if the account exists.',
-                        ),
+                        Text(context.l10n.t('forgot_password_intro')),
                         const SizedBox(height: 16),
                         TextField(
                           controller: _emailController,
@@ -84,10 +82,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                       );
                                   if (!context.mounted || !ok) return;
                                   _emailController.clear();
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).hideCurrentSnackBar();
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
-                                        'If an account exists for this email, we sent a reset link.',
+                                        context.l10n.t(
+                                          'reset_password_sent_generic',
+                                        ),
                                       ),
                                     ),
                                   );
@@ -95,7 +98,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           child: Text(
                             controller.isLoading
                                 ? context.l10n.t('auth_wait')
-                                : 'Send reset link',
+                                : context.l10n.t('reset_password_send_link'),
                           ),
                         ),
                       ],
@@ -138,7 +141,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       builder: (context, _) {
         final controller = scope.authController;
         return Scaffold(
-          appBar: AppBar(title: const Text('Reset password')),
+          appBar: AppBar(title: Text(context.l10n.t('reset_password_title'))),
           body: SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -151,7 +154,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Choose a new password for your account.'),
+                        Text(context.l10n.t('reset_password_intro')),
                         const SizedBox(height: 16),
                         TextField(
                           controller: _newPasswordController,
@@ -164,8 +167,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         TextField(
                           controller: _confirmPasswordController,
                           obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirm new password',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.t('confirm_new_password'),
                           ),
                         ),
                         if (_validationMessage != null) ...[
@@ -199,15 +202,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       .trim();
                                   if (newPassword.length < 8) {
                                     setState(
-                                      () => _validationMessage =
-                                          'Choose a password with at least 8 characters.',
+                                      () => _validationMessage = context.l10n.t(
+                                        'password_min_length',
+                                      ),
                                     );
                                     return;
                                   }
                                   if (newPassword != confirm) {
                                     setState(
-                                      () => _validationMessage =
-                                          'The passwords do not match.',
+                                      () => _validationMessage = context.l10n.t(
+                                        'passwords_do_not_match',
+                                      ),
                                     );
                                     return;
                                   }
@@ -219,9 +224,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   _newPasswordController.clear();
                                   _confirmPasswordController.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
-                                        'Password updated successfully.',
+                                        context.l10n.t(
+                                          'password_updated_success',
+                                        ),
                                       ),
                                     ),
                                   );
@@ -236,7 +243,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           child: Text(
                             controller.isLoading
                                 ? context.l10n.t('auth_wait')
-                                : 'Update password',
+                                : context.l10n.t('update_password'),
                           ),
                         ),
                       ],
@@ -279,7 +286,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       builder: (context, _) {
         final controller = scope.authController;
         return Scaffold(
-          appBar: AppBar(title: const Text('Change password')),
+          appBar: AppBar(title: Text(context.l10n.t('change_password_title'))),
           body: SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -292,7 +299,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Update the password for this account.'),
+                        Text(context.l10n.t('change_password_intro')),
                         const SizedBox(height: 16),
                         TextField(
                           controller: _newPasswordController,
@@ -305,8 +312,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         TextField(
                           controller: _confirmPasswordController,
                           obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirm new password',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.t('confirm_new_password'),
                           ),
                         ),
                         if (_validationMessage != null) ...[
@@ -340,15 +347,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       .trim();
                                   if (newPassword.length < 8) {
                                     setState(
-                                      () => _validationMessage =
-                                          'Choose a password with at least 8 characters.',
+                                      () => _validationMessage = context.l10n.t(
+                                        'password_min_length',
+                                      ),
                                     );
                                     return;
                                   }
                                   if (newPassword != confirm) {
                                     setState(
-                                      () => _validationMessage =
-                                          'The passwords do not match.',
+                                      () => _validationMessage = context.l10n.t(
+                                        'passwords_do_not_match',
+                                      ),
                                     );
                                     return;
                                   }
@@ -360,9 +369,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   _newPasswordController.clear();
                                   _confirmPasswordController.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
-                                        'Password updated successfully.',
+                                        context.l10n.t(
+                                          'password_updated_success',
+                                        ),
                                       ),
                                     ),
                                   );
@@ -371,7 +382,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           child: Text(
                             controller.isLoading
                                 ? context.l10n.t('auth_wait')
-                                : 'Change password',
+                                : context.l10n.t('change_password_title'),
                           ),
                         ),
                       ],

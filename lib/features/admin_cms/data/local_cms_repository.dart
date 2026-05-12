@@ -25,10 +25,46 @@ class LocalCmsRepository implements CmsRepository {
 
   @override
   Future<List<CmsContentBlock>> listBlocks(String procedureSlug) async {
+    final procedures = await _loadBundledProcedures();
+    final matchingProcedures = procedures
+        .where((item) => item['slug'] == procedureSlug)
+        .toList();
+    if (matchingProcedures.length == 1) {
+      final categorySlug =
+          matchingProcedures.first['category_slug']?.toString() ?? '';
+      if (categorySlug.isNotEmpty) {
+        return listBlocksByProcedure(categorySlug, procedureSlug);
+      }
+    }
+
+    final bundle = await loadCanonicalBundle();
+    final explicitBlocks =
+        (bundle['cmsContentBlocks'] as List<dynamic>? ?? const [])
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .where((item) => item['procedure_slug'] == procedureSlug)
+            .toList();
+    if (explicitBlocks.isNotEmpty) {
+      return _safeBlocks(
+        explicitBlocks,
+        categorySlug: explicitBlocks.first['category_slug']?.toString() ?? '',
+        procedureSlug: procedureSlug,
+      );
+    }
+
+    return const <CmsContentBlock>[];
+  }
+
+  @override
+  Future<List<CmsContentBlock>> listBlocksByProcedure(
+    String categorySlug,
+    String procedureSlug,
+  ) async {
     final bundle = await loadCanonicalBundle();
     final canonicalCategories = _loadCanonicalCategoriesTree(bundle);
 
     for (final category in canonicalCategories) {
+      if (category['slug']?.toString() != categorySlug) continue;
       final procedures = (category['procedures'] as List<dynamic>? ?? const [])
           .whereType<Map>()
           .map((item) => Map<String, dynamic>.from(item));
@@ -38,7 +74,11 @@ class LocalCmsRepository implements CmsRepository {
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
             .toList();
-        return _safeBlocks(blocks, procedureSlug);
+        return _safeBlocks(
+          blocks,
+          categorySlug: categorySlug,
+          procedureSlug: procedureSlug,
+        );
       }
     }
 
@@ -46,15 +86,25 @@ class LocalCmsRepository implements CmsRepository {
         (bundle['cmsContentBlocks'] as List<dynamic>? ?? const [])
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
-            .where((item) => item['procedure_slug'] == procedureSlug)
+            .where(
+              (item) =>
+                  item['category_slug'] == categorySlug &&
+                  item['procedure_slug'] == procedureSlug,
+            )
             .toList();
     if (explicitBlocks.isNotEmpty) {
-      return _safeBlocks(explicitBlocks, procedureSlug);
+      return _safeBlocks(
+        explicitBlocks,
+        categorySlug: categorySlug,
+        procedureSlug: procedureSlug,
+      );
     }
 
     final procedures = await _loadBundledProcedures();
     final procedure = procedures.firstWhere(
-      (item) => item['slug'] == procedureSlug,
+      (item) =>
+          item['slug'] == procedureSlug &&
+          item['category_slug'] == categorySlug,
       orElse: () => const <String, dynamic>{},
     );
     final snapshot = Map<String, dynamic>.from(
@@ -70,7 +120,11 @@ class LocalCmsRepository implements CmsRepository {
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
             .toList();
-    return _safeBlocks(blocks, procedureSlug);
+    return _safeBlocks(
+      blocks,
+      categorySlug: categorySlug,
+      procedureSlug: procedureSlug,
+    );
   }
 
   @override
@@ -278,15 +332,17 @@ class LocalCmsRepository implements CmsRepository {
   }
 
   List<CmsContentBlock> _safeBlocks(
-    List<Map<String, dynamic>> rows,
-    String procedureSlug,
-  ) {
+    List<Map<String, dynamic>> rows, {
+    required String categorySlug,
+    required String procedureSlug,
+  }) {
     final result = <CmsContentBlock>[];
     for (final entry in rows.asMap().entries) {
       try {
         result.add(
           CmsContentBlock.fromJson({
             'id': rows[entry.key]['id'] ?? '${procedureSlug}_${entry.key}',
+            'category_slug': rows[entry.key]['category_slug'] ?? categorySlug,
             'procedure_slug':
                 rows[entry.key]['procedure_slug'] ?? procedureSlug,
             ...rows[entry.key],

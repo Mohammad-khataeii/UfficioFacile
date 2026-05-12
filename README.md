@@ -59,9 +59,17 @@ For the admin app:
 ```bash
 cd apps/admin
 npm install
+npm audit
 npm run build
 npm run lint
 npm run content:lint
+```
+
+Supabase verification in a linked environment:
+
+```bash
+supabase migration list
+supabase db push --dry-run
 ```
 
 ## Production Flutter Build
@@ -84,6 +92,8 @@ Production notes:
 - Do not enable `UFFICCIOFACILE_ALLOW_LOCAL_FALLBACK` for production builds.
 
 See `docs/deployment_production.md` for the full deployment checklist.
+See `docs/production_readiness_audit.md` for the current audit status.
+See `docs/supabase_security_audit.md` for the current RLS/security summary.
 
 If the Next.js dev cache is corrupted and `.next/routes-manifest.json` is
 missing:

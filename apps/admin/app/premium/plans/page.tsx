@@ -60,6 +60,7 @@ export default async function PremiumPlansPage() {
               <input name="amountCents" defaultValue="0" />
               <input name="currency" defaultValue="EUR" />
             </div>
+            <input name="stripePriceId" placeholder="stripe price id" />
             <div className="grid gap-3 sm:grid-cols-2">
               <input name="sortOrder" defaultValue="0" />
               <label className="flex items-center gap-3"><input name="isActive" type="checkbox" defaultChecked className="h-4 w-4" /><span>Active</span></label>
@@ -70,6 +71,7 @@ export default async function PremiumPlansPage() {
             <textarea name="descriptionIt" placeholder="Description IT" rows={3} />
             <textarea name="featuresJson" rows={5} defaultValue={"{}"} />
             <textarea name="limitsJson" rows={5} defaultValue={"{}"} />
+            <textarea name="providerMetadataJson" rows={4} defaultValue={"{}"} />
             <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
               Save plan
             </button>

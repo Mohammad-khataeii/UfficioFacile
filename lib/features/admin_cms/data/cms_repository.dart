@@ -4,6 +4,10 @@ abstract class CmsRepository {
   Future<List<CmsCategory>> listCategories();
   Future<List<CmsProcedure>> listProcedures({String? categorySlug});
   Future<List<CmsContentBlock>> listBlocks(String procedureSlug);
+  Future<List<CmsContentBlock>> listBlocksByProcedure(
+    String categorySlug,
+    String procedureSlug,
+  );
   Future<void> saveCategory(Map<String, dynamic> values);
   Future<void> saveProcedure(Map<String, dynamic> values);
   Future<void> saveBlock(Map<String, dynamic> values);

@@ -1,91 +1,135 @@
 # Production Readiness Audit
 
-Last updated: 2026-05-10
+Last updated: 2026-05-12
 
-## Architecture Summary
+## Architecture summary
 
-- Flutter client runtime lives under `lib/` with startup/config in `lib/app`, product flows in `lib/features/italy_admin_copilot`, and local persistence via `SharedPreferences`.
-- Next.js admin lives under `apps/admin` and reads CMS/auth/premium data from Supabase.
-- Supabase schema and policies live in `supabase/migrations`.
-- Bundled CMS content source of truth lives in `lib/features/italy_admin_copilot/content/categories` and `lib/features/italy_admin_copilot/content/category_registry.dart`.
-- Generated CMS exports are written to:
+- Flutter client runtime: `lib/`
+- Startup/config/bootstrap: `lib/app`
+- Premium/catalog/product flows: `lib/features/italy_admin_copilot`
+- Flutter CMS repository layer: `lib/features/admin_cms`
+- Next.js admin: `apps/admin`
+- Supabase migrations: `supabase/migrations`
+- Supabase Edge Functions: `supabase/functions`
+- Bundled CMS source: `lib/features/italy_admin_copilot/content/categories`
+- Generated CMS exports:
   - `docs/generated/cms_bundled_content_export.json`
   - `apps/admin/data/cms_bundled_content_export.json`
-- Canonical Flutter bundled catalog is `assets/catalog/ufficio_catalog.v1.json`.
+- Canonical bundled catalog: `assets/catalog/ufficio_catalog.v1.json`
 
-## Audit Findings
+## What was fixed in this pass
 
-### Flutter startup/config/auth/catalog/premium risks
+### Flutter startup/config/auth/catalog/premium
 
-- Startup previously allowed `supabase` backend builds to degrade into local-only mode when credentials were missing.
-- Production bootstrap previously kept offering local fallback UI even for broken Supabase builds.
-- Startup diagnostics were too sparse to quickly separate bad config from transient runtime failure.
-- Localization fallback logic is sane (`selected -> en -> it -> first available -> fallback`), but there was no dedicated doctor script for missing locale keys or likely raw-key leaks.
-- Premium flow still needs a deeper server-authority audit: `MergedUfficcioEntitlementRepository` merges remote state into local cache, but broader enforcement, webhook idempotency, and admin visibility were not fully reworked in this pass.
+- Premium entitlement resolution now treats server state as authoritative in Supabase mode.
+- Expired, revoked, and cancelled premium states now resolve to non-premium access.
+- Local debug premium is blocked outside development and blocked whenever Supabase is active.
+- Premium usage counters now persist through server-backed RPC when Supabase is active.
+- Premium category/subcategory/procedure navigation now checks access before navigation and the destination screens still check again.
+- Search and direct route helpers now go through the same access gate used by the rest of the app.
+- The plan screen now resolves exactly one current plan from the entitlement state instead of inferring from local products.
+- The current plan card now shows a disabled current-plan button instead of an active purchase button.
+- Startup/auth/paywall strings were localized on the release-critical surfaces and `tool/localization_doctor.dart` now passes.
+- `HybridCatalogRepository.searchCatalog()` now merges remote and bundled search results instead of searching bundled data only.
 
-### Admin auth/RBAC/content risks
+### Admin auth/RBAC/content
 
-- Procedure identity previously preferred database `id` over `category_slug + slug`, which could preserve duplicate public routes and duplicate React keys.
-- Legacy slug-only route lookup (`/content/procedures/[slug]`) previously redirected to the first match, even when ambiguous.
-- Admin Supabase middleware and browser/server factories previously accepted empty env vars and silently created bad clients.
-- Service-role boundaries were implicit rather than clearly marked with `server-only`.
-- RBAC definitions exist in `apps/admin/lib/auth/permissions.ts`; this pass audited them, but did not comprehensively re-check every page action beyond the content and env paths touched here.
+- Admin CMS block lookup is now category-aware instead of relying on `procedure_slug` alone.
+- Admin procedure reads now use `(category_slug, slug)` for canonical content-block detail loading.
+- Premium plan-product writes now require `premium.manage`.
+- Admin premium plan editing now supports `stripe_price_id` and provider metadata.
+- Admin premium user detail now exposes source, period start/end, Stripe customer/subscription/price fields.
 
-### Supabase/RLS/migration risks
+### Supabase/RLS/migrations
 
-- CMS procedure public identity was not enforced at the database level by `category_slug + slug`.
-- Existing schema still carries a global `slug` uniqueness assumption through `ufficio_cms_content_blocks.procedure_slug`; that prevents a safe drop of legacy slug-only uniqueness without a broader block-schema migration.
-- This pass added a migration to archive duplicate active public identities and add a partial unique index on active `(category_slug, slug)` rows.
-- A full table-by-table RLS re-audit is still deferred and should land in a dedicated follow-up.
+- Added a non-partial unique constraint for `public.ufficio_cms_procedures(category_slug, slug)` so Supabase upserts using `onConflict: "category_slug,slug"` have a matching database uniqueness target.
+- Added `category_slug` to `public.ufficio_cms_content_blocks`, backfilled it, added category-aware foreign key/indexes, and updated public/authenticated read policies.
+- Added hardened premium schema fields and indexes for:
+  - `public.ufficio_user_entitlements`
+  - `public.ufficio_premium_events`
+  - `public.ufficio_plan_products`
+  - `public.ufficio_user_content_unlocks`
+  - `public.ufficio_usage_counters`
+- Added `public.increment_ufficio_usage_counter(...)` as a security-definer RPC for server-backed usage updates.
+- Added `supabase/config.toml` with `verify_jwt = false` for Stripe webhooks.
 
-### Content pipeline risks
+### Stripe / server-backed premium
 
-- Generated exports existed and were non-empty at audit time:
-  - `docs/generated/cms_bundled_content_export.json`: 8,047,321 bytes
-  - `apps/admin/data/cms_bundled_content_export.json`: 8,047,321 bytes
-  - `assets/catalog/ufficio_catalog.v1.json`: 830,684 bytes
-- `tool/content_doctor.dart` and `apps/admin/scripts/content-lint.mjs` already checked translations and forbidden phrases, but were missing stronger duplicate-route/public-identity checks.
-- This pass strengthened both tools with duplicate category, duplicate procedure identity, duplicate route, missing slug, and empty export checks.
+- `supabase/functions/create-checkout-session/index.ts` now validates the authenticated user, validates `product_key` against active `ufficio_plan_products`, supports category/procedure metadata for single unlocks, and creates Stripe Checkout sessions server-side.
+- `supabase/functions/stripe-webhook/index.ts` now verifies Stripe signatures from the raw request body, handles subscription and one-shot payment events, records idempotent `stripe_event_id` entries, updates entitlements/unlocks, and logs payment events.
+- Flutter purchase actions now call the checkout-session function instead of relying on local-only state.
 
-## Commands Run
+## Current risks and deferred issues
+
+### Flutter startup/config/auth/catalog/premium
+
+- Live Stripe/Supabase flow was not end-to-end exercised against a real deployed project in this environment.
+- The premium implementation is now server-backed in code and schema, but live webhook deployment and secret wiring are still manual.
+
+### Admin auth/RBAC/content
+
+- Procedure identity is now category-aware in the DB and app code, but legacy slug-only compatibility routes still exist for old links by design.
+
+### Supabase/RLS/migration
+
+- Supabase CLI verification could not be completed in this environment because the `supabase` CLI binary is not installed here.
+- Migrations were not dry-run against a linked project in this environment, so remote-apply verification remains manual.
+- The repo still contains legacy `ufficcio_*` table/helper names alongside newer `ufficio_*` names. This remains compatibility debt, not a completed rename.
+
+### Naming / route compatibility debt
+
+- `/ufficcio/privacy` and related `Ufficcio` names still exist as compatibility routes/keys.
+- No destructive rename was attempted for persisted keys, old routes, or legacy table names.
+
+## Generated asset status
+
+- `docs/generated/cms_bundled_content_export.json` exists and is non-empty.
+- `apps/admin/data/cms_bundled_content_export.json` exists and is non-empty.
+- `assets/catalog/ufficio_catalog.v1.json` remains the canonical committed catalog asset.
+
+## Commands run
 
 From repo root:
 
 - `git status --short`
-- `find . -maxdepth 3 -type f | sort`
-- `rg -n "Ufficcio|ufficcio|/ufficcio|getProcedureCanonicalKey|getProcedureRoutePath|getAdminProcedureBySlug|procedure\.slug|category_slug|subcategory_slug|Math\.random|Date\.now|key=\{|SUPABASE_SERVICE_ROLE_KEY|NEXT_PUBLIC_SUPABASE|UFFICCIOFACILE_BACKEND_MODE|UFFICIOFACILE_ENABLE_PAYWALL|UFFICIOFACILE_ENABLE_BETA_MODE|allowLocalDebugPro|localDebugPro|beta access active|demo data|do not show|internal note|for codex|to help the user|the user should" .`
-- `sed -n ...` on the inspected admin, Flutter, migration, and tooling files used during this audit
-- `wc -c docs/generated/cms_bundled_content_export.json apps/admin/data/cms_bundled_content_export.json assets/catalog/ufficio_catalog.v1.json`
-- `dart format lib test tool`
-
-Verification results:
-
-- `flutter analyze`
-  Result: passed, no issues found.
-- `flutter test`
-  Result: passed, `All tests passed!`
+- `find . -maxdepth 4 -type f | sort`
+- `sed -n ...` on audit target files and migrations
+- `rg -n ...` across premium, CMS, routing, env, localization, and typo debt paths
+- `/usr/local/share/flutter/bin/dart format lib test tool`
+- `/usr/local/share/flutter/bin/flutter pub get`
+- `/usr/local/share/flutter/bin/flutter analyze`
+  - Result: passed
+- `/usr/local/share/flutter/bin/flutter test`
+  - Result: passed
 - `/usr/local/share/flutter/bin/dart run tool/export_cms_seed.dart`
-  Result: passed, rewrote both generated CMS export files.
+  - Result: passed
 - `/usr/local/share/flutter/bin/dart run tool/content_doctor.dart`
-  Result: passed after export/check updates.
+  - Result: passed
 - `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart`
-  Result: failed. Current app still has substantial missing locale keys and hardcoded UI text across startup/auth/life-admin screens.
-- `cd apps/admin && npm install`
-  Result: passed; repo already up to date, `2 moderate severity vulnerabilities` reported by npm audit.
-- `cd apps/admin && rm -rf .next`
-  Result: passed.
-- `cd apps/admin && npm run lint`
-  Result: passed.
-- `cd apps/admin && npm run content:lint`
-  Result: passed after aligning lint rules with canonical export structure.
-- `cd apps/admin && npm run build`
-  Result: passed.
+  - Result: passed
 - `supabase migration list`
-  Result: failed because `SUPABASE_ACCESS_TOKEN` was not configured locally.
+  - Result: failed, `supabase: command not found`
 - `supabase db push --dry-run`
-  Result: failed because `SUPABASE_ACCESS_TOKEN` was not configured locally.
+  - Result: failed, `supabase: command not found`
 
-## Manual SQL Check For Procedure Duplicates
+From `apps/admin`:
+
+- `npm install`
+  - Result: passed, `2 moderate severity vulnerabilities`
+- `npm audit`
+  - Result: failed in this environment, `getaddrinfo ENOTFOUND registry.npmjs.org`
+- `rm -rf .next`
+  - Result: passed
+- `npm run lint`
+  - Result: passed
+- `npm run content:lint`
+  - Result: passed
+- `npm run build`
+  - Result: passed
+
+## Manual SQL checks
+
+Duplicate procedure identity:
 
 ```sql
 select category_slug, slug, count(*)
@@ -95,34 +139,69 @@ having count(*) > 1
 order by count desc, category_slug, slug;
 ```
 
-## Files Changed By This Task
+Current entitlement snapshot:
 
-- `apps/admin/app/content/procedures/[slug]/page.tsx`
-- `apps/admin/app/content/procedures/[categorySlug]/[procedureSlug]/page.tsx`
-- `apps/admin/lib/content/load-content-tree.ts`
+```sql
+select user_id, plan, status, premium_access, current_period_end, revoked_at
+from public.ufficio_user_entitlements
+order by updated_at desc nulls last
+limit 50;
+```
+
+Duplicate Stripe events:
+
+```sql
+select stripe_event_id, count(*)
+from public.ufficio_premium_events
+where stripe_event_id is not null
+group by stripe_event_id
+having count(*) > 1;
+```
+
+Unlock collisions:
+
+```sql
+select user_id, category_slug, procedure_slug, count(*)
+from public.ufficio_user_content_unlocks
+group by user_id, category_slug, procedure_slug
+having count(*) > 1
+order by count(*) desc;
+```
+
+## Files changed by this task
+
+- `apps/admin/app/premium/plans/page.tsx`
+- `apps/admin/app/premium/users/[id]/page.tsx`
+- `apps/admin/data/cms_bundled_content_export.json`
 - `apps/admin/lib/db/mutations.ts`
-- `apps/admin/lib/env.ts`
-- `apps/admin/lib/supabase/server.ts`
-- `apps/admin/lib/supabase/middleware.ts`
-- `apps/admin/lib/supabase/client.ts`
-- `apps/admin/lib/auth/require-admin.ts`
 - `apps/admin/lib/db/queries.ts`
-- `apps/admin/scripts/content-lint.mjs`
+- `docs/generated/cms_bundled_content_export.json`
 - `docs/production_readiness_audit.md`
-- `lib/app/app_config.dart`
-- `lib/app/app_startup.dart`
+- `lib/app/app.dart`
+- `lib/app/app_localizations.dart`
 - `lib/app/app_startup_widgets.dart`
-- `lib/main.dart`
-- `lib/features/italy_admin_copilot/application/italy_admin_copilot_controller.dart`
-- `supabase/migrations/20260510120000_harden_cms_procedure_identity.sql`
-- `test/startup_test.dart`
-- `tool/content_doctor.dart`
+- `lib/features/admin_cms/data/cms_repository.dart`
+- `lib/features/admin_cms/data/local_cms_repository.dart`
+- `lib/features/admin_cms/data/supabase_cms_repository.dart`
+- `lib/features/admin_cms/domain/cms_models.dart`
+- `lib/features/auth/presentation/account_screen.dart`
+- `lib/features/auth/presentation/auth_screen.dart`
+- `lib/features/auth/presentation/password_screens.dart`
+- `lib/features/italy_admin_copilot/data/cms_content_repository.dart`
+- `lib/features/italy_admin_copilot/data/hybrid_catalog_repository.dart`
+- `lib/features/italy_admin_copilot/data/premium_service.dart`
+- `lib/features/italy_admin_copilot/data/ufficcio_supabase_readiness.dart`
+- `lib/features/italy_admin_copilot/data/ufficio_catalog_repository.dart`
+- `lib/features/italy_admin_copilot/domain/premium_config.dart`
+- `lib/features/italy_admin_copilot/domain/ufficcio_entitlement.dart`
+- `lib/features/italy_admin_copilot/presentation/screens/catalog_screens.dart`
+- `lib/features/italy_admin_copilot/presentation/screens/life_admin_screens.dart`
+- `pubspec.lock`
+- `pubspec.yaml`
+- `supabase/config.toml`
+- `supabase/functions/create-checkout-session/index.ts`
+- `supabase/functions/stripe-webhook/index.ts`
+- `supabase/migrations/20260512103000_fix_cms_category_aware_blocks_and_upsert.sql`
+- `supabase/migrations/20260512113000_harden_premium_server_truth.sql`
+- `test/service_intelligence_premium_test.dart`
 - `tool/localization_doctor.dart`
-
-## Deferred Issues
-
-- Full premium/Stripe/server-backed entitlement hardening is not complete in this pass.
-- Flutter search/runtime unification across bundled and Supabase CMS content is not complete in this pass.
-- The `Ufficcio`/`Ufficio` typo debt audit was started via search, but a compatibility migration/redirect sweep is still incomplete.
-- Full Supabase RLS audit docs (`docs/supabase_security_audit.md`) are still pending.
-- `ufficio_cms_content_blocks` still references `procedure_slug` alone, so a deeper schema migration is required before removing any legacy global slug assumptions entirely.

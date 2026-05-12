@@ -88,18 +88,37 @@ class UfficcioEntitlement {
   final bool localDebugProEnabled;
   int get freePacksUsed => generatedPacksUsedThisMonth;
 
-  bool get isProLike =>
-      premiumAccess ||
-      localDebugProEnabled ||
-      plan == UfficioPlan.plusMonthly ||
-      plan == UfficioPlan.plusYearly ||
-      plan == UfficioPlan.pro ||
-      plan == UfficioPlan.consultant ||
-      plan == UfficioPlan.premiumMonthly ||
-      plan == UfficioPlan.premiumYearly ||
-      plan == UfficioPlan.adminGrant ||
-      plan == UfficioPlan.lifetime ||
-      plan == UfficioPlan.trial;
+  bool get isExpiredByDate =>
+      currentPeriodEnd != null && currentPeriodEnd!.isBefore(DateTime.now());
+
+  bool get isRevoked =>
+      revokedAt != null || status == EntitlementStatus.revoked;
+
+  bool get isCancelled =>
+      status == EntitlementStatus.cancelled && !premiumAccess;
+
+  bool get hasActivePremiumEntitlement {
+    if (isRevoked || isExpiredByDate) return false;
+    if (status == EntitlementStatus.expired ||
+        status == EntitlementStatus.cancelled ||
+        status == EntitlementStatus.pastDue) {
+      return false;
+    }
+    return premiumAccess &&
+        <UfficioPlan>{
+          UfficioPlan.plusMonthly,
+          UfficioPlan.plusYearly,
+          UfficioPlan.pro,
+          UfficioPlan.consultant,
+          UfficioPlan.premiumMonthly,
+          UfficioPlan.premiumYearly,
+          UfficioPlan.adminGrant,
+          UfficioPlan.lifetime,
+          UfficioPlan.trial,
+        }.contains(plan);
+  }
+
+  bool get isProLike => localDebugProEnabled || hasActivePremiumEntitlement;
 
   UfficcioEntitlement copyWith({
     String? id,

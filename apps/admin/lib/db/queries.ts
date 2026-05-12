@@ -475,11 +475,25 @@ export async function getCmsCategory(supabase: any, slug: string) {
   return data;
 }
 
-export async function getCmsProcedure(supabase: any, slug: string) {
+export async function getCmsProcedure(
+  supabase: any,
+  categorySlug: string,
+  slug: string,
+) {
   const [procedure, blocks, links, contacts, documents, sources, revisions, drafts] =
     await Promise.all([
-      supabase.from("ufficio_cms_procedures").select("*").eq("slug", slug).maybeSingle(),
-      supabase.from("ufficio_cms_content_blocks").select("*").eq("procedure_slug", slug).order("sort_order"),
+      supabase
+        .from("ufficio_cms_procedures")
+        .select("*")
+        .eq("category_slug", categorySlug)
+        .eq("slug", slug)
+        .maybeSingle(),
+      supabase
+        .from("ufficio_cms_content_blocks")
+        .select("*")
+        .eq("category_slug", categorySlug)
+        .eq("procedure_slug", slug)
+        .order("sort_order"),
       supabase.from("ufficio_cms_links").select("*").eq("procedure_slug", slug).order("sort_order"),
       supabase.from("ufficio_cms_contacts").select("*").eq("procedure_slug", slug).order("sort_order"),
       supabase.from("ufficio_cms_documents").select("*").eq("procedure_slug", slug).order("sort_order"),

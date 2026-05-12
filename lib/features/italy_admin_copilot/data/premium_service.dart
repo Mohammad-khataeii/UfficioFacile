@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../app/app_config.dart';
 import '../../../app/supabase_bootstrap.dart';
 import '../../admin_cms/domain/cms_models.dart';
 import '../domain/premium_config.dart';
@@ -321,6 +322,10 @@ class UfficioPremiumEntitlementService {
   final UfficcioEntitlementRepository _repository;
   final LocalPremiumConfigRepository _configRepository;
   final LocalAnalyticsService analytics;
+  static const _runtimeConfig = UfficcioFacileConfig.fromEnv;
+
+  bool get _canUseLocalBypassConfig =>
+      _runtimeConfig.isDevelopment && SupabaseBootstrap.client == null;
 
   Future<PremiumConfig> getConfig() => _configRepository.getConfig();
 
@@ -328,7 +333,7 @@ class UfficioPremiumEntitlementService {
     final config = await getConfig();
     final entitlement = await _repository.getEntitlement();
     final allowLocalDebugPro =
-        config.allowLocalDebugPro && SupabaseBootstrap.client == null;
+        config.allowLocalDebugPro && _canUseLocalBypassConfig;
     final resetLocalDebug =
         entitlement.localDebugProEnabled && !allowLocalDebugPro;
     final normalized = await resetMonthlyUsageIfNeeded(
@@ -390,6 +395,42 @@ class UfficioPremiumEntitlementService {
       return remote;
     }
     return cached;
+  }
+
+  Future<String?> createCheckoutUrl({
+    required String productKey,
+    String? categorySlug,
+    String? procedureSlug,
+  }) async {
+    final client = SupabaseBootstrap.client;
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) {
+      return null;
+    }
+    try {
+      final response = await client.functions.invoke(
+        'create-checkout-session',
+        body: <String, dynamic>{
+          'product_key': productKey,
+          if (categorySlug != null && categorySlug.isNotEmpty)
+            'category_slug': categorySlug,
+          if (procedureSlug != null && procedureSlug.isNotEmpty)
+            'procedure_slug': procedureSlug,
+        },
+      );
+      final data = response.data;
+      if (data is Map &&
+          data['url'] is String &&
+          (data['url'] as String).isNotEmpty) {
+        return data['url'] as String;
+      }
+      if (data is Map && data['checkout_url'] is String) {
+        return data['checkout_url'] as String;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<bool> isPro() async => (await getCurrentEntitlement()).isProLike;
@@ -481,7 +522,7 @@ class UfficioPremiumEntitlementService {
     UfficioProcedure procedure, {
     bool adminPreview = false,
   }) async {
-    if (!procedure.isPremiumOnly && !procedure.hasPremiumContent) {
+    if (!procedure.isPremiumOnly) {
       return const ContentAccessResult(
         allowed: true,
         reason: ContentAccessReason.freeContent,
@@ -540,6 +581,9 @@ class UfficioPremiumEntitlementService {
   Future<EntitlementDecision> canAccessCategory(
     UfficioCategory category,
   ) async {
+    if (category.isPremiumOnly) {
+      return _catalogLockedDecision();
+    }
     return _allowedDecision(
       reason: category.hasPremiumContent || category.isPremiumOnly
           ? 'This category contains Premium content.'
@@ -598,14 +642,14 @@ class UfficioPremiumEntitlementService {
         isPremiumFeature: true,
       );
     }
-    if (config.betaModeEnabled) {
+    if (_canUseLocalBypassConfig && config.betaModeEnabled) {
       return _allowedDecision(
         reason: 'Beta access active',
         isPremiumFeature: true,
         blockedByBeta: true,
       );
     }
-    if (!config.paywallEnabled) {
+    if (_canUseLocalBypassConfig && !config.paywallEnabled) {
       return _allowedDecision(
         reason: 'Paywall disabled',
         isPremiumFeature: true,
@@ -627,14 +671,14 @@ class UfficioPremiumEntitlementService {
     if (entitlement.isProLike) {
       return _allowedDecision(reason: 'Paid generation enabled');
     }
-    if (config.betaModeEnabled) {
+    if (_canUseLocalBypassConfig && config.betaModeEnabled) {
       return _allowedDecision(
         reason: 'Beta access active',
         blockedByBeta: true,
         isPremiumFeature: true,
       );
     }
-    if (!config.paywallEnabled) {
+    if (_canUseLocalBypassConfig && !config.paywallEnabled) {
       return _allowedDecision(reason: 'Paywall disabled');
     }
     final used = entitlement.generatedPacksUsedThisMonth;
@@ -689,14 +733,14 @@ class UfficioPremiumEntitlementService {
         isPremiumFeature: true,
       );
     }
-    if (config.betaModeEnabled) {
+    if (_canUseLocalBypassConfig && config.betaModeEnabled) {
       return _allowedDecision(
         reason: 'Available during beta',
         isPremiumFeature: true,
         blockedByBeta: true,
       );
     }
-    if (!config.paywallEnabled) {
+    if (_canUseLocalBypassConfig && !config.paywallEnabled) {
       return _allowedDecision(
         reason: 'Paywall disabled',
         isPremiumFeature: true,
@@ -708,6 +752,27 @@ class UfficioPremiumEntitlementService {
     );
   }
 
+  Future<UfficcioEntitlement> _persistUsageUpdate({
+    required UfficcioEntitlement updated,
+    required String counterKey,
+  }) async {
+    final client = SupabaseBootstrap.client;
+    final user = client?.auth.currentUser;
+    if (client != null && user != null) {
+      try {
+        await client.rpc(
+          'increment_ufficio_usage_counter',
+          params: <String, dynamic>{
+            'counter_key': counterKey,
+            'delta_amount': 1,
+          },
+        );
+        return getCurrentEntitlement();
+      } catch (_) {}
+    }
+    return _repository.saveEntitlement(updated);
+  }
+
   Future<UfficcioEntitlement> recordPackGenerated([String? procedureId]) async {
     final entitlement = await getCurrentEntitlement();
     final updated = entitlement.copyWith(
@@ -715,97 +780,109 @@ class UfficioPremiumEntitlementService {
       updatedAt: DateTime.now(),
     );
     await analytics.trackPackGenerated(procedureId ?? 'pack');
-    return _repository.saveEntitlement(updated);
+    return _persistUsageUpdate(
+      updated: updated,
+      counterKey: 'generated_packs_used',
+    );
   }
 
   Future<UfficcioEntitlement> recordUtilityComparison() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         utilityComparisonsUsedThisMonth:
             entitlement.utilityComparisonsUsedThisMonth + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'utility_comparisons_used',
     );
   }
 
   Future<UfficcioEntitlement> recordBillAnalysis() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         billAnalysesUsedThisMonth: entitlement.billAnalysesUsedThisMonth + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'bill_analyses_used',
     );
   }
 
   Future<UfficcioEntitlement> recordSavedRequest() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         savedRequestsCount: entitlement.savedRequestsCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'saved_requests_used',
     );
   }
 
   Future<UfficcioEntitlement> recordReminderCreated() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         remindersCount: entitlement.remindersCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'reminders_used',
     );
   }
 
   Future<UfficcioEntitlement> recordDocumentAdded() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         documentsCount: entitlement.documentsCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'documents_used',
     );
   }
 
   Future<UfficcioEntitlement> recordContactAdded() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         contactsCount: entitlement.contactsCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'contacts_used',
     );
   }
 
   Future<UfficcioEntitlement> recordCostItemAdded() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         costItemsCount: entitlement.costItemsCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'cost_items_used',
     );
   }
 
   Future<UfficcioEntitlement> recordHouseholdMemberAdded() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         householdMembersCount: entitlement.householdMembersCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'household_members_used',
     );
   }
 
   Future<UfficcioEntitlement> recordProofCaseCreated() async {
     final entitlement = await getCurrentEntitlement();
-    return _repository.saveEntitlement(
-      entitlement.copyWith(
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
         proofCasesCount: entitlement.proofCasesCount + 1,
         updatedAt: DateTime.now(),
       ),
+      counterKey: 'proof_cases_used',
     );
   }
 
@@ -886,7 +963,7 @@ class UfficioPremiumEntitlementService {
   }
 
   Future<UfficcioEntitlement> activateLocalProForDebug() async {
-    if (SupabaseBootstrap.client != null) {
+    if (!_canUseLocalBypassConfig) {
       return getCurrentEntitlement();
     }
     final entitlement = await getCurrentEntitlement();
@@ -1023,14 +1100,14 @@ class UfficioPremiumEntitlementService {
         isPremiumFeature: true,
       );
     }
-    if (config.betaModeEnabled) {
+    if (_canUseLocalBypassConfig && config.betaModeEnabled) {
       return _allowedDecision(
         reason: 'Available during beta',
         isPremiumFeature: true,
         blockedByBeta: true,
       );
     }
-    if (!config.paywallEnabled) {
+    if (_canUseLocalBypassConfig && !config.paywallEnabled) {
       return _allowedDecision(reason: 'Paywall disabled');
     }
 
@@ -1084,8 +1161,7 @@ class UfficioPremiumEntitlementService {
 
   Future<List<PlanProduct>> _loadRemotePlanProducts() async {
     final client = SupabaseBootstrap.client;
-    final user = client?.auth.currentUser;
-    if (client == null || user == null) {
+    if (client == null) {
       return const [];
     }
     try {

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'app_localizations.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 
 class StartupLoadingScreen extends StatefulWidget {
@@ -48,18 +49,18 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                const Text('Starting UfficioFacile...'),
+                Text(context.l10n.t('startup_loading')),
                 const SizedBox(height: 8),
                 Text('Backend mode: ${state.backendMode}'),
                 Text('Flavor: ${state.flavor}'),
                 if (state.usedFallbackLocalMode) ...[
                   const SizedBox(height: 8),
-                  const Text('Continuing in local mode.'),
+                  Text(context.l10n.t('startup_continuing_local')),
                 ],
                 if (kDebugMode) ...[
                   const SizedBox(height: 16),
                   ExpansionTile(
-                    title: const Text('Startup diagnostics'),
+                    title: Text(context.l10n.t('startup_diagnostics')),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(12),
@@ -80,7 +81,9 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
                     ElevatedButton(
                       onPressed:
                           widget.controller.continueWithFallbackLocalMode,
-                      child: const Text('Continue in local mode'),
+                      child: Text(
+                        context.l10n.t('startup_continue_local_mode'),
+                      ),
                     ),
                   const SizedBox(height: 8),
                   OutlinedButton(
@@ -90,7 +93,7 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
                   const SizedBox(height: 8),
                   OutlinedButton(
                     onPressed: widget.controller.resetStartupData,
-                    child: const Text('Reset startup data'),
+                    child: Text(context.l10n.t('startup_reset_data')),
                   ),
                 ],
               ],
@@ -121,19 +124,19 @@ class StartupErrorScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.error_outline, size: 56),
                 const SizedBox(height: 16),
-                const Text(
-                  'UfficioFacile could not finish startup.',
+                Text(
+                  context.l10n.t('startup_error_title'),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  state.errorMessage ?? 'Unknown startup error.',
+                  state.errorMessage ?? context.l10n.t('startup_unknown_error'),
                   textAlign: TextAlign.center,
                 ),
                 if (kDebugMode && state.debugDetails != null) ...[
                   const SizedBox(height: 16),
                   ExpansionTile(
-                    title: const Text('Startup diagnostics'),
+                    title: Text(context.l10n.t('startup_diagnostics')),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(12),
@@ -159,13 +162,13 @@ class StartupErrorScreen extends StatelessWidget {
                 if (canFallback) ...[
                   OutlinedButton(
                     onPressed: controller.continueWithFallbackLocalMode,
-                    child: const Text('Continue local-only'),
+                    child: Text(context.l10n.t('startup_continue_local_only')),
                   ),
                   const SizedBox(height: 8),
                 ],
                 OutlinedButton(
                   onPressed: controller.resetStartupData,
-                  child: const Text('Reset startup data'),
+                  child: Text(context.l10n.t('startup_reset_data')),
                 ),
               ],
             ),

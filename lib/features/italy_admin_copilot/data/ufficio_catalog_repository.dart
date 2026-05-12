@@ -80,7 +80,7 @@ class UfficioCatalogRepository {
         return bundledProcedure;
       }
       final blocks = await _cmsRepository
-          .listBlocks(procedureId)
+          .listBlocksByProcedure(categoryId, procedureId)
           .timeout(_remoteTimeout);
       return _mergeProcedure(
         bundledProcedure,

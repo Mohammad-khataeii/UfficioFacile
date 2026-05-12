@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +25,7 @@ import 'package:ufficiofacile/features/italy_admin_copilot/data/utilities_electr
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/premium_config.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/service_intelligence.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/ufficio_catalog.dart';
+import 'package:ufficiofacile/features/italy_admin_copilot/domain/ufficcio_entitlement.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/presentation/screens/life_admin_screens.dart';
 
 const _localConfig = UfficcioFacileConfig(
@@ -398,7 +401,7 @@ void main() {
       }
     });
 
-    test('free user can open premium-badged category shells', () async {
+    test('free user cannot open premium-only category shells', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       final service = UfficioPremiumEntitlementService(
@@ -446,7 +449,7 @@ void main() {
       });
 
       final categoryAccess = await service.canAccessCategory(category);
-      expect(categoryAccess.allowed, isTrue);
+      expect(categoryAccess.allowed, isFalse);
       expect(categoryAccess.isPremiumFeature, isTrue);
       expect(
         (await service.canAccessSubcategory(subcategory)).allowed,
@@ -454,6 +457,80 @@ void main() {
       );
       expect((await service.canAccessProcedure(procedure)).allowed, isFalse);
       expect((await service.canAccessSection(section)).allowed, isFalse);
+    });
+
+    test('revoked premium user is blocked from premium procedure', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final repository = LocalUfficcioEntitlementRepository(prefs);
+      final service = UfficioPremiumEntitlementService(
+        repository,
+        LocalPremiumConfigRepository(prefs),
+        analytics: LocalAnalyticsService(prefs),
+      );
+      await repository.saveEntitlement(
+        (await service.getCurrentEntitlement()).copyWith(
+          plan: UfficioPlan.premiumMonthly,
+          status: EntitlementStatus.revoked,
+          premiumAccess: false,
+          revokedAt: DateTime.now(),
+        ),
+      );
+
+      final procedure = UfficioProcedure.fromJson(
+        const {
+          'id': 'premium-proc',
+          'sortOrder': 1,
+          'isPremiumOnly': true,
+          'requiresAuth': false,
+          'title': {'en': 'Premium procedure'},
+          'shortDescription': {'en': 'Locked'},
+          'sections': [],
+        },
+        categoryId: 'premium-cat',
+        subcategoryId: 'premium-sub',
+      );
+
+      expect((await service.canAccessProcedure(procedure)).allowed, isFalse);
+    });
+
+    test('expired premium user falls back to free access rules', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final repository = LocalUfficcioEntitlementRepository(prefs);
+      final service = UfficioPremiumEntitlementService(
+        repository,
+        LocalPremiumConfigRepository(prefs),
+        analytics: LocalAnalyticsService(prefs),
+      );
+      await repository.saveEntitlement(
+        (await service.getCurrentEntitlement()).copyWith(
+          plan: UfficioPlan.premiumYearly,
+          status: EntitlementStatus.expired,
+          premiumAccess: false,
+          currentPeriodEnd: DateTime.now().subtract(const Duration(days: 1)),
+        ),
+      );
+
+      final procedure = UfficioProcedure.fromJson(
+        const {
+          'id': 'premium-proc',
+          'sortOrder': 1,
+          'isPremiumOnly': true,
+          'requiresAuth': false,
+          'title': {'en': 'Premium procedure'},
+          'shortDescription': {'en': 'Locked'},
+          'sections': [],
+        },
+        categoryId: 'premium-cat',
+        subcategoryId: 'premium-sub',
+      );
+
+      expect((await service.canAccessProcedure(procedure)).allowed, isFalse);
+      expect(
+        (await service.getCurrentEntitlement()).hasActivePremiumEntitlement,
+        isFalse,
+      );
     });
 
     test('free user can access public category with premium content', () async {
@@ -572,6 +649,98 @@ void main() {
     });
   });
 
+  group('plan resolution', () {
+    test('free entitlement maps only to free current plan', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          const UfficcioEntitlement(
+            plan: UfficioPlan.free,
+            status: EntitlementStatus.active,
+            premiumAccess: false,
+          ),
+        ),
+        'free',
+      );
+    });
+
+    test('plus monthly entitlement maps only to plus monthly', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          const UfficcioEntitlement(
+            plan: UfficioPlan.plusMonthly,
+            status: EntitlementStatus.active,
+            premiumAccess: true,
+          ),
+        ),
+        'plus_monthly',
+      );
+    });
+
+    test('plus yearly entitlement maps only to plus yearly', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          const UfficcioEntitlement(
+            plan: UfficioPlan.plusYearly,
+            status: EntitlementStatus.active,
+            premiumAccess: true,
+          ),
+        ),
+        'plus_yearly',
+      );
+    });
+
+    test('premium monthly entitlement maps only to premium monthly', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          const UfficcioEntitlement(
+            plan: UfficioPlan.premiumMonthly,
+            status: EntitlementStatus.active,
+            premiumAccess: true,
+          ),
+        ),
+        'premium_monthly',
+      );
+    });
+
+    test('premium yearly entitlement maps only to premium yearly', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          const UfficcioEntitlement(
+            plan: UfficioPlan.premiumYearly,
+            status: EntitlementStatus.active,
+            premiumAccess: true,
+          ),
+        ),
+        'premium_yearly',
+      );
+    });
+
+    test('expired or revoked premium falls back to free current plan', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          UfficcioEntitlement(
+            plan: UfficioPlan.premiumMonthly,
+            status: EntitlementStatus.expired,
+            premiumAccess: true,
+            currentPeriodEnd: DateTime(2024, 1, 1),
+          ),
+        ),
+        'free',
+      );
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          UfficcioEntitlement(
+            plan: UfficioPlan.premiumYearly,
+            status: EntitlementStatus.revoked,
+            premiumAccess: true,
+            revokedAt: DateTime(2024, 1, 1),
+          ),
+        ),
+        'free',
+      );
+    });
+  });
+
   group('widget smoke tests', () {
     Future<void> pumpWithScope(WidgetTester tester, Widget child) async {
       SharedPreferences.setMockInitialValues({});
@@ -592,6 +761,33 @@ void main() {
               ),
               home: child,
             ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> pumpPlanScreenWithEntitlement(
+      WidgetTester tester,
+      UfficcioEntitlement entitlement,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        LocalUfficcioEntitlementRepository.storageKey: jsonEncode(
+          entitlement.toJson(),
+        ),
+      });
+      final prefs = await SharedPreferences.getInstance();
+      await tester.pumpWidget(
+        AppScope(
+          prefs: prefs,
+          config: _localConfig,
+          supabaseBootstrapResult: const SupabaseBootstrapResult(
+            configured: false,
+            initialized: false,
+          ),
+          child: AppLocalizationsScope(
+            localizations: AppLocalizations('en'),
+            child: const MaterialApp(home: PlanScreen()),
           ),
         ),
       );
@@ -687,6 +883,22 @@ void main() {
       await pumpWithScope(tester, const PlanScreen());
       expect(find.byType(PlanScreen), findsOneWidget);
       expect(find.byType(Scaffold), findsOneWidget);
+    });
+
+    testWidgets('premium monthly current plan does not show choose plan', (
+      tester,
+    ) async {
+      await pumpPlanScreenWithEntitlement(
+        tester,
+        const UfficcioEntitlement(
+          plan: UfficioPlan.premiumMonthly,
+          status: EntitlementStatus.active,
+          premiumAccess: true,
+        ),
+      );
+
+      expect(find.text('Current plan: Premium'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Current plan'), findsNothing);
     });
 
     testWidgets('paywall See plans button opens plan screen', (tester) async {

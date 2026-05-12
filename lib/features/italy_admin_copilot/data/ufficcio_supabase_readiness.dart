@@ -23,6 +23,12 @@ import 'local_storage_list_repository.dart';
 import 'profile_repository.dart';
 import 'request_repository.dart';
 
+String _currentUsagePeriodKey() {
+  final now = DateTime.now();
+  final month = now.month.toString().padLeft(2, '0');
+  return '${now.year}-$month';
+}
+
 String _statusToDb(String value) => value
     .replaceAllMapped(
       RegExp(r'([a-z])([A-Z])'),
@@ -71,31 +77,58 @@ UfficioPlan _planFromDatabase(String? raw, {required bool premiumAccess}) {
   }
 }
 
-String _planToDatabase(UfficioPlan plan) {
-  switch (plan) {
-    case UfficioPlan.free:
-      return 'free';
-    case UfficioPlan.plusMonthly:
-      return 'plus_monthly';
-    case UfficioPlan.plusYearly:
-      return 'plus_yearly';
-    case UfficioPlan.pro:
-      return 'pro';
-    case UfficioPlan.consultant:
-      return 'consultant';
-    case UfficioPlan.premiumMonthly:
-      return 'premium_monthly';
-    case UfficioPlan.premiumYearly:
-      return 'premium_yearly';
-    case UfficioPlan.consultancyOneShot:
-      return 'consultancy_one_shot';
-    case UfficioPlan.adminGrant:
-      return 'admin_grant';
-    case UfficioPlan.lifetime:
-      return 'lifetime';
-    case UfficioPlan.trial:
-      return 'trial';
+EntitlementStatus _entitlementStatusFromDatabase(String? raw) {
+  switch (raw) {
+    case 'trialing':
+      return EntitlementStatus.trialing;
+    case 'expired':
+      return EntitlementStatus.expired;
+    case 'cancelled':
+    case 'canceled':
+      return EntitlementStatus.cancelled;
+    case 'revoked':
+      return EntitlementStatus.revoked;
+    case 'past_due':
+      return EntitlementStatus.pastDue;
+    case 'beta':
+      return EntitlementStatus.beta;
+    default:
+      return EntitlementStatus.active;
   }
+}
+
+bool _resolvePremiumAccess({
+  required UfficioPlan plan,
+  required EntitlementStatus status,
+  required bool premiumAccess,
+  DateTime? currentPeriodEnd,
+  DateTime? revokedAt,
+}) {
+  if (revokedAt != null) return false;
+  if (currentPeriodEnd != null && currentPeriodEnd.isBefore(DateTime.now())) {
+    return false;
+  }
+  if (<EntitlementStatus>{
+    EntitlementStatus.expired,
+    EntitlementStatus.cancelled,
+    EntitlementStatus.revoked,
+    EntitlementStatus.pastDue,
+  }.contains(status)) {
+    return false;
+  }
+  if (plan == UfficioPlan.lifetime || plan == UfficioPlan.adminGrant) {
+    return premiumAccess || status == EntitlementStatus.active;
+  }
+  return premiumAccess &&
+      <UfficioPlan>{
+        UfficioPlan.plusMonthly,
+        UfficioPlan.plusYearly,
+        UfficioPlan.pro,
+        UfficioPlan.consultant,
+        UfficioPlan.premiumMonthly,
+        UfficioPlan.premiumYearly,
+        UfficioPlan.trial,
+      }.contains(plan);
 }
 
 extension AdminCopilotProfileSupabaseMapper on AdminCopilotProfile {
@@ -1018,44 +1051,70 @@ class SupabaseUfficcioEntitlementRepository
 
   @override
   Future<UfficcioEntitlement> getEntitlement() async {
-    final row = await _client
-        .from('ufficio_user_entitlements')
-        .select()
-        .eq('user_id', _userId)
-        .maybeSingle();
+    final periodKey = _currentUsagePeriodKey();
+    final results = await Future.wait<dynamic>([
+      _client
+          .from('ufficio_user_entitlements')
+          .select()
+          .eq('user_id', _userId)
+          .maybeSingle(),
+      _client
+          .from('ufficio_usage_counters')
+          .select()
+          .eq('user_id', _userId)
+          .eq('period_key', periodKey)
+          .maybeSingle(),
+    ]);
+    final row = results[0] as Map<String, dynamic>?;
+    final usageRow = results[1] as Map<String, dynamic>?;
     final isAdmin = await _client.rpc('is_ufficio_admin') == true;
     if (row == null) {
       return UfficcioEntitlement(
         userId: _userId,
         plan: isAdmin ? UfficioPlan.adminGrant : UfficioPlan.free,
         premiumAccess: isAdmin,
+        currentPeriodStart: DateTime(DateTime.now().year, DateTime.now().month),
+        generatedPacksUsedThisMonth:
+            (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
+        utilityComparisonsUsedThisMonth:
+            (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
+        billAnalysesUsedThisMonth:
+            (usageRow?['bill_analyses_used'] as num?)?.toInt() ?? 0,
+        savedRequestsCount:
+            (usageRow?['saved_requests_used'] as num?)?.toInt() ?? 0,
+        remindersCount: (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
+        documentsCount: (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
+        contactsCount: (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
+        costItemsCount: (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
+        householdMembersCount:
+            (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
+        proofCasesCount: (usageRow?['proof_cases_used'] as num?)?.toInt() ?? 0,
       );
     }
     final planName = row['plan'] as String? ?? 'free';
     final statusName = row['status'] as String? ?? 'active';
-    final premiumAccess =
-        row['premium_access'] as bool? ??
-        (statusName == 'active' || statusName == 'trialing') &&
-            <String>{
-              'plus_monthly',
-              'plus_yearly',
-              'premium_monthly',
-              'premium_yearly',
-              'admin_grant',
-              'lifetime',
-              'trial',
-              'pro',
-              'admin',
-            }.contains(planName);
+    final status = _entitlementStatusFromDatabase(statusName);
+    final plan = _planFromDatabase(
+      isAdmin && planName == 'free' ? 'admin_grant' : planName,
+      premiumAccess: row['premium_access'] as bool? ?? false || isAdmin,
+    );
+    final currentPeriodEnd = DateTime.tryParse(
+      row['current_period_end'] as String? ?? '',
+    );
+    final revokedAt = DateTime.tryParse(row['revoked_at'] as String? ?? '');
+    final premiumAccess = _resolvePremiumAccess(
+      plan: plan,
+      status: status,
+      premiumAccess: (row['premium_access'] as bool? ?? false) || isAdmin,
+      currentPeriodEnd: currentPeriodEnd,
+      revokedAt: revokedAt,
+    );
     return UfficcioEntitlement.fromJson({
       'id': row['id'],
       'userId': row['user_id'],
-      'plan': _planFromDatabase(
-        isAdmin && planName == 'free' ? 'admin_grant' : planName,
-        premiumAccess: premiumAccess || isAdmin,
-      ).name,
-      'status': _statusFromDb(statusName),
-      'premiumAccess': premiumAccess || isAdmin,
+      'plan': plan.name,
+      'status': status.name,
+      'premiumAccess': premiumAccess,
       'source': row['source'],
       'currentPeriodStart': row['current_period_start'],
       'currentPeriodEnd': row['current_period_end'],
@@ -1069,6 +1128,21 @@ class SupabaseUfficcioEntitlementRepository
           row['provider_subscription_id'] ?? row['stripe_subscription_id'],
       'createdAt': row['created_at'],
       'updatedAt': row['updated_at'],
+      'generatedPacksUsedThisMonth':
+          (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
+      'utilityComparisonsUsedThisMonth':
+          (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
+      'billAnalysesUsedThisMonth':
+          (usageRow?['bill_analyses_used'] as num?)?.toInt() ?? 0,
+      'savedRequestsCount':
+          (usageRow?['saved_requests_used'] as num?)?.toInt() ?? 0,
+      'remindersCount': (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
+      'documentsCount': (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
+      'contactsCount': (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
+      'costItemsCount': (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
+      'householdMembersCount':
+          (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
+      'proofCasesCount': (usageRow?['proof_cases_used'] as num?)?.toInt() ?? 0,
     });
   }
 
@@ -1076,57 +1150,7 @@ class SupabaseUfficcioEntitlementRepository
   Future<UfficcioEntitlement> saveEntitlement(
     UfficcioEntitlement entitlement,
   ) async {
-    try {
-      final plan = _planToDatabase(entitlement.plan);
-      final row = await _client
-          .from('ufficio_user_entitlements')
-          .upsert({
-            'user_id': _userId,
-            'plan': plan,
-            'status': entitlement.status.name,
-            'source': entitlement.source,
-            'premium_access': entitlement.premiumAccess,
-            'current_period_start': entitlement.currentPeriodStart
-                ?.toIso8601String(),
-            'current_period_end': entitlement.currentPeriodEnd
-                ?.toIso8601String(),
-            'trial_end': entitlement.trialEnd?.toIso8601String(),
-            'cancelled_at': entitlement.cancelledAt?.toIso8601String(),
-            'revoked_at': entitlement.revokedAt?.toIso8601String(),
-            'provider': entitlement.provider,
-            'provider_customer_id': entitlement.providerCustomerId,
-            'provider_subscription_id': entitlement.providerSubscriptionId,
-            'metadata': {
-              'generatedPacksUsedThisMonth':
-                  entitlement.generatedPacksUsedThisMonth,
-            },
-          })
-          .select()
-          .single();
-      return UfficcioEntitlement.fromJson({
-        'id': row['id'],
-        'userId': row['user_id'],
-        'plan': _planFromDatabase(
-          row['plan'] as String? ?? plan,
-          premiumAccess: row['premium_access'] as bool? ?? plan != 'free',
-        ).name,
-        'status': _statusFromDb(row['status'] as String? ?? 'active'),
-        'premiumAccess': row['premium_access'] as bool? ?? plan != 'free',
-        'source': row['source'],
-        'currentPeriodStart': row['current_period_start'],
-        'currentPeriodEnd': row['current_period_end'],
-        'trialEnd': row['trial_end'],
-        'cancelledAt': row['cancelled_at'],
-        'revokedAt': row['revoked_at'],
-        'provider': row['provider'] ?? row['source'],
-        'providerCustomerId': row['provider_customer_id'],
-        'providerSubscriptionId': row['provider_subscription_id'],
-        'createdAt': row['created_at'],
-        'updatedAt': row['updated_at'],
-      });
-    } catch (_) {
-      return entitlement;
-    }
+    return getEntitlement();
   }
 }
 

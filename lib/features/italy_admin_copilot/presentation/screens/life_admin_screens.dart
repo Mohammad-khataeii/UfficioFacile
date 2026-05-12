@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../app/app_localizations.dart';
@@ -54,6 +56,7 @@ import '../../domain/service_intelligence.dart';
 import '../../domain/sync_models.dart';
 import '../../domain/rich_category_models.dart';
 import '../../domain/ufficio_catalog.dart';
+import '../../domain/ufficcio_entitlement.dart';
 import '../../domain/utility_comparison.dart';
 import '../../domain/utility_offer.dart';
 import '../widgets/cms_interactive_tools.dart';
@@ -88,8 +91,9 @@ class TermRouteArgs {
 }
 
 class CmsProcedureRouteArgs {
-  const CmsProcedureRouteArgs(this.procedureSlug);
+  const CmsProcedureRouteArgs(this.procedureSlug, {this.categorySlug});
   final String procedureSlug;
+  final String? categorySlug;
 }
 
 class CmsCategoryRouteArgs {
@@ -121,32 +125,29 @@ String _formatCurrencyCents(int cents, [String currency = 'EUR']) {
   return '${currency.toUpperCase()} ${amount.toStringAsFixed(2)}';
 }
 
-String _planProductKeyForPlan(UfficioPlan plan) {
-  switch (plan) {
-    case UfficioPlan.free:
-      return 'free';
-    case UfficioPlan.plusMonthly:
-      return 'plus_monthly';
-    case UfficioPlan.plusYearly:
-      return 'plus_yearly';
-    case UfficioPlan.premiumMonthly:
-      return 'premium_monthly';
-    case UfficioPlan.premiumYearly:
-      return 'premium_yearly';
-    case UfficioPlan.consultancyOneShot:
-      return 'consultancy_one_shot';
-    case UfficioPlan.adminGrant:
-      return 'admin_grant';
-    case UfficioPlan.lifetime:
-      return 'lifetime';
-    case UfficioPlan.trial:
-      return 'trial';
-    case UfficioPlan.consultant:
-      return 'consultant';
-    case UfficioPlan.pro:
-      return 'pro';
+String? _resolvedCurrentPlanProductKey(UfficcioEntitlement entitlement) {
+  if (!entitlement.hasActivePremiumEntitlement) {
+    return 'free';
   }
+  return switch (entitlement.plan) {
+    UfficioPlan.free => 'free',
+    UfficioPlan.plusMonthly => 'plus_monthly',
+    UfficioPlan.plusYearly => 'plus_yearly',
+    UfficioPlan.premiumMonthly => 'premium_monthly',
+    UfficioPlan.premiumYearly => 'premium_yearly',
+    UfficioPlan.trial => 'premium_monthly',
+    UfficioPlan.pro => 'premium_monthly',
+    UfficioPlan.consultancyOneShot => null,
+    UfficioPlan.adminGrant => null,
+    UfficioPlan.lifetime => null,
+    UfficioPlan.consultant => null,
+  };
 }
+
+@visibleForTesting
+String? resolvedCurrentPlanProductKeyForTesting(
+  UfficcioEntitlement entitlement,
+) => _resolvedCurrentPlanProductKey(entitlement);
 
 String _planPriceLabel(PlanProduct product) {
   final amount = _formatCurrencyCents(product.amountCents, product.currency);
@@ -1650,9 +1651,14 @@ class ProcedureDetailScreen extends StatelessWidget {
 }
 
 class CmsProcedureDetailScreen extends StatefulWidget {
-  const CmsProcedureDetailScreen({super.key, required this.procedureSlug});
+  const CmsProcedureDetailScreen({
+    super.key,
+    required this.procedureSlug,
+    this.categorySlug,
+  });
 
   final String procedureSlug;
+  final String? categorySlug;
 
   @override
   State<CmsProcedureDetailScreen> createState() =>
@@ -1672,7 +1678,12 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
     final scope = AppScope.of(context);
     return Future.wait<Object>([
       scope.cmsRepository.listProcedures(),
-      scope.cmsRepository.listBlocks(widget.procedureSlug),
+      widget.categorySlug != null && widget.categorySlug!.isNotEmpty
+          ? scope.cmsRepository.listBlocksByProcedure(
+              widget.categorySlug!,
+              widget.procedureSlug,
+            )
+          : scope.cmsRepository.listBlocks(widget.procedureSlug),
     ]).timeout(const Duration(seconds: 3));
   }
 
@@ -1698,7 +1709,9 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
             final blocks = snapshot.data![1] as List<CmsContentBlock>;
             CmsProcedure? procedure;
             for (final item in procedures) {
-              if (item.slug == widget.procedureSlug) {
+              if (item.slug == widget.procedureSlug &&
+                  (widget.categorySlug == null ||
+                      widget.categorySlug == item.categorySlug)) {
                 procedure = item;
                 break;
               }
@@ -1791,16 +1804,12 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
                                 UnlockOption.singlePurchase,
                               ))
                                 OutlinedButton(
-                                  onPressed: () => ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            context.l10n.t(
-                                              'payment_not_active_yet',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                  onPressed: () => startCheckoutFlow(
+                                    context,
+                                    productKey: 'subcategory_unlock',
+                                    categorySlug: procedure!.categorySlug,
+                                    procedureSlug: procedure.slug,
+                                  ),
                                   child: Text(
                                     context.l10n.t('unlock_this_guide_only'),
                                   ),
@@ -3196,7 +3205,34 @@ IconData _iconForCategorySlug(String slug) {
   }
 }
 
-void _openCategoryFromSlug(BuildContext context, String slug) {
+Future<void> _openCategoryFromSlug(BuildContext context, String slug) async {
+  final scope = AppScope.of(context);
+  final catalog = await scope.ufficioCatalogRepository.loadCatalog();
+  final category = catalog.findCategory(slug);
+  if (!context.mounted) return;
+  if (category == null) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.category,
+      arguments: CatalogCategoryRouteArgs(slug),
+    );
+    return;
+  }
+  final access = await scope.entitlementService.canAccessCategory(category);
+  if (!context.mounted) return;
+  if (!access.allowed) {
+    await showPremiumPaywallSheet(
+      context,
+      decision: access,
+      featureLabel: _localizedCatalogText(
+        context,
+        category.title,
+        fallback: category.id,
+      ),
+      teaser: _localizedCatalogText(context, category.description),
+    );
+    return;
+  }
   Navigator.pushNamed(
     context,
     AppRoutes.category,
@@ -3204,12 +3240,41 @@ void _openCategoryFromSlug(BuildContext context, String slug) {
   );
 }
 
-void _openCatalogProcedureFromSlugs(
+Future<void> _openCatalogProcedureFromSlugs(
   BuildContext context, {
   required String categorySlug,
   required String procedureSlug,
   String? subcategorySlug,
-}) {
+}) async {
+  final scope = AppScope.of(context);
+  final procedure = await scope.ufficioCatalogRepository.loadProcedureDetail(
+    categoryId: categorySlug,
+    subcategoryId: subcategorySlug ?? procedureSlug,
+    procedureId: procedureSlug,
+  );
+  if (!context.mounted) return;
+  if (procedure != null) {
+    final access = await scope.entitlementService.canAccessProcedure(procedure);
+    if (!context.mounted) return;
+    if (!access.allowed) {
+      await showPremiumPaywallSheet(
+        context,
+        decision: access,
+        featureLabel: _localizedCatalogText(
+          context,
+          procedure.title,
+          fallback: procedure.id,
+        ),
+        teaser: _localizedCatalogText(
+          context,
+          procedure.premiumTeaser.isNotEmpty
+              ? procedure.premiumTeaser
+              : procedure.shortDescription,
+        ),
+      );
+      return;
+    }
+  }
   Navigator.pushNamed(
     context,
     AppRoutes.catalogProcedure,
@@ -3219,6 +3284,40 @@ void _openCatalogProcedureFromSlugs(
       procedureId: procedureSlug,
     ),
   );
+}
+
+Future<void> startCheckoutFlow(
+  BuildContext context, {
+  required String productKey,
+  String? categorySlug,
+  String? procedureSlug,
+}) async {
+  final scope = AppScope.of(context);
+  if (!scope.authController.isAuthenticated) {
+    Navigator.pushNamed(context, AppRoutes.auth);
+    return;
+  }
+  final url = await scope.entitlementService.createCheckoutUrl(
+    productKey: productKey,
+    categorySlug: categorySlug,
+    procedureSlug: procedureSlug,
+  );
+  if (!context.mounted) return;
+  if (url == null || url.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.t('payment_not_active_yet'))),
+    );
+    return;
+  }
+  final launched = await launchUrl(
+    Uri.parse(url),
+    mode: LaunchMode.externalApplication,
+  );
+  if (!launched && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.t('payment_not_active_yet'))),
+    );
+  }
 }
 
 bool _shouldShowHealthQuestion(
@@ -5824,12 +5923,36 @@ List<_CatalogProcedurePreview> _visibleCatalogProcedures(
           final haystack = <String>[
             _localizedCatalogText(
               context,
+              category.title,
+              fallback: _humanReadableLabel(category.id),
+            ),
+            _localizedCatalogText(context, category.description),
+            _localizedCatalogText(
+              context,
+              subcategory.title,
+              fallback: _humanReadableLabel(subcategory.id),
+            ),
+            _localizedCatalogText(context, subcategory.description),
+            _localizedCatalogText(
+              context,
               procedure.title,
               fallback: _humanReadableLabel(procedure.id),
             ),
             _localizedCatalogText(context, procedure.shortDescription),
             _localizedCatalogText(context, subcategory.title),
             ...procedure.tags,
+            ...procedure.sections.map(
+              (section) => _localizedCatalogText(context, section.title),
+            ),
+            ...procedure.sections.map(
+              (section) => _localizedCatalogText(context, section.body),
+            ),
+            ...procedure.officialLinks.map(
+              (link) => _localizedCatalogText(context, link.label),
+            ),
+            ...procedure.contacts.map(
+              (contact) => _localizedCatalogText(context, contact.label),
+            ),
           ].join(' ').toLowerCase();
           if (!haystack.contains(normalizedQuery)) continue;
         }
@@ -7809,6 +7932,7 @@ Future<bool?> showPremiumPaywallSheet(
   required String featureLabel,
   String? teaser,
 }) {
+  const genericLockedReason = 'This guide is part of UfficioFacile Premium.';
   return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
@@ -7819,13 +7943,11 @@ Future<bool?> showPremiumPaywallSheet(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Premium feature',
+            context.l10n.t('premium_feature'),
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 12),
-          Text(
-            'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
-          ),
+          Text(context.l10n.t('paywall_premium_body')),
           if (teaser != null && teaser.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(teaser),
@@ -7834,19 +7956,27 @@ Future<bool?> showPremiumPaywallSheet(
           Text(featureLabel),
           if (decision.limit != null && decision.used != null) ...[
             const SizedBox(height: 8),
-            Text('Usage: ${decision.used} / ${decision.limit}'),
+            Text(
+              [
+                context.l10n.t('paywall_usage_label'),
+                '${decision.used} / ${decision.limit}',
+              ].join(': '),
+            ),
           ],
-          const SizedBox(height: 8),
-          Text(decision.reason),
+          if (decision.reason.trim().isNotEmpty &&
+              decision.reason.trim() != genericLockedReason) ...[
+            const SizedBox(height: 8),
+            Text(decision.reason),
+          ],
           const SizedBox(height: 16),
           FilledButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
-            child: const Text('See plans'),
+            child: Text(context.l10n.t('paywall_open_plan')),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Not now'),
+            child: Text(context.l10n.t('paywall_maybe_later')),
           ),
         ],
       ),
@@ -7869,12 +7999,35 @@ class PlanScreen extends StatelessWidget {
           entitlementService.getPlanProducts(),
         ]),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(context.l10n.t('payment_not_active_yet')),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRoutes.dashboard),
+                      child: Text(context.l10n.t('retry')),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           final values = snapshot.data!;
-          final entitlement = values[0] as dynamic;
+          final entitlement = values[0] as UfficcioEntitlement;
           final usage = values[1] as List<UsageSummaryItem>;
+          final currentProductKey = _resolvedCurrentPlanProductKey(entitlement);
+          final currentPlanLabel = currentProductKey == 'free'
+              ? context.l10n.t('free_plan_label')
+              : _planLabel(context, entitlement.plan);
           final plans =
               (values[2] as List<PlanProduct>)
                   .where(_isPubliclyVisiblePlan)
@@ -7889,7 +8042,10 @@ class PlanScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                '${context.l10n.t('current_plan_label')}: ${_planLabel(context, entitlement.plan)}',
+                [
+                  context.l10n.t('current_plan_label'),
+                  currentPlanLabel,
+                ].join(': '),
               ),
               const SizedBox(height: 16),
               Wrap(
@@ -7922,13 +8078,12 @@ class PlanScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        if (_planProductKeyForPlan(entitlement.plan) ==
-                                plan.productKey ||
-                            (plan.productKey == 'free' &&
-                                entitlement.plan == UfficioPlan.free))
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: PremiumBadge(label: 'Current plan'),
+                        if (currentProductKey == plan.productKey)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: PremiumBadge(
+                              label: context.l10n.t('current_plan_label'),
+                            ),
                           ),
                         ...plan.features.entries
                             .where((entry) => entry.value == true)
@@ -7938,38 +8093,35 @@ class PlanScreen extends StatelessWidget {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            if (plan.productKey == 'free')
+                            if (currentProductKey == plan.productKey)
                               OutlinedButton(
                                 onPressed: null,
-                                child: const Text('Current plan'),
+                                child: Text(
+                                  context.l10n.t('current_plan_label'),
+                                ),
+                              )
+                            else if (plan.productKey == 'free')
+                              OutlinedButton(
+                                onPressed: null,
+                                child: Text(context.l10n.t('free_plan_label')),
                               )
                             else if (plan.productKey == 'consultancy_one_shot')
                               FilledButton(
-                                onPressed: () =>
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          context.l10n.t(
-                                            'payment_not_active_yet',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                child: const Text('Request consultancy'),
+                                onPressed: () => startCheckoutFlow(
+                                  context,
+                                  productKey: plan.productKey,
+                                ),
+                                child: Text(
+                                  context.l10n.t('request_consultancy'),
+                                ),
                               )
                             else
                               FilledButton(
-                                onPressed: () =>
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          context.l10n.t(
-                                            'payment_not_active_yet',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                child: const Text('Choose plan'),
+                                onPressed: () => startCheckoutFlow(
+                                  context,
+                                  productKey: plan.productKey,
+                                ),
+                                child: Text(context.l10n.t('choose_plan')),
                               ),
                           ],
                         ),

@@ -247,8 +247,60 @@ class HybridCatalogRepository implements CatalogRepository {
   }
 
   @override
-  Future<List<Object>> searchCatalog(String query) =>
-      _bundled.searchCatalog(query);
+  Future<List<Object>> searchCatalog(String query) async {
+    final bundledResults = await _bundled.searchCatalog(query);
+    if (_remote == null) {
+      return bundledResults;
+    }
+
+    try {
+      final remoteResults = await _remote
+          .searchCatalog(query)
+          .timeout(const Duration(seconds: 3));
+      _remoteAvailable = true;
+      _usingFallback = remoteResults.isEmpty;
+      _lastFetchAt = DateTime.now();
+      return _mergeSearchResults(bundledResults, remoteResults);
+    } catch (_) {
+      _remoteAvailable = false;
+      _usingFallback = true;
+      return bundledResults;
+    }
+  }
+
+  List<Object> _mergeSearchResults(
+    List<Object> bundledResults,
+    List<Object> remoteResults,
+  ) {
+    final seenKeys = <String>{};
+    final merged = <Object>[];
+
+    void addAll(Iterable<Object> items) {
+      for (final item in items) {
+        final key = _searchResultKey(item);
+        if (key == null || seenKeys.add(key)) {
+          merged.add(item);
+        }
+      }
+    }
+
+    addAll(remoteResults);
+    addAll(bundledResults);
+    return merged;
+  }
+
+  String? _searchResultKey(Object item) {
+    if (item is OfficialLink) {
+      return 'official-link:${item.id}';
+    }
+    if (item is ServiceProvider) {
+      return 'service-provider:${item.id}';
+    }
+    if (item is ProcedureGuidance) {
+      return 'procedure-guidance:${item.procedureId}';
+    }
+    return item.toString();
+  }
 
   @override
   Future<Map<String, dynamic>> getAppPublicConfig() async {

@@ -71,7 +71,7 @@ class AccountScreen extends StatelessWidget {
                               context,
                               AppRoutes.changePassword,
                             ),
-                      child: const Text('Change password'),
+                      child: Text(context.l10n.t('account_change_password')),
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton(

@@ -227,6 +227,7 @@ class CmsProcedure {
 class CmsContentBlock {
   const CmsContentBlock({
     required this.id,
+    required this.categorySlug,
     required this.procedureSlug,
     required this.blockType,
     required this.title,
@@ -246,6 +247,7 @@ class CmsContentBlock {
   });
 
   final String id;
+  final String categorySlug;
   final String procedureSlug;
   final String blockType;
   final Map<String, dynamic> title;
@@ -266,6 +268,7 @@ class CmsContentBlock {
   factory CmsContentBlock.fromJson(Map<String, dynamic> json) =>
       CmsContentBlock(
         id: json['id'] as String? ?? '',
+        categorySlug: json['category_slug'] as String? ?? '',
         procedureSlug: json['procedure_slug'] as String? ?? '',
         blockType: json['block_type'] as String? ?? 'info',
         title: Map<String, dynamic>.from((json['title'] as Map?) ?? const {}),

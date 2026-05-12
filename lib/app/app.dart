@@ -261,6 +261,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => CmsProcedureDetailScreen(
                         procedureSlug: args.procedureSlug,
+                        categorySlug: args.categorySlug,
                       ),
                     );
                   case AppRoutes.procedureStart:

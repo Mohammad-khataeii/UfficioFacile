@@ -120,8 +120,11 @@ export async function updateEntitlement(formData: FormData) {
     "pro",
     "consultant",
   ]);
+  const statusAllowsPremium =
+    parsed.status === "active" || parsed.status === "trialing";
   const isPremiumAccess =
-    parsed.premiumAccess || premiumPlans.has(parsed.plan) || parsed.status === "trialing";
+    statusAllowsPremium &&
+    (parsed.premiumAccess || premiumPlans.has(parsed.plan));
   const currentPeriodStart = new Date();
   const currentPeriodEnd =
     parsed.plan === "free" || parsed.status === "revoked" || parsed.status === "expired"
@@ -213,20 +216,29 @@ export async function resetUsageCounters(formData: FormData) {
 }
 
 export async function upsertPlanProduct(formData: FormData) {
-  const admin = await requireAdmin("settings.manage");
+  const admin = await requireAdmin("premium.manage");
   const productKey = String(formData.get("productKey") ?? "");
+  const stripePriceId = String(formData.get("stripePriceId") ?? "").trim();
+  const providerMetadata = JSON.parse(
+    String(formData.get("providerMetadataJson") ?? "{}"),
+  );
   const payload = {
     product_key: productKey,
     plan_type: String(formData.get("planType") ?? "free"),
     billing_interval: String(formData.get("billingInterval") ?? "none"),
     amount_cents: Number(formData.get("amountCents") ?? 0),
     currency: String(formData.get("currency") ?? "EUR"),
+    stripe_price_id: stripePriceId || null,
     is_active: formData.get("isActive") === "on",
     sort_order: Number(formData.get("sortOrder") ?? 0),
     title: localizedFromFormData(formData, "title"),
     description: localizedFromFormData(formData, "description"),
     features: JSON.parse(String(formData.get("featuresJson") ?? "{}")),
     limits: JSON.parse(String(formData.get("limitsJson") ?? "{}")),
+    provider_metadata: {
+      ...providerMetadata,
+      ...(stripePriceId ? { stripe_price_id: stripePriceId } : {}),
+    },
   };
 
   const { data: before } = await admin.supabase

@@ -110,8 +110,28 @@ export default async function PremiumUserDetailPage({
                   <dd>{entitlement?.premium_access ? "yes" : "no"}</dd>
                 </div>
                 <div>
+                  <dt className="text-slate-500">Source</dt>
+                  <dd>{entitlement?.source ?? "system"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Period start</dt>
+                  <dd>{entitlement?.current_period_start ? new Date(entitlement.current_period_start).toLocaleString() : "—"}</dd>
+                </div>
+                <div>
                   <dt className="text-slate-500">Period end</dt>
                   <dd>{entitlement?.current_period_end ? new Date(entitlement.current_period_end).toLocaleString() : "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Stripe customer</dt>
+                  <dd className="font-mono text-xs text-slate-900">{entitlement?.stripe_customer_id ?? entitlement?.provider_customer_id ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Stripe subscription</dt>
+                  <dd className="font-mono text-xs text-slate-900">{entitlement?.stripe_subscription_id ?? entitlement?.provider_subscription_id ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Stripe price</dt>
+                  <dd className="font-mono text-xs text-slate-900">{entitlement?.stripe_price_id ?? entitlement?.provider_price_id ?? "—"}</dd>
                 </div>
               </dl>
             </div>

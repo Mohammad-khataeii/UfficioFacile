@@ -47,9 +47,10 @@ class CmsContentRepository {
       final blocks = await client
           .from('ufficio_cms_content_blocks')
           .select(
-            'procedure_slug, block_type, title, body, items, sort_order, '
+            'category_slug, procedure_slug, block_type, title, body, items, sort_order, '
             'is_active, is_premium, visibility, warning_level, metadata',
           )
+          .eq('category_slug', slug)
           .eq('is_active', true)
           .eq('visibility', 'public')
           .order('sort_order', ascending: true);

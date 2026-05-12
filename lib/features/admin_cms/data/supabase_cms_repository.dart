@@ -52,11 +52,30 @@ class SupabaseCmsRepository implements CmsRepository {
 
   @override
   Future<List<CmsContentBlock>> listBlocks(String procedureSlug) async {
-    final fallback = await _fallback.listBlocks(procedureSlug);
+    final procedures = await listProcedures();
+    final matches = procedures
+        .where((item) => item.slug == procedureSlug)
+        .toList();
+    if (matches.length == 1) {
+      return listBlocksByProcedure(matches.first.categorySlug, procedureSlug);
+    }
+    return _fallback.listBlocks(procedureSlug);
+  }
+
+  @override
+  Future<List<CmsContentBlock>> listBlocksByProcedure(
+    String categorySlug,
+    String procedureSlug,
+  ) async {
+    final fallback = await _fallback.listBlocksByProcedure(
+      categorySlug,
+      procedureSlug,
+    );
     try {
       final rows = await _client
           .from('ufficio_cms_content_blocks')
           .select()
+          .eq('category_slug', categorySlug)
           .eq('procedure_slug', procedureSlug)
           .order('sort_order')
           .timeout(_remoteTimeout);

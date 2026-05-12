@@ -12,7 +12,15 @@ enum UfficioPlan {
   trial,
 }
 
-enum EntitlementStatus { active, trialing, expired, cancelled, beta }
+enum EntitlementStatus {
+  active,
+  trialing,
+  expired,
+  cancelled,
+  revoked,
+  pastDue,
+  beta,
+}
 
 enum FeatureKey {
   generatePack,
