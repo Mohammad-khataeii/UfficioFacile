@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +19,6 @@ import '../../data/general_guidance_definitions.dart';
 import '../../data/health_asl_guidance_definitions.dart';
 import '../../data/housing_rent_guidance_definitions.dart';
 import '../../data/cms_content_repository.dart';
-import '../../data/catalog_premium_marker.dart';
 import '../../data/pack_generator.dart';
 import '../../data/premium_service.dart';
 import '../../data/public_office_comune_guidance_definitions.dart';
@@ -546,7 +544,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                       ),
                     );
                   }
-                  final marker = const CatalogPremiumMarker();
                   final catalog = snapshot.data!;
                   return Wrap(
                     spacing: 12,
@@ -560,22 +557,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             fallback: item.id,
                           ),
                           _iconForCategorySlug(item.id),
-                          () async {
-                            final access = await scope.entitlementService
-                                .canAccessCategory(item);
-                            if (!context.mounted) return;
-                            if (!access.allowed) {
-                              await showPremiumPaywallSheet(
-                                context,
-                                decision: access,
-                                featureLabel: ufficioLocalizedValue(
-                                  item.title,
-                                  context.l10n.languageCode,
-                                  fallback: item.id,
-                                ),
-                              );
-                              return;
-                            }
+                          () {
                             Navigator.pushNamed(
                               context,
                               AppRoutes.category,
@@ -586,11 +568,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             item.description,
                             context.l10n.languageCode,
                           ),
-                          trailing: marker.categoryHasPremiumContent(item)
-                              ? PremiumBadge(
-                                  label: context.l10n.t('premium_plan_label'),
-                                )
-                              : null,
                           footer:
                               '${item.procedureCount} ${context.l10n.t('browse_procedures').toLowerCase()}',
                         ),
@@ -3215,21 +3192,6 @@ Future<void> _openCategoryFromSlug(BuildContext context, String slug) async {
       context,
       AppRoutes.category,
       arguments: CatalogCategoryRouteArgs(slug),
-    );
-    return;
-  }
-  final access = await scope.entitlementService.canAccessCategory(category);
-  if (!context.mounted) return;
-  if (!access.allowed) {
-    await showPremiumPaywallSheet(
-      context,
-      decision: access,
-      featureLabel: _localizedCatalogText(
-        context,
-        category.title,
-        fallback: category.id,
-      ),
-      teaser: _localizedCatalogText(context, category.description),
     );
     return;
   }
@@ -7396,20 +7358,41 @@ class _StatChip extends StatelessWidget {
   }
 }
 
+enum PremiumBadgeTone { premium, free }
+
 class PremiumBadge extends StatelessWidget {
-  const PremiumBadge({super.key, required this.label});
+  const PremiumBadge({
+    super.key,
+    required this.label,
+    this.tone = PremiumBadgeTone.premium,
+  });
 
   final String label;
+  final PremiumBadgeTone tone;
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final backgroundColor = switch (tone) {
+      PremiumBadgeTone.premium => colors.primaryContainer,
+      PremiumBadgeTone.free => Colors.green.shade100,
+    };
+    final foregroundColor = switch (tone) {
+      PremiumBadgeTone.premium => colors.onPrimaryContainer,
+      PremiumBadgeTone.free => Colors.green.shade900,
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(color: foregroundColor),
+      ),
     );
   }
 }

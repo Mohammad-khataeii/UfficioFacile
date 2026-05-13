@@ -581,9 +581,6 @@ class UfficioPremiumEntitlementService {
   Future<EntitlementDecision> canAccessCategory(
     UfficioCategory category,
   ) async {
-    if (category.isPremiumOnly) {
-      return _catalogLockedDecision();
-    }
     return _allowedDecision(
       reason: category.hasPremiumContent || category.isPremiumOnly
           ? 'This category contains Premium content.'

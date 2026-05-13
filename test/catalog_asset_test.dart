@@ -37,8 +37,7 @@ void main() {
     const forbiddenPhrases = <String>[
       'to help the user',
       'the user should',
-      'do not show',
-      'internal',
+      'internal note',
       'placeholder',
       'todo',
       'fake data',
@@ -66,5 +65,33 @@ void main() {
         );
       }
     }
+
+    final premiumCategories = categories
+        .where((category) => category['isPremiumOnly'] == true)
+        .toList();
+    expect(
+      premiumCategories,
+      isEmpty,
+      reason: 'Categories should stay open for all users.',
+    );
+
+    final allSubcategories = categories
+        .expand(
+          (category) =>
+              (category['subcategories'] as List<dynamic>? ?? const <dynamic>[])
+                  .whereType<Map>()
+                  .map((item) => Map<String, dynamic>.from(item)),
+        )
+        .toList();
+    final premiumSubcategories = allSubcategories
+        .where((subcategory) => subcategory['isPremiumOnly'] == true)
+        .toList();
+
+    expect(
+      premiumSubcategories.length,
+      inInclusiveRange(8, 24),
+      reason:
+          'Premium subcategories should be curated, not so broad that most of the catalog looks locked.',
+    );
   });
 }

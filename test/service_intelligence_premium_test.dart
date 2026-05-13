@@ -401,63 +401,66 @@ void main() {
       }
     });
 
-    test('free user cannot open premium-only category shells', () async {
-      SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
-      final service = UfficioPremiumEntitlementService(
-        LocalUfficcioEntitlementRepository(prefs),
-        LocalPremiumConfigRepository(prefs),
-        analytics: LocalAnalyticsService(prefs),
-      );
+    test(
+      'free user can open category shells but not premium subcategories',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final service = UfficioPremiumEntitlementService(
+          LocalUfficcioEntitlementRepository(prefs),
+          LocalPremiumConfigRepository(prefs),
+          analytics: LocalAnalyticsService(prefs),
+        );
 
-      final category = UfficioCategory.fromJson(const {
-        'id': 'premium-cat',
-        'icon': 'lock',
-        'sortOrder': 1,
-        'isPremiumOnly': true,
-        'title': {'en': 'Premium category'},
-        'description': {'en': 'Locked'},
-        'subcategories': [],
-      });
-      final subcategory = UfficioSubcategory.fromJson(const {
-        'id': 'premium-sub',
-        'sortOrder': 1,
-        'isPremiumOnly': true,
-        'title': {'en': 'Premium subcategory'},
-        'description': {'en': 'Locked'},
-        'procedures': [],
-      }, categoryId: 'premium-cat');
-      final procedure = UfficioProcedure.fromJson(
-        const {
-          'id': 'premium-proc',
+        final category = UfficioCategory.fromJson(const {
+          'id': 'premium-cat',
+          'icon': 'lock',
           'sortOrder': 1,
           'isPremiumOnly': true,
-          'requiresAuth': false,
-          'title': {'en': 'Premium procedure'},
-          'shortDescription': {'en': 'Locked'},
-          'sections': [],
-        },
-        categoryId: 'premium-cat',
-        subcategoryId: 'premium-sub',
-      );
-      final section = UfficioContentSection.fromJson(const {
-        'type': 'text',
-        'key': 'premium',
-        'title': {'en': 'Premium section'},
-        'body': {'en': 'Locked'},
-        'isPremiumOnly': true,
-      });
+          'title': {'en': 'Premium category'},
+          'description': {'en': 'Locked'},
+          'subcategories': [],
+        });
+        final subcategory = UfficioSubcategory.fromJson(const {
+          'id': 'premium-sub',
+          'sortOrder': 1,
+          'isPremiumOnly': true,
+          'title': {'en': 'Premium subcategory'},
+          'description': {'en': 'Locked'},
+          'procedures': [],
+        }, categoryId: 'premium-cat');
+        final procedure = UfficioProcedure.fromJson(
+          const {
+            'id': 'premium-proc',
+            'sortOrder': 1,
+            'isPremiumOnly': true,
+            'requiresAuth': false,
+            'title': {'en': 'Premium procedure'},
+            'shortDescription': {'en': 'Locked'},
+            'sections': [],
+          },
+          categoryId: 'premium-cat',
+          subcategoryId: 'premium-sub',
+        );
+        final section = UfficioContentSection.fromJson(const {
+          'type': 'text',
+          'key': 'premium',
+          'title': {'en': 'Premium section'},
+          'body': {'en': 'Locked'},
+          'isPremiumOnly': true,
+        });
 
-      final categoryAccess = await service.canAccessCategory(category);
-      expect(categoryAccess.allowed, isFalse);
-      expect(categoryAccess.isPremiumFeature, isTrue);
-      expect(
-        (await service.canAccessSubcategory(subcategory)).allowed,
-        isFalse,
-      );
-      expect((await service.canAccessProcedure(procedure)).allowed, isFalse);
-      expect((await service.canAccessSection(section)).allowed, isFalse);
-    });
+        final categoryAccess = await service.canAccessCategory(category);
+        expect(categoryAccess.allowed, isTrue);
+        expect(categoryAccess.isPremiumFeature, isTrue);
+        expect(
+          (await service.canAccessSubcategory(subcategory)).allowed,
+          isFalse,
+        );
+        expect((await service.canAccessProcedure(procedure)).allowed, isFalse);
+        expect((await service.canAccessSection(section)).allowed, isFalse);
+      },
+    );
 
     test('revoked premium user is blocked from premium procedure', () async {
       SharedPreferences.setMockInitialValues({});

@@ -50,7 +50,9 @@ void main() {
         expect(procedure, isNotNull);
         final sections = procedure!.sections;
         expect(
-          sections.where((section) => section.title['en'] == 'What it is'),
+          sections.where(
+            (section) => section.title['en'] == 'What STP and ENI mean',
+          ),
           hasLength(1),
         );
         expect(
@@ -61,7 +63,7 @@ void main() {
         );
         expect(
           sections.where(
-            (section) => section.title['en'] == 'How to do it in Torino',
+            (section) => section.title['en'] == 'Step-by-step in Torino',
           ),
           hasLength(1),
         );

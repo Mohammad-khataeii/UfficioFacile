@@ -3,16 +3,27 @@ import 'package:flutter/material.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
-import '../../data/catalog_premium_marker.dart';
 import '../../domain/premium_config.dart';
 import '../../domain/ufficio_catalog.dart';
 import 'life_admin_screens.dart'
     show
         GlobalProblemRequestCard,
         PremiumBadge,
+        PremiumBadgeTone,
         PrivateConsultancyCard,
         startCheckoutFlow,
         showPremiumPaywallSheet;
+
+PremiumBadge _subcategoryAccessBadge(
+  BuildContext context,
+  UfficioSubcategory subcategory,
+) {
+  final isPremium = subcategory.isPremiumOnly;
+  return PremiumBadge(
+    label: context.l10n.t(isPremium ? 'premium_plan_label' : 'free_plan_label'),
+    tone: isPremium ? PremiumBadgeTone.premium : PremiumBadgeTone.free,
+  );
+}
 
 class CatalogCategoryRouteArgs {
   const CatalogCategoryRouteArgs(this.categoryId);
@@ -86,142 +97,113 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
             if (category == null) {
               return const _CatalogNotFoundState();
             }
-            final marker = const CatalogPremiumMarker();
-            return FutureBuilder(
-              future: AppScope.of(
-                context,
-              ).entitlementService.canAccessCategory(category),
-              builder: (context, accessSnapshot) {
-                if (!accessSnapshot.hasData) {
-                  return const _CatalogLoadingState();
-                }
-                final access = accessSnapshot.data!;
-                if (!access.allowed) {
-                  return _CatalogLockedState(
-                    decision: access,
-                    description: ufficioLocalizedValue(
-                      category.description,
-                      context.l10n.languageCode,
-                    ),
-                  );
-                }
-                return ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    _CatalogHeaderCard(
-                      title: ufficioLocalizedValue(
-                        category.title,
-                        context.l10n.languageCode,
-                        fallback: category.id,
-                      ),
-                      description: ufficioLocalizedValue(
-                        category.description,
-                        context.l10n.languageCode,
-                      ),
-                      badge: marker.categoryHasPremiumContent(category)
-                          ? context.l10n.t('premium_plan_label')
-                          : null,
-                      icon: _iconForCategory(category.icon, category.id),
-                    ),
-                    const SizedBox(height: 12),
-                    ...category.subcategories.map(
-                      (subcategory) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Card(
-                          child: ListTile(
-                            leading: Icon(
-                              _iconForCategory(category.icon, category.id),
-                            ),
-                            title: Text(
-                              ufficioLocalizedValue(
-                                subcategory.title,
-                                context.l10n.languageCode,
-                                fallback: subcategory.id,
-                              ),
-                            ),
-                            subtitle: Text(
-                              ufficioLocalizedValue(
-                                subcategory.description,
-                                context.l10n.languageCode,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (marker.subcategoryHasPremiumContent(
-                                  subcategory,
-                                ))
-                                  PremiumBadge(
-                                    label: context.l10n.t('premium_plan_label'),
-                                  ),
-                                const SizedBox(width: 8),
-                                Text('${subcategory.procedures.length}'),
-                                const Icon(Icons.chevron_right),
-                              ],
-                            ),
-                            onTap: () async {
-                              final featureLabel = ufficioLocalizedValue(
-                                subcategory.title,
-                                context.l10n.languageCode,
-                                fallback: subcategory.id,
-                              );
-
-                              final subcategoryAccess =
-                                  await AppScope.of(context).entitlementService
-                                      .canAccessSubcategory(subcategory);
-
-                              if (!context.mounted) return;
-
-                              final mustLock =
-                                  subcategory.isPremiumOnly &&
-                                  !subcategoryAccess.allowed;
-
-                              if (mustLock) {
-                                await showPremiumPaywallSheet(
-                                  context,
-                                  decision: const EntitlementDecision(
-                                    allowed: false,
-                                    isPremiumFeature: true,
-                                    reason:
-                                        'This guide is part of UfficioFacile Premium.',
-                                    upgradeTitle: 'Premium feature',
-                                    upgradeMessage:
-                                        'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
-                                    recommendedPlan: UfficioPlan.premiumMonthly,
-                                  ),
-                                  featureLabel: featureLabel,
-                                );
-                                return;
-                              }
-
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.subcategory,
-                                arguments: CatalogSubcategoryRouteArgs(
-                                  categoryId: category.id,
-                                  subcategoryId: subcategory.id,
-                                ),
-                              );
-                            },
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _CatalogHeaderCard(
+                  title: ufficioLocalizedValue(
+                    category.title,
+                    context.l10n.languageCode,
+                    fallback: category.id,
+                  ),
+                  description: ufficioLocalizedValue(
+                    category.description,
+                    context.l10n.languageCode,
+                  ),
+                  icon: _iconForCategory(category.icon, category.id),
+                ),
+                const SizedBox(height: 12),
+                ...category.subcategories.map(
+                  (subcategory) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Card(
+                      child: ListTile(
+                        leading: Icon(
+                          _iconForCategory(category.icon, category.id),
+                        ),
+                        title: Text(
+                          ufficioLocalizedValue(
+                            subcategory.title,
+                            context.l10n.languageCode,
+                            fallback: subcategory.id,
                           ),
                         ),
+                        subtitle: Text(
+                          ufficioLocalizedValue(
+                            subcategory.description,
+                            context.l10n.languageCode,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _subcategoryAccessBadge(context, subcategory),
+                            const SizedBox(width: 8),
+                            Text('${subcategory.procedures.length}'),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () async {
+                          final featureLabel = ufficioLocalizedValue(
+                            subcategory.title,
+                            context.l10n.languageCode,
+                            fallback: subcategory.id,
+                          );
+
+                          final subcategoryAccess = await AppScope.of(context)
+                              .entitlementService
+                              .canAccessSubcategory(subcategory);
+
+                          if (!context.mounted) return;
+
+                          final mustLock =
+                              subcategory.isPremiumOnly &&
+                              !subcategoryAccess.allowed;
+
+                          if (mustLock) {
+                            await showPremiumPaywallSheet(
+                              context,
+                              decision: const EntitlementDecision(
+                                allowed: false,
+                                isPremiumFeature: true,
+                                reason:
+                                    'This guide is part of UfficioFacile Premium.',
+                                upgradeTitle: 'Premium feature',
+                                upgradeMessage:
+                                    'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+                                recommendedPlan: UfficioPlan.premiumMonthly,
+                              ),
+                              featureLabel: featureLabel,
+                            );
+                            return;
+                          }
+
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.subcategory,
+                            arguments: CatalogSubcategoryRouteArgs(
+                              categoryId: category.id,
+                              subcategoryId: subcategory.id,
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    GlobalProblemRequestCard(
-                      categoryId: category.id,
-                      sourcePage: category.id,
-                    ),
-                    const SizedBox(height: 12),
-                    PrivateConsultancyCard(
-                      categoryId: category.id,
-                      sourcePage: category.id,
-                    ),
-                  ],
-                );
-              },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GlobalProblemRequestCard(
+                  categoryId: category.id,
+                  sourcePage: category.id,
+                ),
+                const SizedBox(height: 12),
+                PrivateConsultancyCard(
+                  categoryId: category.id,
+                  sourcePage: category.id,
+                ),
+              ],
             );
           },
         ),
@@ -285,7 +267,6 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
             if (category == null || subcategory == null) {
               return const _CatalogNotFoundState();
             }
-            final marker = const CatalogPremiumMarker();
             return FutureBuilder(
               future: AppScope.of(
                 context,
@@ -317,9 +298,11 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                         subcategory.description,
                         context.l10n.languageCode,
                       ),
-                      badge: marker.subcategoryHasPremiumContent(subcategory)
-                          ? context.l10n.t('premium_plan_label')
-                          : null,
+                      badge: context.l10n.t(
+                        subcategory.isPremiumOnly
+                            ? 'premium_plan_label'
+                            : 'free_plan_label',
+                      ),
                       icon: _iconForCategory(category.icon, category.id),
                     ),
                     const SizedBox(height: 12),
@@ -330,7 +313,6 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                           future: AppScope.of(context).entitlementService
                               .canAccessCatalogProcedure(procedure),
                           builder: (context, accessSnapshot) {
-                            final access = accessSnapshot.data;
                             return Card(
                               child: ListTile(
                                 title: Text(
@@ -350,18 +332,7 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (marker.procedureIsPremium(procedure))
-                                      PremiumBadge(
-                                        label: access?.alreadyUnlocked == true
-                                            ? context.l10n.t('already_unlocked')
-                                            : context.l10n.t(
-                                                'premium_plan_label',
-                                              ),
-                                      ),
-                                    const SizedBox(width: 8),
-                                    const Icon(Icons.chevron_right),
-                                  ],
+                                  children: [const Icon(Icons.chevron_right)],
                                 ),
                                 onTap: () async {
                                   final featureLabel = ufficioLocalizedValue(
@@ -513,9 +484,6 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                         procedure.shortDescription,
                         context.l10n.languageCode,
                       ),
-                      badge: procedure.hasPremiumContent
-                          ? context.l10n.t('premium_plan_label')
-                          : null,
                     ),
                     if (showLockedPremiumShell) ...[
                       const SizedBox(height: 12),

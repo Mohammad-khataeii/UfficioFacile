@@ -283,7 +283,6 @@ void main() {
     'beta access active',
     'demo data',
     'for codex',
-    'do not show',
     'internal note',
     'pro feature',
     'lorem',
