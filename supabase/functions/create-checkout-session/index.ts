@@ -8,14 +8,31 @@ type CheckoutRequest = {
   procedure_slug?: string;
 };
 
+const corsHeaders = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-headers":
+    "authorization, x-client-info, apikey, content-type",
+  "access-control-allow-methods": "POST, OPTIONS",
+};
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      ...corsHeaders,
+    },
   });
 }
 
 serve(async (request) => {
+  if (request.method === "OPTIONS") {
+    return new Response("ok", {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, 405);
   }
