@@ -279,6 +279,30 @@ class ConsultancyRequestRecord {
   );
 }
 
+const Set<String> problemRequestInsertColumns = <String>{
+  'id',
+  'user_id',
+  'email',
+  'category',
+  'problem_title',
+  'problem_description',
+  'language_code',
+  'status',
+};
+
+const Set<String> consultancyRequestInsertColumns = <String>{
+  'id',
+  'user_id',
+  'email',
+  'category',
+  'subject',
+  'message',
+  'language_code',
+  'is_premium_snapshot',
+  'payment_status',
+  'status',
+};
+
 enum UfficioCostItemType { expense, refund, deposit, installment, estimate }
 
 UfficioCostItemType ufficioCostItemTypeFromJson(String? value) {
@@ -1272,111 +1296,305 @@ class ConsultancyService {
 }
 
 Map<String, dynamic> _problemRequestToDb(ProblemRequestRecord item) => {
-  'id': item.id,
-  'user_id': item.userId,
-  'user_email': item.userEmail,
-  'category_id': item.categoryId,
-  'subcategory_id': item.subcategoryId,
-  'title': item.title,
-  'description': item.description,
-  'city': item.city,
-  'region': item.region,
-  'urgency': item.urgency,
-  'language': item.language,
-  'attachment_placeholder': item.attachmentPlaceholder,
-  'status': switch (item.status) {
+  ...toProblemRequestInsertPayload(item),
+};
+
+Map<String, dynamic> toProblemRequestInsertPayload(ProblemRequestRecord item) {
+  final payload = <String, dynamic>{
+    'user_id': _nonEmptyOrNull(item.userId),
+    'email': _nonEmptyOrNull(item.userEmail),
+    'category': _problemRequestCategoryValue(item),
+    'problem_title': item.title.trim(),
+    'problem_description': item.description.trim(),
+    'language_code': _normalizeRequestLanguageCode(item.language),
+    'status': _problemRequestStatusToDb(item.status),
+  };
+  final id = _nonEmptyOrNull(item.id);
+  if (id != null) {
+    payload['id'] = id;
+  }
+  payload.removeWhere((key, value) => value == null);
+  return payload;
+}
+
+ProblemRequestRecord _problemRequestFromDb(Map<String, dynamic> row) =>
+    ProblemRequestRecord(
+      id: row['id'] as String? ?? '',
+      userId: row['user_id'] as String?,
+      userEmail: _firstString(row, const ['email', 'user_email']),
+      categoryId: _firstString(row, const [
+        'category',
+        'category_id',
+        'linked_category_slug',
+      ]),
+      subcategoryId: _firstString(row, const [
+        'subcategory_id',
+        'linked_procedure_slug',
+      ]),
+      title: _firstString(row, const ['problem_title', 'title']) ?? '',
+      description:
+          _firstString(row, const ['problem_description', 'description']) ?? '',
+      city: row['city'] as String? ?? 'Torino',
+      region: row['region'] as String? ?? 'Piemonte',
+      urgency: row['urgency'] as String? ?? 'normal',
+      language:
+          _languageCodeToUiLabel(
+            _firstString(row, const ['language_code', 'language']) ?? 'en',
+          ) ??
+          'English',
+      attachmentPlaceholder: row['attachment_placeholder'] as String?,
+      status: _problemRequestStatusFromDb(row['status'] as String?),
+      isPremiumUser: row['is_premium_user'] as bool? ?? false,
+      sourcePage: row['source_page'] as String? ?? '',
+      createdAt: _parseDateTime(row['created_at']) ?? DateTime.now(),
+      updatedAt: _parseDateTime(row['updated_at']) ?? DateTime.now(),
+    );
+
+Map<String, dynamic> _consultancyRequestToDb(ConsultancyRequestRecord item) => {
+  ...toConsultancyRequestInsertPayload(item),
+};
+
+Map<String, dynamic> toConsultancyRequestInsertPayload(
+  ConsultancyRequestRecord item,
+) {
+  final payload = <String, dynamic>{
+    'user_id': _nonEmptyOrNull(item.userId),
+    'email': _nonEmptyOrNull(item.userEmail),
+    'category': _consultancyRequestCategoryValue(item),
+    'subject': _consultancySubjectValue(item),
+    'message': _consultancyMessageValue(item),
+    'language_code': 'en',
+    'is_premium_snapshot': _isPremiumPlanName(item.userPlan),
+    'payment_status': _consultancyPaymentStatusToDb(item.paymentStatus),
+    'status': _consultancyRequestStatusToDb(item.status),
+  };
+  final id = _nonEmptyOrNull(item.id);
+  if (id != null) {
+    payload['id'] = id;
+  }
+  payload.removeWhere((key, value) => value == null);
+  return payload;
+}
+
+ConsultancyRequestRecord _consultancyRequestFromDb(Map<String, dynamic> row) =>
+    ConsultancyRequestRecord(
+      id: row['id'] as String? ?? '',
+      userId: row['user_id'] as String?,
+      userEmail: _firstString(row, const ['email', 'user_email']),
+      fullName:
+          _firstString(row, const ['full_name']) ??
+          _firstString(row, const ['email', 'user_email']) ??
+          '',
+      categoryId: _firstString(row, const ['category', 'category_id']),
+      subcategoryId: _firstString(row, const ['subcategory_id']),
+      problemType: _firstString(row, const ['subject', 'problem_type']) ?? '',
+      description: _firstString(row, const ['message', 'description']) ?? '',
+      desiredResult:
+          _firstString(row, const ['desired_result', 'admin_notes']) ?? '',
+      city: row['city'] as String? ?? 'Torino',
+      region: row['region'] as String? ?? 'Piemonte',
+      documentsAvailable: row['documents_available'] as String? ?? '',
+      attachmentUrls: ((row['attachment_urls'] as List?) ?? const [])
+          .cast<String>(),
+      userPlan: _consultancyUserPlanFromDb(row),
+      paymentStatus: consultancyPaymentStatusFromJson(
+        _consultancyPaymentStatusFromDb(row['payment_status'] as String?),
+      ),
+      status: consultancyRequestStatusFromJson(
+        _consultancyRequestStatusFromDb(row['status'] as String?),
+      ),
+      sourcePage: row['source_page'] as String? ?? '',
+      createdAt: _parseDateTime(row['created_at']) ?? DateTime.now(),
+      updatedAt: _parseDateTime(row['updated_at']) ?? DateTime.now(),
+    );
+
+String? _nonEmptyOrNull(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) {
+    return null;
+  }
+  return trimmed;
+}
+
+String? _firstString(Map<String, dynamic> row, List<String> keys) {
+  for (final key in keys) {
+    final value = row[key];
+    if (value is String && value.trim().isNotEmpty) {
+      return value;
+    }
+  }
+  return null;
+}
+
+DateTime? _parseDateTime(dynamic value) {
+  if (value is DateTime) {
+    return value;
+  }
+  if (value is String) {
+    return DateTime.tryParse(value);
+  }
+  return null;
+}
+
+String _problemRequestCategoryValue(ProblemRequestRecord item) {
+  return _nonEmptyOrNull(item.categoryId) ??
+      _nonEmptyOrNull(item.subcategoryId) ??
+      _nonEmptyOrNull(item.sourcePage) ??
+      'general';
+}
+
+String _consultancyRequestCategoryValue(ConsultancyRequestRecord item) {
+  return _nonEmptyOrNull(item.categoryId) ??
+      _nonEmptyOrNull(item.subcategoryId) ??
+      _nonEmptyOrNull(item.sourcePage) ??
+      'general';
+}
+
+String _consultancySubjectValue(ConsultancyRequestRecord item) {
+  return _nonEmptyOrNull(item.problemType) ??
+      _nonEmptyOrNull(item.desiredResult) ??
+      _nonEmptyOrNull(item.categoryId) ??
+      'Private consultancy request';
+}
+
+String _consultancyMessageValue(ConsultancyRequestRecord item) {
+  final description = item.description.trim();
+  if (description.isNotEmpty) {
+    return description;
+  }
+  final desiredResult = item.desiredResult.trim();
+  if (desiredResult.isNotEmpty) {
+    return desiredResult;
+  }
+  return 'Private consultancy request';
+}
+
+String _normalizeRequestLanguageCode(String value) {
+  final normalized = value.trim().toLowerCase();
+  switch (normalized) {
+    case 'it':
+    case 'italian':
+    case 'italiano':
+      return 'it';
+    case 'fr':
+    case 'french':
+    case 'francais':
+    case 'français':
+      return 'fr';
+    case 'fa':
+    case 'persian':
+    case 'farsi':
+      return 'fa';
+    case 'en':
+    case 'english':
+      return 'en';
+    default:
+      return 'en';
+  }
+}
+
+String? _languageCodeToUiLabel(String value) {
+  switch (value.trim().toLowerCase()) {
+    case 'it':
+      return 'Italian';
+    case 'fr':
+      return 'French';
+    case 'fa':
+      return 'Persian';
+    case 'ar':
+      return 'Arabic';
+    case 'es':
+      return 'Spanish';
+    case 'en':
+    default:
+      return 'English';
+  }
+}
+
+String _problemRequestStatusToDb(ProblemRequestStatus status) {
+  return switch (status) {
     ProblemRequestStatus.newRequest => 'new',
     ProblemRequestStatus.reviewing => 'reviewing',
     ProblemRequestStatus.planned => 'planned',
     ProblemRequestStatus.added => 'added',
     ProblemRequestStatus.rejected => 'rejected',
-  },
-  'is_premium_user': item.isPremiumUser,
-  'source_page': item.sourcePage,
-  'created_at': item.createdAt.toIso8601String(),
-  'updated_at': item.updatedAt.toIso8601String(),
-};
+  };
+}
 
-ProblemRequestRecord _problemRequestFromDb(
-  Map<String, dynamic> row,
-) => ProblemRequestRecord(
-  id: row['id'] as String? ?? '',
-  userId: row['user_id'] as String?,
-  userEmail: row['user_email'] as String?,
-  categoryId: row['category_id'] as String?,
-  subcategoryId: row['subcategory_id'] as String?,
-  title: row['title'] as String? ?? '',
-  description: row['description'] as String? ?? '',
-  city: row['city'] as String? ?? 'Torino',
-  region: row['region'] as String? ?? 'Piemonte',
-  urgency: row['urgency'] as String? ?? 'normal',
-  language: row['language'] as String? ?? 'English',
-  attachmentPlaceholder: row['attachment_placeholder'] as String?,
-  status: switch (row['status']) {
+ProblemRequestStatus _problemRequestStatusFromDb(String? status) {
+  return switch (status) {
     'reviewing' => ProblemRequestStatus.reviewing,
     'planned' => ProblemRequestStatus.planned,
     'added' => ProblemRequestStatus.added,
     'rejected' => ProblemRequestStatus.rejected,
     _ => ProblemRequestStatus.newRequest,
-  },
-  isPremiumUser: row['is_premium_user'] as bool? ?? false,
-  sourcePage: row['source_page'] as String? ?? '',
-  createdAt:
-      DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
-  updatedAt:
-      DateTime.tryParse(row['updated_at'] as String? ?? '') ?? DateTime.now(),
-);
+  };
+}
 
-Map<String, dynamic> _consultancyRequestToDb(ConsultancyRequestRecord item) => {
-  'id': item.id,
-  'user_id': item.userId,
-  'user_email': item.userEmail,
-  'full_name': item.fullName,
-  'category_id': item.categoryId,
-  'subcategory_id': item.subcategoryId,
-  'problem_type': item.problemType,
-  'description': item.description,
-  'desired_result': item.desiredResult,
-  'city': item.city,
-  'region': item.region,
-  'documents_available': item.documentsAvailable,
-  'attachment_urls': item.attachmentUrls,
-  'user_plan': item.userPlan,
-  'payment_status': item.paymentStatus.name,
-  'status': item.status.name,
-  'source_page': item.sourcePage,
-  'created_at': item.createdAt.toIso8601String(),
-  'updated_at': item.updatedAt.toIso8601String(),
-};
+String _consultancyPaymentStatusToDb(ConsultancyPaymentStatus status) {
+  return switch (status) {
+    ConsultancyPaymentStatus.freeForPremium => 'not_required',
+    ConsultancyPaymentStatus.paymentRequired => 'required',
+    ConsultancyPaymentStatus.waitingPayment => 'pending',
+    ConsultancyPaymentStatus.paid => 'paid',
+    ConsultancyPaymentStatus.failed => 'failed',
+    ConsultancyPaymentStatus.notAvailable => 'waived',
+  };
+}
 
-ConsultancyRequestRecord _consultancyRequestFromDb(
-  Map<String, dynamic> row,
-) => ConsultancyRequestRecord(
-  id: row['id'] as String? ?? '',
-  userId: row['user_id'] as String?,
-  userEmail: row['user_email'] as String?,
-  fullName: row['full_name'] as String? ?? '',
-  categoryId: row['category_id'] as String?,
-  subcategoryId: row['subcategory_id'] as String?,
-  problemType: row['problem_type'] as String? ?? '',
-  description: row['description'] as String? ?? '',
-  desiredResult: row['desired_result'] as String? ?? '',
-  city: row['city'] as String? ?? 'Torino',
-  region: row['region'] as String? ?? 'Piemonte',
-  documentsAvailable: row['documents_available'] as String? ?? '',
-  attachmentUrls: ((row['attachment_urls'] as List?) ?? const [])
-      .cast<String>(),
-  userPlan: row['user_plan'] as String? ?? UfficioPlan.free.name,
-  paymentStatus: consultancyPaymentStatusFromJson(
-    row['payment_status'] as String?,
-  ),
-  status: consultancyRequestStatusFromJson(row['status'] as String?),
-  sourcePage: row['source_page'] as String? ?? '',
-  createdAt:
-      DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
-  updatedAt:
-      DateTime.tryParse(row['updated_at'] as String? ?? '') ?? DateTime.now(),
-);
+String _consultancyPaymentStatusFromDb(String? status) {
+  return switch (status) {
+    'not_required' => ConsultancyPaymentStatus.freeForPremium.name,
+    'required' => ConsultancyPaymentStatus.paymentRequired.name,
+    'pending' => ConsultancyPaymentStatus.waitingPayment.name,
+    'paid' => ConsultancyPaymentStatus.paid.name,
+    'failed' => ConsultancyPaymentStatus.failed.name,
+    'waived' => ConsultancyPaymentStatus.notAvailable.name,
+    _ => status ?? ConsultancyPaymentStatus.notAvailable.name,
+  };
+}
+
+String _consultancyRequestStatusToDb(ConsultancyRequestStatus status) {
+  return switch (status) {
+    ConsultancyRequestStatus.newRequest => 'new',
+    ConsultancyRequestStatus.waitingPayment => 'waiting_user',
+    ConsultancyRequestStatus.reviewing => 'reviewing',
+    ConsultancyRequestStatus.replied => 'answered',
+    ConsultancyRequestStatus.closed => 'closed',
+  };
+}
+
+String _consultancyRequestStatusFromDb(String? status) {
+  return switch (status) {
+    'new' => ConsultancyRequestStatus.newRequest.name,
+    'waiting_user' => ConsultancyRequestStatus.waitingPayment.name,
+    'reviewing' => ConsultancyRequestStatus.reviewing.name,
+    'answered' => ConsultancyRequestStatus.replied.name,
+    'closed' => ConsultancyRequestStatus.closed.name,
+    _ => status ?? ConsultancyRequestStatus.newRequest.name,
+  };
+}
+
+bool _isPremiumPlanName(String value) {
+  final normalized = value.trim().toLowerCase();
+  return normalized == UfficioPlan.premiumMonthly.name.toLowerCase() ||
+      normalized == UfficioPlan.premiumYearly.name.toLowerCase() ||
+      normalized == UfficioPlan.plusMonthly.name.toLowerCase() ||
+      normalized == UfficioPlan.plusYearly.name.toLowerCase() ||
+      normalized == 'premium' ||
+      normalized == 'pro' ||
+      normalized == 'consultant';
+}
+
+String _consultancyUserPlanFromDb(Map<String, dynamic> row) {
+  final explicitPlan = _firstString(row, const ['user_plan']);
+  if (explicitPlan != null) {
+    return explicitPlan;
+  }
+  return row['is_premium_snapshot'] == true
+      ? UfficioPlan.premiumMonthly.name
+      : UfficioPlan.free.name;
+}
 
 class CostDashboardService {
   const CostDashboardService(this._repository);
