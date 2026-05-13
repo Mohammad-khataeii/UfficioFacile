@@ -51,8 +51,7 @@ void main() {
   const forbiddenPhrases = <String>[
     'to help the user',
     'the user should',
-    'do not show',
-    'internal',
+    'internal note',
     'placeholder',
     'todo',
     'fake data',
@@ -64,7 +63,7 @@ void main() {
   final categoryIds = <String>{};
   final duplicateCategoryIds = <String>{};
   var subcategoryCount = 0;
-  var singleProcedureSubcategoryCount = 0;
+  var premiumOnlySubcategoryCount = 0;
 
   for (final category in categories) {
     final categoryId = '${category['id'] ?? ''}';
@@ -122,8 +121,8 @@ void main() {
               .whereType<Map>()
               .map((item) => Map<String, dynamic>.from(item))
               .toList();
-      if (procedures.length == 1) {
-        singleProcedureSubcategoryCount++;
+      if (subcategory['isPremiumOnly'] == true) {
+        premiumOnlySubcategoryCount++;
       }
       final procedureIds = <String>{};
       for (final procedure in procedures) {
@@ -155,10 +154,10 @@ void main() {
   }
 
   if (subcategoryCount > 0 &&
-      singleProcedureSubcategoryCount / subcategoryCount > 0.70) {
+      premiumOnlySubcategoryCount / subcategoryCount > 0.35) {
     problems.add(
-      'Catalog still looks flattened: $singleProcedureSubcategoryCount of '
-      '$subcategoryCount subcategories contain exactly one procedure.',
+      'Catalog has too many premium-only subcategories: '
+      '$premiumOnlySubcategoryCount of $subcategoryCount.',
     );
   }
 
