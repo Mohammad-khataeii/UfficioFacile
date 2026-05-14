@@ -9,6 +9,7 @@ import {
   editableCatalogTables,
   type EditableCatalogTable,
 } from "@/lib/db/queries";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import {
   adminUserSchema,
   categorySchema,
@@ -40,6 +41,62 @@ export async function logAdminAction(input: {
     after_value: input.afterValue ?? {},
     metadata: input.metadata ?? {},
   });
+}
+
+async function resolveProfileTable(
+  service: ReturnType<typeof createServiceRoleClient>,
+) {
+  try {
+    await service.from("ufficio_profiles").select("user_id").limit(1);
+    return "ufficio_profiles";
+  } catch {
+    return "ufficcio_profiles";
+  }
+}
+
+async function profileTableSupportsMetadata(
+  service: ReturnType<typeof createServiceRoleClient>,
+  table: string,
+) {
+  try {
+    await service.from(table).select("metadata").limit(1);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function assertManageableUserTarget(
+  actorRole: AdminRole,
+  actorUserId: string,
+  targetUserId: string,
+  {
+    allowSelf = false,
+    actionLabel = "manage this user",
+  }: { allowSelf?: boolean; actionLabel?: string } = {},
+) {
+  if (!allowSelf && actorUserId === targetUserId) {
+    throw new Error(
+      `You cannot ${actionLabel} for your own account from the admin panel.`,
+    );
+  }
+
+  const service = createServiceRoleClient();
+  const { data: targetAdmin, error } = await service
+    .from("ufficio_admin_users")
+    .select("role, is_active")
+    .eq("user_id", targetUserId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!targetAdmin?.role) return;
+
+  const targetRole = targetAdmin.role as AdminRole;
+  if (
+    !canManageAdminTarget(actorRole, targetRole) &&
+    actorRole !== "owner"
+  ) {
+    throw new Error("You do not have permission to manage that admin account.");
+  }
 }
 
 export async function upsertAdminUser(formData: FormData) {
@@ -411,6 +468,134 @@ export async function updateConsultancyRequest(formData: FormData) {
   });
   revalidatePath("/requests/consultancy");
   revalidatePath(`/requests/consultancy/${id}`);
+}
+
+export async function updateUserDeviceLock(formData: FormData) {
+  const admin = await requireAdmin("users.manage");
+  const userId = String(formData.get("userId") ?? "").trim();
+  const mode = String(formData.get("mode") ?? "").trim();
+  if (!userId) throw new Error("User ID is required.");
+  if (!["unlock", "lockNextSignIn"].includes(mode)) {
+    throw new Error("Invalid device lock action.");
+  }
+
+  await assertManageableUserTarget(admin.role, admin.userId, userId, {
+    actionLabel: "change the device lock",
+  });
+
+  const service = createServiceRoleClient();
+  const table = await resolveProfileTable(service);
+  const supportsMetadata = await profileTableSupportsMetadata(service, table);
+  if (!supportsMetadata) {
+    throw new Error(
+      "This Supabase project does not have profile metadata yet. Apply the latest profile migration before managing device locks.",
+    );
+  }
+
+  const { data: beforeRow, error: beforeError } = await service
+    .from(table)
+    .select("user_id, email, metadata")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (beforeError) throw beforeError;
+
+  const beforeMetadata =
+    beforeRow?.metadata && typeof beforeRow.metadata === "object"
+      ? { ...(beforeRow.metadata as Record<string, unknown>) }
+      : {};
+  const existingBinding =
+    beforeMetadata.device_binding &&
+    typeof beforeMetadata.device_binding === "object"
+      ? { ...(beforeMetadata.device_binding as Record<string, unknown>) }
+      : {};
+
+  const now = new Date().toISOString();
+  const nextBinding: Record<string, unknown> =
+    mode === "unlock"
+      ? {
+          ...existingBinding,
+          enabled: false,
+          unlocked_by_admin_at: now,
+          unlocked_by_admin_user_id: admin.userId,
+        }
+      : {
+          ...existingBinding,
+          enabled: true,
+          locked_by_admin_at: now,
+          locked_by_admin_user_id: admin.userId,
+        };
+
+  if (mode === "lockNextSignIn") {
+    delete nextBinding.installation_id;
+    delete nextBinding.platform;
+    delete nextBinding.bound_at;
+    delete nextBinding.last_seen_at;
+    delete nextBinding.unlocked_by_admin_at;
+    delete nextBinding.unlocked_by_admin_user_id;
+  }
+
+  const payload = {
+    user_id: userId,
+    email: typeof beforeRow?.email === "string" ? beforeRow.email : null,
+    metadata: {
+      ...beforeMetadata,
+      device_binding: nextBinding,
+    },
+  };
+
+  const { error } = await service
+    .from(table)
+    .upsert(payload, { onConflict: "user_id" });
+  if (error) throw error;
+
+  await logAdminAction({
+    action: `user.device_lock.${mode}`,
+    targetTable: table,
+    targetId: userId,
+    targetUserId: userId,
+    beforeValue: beforeRow ?? {},
+    afterValue: payload,
+  });
+  revalidatePath("/users");
+  revalidatePath(`/users/${userId}`);
+}
+
+export async function deleteUserAccount(formData: FormData) {
+  const admin = await requireAdmin("users.manage");
+  const userId = String(formData.get("userId") ?? "").trim();
+  if (!userId) throw new Error("User ID is required.");
+
+  await assertManageableUserTarget(admin.role, admin.userId, userId, {
+    actionLabel: "delete",
+  });
+
+  const service = createServiceRoleClient();
+  const authUserResult = await service.auth.admin.getUserById(userId);
+  if (authUserResult.error) throw authUserResult.error;
+
+  const { data: adminRow, error: adminRowError } = await service
+    .from("ufficio_admin_users")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (adminRowError) throw adminRowError;
+
+  const deleteResult = await service.auth.admin.deleteUser(userId);
+  if (deleteResult.error) throw deleteResult.error;
+
+  await logAdminAction({
+    action: "user.account.deleted",
+    targetTable: "auth.users",
+    targetId: userId,
+    targetUserId: userId,
+    summary: authUserResult.data.user?.email ?? userId,
+    beforeValue: {
+      authUser: authUserResult.data.user ?? null,
+      adminUser: adminRow ?? null,
+    },
+    afterValue: {},
+  });
+  revalidatePath("/users");
 }
 
 function localizedFromFormData(formData: FormData, prefix: string) {

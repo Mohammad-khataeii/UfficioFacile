@@ -56,6 +56,10 @@ class DeviceBindingService {
         .maybeSingle();
     final existingMetadata = _jsonMap(row?['metadata']);
     final binding = _jsonMap(existingMetadata['device_binding']);
+    final bindingEnabled = binding['enabled'];
+    if (bindingEnabled is bool && !bindingEnabled) {
+      return;
+    }
     final boundInstallationId = binding['installation_id'] as String?;
     if (boundInstallationId != null &&
         boundInstallationId.isNotEmpty &&
@@ -69,6 +73,7 @@ class DeviceBindingService {
       ...existingMetadata,
       'device_binding': <String, dynamic>{
         ...binding,
+        'enabled': true,
         'installation_id': installationId,
         'platform': _platformLabel,
         'bound_at': binding['bound_at'] ?? now,
