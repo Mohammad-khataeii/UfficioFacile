@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
+import '../../data/ufficio_city_registry.dart';
+import '../../domain/ufficio_city.dart';
 import '../../domain/premium_config.dart';
 import '../../domain/ufficio_catalog.dart';
+import '../../data/ufficio_catalog_repository.dart';
 import 'life_admin_screens.dart'
     show
         GlobalProblemRequestCard,
         PremiumBadge,
         PremiumBadgeTone,
         PrivateConsultancyCard,
-        startCheckoutFlow,
+        showCityCatalogRequestSheet,
         showPremiumPaywallSheet;
 
 PremiumBadge _subcategoryAccessBadge(
@@ -63,14 +66,43 @@ class CatalogCategoryScreen extends StatefulWidget {
 }
 
 class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
-  Future<UfficioCatalog>? _catalogFuture;
+  Future<UfficioCatalogLoadResult>? _catalogFuture;
+  String? _resolvedCitySlug;
+  ChangeNotifier? _profileListenable;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _catalogFuture ??= AppScope.of(
-      context,
-    ).ufficioCatalogRepository.loadCatalog();
+    final nextListenable = AppScope.of(context).profileController;
+    if (!identical(_profileListenable, nextListenable)) {
+      _profileListenable?.removeListener(_handleProfileChanged);
+      _profileListenable = nextListenable;
+      _profileListenable?.addListener(_handleProfileChanged);
+    }
+    _refreshCatalogFutureIfNeeded();
+  }
+
+  void _handleProfileChanged() {
+    if (!mounted) return;
+    setState(_refreshCatalogFutureIfNeeded);
+  }
+
+  @override
+  void dispose() {
+    _profileListenable?.removeListener(_handleProfileChanged);
+    super.dispose();
+  }
+
+  void _refreshCatalogFutureIfNeeded() {
+    final scope = AppScope.of(context);
+    final nextCitySlug = UfficioCityRegistry.normalizeSlug(
+      scope.profileController.profile.selectedCityPackId,
+    );
+    if (_catalogFuture != null && _resolvedCitySlug == nextCitySlug) {
+      return;
+    }
+    _resolvedCitySlug = nextCitySlug;
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
   }
 
   @override
@@ -78,22 +110,35 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: FutureBuilder<UfficioCatalog>(
+        child: FutureBuilder<UfficioCatalogLoadResult>(
           future: _catalogFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const _CatalogLoadingState();
             }
-            if (snapshot.hasError || !snapshot.hasData) {
+            final result = snapshot.data;
+            if (snapshot.hasError || result == null) {
               return _CatalogErrorState(
                 onRetry: () => setState(
                   () => _catalogFuture = AppScope.of(
                     context,
-                  ).ufficioCatalogRepository.loadCatalog(),
+                  ).ufficioCatalogRepository.loadCatalogResult(),
                 ),
               );
             }
-            final category = snapshot.data!.findCategory(widget.categoryId);
+            if (result.isUnavailable) {
+              return _CatalogUnavailableState(city: result.city);
+            }
+            if (result.catalog == null) {
+              return _CatalogErrorState(
+                onRetry: () => setState(
+                  () => _catalogFuture = AppScope.of(
+                    context,
+                  ).ufficioCatalogRepository.loadCatalogResult(),
+                ),
+              );
+            }
+            final category = result.catalog!.findCategory(widget.categoryId);
             if (category == null) {
               return const _CatalogNotFoundState();
             }
@@ -228,14 +273,43 @@ class CatalogSubcategoryScreen extends StatefulWidget {
 }
 
 class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
-  Future<UfficioCatalog>? _catalogFuture;
+  Future<UfficioCatalogLoadResult>? _catalogFuture;
+  String? _resolvedCitySlug;
+  ChangeNotifier? _profileListenable;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _catalogFuture ??= AppScope.of(
-      context,
-    ).ufficioCatalogRepository.loadCatalog();
+    final nextListenable = AppScope.of(context).profileController;
+    if (!identical(_profileListenable, nextListenable)) {
+      _profileListenable?.removeListener(_handleProfileChanged);
+      _profileListenable = nextListenable;
+      _profileListenable?.addListener(_handleProfileChanged);
+    }
+    _refreshCatalogFutureIfNeeded();
+  }
+
+  void _handleProfileChanged() {
+    if (!mounted) return;
+    setState(_refreshCatalogFutureIfNeeded);
+  }
+
+  @override
+  void dispose() {
+    _profileListenable?.removeListener(_handleProfileChanged);
+    super.dispose();
+  }
+
+  void _refreshCatalogFutureIfNeeded() {
+    final scope = AppScope.of(context);
+    final nextCitySlug = UfficioCityRegistry.normalizeSlug(
+      scope.profileController.profile.selectedCityPackId,
+    );
+    if (_catalogFuture != null && _resolvedCitySlug == nextCitySlug) {
+      return;
+    }
+    _resolvedCitySlug = nextCitySlug;
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
   }
 
   @override
@@ -243,22 +317,35 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: FutureBuilder<UfficioCatalog>(
+        child: FutureBuilder<UfficioCatalogLoadResult>(
           future: _catalogFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const _CatalogLoadingState();
             }
-            if (snapshot.hasError || !snapshot.hasData) {
+            final result = snapshot.data;
+            if (snapshot.hasError || result == null) {
               return _CatalogErrorState(
                 onRetry: () => setState(
                   () => _catalogFuture = AppScope.of(
                     context,
-                  ).ufficioCatalogRepository.loadCatalog(),
+                  ).ufficioCatalogRepository.loadCatalogResult(),
                 ),
               );
             }
-            final catalog = snapshot.data!;
+            if (result.isUnavailable) {
+              return _CatalogUnavailableState(city: result.city);
+            }
+            if (result.catalog == null) {
+              return _CatalogErrorState(
+                onRetry: () => setState(
+                  () => _catalogFuture = AppScope.of(
+                    context,
+                  ).ufficioCatalogRepository.loadCatalogResult(),
+                ),
+              );
+            }
+            final catalog = result.catalog!;
             final category = catalog.findCategory(widget.categoryId);
             final subcategory = catalog.findSubcategory(
               widget.categoryId,
@@ -422,21 +509,52 @@ class CatalogProcedureScreen extends StatefulWidget {
 
 class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
   Future<UfficioProcedure?>? _procedureFuture;
+  String? _resolvedCitySlug;
+  ChangeNotifier? _profileListenable;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _procedureFuture ??= AppScope.of(context).ufficioCatalogRepository
-        .loadProcedureDetail(
-          categoryId: widget.categoryId,
-          subcategoryId: widget.subcategoryId,
-          procedureId: widget.procedureId,
-        );
+    final nextListenable = AppScope.of(context).profileController;
+    if (!identical(_profileListenable, nextListenable)) {
+      _profileListenable?.removeListener(_handleProfileChanged);
+      _profileListenable = nextListenable;
+      _profileListenable?.addListener(_handleProfileChanged);
+    }
+    _refreshProcedureFutureIfNeeded();
+  }
+
+  void _handleProfileChanged() {
+    if (!mounted) return;
+    setState(_refreshProcedureFutureIfNeeded);
+  }
+
+  void _refreshProcedureFutureIfNeeded() {
+    final scope = AppScope.of(context);
+    final nextCitySlug = UfficioCityRegistry.normalizeSlug(
+      scope.profileController.profile.selectedCityPackId,
+    );
+    if (_procedureFuture != null && _resolvedCitySlug == nextCitySlug) {
+      return;
+    }
+    _resolvedCitySlug = nextCitySlug;
+    _procedureFuture = scope.ufficioCatalogRepository.loadProcedureDetail(
+      categoryId: widget.categoryId,
+      subcategoryId: widget.subcategoryId,
+      procedureId: widget.procedureId,
+    );
+  }
+
+  @override
+  void dispose() {
+    _profileListenable?.removeListener(_handleProfileChanged);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
+    _refreshProcedureFutureIfNeeded();
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
@@ -447,6 +565,10 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
               return const _CatalogLoadingState();
             }
             if (snapshot.hasError) {
+              final error = snapshot.error;
+              if (error is UfficioCatalogUnavailableException) {
+                return _CatalogUnavailableState(city: error.city);
+              }
               return _CatalogErrorState(
                 onRetry: () => setState(
                   () => _procedureFuture = scope.ufficioCatalogRepository
@@ -513,17 +635,6 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                 spacing: 8,
                                 runSpacing: 8,
                                 children: [
-                                  OutlinedButton(
-                                    onPressed: () => startCheckoutFlow(
-                                      context,
-                                      productKey: 'subcategory_unlock',
-                                      categorySlug: procedure.categoryId,
-                                      procedureSlug: procedure.id,
-                                    ),
-                                    child: Text(
-                                      context.l10n.t('unlock_this_guide_only'),
-                                    ),
-                                  ),
                                   FilledButton(
                                     onPressed: () => Navigator.pushNamed(
                                       context,
@@ -905,6 +1016,57 @@ class _CatalogNotFoundState extends StatelessWidget {
                 (route) => false,
               ),
               child: Text(context.l10n.t('back_to_dashboard')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CatalogUnavailableState extends StatelessWidget {
+  const _CatalogUnavailableState({required this.city});
+
+  final UfficioCity city;
+
+  @override
+  Widget build(BuildContext context) {
+    final isComingSoon = !city.isAvailable;
+    final suffix = isComingSoon
+        ? context.l10n.t('city_catalog_status_coming_soon')
+        : context.l10n.t('city_catalog_status_available');
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.l10n.t('city_catalog_unavailable_title'),
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.l10n
+                  .t('city_catalog_unavailable_body')
+                  .replaceAll('{city}', city.label),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${context.l10n.t('city_catalog_label')}: ${city.label} — $suffix',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => showCityCatalogRequestSheet(context, city: city),
+              child: Text(context.l10n.t('city_catalog_request_cta')),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
+              child: Text(context.l10n.t('city_catalog_change_city')),
             ),
           ],
         ),

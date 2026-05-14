@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "content:lint": "node scripts/content-lint.mjs"
+    "typecheck": "tsc --noEmit",
+    "content:lint": "node scripts/content-lint.mjs",
+    "copy:audit": "node scripts/audit-user-facing-copy.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

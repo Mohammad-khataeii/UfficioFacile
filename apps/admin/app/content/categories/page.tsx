@@ -4,23 +4,32 @@ import { AdminShell } from "@/components/admin-shell";
 import { DataTable } from "@/components/data-table";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { getAdminCategories } from "@/lib/content/load-content-tree";
+import { getAdminCategoriesNormalized } from "@/lib/catalog/queries";
 
 export default async function ContentCategoriesPage() {
   const admin = await requireAdmin("content.read");
-  const categories = await getAdminCategories(admin.supabase, {
+  const categories = await getAdminCategoriesNormalized(admin.supabase, {
     bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
   });
 
   return (
     <AdminShell email={admin.email} role={admin.role}>
       <DataTable
-        headers={["Title", "Slug", "Verification", "Active", "Source", "Open"]}
+        headers={[
+          "Title",
+          "Slug",
+          "Subcategories",
+          "Procedures",
+          "Visibility",
+          "Source",
+          "Open",
+        ]}
         rows={categories.map((category) => [
-          category.title?.en || category.slug,
+          category.title.en || category.slug,
           category.slug,
-          <StatusBadge key="verify" value={category.verification_status} />,
-          category.is_active ? "yes" : "no",
+          category.subcategoryCount,
+          category.procedureCount,
+          <StatusBadge key="visibility" value={category.premiumVisibility} />,
           <StatusBadge key="source" value={category.source} />,
           <Link key="open" href={`/content/categories/${category.slug}`}>Edit</Link>,
         ])}

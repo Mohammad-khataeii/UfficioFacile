@@ -47,6 +47,16 @@ String _statusFromDb(String value) {
           .join();
 }
 
+Map<String, dynamic> _supabaseJsonMap(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+  if (value is Map) {
+    return Map<String, dynamic>.from(value);
+  }
+  return const <String, dynamic>{};
+}
+
 UfficioPlan _planFromDatabase(String? raw, {required bool premiumAccess}) {
   switch (raw) {
     case 'plus_monthly':
@@ -67,7 +77,7 @@ UfficioPlan _planFromDatabase(String? raw, {required bool premiumAccess}) {
     case 'trial':
       return UfficioPlan.trial;
     case 'premium':
-      return premiumAccess ? UfficioPlan.premiumMonthly : UfficioPlan.pro;
+      return premiumAccess ? UfficioPlan.premiumMonthly : UfficioPlan.free;
     case 'pro':
       return UfficioPlan.pro;
     case 'consultant':
@@ -121,49 +131,60 @@ bool _resolvePremiumAccess({
   }
   return premiumAccess &&
       <UfficioPlan>{
+        UfficioPlan.premiumMonthly,
+        UfficioPlan.premiumYearly,
+        UfficioPlan.trial,
         UfficioPlan.plusMonthly,
         UfficioPlan.plusYearly,
         UfficioPlan.pro,
         UfficioPlan.consultant,
-        UfficioPlan.premiumMonthly,
-        UfficioPlan.premiumYearly,
-        UfficioPlan.trial,
       }.contains(plan);
 }
 
 extension AdminCopilotProfileSupabaseMapper on AdminCopilotProfile {
-  Map<String, dynamic> toSupabaseJson({required String userId}) => {
-    'user_id': userId,
-    'full_name': fullName,
-    'codice_fiscale': codiceFiscale,
-    'date_of_birth': dateOfBirth?.toIso8601String().split('T').first,
-    'nationality': nationality,
-    'phone': phone,
-    'email': email,
-    'city': city,
-    'address': address,
-    'preferred_language': preferredLanguage,
-    'has_spid': hasSpid,
-    'has_cie': hasCie,
-    'has_pec': hasPec,
-    'student_status': studentStatus,
-    'university_name': universityName,
-    'matricola': matricola,
-    'work_status': workStatus,
-    'employer_name': employerName,
-    'contract_type': contractType,
-    'house_status': houseStatus,
-    'landlord_name': landlordName,
-    'electricity_provider': electricityProvider,
-    'gas_provider': gasProvider,
-    'internet_provider': internetProvider,
-    'default_asl': defaultAsl,
-    'default_comune': defaultComune,
-    'default_patronato': defaultPatronato,
-    'notes': notes,
-  };
+  Map<String, dynamic> toSupabaseJson({
+    required String userId,
+    Map<String, dynamic> existingMetadata = const <String, dynamic>{},
+  }) {
+    final metadata = <String, dynamic>{...existingMetadata};
+    if (selectedCityPackId != null && selectedCityPackId!.trim().isNotEmpty) {
+      metadata['selected_city_pack_id'] = selectedCityPackId;
+    }
+    return {
+      'user_id': userId,
+      'full_name': fullName,
+      'codice_fiscale': codiceFiscale,
+      'date_of_birth': dateOfBirth?.toIso8601String().split('T').first,
+      'nationality': nationality,
+      'phone': phone,
+      'email': email,
+      'city': city,
+      'address': address,
+      'preferred_language': preferredLanguage,
+      'has_spid': hasSpid,
+      'has_cie': hasCie,
+      'has_pec': hasPec,
+      'student_status': studentStatus,
+      'university_name': universityName,
+      'matricola': matricola,
+      'work_status': workStatus,
+      'employer_name': employerName,
+      'contract_type': contractType,
+      'house_status': houseStatus,
+      'landlord_name': landlordName,
+      'electricity_provider': electricityProvider,
+      'gas_provider': gasProvider,
+      'internet_provider': internetProvider,
+      'default_asl': defaultAsl,
+      'default_comune': defaultComune,
+      'default_patronato': defaultPatronato,
+      'notes': notes,
+      'metadata': metadata,
+    };
+  }
 
   static AdminCopilotProfile fromSupabaseJson(Map<String, dynamic> json) {
+    final metadata = _supabaseJsonMap(json['metadata']);
     return AdminCopilotProfile(
       fullName: json['full_name'] as String?,
       codiceFiscale: json['codice_fiscale'] as String?,
@@ -192,6 +213,7 @@ extension AdminCopilotProfileSupabaseMapper on AdminCopilotProfile {
       defaultComune: json['default_comune'] as String?,
       defaultPatronato: json['default_patronato'] as String?,
       notes: json['notes'] as String?,
+      selectedCityPackId: metadata['selected_city_pack_id'] as String?,
     );
   }
 }
@@ -702,6 +724,7 @@ class SupabaseAdminCopilotProfileRepository
 
   final SupabaseClient _client;
   final String _userId;
+  bool? _supportsMetadataColumn;
 
   Future<String> _tableName() async {
     try {
@@ -709,6 +732,24 @@ class SupabaseAdminCopilotProfileRepository
       return 'ufficio_profiles';
     } on PostgrestException {
       return 'ufficcio_profiles';
+    }
+  }
+
+  Future<bool> _tableSupportsMetadata(String table) async {
+    final cached = _supportsMetadataColumn;
+    if (cached != null) {
+      return cached;
+    }
+    try {
+      await _client.from(table).select('metadata').limit(1);
+      _supportsMetadataColumn = true;
+      return true;
+    } on PostgrestException catch (error) {
+      if (_isMissingColumnError(error, 'metadata')) {
+        _supportsMetadataColumn = false;
+        return false;
+      }
+      rethrow;
     }
   }
 
@@ -734,13 +775,51 @@ class SupabaseAdminCopilotProfileRepository
   @override
   Future<AdminCopilotProfile> saveProfile(AdminCopilotProfile profile) async {
     final table = await _tableName();
+    final supportsMetadata = await _tableSupportsMetadata(table);
+    Map<String, dynamic> existingMetadata = const <String, dynamic>{};
+    if (supportsMetadata) {
+      try {
+        final existingRow = await _client
+            .from(table)
+            .select('metadata')
+            .eq('user_id', _userId)
+            .maybeSingle();
+        existingMetadata = _supabaseJsonMap(existingRow?['metadata']);
+      } on PostgrestException catch (error) {
+        if (_isMissingColumnError(error, 'metadata')) {
+          _supportsMetadataColumn = false;
+        } else {
+          rethrow;
+        }
+      }
+    }
+    final payload = profile.toSupabaseJson(
+      userId: _userId,
+      existingMetadata: existingMetadata,
+    );
+    if (!(_supportsMetadataColumn ?? supportsMetadata)) {
+      payload.remove('metadata');
+    }
     final row = await _client
         .from(table)
-        .upsert(profile.toSupabaseJson(userId: _userId), onConflict: 'user_id')
+        .upsert(payload, onConflict: 'user_id')
         .select()
         .single();
     return AdminCopilotProfileSupabaseMapper.fromSupabaseJson(row);
   }
+}
+
+bool _isMissingColumnError(PostgrestException error, String columnName) {
+  final parts = <String>[
+    error.message,
+    (error.details ?? '').toString(),
+    (error.hint ?? '').toString(),
+  ].join(' ').toLowerCase();
+  final column = columnName.toLowerCase();
+  return parts.contains(column) &&
+      (parts.contains('schema cache') ||
+          parts.contains('could not find') ||
+          parts.contains('column'));
 }
 
 class SupabaseAdminCopilotRequestRepository
@@ -1076,6 +1155,10 @@ class SupabaseUfficcioEntitlementRepository
         currentPeriodStart: DateTime(DateTime.now().year, DateTime.now().month),
         generatedPacksUsedThisMonth:
             (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
+        problemRequestsUsedThisMonth:
+            (usageRow?['problem_requests_used'] as num?)?.toInt() ?? 0,
+        consultancyRequestsUsedThisMonth:
+            (usageRow?['consultancy_requests_used'] as num?)?.toInt() ?? 0,
         utilityComparisonsUsedThisMonth:
             (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
         billAnalysesUsedThisMonth:
@@ -1130,6 +1213,10 @@ class SupabaseUfficcioEntitlementRepository
       'updatedAt': row['updated_at'],
       'generatedPacksUsedThisMonth':
           (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
+      'problemRequestsUsedThisMonth':
+          (usageRow?['problem_requests_used'] as num?)?.toInt() ?? 0,
+      'consultancyRequestsUsedThisMonth':
+          (usageRow?['consultancy_requests_used'] as num?)?.toInt() ?? 0,
       'utilityComparisonsUsedThisMonth':
           (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
       'billAnalysesUsedThisMonth':
@@ -1312,8 +1399,12 @@ class MergedAdminCopilotProfileRepository
     try {
       final remote = await remoteRepository.getProfile();
       if (remote != null) {
-        await localRepository.saveProfile(remote);
-        return _withAuthDefaults(remote);
+        final mergedRemote = _preserveSelectedCity(
+          preferred: remote,
+          fallback: local,
+        );
+        await localRepository.saveProfile(mergedRemote);
+        return _withAuthDefaults(mergedRemote);
       }
     } catch (_) {}
     return _withAuthDefaults(local);
@@ -1332,8 +1423,12 @@ class MergedAdminCopilotProfileRepository
     }
     try {
       final remoteSaved = await remoteRepository.saveProfile(normalized);
-      await localRepository.saveProfile(remoteSaved);
-      return remoteSaved;
+      final mergedRemote = _preserveSelectedCity(
+        preferred: remoteSaved,
+        fallback: normalized,
+      );
+      await localRepository.saveProfile(mergedRemote);
+      return mergedRemote;
     } catch (_) {
       return localSaved;
     }
@@ -1346,6 +1441,21 @@ class MergedAdminCopilotProfileRepository
       return next;
     }
     return next.copyWith(email: auth.email);
+  }
+
+  AdminCopilotProfile _preserveSelectedCity({
+    required AdminCopilotProfile preferred,
+    AdminCopilotProfile? fallback,
+  }) {
+    final selectedCity = preferred.selectedCityPackId?.trim();
+    if (selectedCity != null && selectedCity.isNotEmpty) {
+      return preferred;
+    }
+    final fallbackSelectedCity = fallback?.selectedCityPackId?.trim();
+    if (fallbackSelectedCity == null || fallbackSelectedCity.isEmpty) {
+      return preferred;
+    }
+    return preferred.copyWith(selectedCityPackId: fallbackSelectedCity);
   }
 }
 

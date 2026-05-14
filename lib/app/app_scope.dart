@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +14,7 @@ import '../features/admin_cms/data/local_cms_repository.dart';
 import '../features/admin_cms/data/supabase_cms_repository.dart';
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/data/auth_repository.dart';
+import '../features/auth/data/device_binding_service.dart';
 import '../features/auth/data/supabase_auth_repository.dart';
 import '../features/italy_admin_copilot/application/admin_controller.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
@@ -33,9 +36,11 @@ import '../features/italy_admin_copilot/data/life_admin_phase5_services.dart';
 import '../features/italy_admin_copilot/data/premium_service.dart';
 import '../features/italy_admin_copilot/data/supabase_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/ufficio_catalog_repository.dart';
+import '../features/italy_admin_copilot/data/ufficio_city_registry.dart';
 import '../features/italy_admin_copilot/data/ufficio_product_services.dart';
 import '../features/italy_admin_copilot/data/ufficcio_supabase_readiness.dart';
 import 'supabase_bootstrap.dart';
+import 'screenshot_protection_service.dart';
 
 class AppScope extends InheritedWidget {
   AppScope({
@@ -49,6 +54,8 @@ class AppScope extends InheritedWidget {
         config.isSupabaseEnabled && SupabaseBootstrap.client != null
         ? SupabaseAuthRepository(SupabaseBootstrap.client!)
         : LocalAuthRepository(prefs);
+    deviceBindingService = DeviceBindingService(prefs);
+    screenshotProtectionService = ScreenshotProtectionService();
     final analytics = LocalAnalyticsService(prefs);
     appController = ItalyAdminCopilotController(
       appConfig: config,
@@ -128,7 +135,12 @@ class AppScope extends InheritedWidget {
           : null,
       prefs: prefs,
     );
-    ufficioCatalogRepository = UfficioCatalogRepository(cmsRepository);
+    ufficioCatalogRepository = UfficioCatalogRepository(
+      cmsRepository,
+      selectedCitySlugLoader: () async => UfficioCityRegistry.normalizeSlug(
+        profileController.profile.selectedCityPackId,
+      ),
+    );
     userSettingsRepository = LocalUfficcioUserSettingsRepository(prefs);
     entitlementRepository = LocalUfficcioEntitlementRepository(prefs);
     repositoryFactory = UfficcioRepositoryFactory(
@@ -176,9 +188,11 @@ class AppScope extends InheritedWidget {
     productEntitlementsService = EntitlementsService(entitlementService);
     problemRequestsService = ProblemRequestsService(
       hybridProblemRequestsRepository,
+      entitlementService,
     );
     consultancyService = ConsultancyService(
       hybridConsultancyRequestsRepository,
+      entitlementService,
     );
     costDashboardService = CostDashboardService(costItemsRepository);
     contactsDirectoryService = ContactsDirectoryService(
@@ -188,9 +202,16 @@ class AppScope extends InheritedWidget {
     authController = AuthController(
       authRepository,
       beforeAuthChange: clearAuthSensitiveState,
-      afterAuthenticated: (_) => reloadAuthSensitiveState(),
-      afterSignedOut: clearAuthSensitiveState,
+      afterAuthenticated: (user) async {
+        await deviceBindingService.enforceForSignedInUser(user);
+        await reloadAuthSensitiveState();
+      },
+      afterSignedOut: () async {
+        await clearAuthSensitiveState();
+        await updateScreenshotProtection();
+      },
     );
+    unawaited(updateScreenshotProtection());
   }
 
   final SharedPreferences _prefs;
@@ -199,6 +220,8 @@ class AppScope extends InheritedWidget {
 
   late final AuthRepository authRepository;
   late final AuthController authController;
+  late final DeviceBindingService deviceBindingService;
+  late final ScreenshotProtectionService screenshotProtectionService;
   late final ItalyAdminCopilotController appController;
   late final ProcedureController procedureController;
   late final LocalAdminCopilotProfileRepository localProfileRepository;
@@ -290,6 +313,7 @@ class AppScope extends InheritedWidget {
     profileController.resetLocalState();
     await requestController.clearLocalState();
     await adminPanelController.reset();
+    await updateScreenshotProtection();
   }
 
   Future<void> reloadAuthSensitiveState() async {
@@ -299,6 +323,14 @@ class AppScope extends InheritedWidget {
       adminPanelController.load(),
       entitlementService.getCurrentEntitlement(),
     ]);
+    await updateScreenshotProtection();
+  }
+
+  Future<void> updateScreenshotProtection() async {
+    final entitlement = await entitlementService.getCurrentEntitlement();
+    await screenshotProtectionService.setFreeAccountProtectionEnabled(
+      !entitlement.hasActivePremiumEntitlement,
+    );
   }
 
   static AppScope of(BuildContext context) {

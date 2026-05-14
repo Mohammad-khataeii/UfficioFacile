@@ -15,14 +15,14 @@ export default async function ConsultancyRequestsPage() {
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
         <h2 className="text-xl font-semibold text-slate-900">Consultancy requests</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Free for premium users, payment placeholder for free users until billing is integrated.
+          Premium members use their monthly consultancy quota here. Free-user payment status is tracked separately.
         </p>
       </section>
       <DataTable
-        headers={["Name", "Category", "Plan", "Payment", "Status", "Open"]}
+        headers={["Name", "Topic", "Plan", "Payment", "Status", "Open"]}
         rows={rows.map((row: any) => [
           row.full_name,
-          row.category_id ?? "—",
+          row.problem_type || row.category_id || "—",
           <StatusBadge key="plan" value={row.user_plan} />,
           <StatusBadge key="payment" value={row.payment_status} />,
           <StatusBadge key="status" value={row.status} />,

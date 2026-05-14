@@ -47,7 +47,12 @@ class AuthController extends ChangeNotifier {
       }
       user = sessionUser;
       if (sessionUser.isAuthenticated) {
-        await afterAuthenticated?.call(sessionUser);
+        try {
+          await afterAuthenticated?.call(sessionUser);
+        } on AuthFailure catch (error) {
+          await _signOutAfterAuthFailure(error.message);
+          return false;
+        }
       }
       return true;
     } on AuthFailure catch (error) {
@@ -78,7 +83,12 @@ class AuthController extends ChangeNotifier {
         return await _handleSessionMismatch();
       }
       user = sessionUser;
-      await afterAuthenticated?.call(sessionUser);
+      try {
+        await afterAuthenticated?.call(sessionUser);
+      } on AuthFailure catch (error) {
+        await _signOutAfterAuthFailure(error.message);
+        return false;
+      }
       return true;
     } on AuthFailure catch (error) {
       errorMessage = error.message;
@@ -156,6 +166,15 @@ class AuthController extends ChangeNotifier {
     await afterSignedOut?.call();
     errorMessage = 'Session mismatch. Please sign in again.';
     return false;
+  }
+
+  Future<void> _signOutAfterAuthFailure(String message) async {
+    try {
+      await _repository.signOut();
+    } catch (_) {}
+    user = null;
+    await afterSignedOut?.call();
+    errorMessage = message;
   }
 
   @override

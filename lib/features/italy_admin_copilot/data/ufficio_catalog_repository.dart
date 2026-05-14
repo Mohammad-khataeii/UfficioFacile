@@ -6,12 +6,77 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../../admin_cms/data/cms_repository.dart';
 import '../../admin_cms/domain/cms_models.dart';
 import '../content/ufficio_catalog_exporter.dart';
+import '../domain/ufficio_city.dart';
 import '../domain/ufficio_catalog.dart';
+import 'ufficio_city_registry.dart';
+
+enum UfficioCatalogLoadStatus { success, unavailable, invalid }
+
+class UfficioCatalogUnavailableException implements Exception {
+  const UfficioCatalogUnavailableException(this.city);
+
+  final UfficioCity city;
+
+  @override
+  String toString() =>
+      'No verified catalog is available for ${city.label} (${city.slug}).';
+}
+
+class UfficioCatalogLoadResult {
+  const UfficioCatalogLoadResult._({
+    required this.status,
+    required this.city,
+    this.catalog,
+    this.error,
+    this.assetPath,
+  });
+
+  factory UfficioCatalogLoadResult.success({
+    required UfficioCity city,
+    required UfficioCatalog catalog,
+    required String assetPath,
+  }) => UfficioCatalogLoadResult._(
+    status: UfficioCatalogLoadStatus.success,
+    city: city,
+    catalog: catalog,
+    assetPath: assetPath,
+  );
+
+  factory UfficioCatalogLoadResult.unavailable({required UfficioCity city}) =>
+      UfficioCatalogLoadResult._(
+        status: UfficioCatalogLoadStatus.unavailable,
+        city: city,
+      );
+
+  factory UfficioCatalogLoadResult.invalid({
+    required UfficioCity city,
+    required Object error,
+    String? assetPath,
+  }) => UfficioCatalogLoadResult._(
+    status: UfficioCatalogLoadStatus.invalid,
+    city: city,
+    error: error,
+    assetPath: assetPath,
+  );
+
+  final UfficioCatalogLoadStatus status;
+  final UfficioCity city;
+  final UfficioCatalog? catalog;
+  final Object? error;
+  final String? assetPath;
+
+  bool get isSuccess => status == UfficioCatalogLoadStatus.success;
+  bool get isUnavailable => status == UfficioCatalogLoadStatus.unavailable;
+}
 
 class UfficioCatalogRepository {
-  UfficioCatalogRepository(this._cmsRepository);
+  UfficioCatalogRepository(
+    this._cmsRepository, {
+    Future<String> Function()? selectedCitySlugLoader,
+  }) : _selectedCitySlugLoader = selectedCitySlugLoader;
 
   final CmsRepository _cmsRepository;
+  final Future<String> Function()? _selectedCitySlugLoader;
 
   static const _bundledAssetPath = 'assets/catalog/ufficio_catalog.v1.json';
   static const _legacyBundledAssetPaths = <String>[
@@ -26,8 +91,33 @@ class UfficioCatalogRepository {
 
   bool get _allowLegacyFallback => _legacyFallbackFromEnv || !kReleaseMode;
 
+  Future<String> _selectedCitySlug() async {
+    final loaded = await _selectedCitySlugLoader?.call();
+    return UfficioCityRegistry.normalizeSlug(loaded);
+  }
+
   Future<UfficioCatalog> loadCatalog() async {
-    final bundled = await _loadBundledCatalog();
+    final result = await loadCatalogResult();
+    if (result.catalog != null) {
+      return result.catalog!;
+    }
+    if (result.isUnavailable) {
+      throw UfficioCatalogUnavailableException(result.city);
+    }
+    throw FlutterError(
+      'Catalog could not be loaded for ${result.city.label} (${result.city.slug}).',
+    );
+  }
+
+  Future<UfficioCatalogLoadResult> loadCatalogResult({String? citySlug}) async {
+    final resolvedCity = await UfficioCityRegistry.resolveCity(
+      citySlug ?? await _selectedCitySlug(),
+    );
+    final bundled = await _loadBundledCatalogForCity(resolvedCity);
+    if (!bundled.isSuccess || bundled.catalog == null) {
+      return bundled;
+    }
+    final bundledCatalog = bundled.catalog!;
     try {
       final values = await Future.wait<Object>(<Future<Object>>[
         _cmsRepository.listCategories(),
@@ -38,10 +128,14 @@ class UfficioCatalogRepository {
       if (categories.isEmpty && procedures.isEmpty) {
         return bundled;
       }
-      return _mergeCatalog(
-        bundled,
-        categories: categories,
-        procedures: procedures,
+      return UfficioCatalogLoadResult.success(
+        city: resolvedCity,
+        catalog: _mergeCatalog(
+          bundledCatalog,
+          categories: categories,
+          procedures: procedures,
+        ),
+        assetPath: bundled.assetPath ?? '',
       );
     } catch (error) {
       assert(() {
@@ -57,7 +151,17 @@ class UfficioCatalogRepository {
     required String subcategoryId,
     required String procedureId,
   }) async {
-    final catalog = await loadCatalog();
+    final result = await loadCatalogResult();
+    if (result.catalog == null) {
+      if (result.isUnavailable) {
+        throw UfficioCatalogUnavailableException(result.city);
+      }
+      if (result.error != null) {
+        throw result.error!;
+      }
+      return null;
+    }
+    final catalog = result.catalog!;
     final bundledProcedure =
         catalog.findProcedure(categoryId, subcategoryId, procedureId) ??
         catalog.findProcedureInCategory(categoryId, procedureId);
@@ -93,10 +197,62 @@ class UfficioCatalogRepository {
     }
   }
 
-  Future<UfficioCatalog> _loadBundledCatalog() async {
+  Future<UfficioCatalogLoadResult> _loadBundledCatalogForCity(
+    UfficioCity city,
+  ) async {
+    Object? invalidAssetError;
+    String? invalidAssetPath;
+    for (final assetPath in UfficioCityRegistry.bundledAssetCandidates(
+      city.slug,
+    )) {
+      final assetExists = await UfficioCityRegistry.assetExists(assetPath);
+      if (!assetExists) {
+        continue;
+      }
+      try {
+        final raw = await rootBundle.loadString(assetPath);
+        return UfficioCatalogLoadResult.success(
+          city: city.copyWith(
+            isAvailable: true,
+            bundledCatalogAsset: assetPath,
+          ),
+          catalog: _catalogFromDecodedJson(jsonDecode(raw)),
+          assetPath: assetPath,
+        );
+      } catch (error) {
+        invalidAssetError = error;
+        invalidAssetPath = assetPath;
+        assert(() {
+          debugPrint('[Catalog] Failed to load city asset $assetPath: $error');
+          return true;
+        }());
+      }
+    }
+
+    if (invalidAssetError != null) {
+      return UfficioCatalogLoadResult.invalid(
+        city: city,
+        error: invalidAssetError,
+        assetPath: invalidAssetPath,
+      );
+    }
+
+    if (city.slug != 'torino') {
+      return UfficioCatalogLoadResult.unavailable(
+        city: city.copyWith(isAvailable: false),
+      );
+    }
+
     try {
       final raw = await rootBundle.loadString(_bundledAssetPath);
-      return _catalogFromDecodedJson(jsonDecode(raw));
+      return UfficioCatalogLoadResult.success(
+        city: city.copyWith(
+          isAvailable: true,
+          bundledCatalogAsset: _bundledAssetPath,
+        ),
+        catalog: _catalogFromDecodedJson(jsonDecode(raw)),
+        assetPath: _bundledAssetPath,
+      );
     } catch (error) {
       assert(() {
         debugPrint(
@@ -105,9 +261,13 @@ class UfficioCatalogRepository {
         return true;
       }());
       if (!_allowLegacyFallback) {
-        throw FlutterError(
-          'Catalog could not be loaded. The canonical asset '
-          '"assets/catalog/ufficio_catalog.v1.json" is missing or unreadable.',
+        return UfficioCatalogLoadResult.invalid(
+          city: city,
+          error: FlutterError(
+            'Catalog could not be loaded. The canonical asset '
+            '"assets/catalog/ufficio_catalog.v1.json" is missing or unreadable.',
+          ),
+          assetPath: _bundledAssetPath,
         );
       }
     }
@@ -123,7 +283,14 @@ class UfficioCatalogRepository {
                   : null);
         if (normalized == null) continue;
         final catalogBundle = buildUfficioCatalogBundleFromCmsSeed(normalized);
-        return UfficioCatalog.fromJson(catalogBundle);
+        return UfficioCatalogLoadResult.success(
+          city: city.copyWith(
+            isAvailable: true,
+            bundledCatalogAsset: assetPath,
+          ),
+          catalog: UfficioCatalog.fromJson(catalogBundle),
+          assetPath: assetPath,
+        );
       } catch (error) {
         assert(() {
           debugPrint('[Catalog] Legacy fallback failed for $assetPath: $error');
@@ -132,8 +299,11 @@ class UfficioCatalogRepository {
       }
     }
 
-    throw const FormatException(
-      'Bundled catalog assets are missing or malformed.',
+    return UfficioCatalogLoadResult.invalid(
+      city: city,
+      error: const FormatException(
+        'Bundled catalog assets are missing or malformed.',
+      ),
     );
   }
 

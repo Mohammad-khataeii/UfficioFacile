@@ -35,8 +35,7 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   bool _initializing = false;
   AppStartupState startupState = const AppStartupState.initial();
 
-  bool get canContinueWithFallbackLocalMode =>
-      _appConfig.canFallbackToLocalMode;
+  bool get canContinueWithFallbackLocalMode => false;
 
   Future<void> initialize() async {
     if (_initializing) return;
@@ -49,9 +48,7 @@ class ItalyAdminCopilotController extends ChangeNotifier {
       flavor: _appConfig.flavorLabel,
       errorMessage: null,
       debugDetails: null,
-      usedFallbackLocalMode:
-          _appConfig.backendMode == AppBackendMode.supabase &&
-          !_appConfig.hasSupabaseCredentials,
+      usedFallbackLocalMode: false,
       canFallbackToLocalMode: _appConfig.canFallbackToLocalMode,
       supabaseConfigured: _appConfig.hasSupabaseCredentials,
       supabaseInitialized: _appConfig.isSupabaseEnabled,
@@ -135,30 +132,13 @@ class ItalyAdminCopilotController extends ChangeNotifier {
   Future<void> retryStartup() => initialize();
 
   Future<void> continueWithFallbackLocalMode() async {
-    if (!_appConfig.canFallbackToLocalMode) {
-      startupState = startupState.copyWith(
-        isLoading: false,
-        isReady: false,
-        errorMessage: 'This build cannot continue in local-only mode.',
-      );
-      notifyListeners();
-      return;
-    }
-    languageCode = LocalAppLanguageRepository.sanitize(languageCode);
-    startupState = AppStartupState(
+    startupState = startupState.copyWith(
       isLoading: false,
-      isReady: true,
-      onboardingCompleted: onboardingState.completed,
-      backendMode: 'local',
-      flavor: _appConfig.flavorLabel,
-      languageCode: languageCode,
-      usedFallbackLocalMode: true,
-      canFallbackToLocalMode: true,
-      supabaseConfigured: _appConfig.hasSupabaseCredentials,
-      supabaseInitialized: false,
-      remoteCatalogAvailable: false,
+      isReady: false,
+      usedFallbackLocalMode: false,
+      errorMessage:
+          'UfficioFacile requires a live Supabase connection for this build.',
     );
-    initialized = true;
     notifyListeners();
   }
 

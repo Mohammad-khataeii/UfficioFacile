@@ -30,7 +30,7 @@ class AppStartupState {
     : isLoading = true,
       isReady = false,
       onboardingCompleted = false,
-      backendMode = 'local',
+      backendMode = 'supabase',
       flavor = 'development',
       languageCode = 'en',
       usedFallbackLocalMode = false,
@@ -158,17 +158,8 @@ class AppStartupService {
     final adminConfig = await _loadAdminConfig();
     final languageCode = _loadLanguage();
 
-    final usedFallbackLocalMode =
-        config.backendMode == AppBackendMode.supabase &&
-        !config.hasSupabaseCredentials;
-
-    if (usedFallbackLocalMode) {
-      _log('Supabase config missing. Continuing in local mode.');
-    }
-
     if (config.backendMode == AppBackendMode.supabase &&
-        !config.hasSupabaseCredentials &&
-        config.mustFailLoudOnMissingSupabase) {
+        !config.hasSupabaseCredentials) {
       return AppStartupResult(
         onboardingState: onboardingState,
         adminConfig: adminConfig,
@@ -202,14 +193,11 @@ class AppStartupService {
       onboardingState: onboardingState,
       adminConfig: adminConfig,
       languageCode: languageCode,
-      usedFallbackLocalMode: usedFallbackLocalMode,
+      usedFallbackLocalMode: false,
       supabaseConfigured: config.hasSupabaseCredentials,
       supabaseInitialized: config.isSupabaseEnabled,
       remoteCatalogAvailable: config.isSupabaseEnabled,
-      errorMessage:
-          usedFallbackLocalMode && config.backendMode == AppBackendMode.supabase
-          ? 'Supabase is not configured for this build.'
-          : null,
+      errorMessage: null,
       debugDetails:
           'flavor=${config.flavorLabel}; backend=${config.backendLabel}; supabaseConfigured=${config.hasSupabaseCredentials}; language=$languageCode; onboardingCompleted=${onboardingState.completed}',
     );

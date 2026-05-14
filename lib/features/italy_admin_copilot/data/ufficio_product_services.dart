@@ -1047,6 +1047,15 @@ abstract class ConsultancyRequestsRepository {
   Future<ConsultancyRequestRecord> save(ConsultancyRequestRecord item);
 }
 
+class RequestLimitExceededException implements Exception {
+  const RequestLimitExceededException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class SupabaseConsultancyRequestsRepository
     implements ConsultancyRequestsRepository {
   const SupabaseConsultancyRequestsRepository(this._client);
@@ -1239,16 +1248,22 @@ class LocalDirectoryDocumentsRepository {
 }
 
 class ProblemRequestsService {
-  const ProblemRequestsService(this._repository);
+  const ProblemRequestsService(this._repository, this._premiumService);
 
   final ProblemRequestsRepository _repository;
+  final UfficioPremiumEntitlementService _premiumService;
 
   Future<ProblemRequestRecord> submitProblemRequest(
     ProblemRequestRecord request,
   ) async {
+    final decision = await _premiumService.canSubmitProblemRequest();
+    if (!decision.allowed) {
+      throw RequestLimitExceededException(decision.reason);
+    }
     final saved = request.copyWith(updatedAt: DateTime.now());
-    await _repository.save(saved);
-    return saved;
+    final persisted = await _repository.save(saved);
+    await _premiumService.recordProblemRequestSubmitted();
+    return persisted;
   }
 
   Future<List<ProblemRequestRecord>> listUserProblemRequests() =>
@@ -1259,15 +1274,21 @@ class ProblemRequestsService {
 }
 
 class ConsultancyService {
-  const ConsultancyService(this._repository);
+  const ConsultancyService(this._repository, this._premiumService);
 
   final ConsultancyRequestsRepository _repository;
+  final UfficioPremiumEntitlementService _premiumService;
 
   Future<ConsultancyRequestRecord> submitConsultancyRequest(
     ConsultancyRequestRecord request,
   ) async {
-    await _repository.save(request);
-    return request;
+    final decision = await _premiumService.canSubmitConsultancyRequest();
+    if (!decision.allowed) {
+      throw RequestLimitExceededException(decision.reason);
+    }
+    final saved = await _repository.save(request);
+    await _premiumService.recordConsultancyRequestSubmitted();
+    return saved;
   }
 
   Future<PaymentPlaceholderResult> createConsultancyPayment({
@@ -1885,6 +1906,10 @@ class EntitlementsService {
   Future<UfficioUserEntitlements> getUserEntitlements() async {
     final entitlement = await _premiumService.getCurrentEntitlement();
     final isPremium = entitlement.isProLike;
+    final problemRequestDecision = await _premiumService
+        .canSubmitProblemRequest();
+    final consultancyDecision = await _premiumService
+        .canSubmitConsultancyRequest();
     final costDecision = await _premiumService.canUseFeature(
       FeatureKey.costDashboard,
     );
@@ -1892,8 +1917,10 @@ class EntitlementsService {
     final contactsDecision = await _premiumService.canAddContact();
     return UfficioUserEntitlements(
       isPremium: isPremium,
-      canRequestProblem: true,
-      canUsePrivateConsultancyForFree: isPremium || entitlement.betaModeEnabled,
+      canRequestProblem: problemRequestDecision.allowed,
+      canUsePrivateConsultancyForFree:
+          consultancyDecision.allowed &&
+          (isPremium || entitlement.betaModeEnabled),
       canUseCostDashboard: costDecision.allowed,
       canUseDocuments: documentsDecision.allowed,
       canUseContactsDirectory: contactsDecision.allowed,
@@ -1905,7 +1932,7 @@ class EntitlementsService {
   }) async {
     final decision = await _premiumService.canUseFeature(
       purpose == 'consultancy'
-          ? FeatureKey.consultantMode
+          ? FeatureKey.privateConsultancy
           : FeatureKey.serviceIntelligenceAdvanced,
     );
     if (decision.allowed) {
@@ -1920,7 +1947,7 @@ class EntitlementsService {
       allowed: false,
       paymentAvailable: purpose == 'consultancy',
       message: purpose == 'consultancy'
-          ? 'Premium includes consultancy, or you can pay once for a private request when payments are enabled.'
+          ? 'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.'
           : 'Upgrade to Premium to unlock this feature.',
       decision: decision,
     );

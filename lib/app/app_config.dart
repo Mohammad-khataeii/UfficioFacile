@@ -55,7 +55,7 @@ class UfficcioFacileConfig {
   bool get isSupabaseEnabled =>
       backendMode == AppBackendMode.supabase && hasSupabaseCredentials;
 
-  String get backendLabel => isSupabaseEnabled ? 'supabase' : 'local';
+  String get backendLabel => backendMode.name;
 
   String get flavorLabel => switch (flavor) {
     UfficioFacileFlavor.development => 'development',
@@ -64,26 +64,11 @@ class UfficcioFacileConfig {
   };
 
   bool get mustFailLoudOnMissingSupabase =>
-      backendMode == AppBackendMode.supabase && isProduction;
+      backendMode == AppBackendMode.supabase;
 
-  bool get canFallbackToLocalMode =>
-      backendMode == AppBackendMode.local ||
-      (!isProduction && allowLocalFallback);
+  bool get canFallbackToLocalMode => false;
 
-  static const _backendModeString = String.fromEnvironment(
-    'UFFICCIOFACILE_BACKEND_MODE',
-    defaultValue: String.fromEnvironment(
-      'APP_BACKEND_MODE',
-      defaultValue: String.fromEnvironment(
-        'GYMPAL_BACKEND_MODE',
-        defaultValue: 'local',
-      ),
-    ),
-  );
-
-  static const _backendMode = _backendModeString == 'supabase'
-      ? AppBackendMode.supabase
-      : AppBackendMode.local;
+  static const _backendMode = AppBackendMode.supabase;
 
   static const _flavorString = String.fromEnvironment(
     'UFFICCIOFACILE_FLAVOR',
@@ -113,11 +98,11 @@ class UfficcioFacileConfig {
   );
   static const _betaModeEnabled = bool.fromEnvironment(
     'UFFICCIOFACILE_ENABLE_BETA_MODE',
-    defaultValue: true,
+    defaultValue: false,
   );
   static const _paywallEnabled = bool.fromEnvironment(
     'UFFICCIOFACILE_ENABLE_PAYWALL',
-    defaultValue: false,
+    defaultValue: true,
   );
   static const _analyticsEnabled = bool.fromEnvironment(
     'UFFICCIOFACILE_ENABLE_ANALYTICS',

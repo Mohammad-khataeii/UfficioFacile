@@ -1,6 +1,59 @@
 # Production Readiness Audit
 
-Last updated: 2026-05-12
+Last updated: 2026-05-14
+
+## Admin alignment pass (2026-05-14)
+
+### What was broken
+
+- The Next.js admin content pages were rendering raw `ufficio_cms_*` rows directly instead of a normalized admin model.
+- `apps/admin/app/content/procedures/[categorySlug]/[procedureSlug]/page.tsx` assumed `procedure.category_slug`, `procedure.slug`, `procedure.title`, and other fields were always present and correctly shaped, so a missing or partially mismapped procedure row caused a runtime crash instead of a safe admin error state.
+- Category and procedure screens were still modeling the catalog as flat category/procedure rows even though the Flutter app now uses a real category → subcategory → procedure hierarchy.
+- Premium admin pages still surfaced legacy Plus-era products as first-class plans instead of treating them as backward-compatible legacy records.
+- Problem and consultancy request screens still showed older field assumptions and copy that no longer matched the simplified premium model.
+
+### Real current schema and app model
+
+- Public app catalog model:
+  - category
+  - derived subcategory
+  - procedure
+- Admin CMS storage model:
+  - `public.ufficio_cms_categories`
+  - `public.ufficio_cms_procedures`
+  - `public.ufficio_cms_content_blocks`
+  - supporting `links`, `contacts`, `documents`, `sources`, `revisions`, `drafts`
+- Current canonical public procedure identity remains `(category_slug, slug)`.
+- Current public premium product model is only:
+  - `premium_monthly`
+  - `premium_yearly`
+- Legacy plans and unlock products still exist in data for compatibility and history, but should not be treated as the primary public offering.
+
+### Files being changed in this admin alignment pass
+
+- `apps/admin/app/content/page.tsx`
+- `apps/admin/app/content/categories/page.tsx`
+- `apps/admin/app/content/categories/[slug]/page.tsx`
+- `apps/admin/app/content/procedures/page.tsx`
+- `apps/admin/app/content/procedures/[categorySlug]/[procedureSlug]/page.tsx`
+- `apps/admin/app/premium/page.tsx`
+- `apps/admin/app/premium/plans/page.tsx`
+- `apps/admin/app/requests/problem/page.tsx`
+- `apps/admin/app/requests/consultancy/page.tsx`
+- `apps/admin/components/sidebar.tsx`
+- `apps/admin/lib/catalog/types.ts`
+- `apps/admin/lib/catalog/mappers.ts`
+- `apps/admin/lib/catalog/queries.ts`
+- `apps/admin/lib/db/mutations.ts`
+- `apps/admin/lib/db/queries.ts`
+- `apps/admin/lib/validation/schemas.ts`
+- `apps/admin/package.json`
+- `apps/admin/scripts/audit-user-facing-copy.mjs`
+
+### Migration need
+
+- No new Supabase migration has been added in this admin alignment pass so far.
+- The current admin crash and model drift can be fixed in the application layer because the needed CMS/request/premium fields already exist in the current schema.
 
 ## Architecture summary
 

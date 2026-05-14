@@ -7,6 +7,7 @@ void main() {
   final adminFile = File(
     '$root/apps/admin/data/cms_bundled_content_export.json',
   );
+  final catalogDir = Directory('$root/assets/catalog');
   final migrationsDir = Directory('$root/supabase/migrations');
 
   final problems = <String>[];
@@ -19,6 +20,9 @@ void main() {
   }
   if (!migrationsDir.existsSync()) {
     problems.add('Missing supabase/migrations directory');
+  }
+  if (!catalogDir.existsSync()) {
+    problems.add('Missing assets/catalog directory');
   }
 
   if (problems.isNotEmpty) {
@@ -51,6 +55,11 @@ void main() {
       .listSync()
       .whereType<File>()
       .map((file) => file.path.split(Platform.pathSeparator).last)
+      .toList();
+  final cityCatalogFiles = catalogDir
+      .listSync()
+      .whereType<File>()
+      .where((file) => file.path.endsWith('.json'))
       .toList();
 
   final docsSlugs = docsCategories.map((row) => '${row['slug']}').toSet();
@@ -147,6 +156,40 @@ void main() {
     problems.add(
       'Generated CMS exports must include non-empty cmsCategories and cmsProcedures',
     );
+  }
+
+  for (final file in cityCatalogFiles) {
+    final filename = file.path.split(Platform.pathSeparator).last;
+    try {
+      final decoded = jsonDecode(file.readAsStringSync());
+      if (decoded is! Map) {
+        problems.add('Catalog file `$filename` must contain a JSON object');
+        continue;
+      }
+      final normalized = Map<String, dynamic>.from(decoded);
+      if (normalized['categories'] is! List) {
+        problems.add('Catalog file `$filename` is missing categories array');
+      }
+      final slugMatch = RegExp(
+        r'^ufficio_catalog\.([a-z0-9_-]+)\.v1\.json$',
+      ).firstMatch(filename);
+      if (slugMatch != null) {
+        final fileCitySlug = slugMatch.group(1)!;
+        final metadata = normalized['metadata'];
+        final metadataCitySlug = metadata is Map
+            ? metadata['city_slug']?.toString().trim()
+            : null;
+        if (metadataCitySlug != null &&
+            metadataCitySlug.isNotEmpty &&
+            metadataCitySlug != fileCitySlug) {
+          problems.add(
+            'Catalog file `$filename` metadata city_slug `$metadataCitySlug` does not match file slug `$fileCitySlug`',
+          );
+        }
+      }
+    } catch (error) {
+      problems.add('Catalog file `$filename` could not be parsed: $error');
+    }
   }
 
   final duplicateProcedureKeys = <String, int>{};

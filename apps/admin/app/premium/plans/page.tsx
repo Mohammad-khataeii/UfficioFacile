@@ -4,9 +4,15 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { upsertPlanProduct } from "@/lib/db/mutations";
 import { getPremiumOverviewData } from "@/lib/db/queries";
 
+const publicPremiumPlans = new Set(["premium_monthly", "premium_yearly"]);
+
 export default async function PremiumPlansPage() {
   const admin = await requireAdmin("premium.read");
   const { plans, warnings } = await getPremiumOverviewData(admin.supabase);
+  const sortedPlans = [
+    ...plans.filter((plan: any) => publicPremiumPlans.has(plan.product_key)),
+    ...plans.filter((plan: any) => !publicPremiumPlans.has(plan.product_key)),
+  ];
 
   return (
     <AdminShell email={admin.email} role={admin.role}>
@@ -23,17 +29,30 @@ export default async function PremiumPlansPage() {
         ) : null}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
           <h2 className="text-xl font-semibold text-slate-900">Plan products</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            The public app only sells Premium Monthly and Premium Yearly. Legacy products stay here for compatibility and historic records.
+          </p>
           <div className="mt-5 space-y-4">
-            {plans.map((plan: any) => (
+            {sortedPlans.map((plan: any) => (
               <div key={plan.product_key} className="rounded-2xl border border-slate-100 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-slate-900">{plan.product_key}</p>
+                    <p className="font-medium text-slate-900">
+                      {plan.title?.en ?? plan.product_key}
+                    </p>
                     <p className="text-sm text-slate-500">
                       {(plan.amount_cents ?? 0) / 100} {plan.currency ?? "EUR"} • {plan.billing_interval}
                     </p>
                   </div>
-                  <StatusBadge value={plan.plan_type} />
+                  <StatusBadge
+                    value={
+                      publicPremiumPlans.has(plan.product_key)
+                        ? plan.is_active
+                          ? "public"
+                          : "inactive"
+                        : "legacy"
+                    }
+                  />
                 </div>
               </div>
             ))}

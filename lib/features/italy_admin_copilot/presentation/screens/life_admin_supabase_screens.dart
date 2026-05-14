@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
 import '../../domain/ufficcio_user_settings.dart';
@@ -42,8 +43,8 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                   title: const Text('Mode'),
                   subtitle: Text(
                     scope.config.isSupabaseEnabled
-                        ? 'Supabase-capable, local-first'
-                        : 'Local-only mode',
+                        ? 'Supabase-required mode'
+                        : 'Supabase connection required',
                   ),
                 ),
                 SwitchListTile(
@@ -203,9 +204,7 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                       label: const Text('Sync now'),
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'Sign in to sync UfficioFacile data across devices. You can also continue using the app locally without an account.',
-                    ),
+                    Text(context.l10n.t('sync_same_device_notice')),
                   ],
                 );
               },

@@ -3,14 +3,11 @@ import Link from "next/link";
 import { AdminShell } from "@/components/admin-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import {
-  getAdminContentTree,
-  getProcedureRoutePath,
-} from "@/lib/content/load-content-tree";
+import { getAdminCatalogTreeNormalized } from "@/lib/catalog/queries";
 
 export default async function ContentPage() {
   const admin = await requireAdmin("content.read");
-  const tree = await getAdminContentTree(admin.supabase, {
+  const tree = await getAdminCatalogTreeNormalized(admin.supabase, {
     bootstrapIfEmpty: admin.role === "owner" || admin.role === "admin",
   });
 
@@ -34,11 +31,14 @@ export default async function ContentPage() {
               >
                 <div>
                   <p className="font-medium text-slate-900">
-                    {category.title?.en || category.slug}
+                    {category.title.en || category.slug}
                   </p>
-                  <p className="text-sm text-slate-500">{category.slug}</p>
+                  <p className="text-sm text-slate-500">
+                    {category.slug} • {category.subcategoryCount} subcategories •{" "}
+                    {category.procedureCount} procedures
+                  </p>
                 </div>
-                <StatusBadge value={category.verification_status} />
+                <StatusBadge value={category.premiumVisibility} />
               </Link>
             ))}
           </div>
@@ -52,22 +52,22 @@ export default async function ContentPage() {
           <div className="mt-5 space-y-3">
             {tree.procedures.map((procedure) => (
               <Link
-                key={getProcedureRoutePath(procedure)}
-                href={getProcedureRoutePath(procedure)}
+                key={`${procedure.categorySlug}:${procedure.slug}`}
+                href={`/content/procedures/${procedure.categorySlug}/${procedure.slug}`}
                 className="flex items-center justify-between rounded-2xl border border-slate-100 p-4 hover:bg-slate-50"
               >
                 <div>
                   <p className="font-medium text-slate-900">
-                    {procedure.title?.en || procedure.slug}
+                    {procedure.title.en || procedure.slug}
                   </p>
                   <p className="text-sm text-slate-500">
-                    {procedure.category_slug}
-                    {procedure.subcategory_slug ? ` / ${procedure.subcategory_slug}` : ""}
+                    {procedure.categorySlug}
+                    {procedure.subcategorySlug ? ` / ${procedure.subcategorySlug}` : ""}
                     {" • "}
                     {procedure.slug}
                   </p>
                 </div>
-                <StatusBadge value={procedure.status} />
+                <StatusBadge value={procedure.premiumVisibility} />
               </Link>
             ))}
           </div>

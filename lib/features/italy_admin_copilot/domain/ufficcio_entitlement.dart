@@ -16,6 +16,8 @@ class UfficcioEntitlement {
     this.cancelledAt,
     this.revokedAt,
     this.generatedPacksUsedThisMonth = 0,
+    this.problemRequestsUsedThisMonth = 0,
+    this.consultancyRequestsUsedThisMonth = 0,
     this.utilityComparisonsUsedThisMonth = 0,
     this.billAnalysesUsedThisMonth = 0,
     this.savedRequestsCount = 0,
@@ -26,6 +28,8 @@ class UfficcioEntitlement {
     this.householdMembersCount = 0,
     this.proofCasesCount = 0,
     this.freePackLimit = 3,
+    this.problemRequestsLimit = 2,
+    this.consultancyRequestsLimit = 2,
     this.savedRequestsLimit = 5,
     this.remindersLimit = 5,
     this.documentsLimit = 5,
@@ -59,6 +63,8 @@ class UfficcioEntitlement {
   final DateTime? cancelledAt;
   final DateTime? revokedAt;
   final int generatedPacksUsedThisMonth;
+  final int problemRequestsUsedThisMonth;
+  final int consultancyRequestsUsedThisMonth;
   final int utilityComparisonsUsedThisMonth;
   final int billAnalysesUsedThisMonth;
   final int savedRequestsCount;
@@ -69,6 +75,8 @@ class UfficcioEntitlement {
   final int householdMembersCount;
   final int proofCasesCount;
   final int freePackLimit;
+  final int problemRequestsLimit;
+  final int consultancyRequestsLimit;
   final int savedRequestsLimit;
   final int remindersLimit;
   final int documentsLimit;
@@ -106,15 +114,15 @@ class UfficcioEntitlement {
     }
     return premiumAccess &&
         <UfficioPlan>{
-          UfficioPlan.plusMonthly,
-          UfficioPlan.plusYearly,
-          UfficioPlan.pro,
-          UfficioPlan.consultant,
           UfficioPlan.premiumMonthly,
           UfficioPlan.premiumYearly,
           UfficioPlan.adminGrant,
           UfficioPlan.lifetime,
           UfficioPlan.trial,
+          UfficioPlan.plusMonthly,
+          UfficioPlan.plusYearly,
+          UfficioPlan.pro,
+          UfficioPlan.consultant,
         }.contains(plan);
   }
 
@@ -135,6 +143,8 @@ class UfficcioEntitlement {
     DateTime? cancelledAt,
     DateTime? revokedAt,
     int? generatedPacksUsedThisMonth,
+    int? problemRequestsUsedThisMonth,
+    int? consultancyRequestsUsedThisMonth,
     int? freePacksUsed,
     int? utilityComparisonsUsedThisMonth,
     int? billAnalysesUsedThisMonth,
@@ -146,6 +156,8 @@ class UfficcioEntitlement {
     int? householdMembersCount,
     int? proofCasesCount,
     int? freePackLimit,
+    int? problemRequestsLimit,
+    int? consultancyRequestsLimit,
     int? savedRequestsLimit,
     int? remindersLimit,
     int? documentsLimit,
@@ -182,6 +194,11 @@ class UfficcioEntitlement {
           generatedPacksUsedThisMonth ??
           freePacksUsed ??
           this.generatedPacksUsedThisMonth,
+      problemRequestsUsedThisMonth:
+          problemRequestsUsedThisMonth ?? this.problemRequestsUsedThisMonth,
+      consultancyRequestsUsedThisMonth:
+          consultancyRequestsUsedThisMonth ??
+          this.consultancyRequestsUsedThisMonth,
       utilityComparisonsUsedThisMonth:
           utilityComparisonsUsedThisMonth ??
           this.utilityComparisonsUsedThisMonth,
@@ -196,6 +213,9 @@ class UfficcioEntitlement {
           householdMembersCount ?? this.householdMembersCount,
       proofCasesCount: proofCasesCount ?? this.proofCasesCount,
       freePackLimit: freePackLimit ?? this.freePackLimit,
+      problemRequestsLimit: problemRequestsLimit ?? this.problemRequestsLimit,
+      consultancyRequestsLimit:
+          consultancyRequestsLimit ?? this.consultancyRequestsLimit,
       savedRequestsLimit: savedRequestsLimit ?? this.savedRequestsLimit,
       remindersLimit: remindersLimit ?? this.remindersLimit,
       documentsLimit: documentsLimit ?? this.documentsLimit,
@@ -235,6 +255,8 @@ class UfficcioEntitlement {
     'cancelledAt': cancelledAt?.toIso8601String(),
     'revokedAt': revokedAt?.toIso8601String(),
     'generatedPacksUsedThisMonth': generatedPacksUsedThisMonth,
+    'problemRequestsUsedThisMonth': problemRequestsUsedThisMonth,
+    'consultancyRequestsUsedThisMonth': consultancyRequestsUsedThisMonth,
     'freePacksUsed': generatedPacksUsedThisMonth,
     'utilityComparisonsUsedThisMonth': utilityComparisonsUsedThisMonth,
     'billAnalysesUsedThisMonth': billAnalysesUsedThisMonth,
@@ -246,6 +268,8 @@ class UfficcioEntitlement {
     'householdMembersCount': householdMembersCount,
     'proofCasesCount': proofCasesCount,
     'freePackLimit': freePackLimit,
+    'problemRequestsLimit': problemRequestsLimit,
+    'consultancyRequestsLimit': consultancyRequestsLimit,
     'savedRequestsLimit': savedRequestsLimit,
     'remindersLimit': remindersLimit,
     'documentsLimit': documentsLimit,
@@ -294,6 +318,10 @@ class UfficcioEntitlement {
           json['generatedPacksUsedThisMonth'] as int? ??
           json['freePacksUsed'] as int? ??
           0,
+      problemRequestsUsedThisMonth:
+          json['problemRequestsUsedThisMonth'] as int? ?? 0,
+      consultancyRequestsUsedThisMonth:
+          json['consultancyRequestsUsedThisMonth'] as int? ?? 0,
       utilityComparisonsUsedThisMonth:
           json['utilityComparisonsUsedThisMonth'] as int? ?? 0,
       billAnalysesUsedThisMonth: json['billAnalysesUsedThisMonth'] as int? ?? 0,
@@ -305,6 +333,8 @@ class UfficcioEntitlement {
       householdMembersCount: json['householdMembersCount'] as int? ?? 0,
       proofCasesCount: json['proofCasesCount'] as int? ?? 0,
       freePackLimit: json['freePackLimit'] as int? ?? 3,
+      problemRequestsLimit: json['problemRequestsLimit'] as int? ?? 2,
+      consultancyRequestsLimit: json['consultancyRequestsLimit'] as int? ?? 2,
       savedRequestsLimit: json['savedRequestsLimit'] as int? ?? 5,
       remindersLimit: json['remindersLimit'] as int? ?? 5,
       documentsLimit: json['documentsLimit'] as int? ?? 5,

@@ -2,16 +2,18 @@ import Link from "next/link";
 
 const items = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/content", label: "Content" },
+  { href: "/content/categories", label: "Categories" },
+  { href: "/content/procedures", label: "Procedures" },
+  { href: "/premium", label: "Premium" },
   { href: "/users", label: "Users" },
   { href: "/admins", label: "Admins" },
-  { href: "/premium", label: "Premium" },
   { href: "/requests/problem", label: "Problem requests" },
   { href: "/requests/consultancy", label: "Consultancy" },
   { href: "/catalog", label: "Catalog" },
-  { href: "/content", label: "Content" },
   { href: "/translations", label: "Translations" },
   { href: "/audit", label: "Audit" },
-  { href: "/settings", label: "Settings" },
+  { href: "/settings", label: "Config" },
 ];
 
 export function Sidebar() {

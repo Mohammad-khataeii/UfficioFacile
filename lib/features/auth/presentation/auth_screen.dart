@@ -141,11 +141,6 @@ class _AuthScreenState extends State<AuthScreen>
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(context.l10n.t('auth_continue_public')),
-                      ),
                     ],
                   ),
                 ),

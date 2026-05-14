@@ -169,10 +169,7 @@ const PremiumConfig _defaultConfig = PremiumConfig(
     FeatureKey.privateConsultancy,
     FeatureKey.priorityProblemRequest,
   ],
-  consultantFeatureKeys: [
-    FeatureKey.consultantMode,
-    FeatureKey.privateConsultancy,
-  ],
+  consultantFeatureKeys: [FeatureKey.consultantMode],
   trialDays: 7,
   allowLocalDebugPro: false,
 );
@@ -345,6 +342,8 @@ class UfficioPremiumEntitlementService {
         betaModeEnabled: config.betaModeEnabled,
         paywallEnabled: config.paywallEnabled,
         freePackLimit: config.freePackLimit,
+        problemRequestsLimit: 2,
+        consultancyRequestsLimit: 2,
         savedRequestsLimit: config.freeSavedRequestsLimit,
         remindersLimit: config.freeRemindersLimit,
         documentsLimit: config.freeDocumentsLimit,
@@ -487,33 +486,12 @@ class UfficioPremiumEntitlementService {
       );
     }
 
-    final metadata = procedure.metadata;
-    final allowSingleUnlock =
-        procedure.allowSingleUnlock ||
-        (metadata['allow_single_unlock'] as bool? ?? false) ||
-        (metadata['allowSingleUnlock'] as bool? ?? false);
-    final price =
-        procedure.singleUnlockPriceCents ??
-        (metadata['single_unlock_price_cents'] as num?)?.toInt() ??
-        (metadata['singleUnlockPriceCents'] as num?)?.toInt() ??
-        399;
-    final currency = procedure.singleUnlockCurrency.isEmpty
-        ? (metadata['single_unlock_currency'] as String? ??
-              metadata['singleUnlockCurrency'] as String? ??
-              'EUR')
-        : procedure.singleUnlockCurrency;
-
     return ContentAccessResult(
       allowed: false,
       reason: ContentAccessReason.locked,
-      message: 'Premium or a one-time unlock is required for this guide.',
-      unlockOptions: <UnlockOption>[
-        if (allowSingleUnlock) UnlockOption.singlePurchase,
-        UnlockOption.premium,
-        UnlockOption.consultancy,
-      ],
-      singleUnlockPriceCents: allowSingleUnlock ? price : null,
-      singleUnlockCurrency: currency,
+      message:
+          'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
+      unlockOptions: const <UnlockOption>[UnlockOption.premium],
       requiresPremium: true,
     );
   }
@@ -566,14 +544,9 @@ class UfficioPremiumEntitlementService {
     return ContentAccessResult(
       allowed: false,
       reason: ContentAccessReason.locked,
-      message: 'Premium or a one-time unlock is required for this guide.',
-      unlockOptions: const <UnlockOption>[
-        UnlockOption.singlePurchase,
-        UnlockOption.premium,
-        UnlockOption.consultancy,
-      ],
-      singleUnlockPriceCents: 399,
-      singleUnlockCurrency: 'EUR',
+      message:
+          'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
+      unlockOptions: const <UnlockOption>[UnlockOption.premium],
       requiresPremium: true,
     );
   }
@@ -749,6 +722,66 @@ class UfficioPremiumEntitlementService {
     );
   }
 
+  Future<EntitlementDecision> canSubmitProblemRequest() async {
+    final entitlement = await getCurrentEntitlement();
+    if (!entitlement.hasActivePremiumEntitlement) {
+      return _allowedDecision(reason: 'Problem requests are available.');
+    }
+    final used = entitlement.problemRequestsUsedThisMonth;
+    final limit = entitlement.problemRequestsLimit;
+    if (used < limit) {
+      return _allowedDecision(
+        reason: 'Monthly Premium request available.',
+        isPremiumFeature: true,
+        used: used,
+        limit: limit,
+      );
+    }
+    return EntitlementDecision(
+      allowed: false,
+      isPremiumFeature: true,
+      reason:
+          'You have used your 2 monthly requests. Your limit resets next month.',
+      upgradeTitle: 'Monthly limit reached',
+      upgradeMessage:
+          'You have used your 2 monthly requests. Your limit resets next month.',
+      recommendedPlan: UfficioPlan.premiumMonthly,
+      used: used,
+      limit: limit,
+      remainingUsage: 0,
+    );
+  }
+
+  Future<EntitlementDecision> canSubmitConsultancyRequest() async {
+    final entitlement = await getCurrentEntitlement();
+    if (!entitlement.hasActivePremiumEntitlement) {
+      return _allowedDecision(reason: 'Private consultancy request available.');
+    }
+    final used = entitlement.consultancyRequestsUsedThisMonth;
+    final limit = entitlement.consultancyRequestsLimit;
+    if (used < limit) {
+      return _allowedDecision(
+        reason: 'Monthly Premium consultancy available.',
+        isPremiumFeature: true,
+        used: used,
+        limit: limit,
+      );
+    }
+    return EntitlementDecision(
+      allowed: false,
+      isPremiumFeature: true,
+      reason:
+          'You have used your 2 monthly requests. Your limit resets next month.',
+      upgradeTitle: 'Monthly limit reached',
+      upgradeMessage:
+          'You have used your 2 monthly requests. Your limit resets next month.',
+      recommendedPlan: UfficioPlan.premiumMonthly,
+      used: used,
+      limit: limit,
+      remainingUsage: 0,
+    );
+  }
+
   Future<UfficcioEntitlement> _persistUsageUpdate({
     required UfficcioEntitlement updated,
     required String counterKey,
@@ -883,6 +916,30 @@ class UfficioPremiumEntitlementService {
     );
   }
 
+  Future<UfficcioEntitlement> recordProblemRequestSubmitted() async {
+    final entitlement = await getCurrentEntitlement();
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
+        problemRequestsUsedThisMonth:
+            entitlement.problemRequestsUsedThisMonth + 1,
+        updatedAt: DateTime.now(),
+      ),
+      counterKey: 'problem_requests_used',
+    );
+  }
+
+  Future<UfficcioEntitlement> recordConsultancyRequestSubmitted() async {
+    final entitlement = await getCurrentEntitlement();
+    return _persistUsageUpdate(
+      updated: entitlement.copyWith(
+        consultancyRequestsUsedThisMonth:
+            entitlement.consultancyRequestsUsedThisMonth + 1,
+        updatedAt: DateTime.now(),
+      ),
+      counterKey: 'consultancy_requests_used',
+    );
+  }
+
   Future<UfficcioEntitlement> resetMonthlyUsageIfNeeded(
     UfficcioEntitlement entitlement,
   ) async {
@@ -893,6 +950,8 @@ class UfficioPremiumEntitlementService {
         currentPeriodStart: DateTime(now.year, now.month),
         currentPeriodEnd: DateTime(now.year, now.month + 1, 0),
         generatedPacksUsedThisMonth: 0,
+        problemRequestsUsedThisMonth: 0,
+        consultancyRequestsUsedThisMonth: 0,
         utilityComparisonsUsedThisMonth: 0,
         billAnalysesUsedThisMonth: 0,
       );
@@ -907,6 +966,16 @@ class UfficioPremiumEntitlementService {
         label: 'Generated packs',
         used: entitlement.generatedPacksUsedThisMonth,
         limit: entitlement.freePackLimit,
+      ),
+      UsageSummaryItem(
+        label: 'Problem requests',
+        used: entitlement.problemRequestsUsedThisMonth,
+        limit: entitlement.problemRequestsLimit,
+      ),
+      UsageSummaryItem(
+        label: 'Private consultancies',
+        used: entitlement.consultancyRequestsUsedThisMonth,
+        limit: entitlement.consultancyRequestsLimit,
       ),
       UsageSummaryItem(
         label: 'Saved requests',
@@ -939,21 +1008,21 @@ class UfficioPremiumEntitlementService {
   String getUpgradeReason(FeatureKey feature) {
     switch (feature) {
       case FeatureKey.generatePack:
-        return 'Pro unlocks more monthly request packs.';
+        return 'Premium unlocks higher monthly usage and full guides.';
       case FeatureKey.utilityComparison:
-        return 'Pro unlocks advanced utility comparison tools.';
+        return 'Premium unlocks advanced utility comparison tools.';
       case FeatureKey.billAnalysis:
-        return 'Pro unlocks advanced bill analysis and complaint support.';
+        return 'Premium unlocks advanced bill analysis and complaint support.';
       case FeatureKey.costDashboard:
         return 'Premium unlocks the full cost dashboard and higher limits.';
       case FeatureKey.privateConsultancy:
-        return 'Premium includes private consultancy or a paid one-shot option.';
+        return 'Premium includes 2 private consultancies per month.';
       case FeatureKey.bonusFinderAdvanced:
         return 'Premium unlocks the full bonus finder and money-saving guidance.';
       case FeatureKey.loanComparisonAdvanced:
         return 'Premium unlocks the full loan comparison guidance.';
       case FeatureKey.consultantMode:
-        return 'Consultant mode is planned for a future plan.';
+        return 'Premium gives you full access to UfficioFacile.';
       default:
         return 'This is a Premium feature.';
     }
@@ -1002,9 +1071,9 @@ class UfficioPremiumEntitlementService {
       allowed: false,
       isPremiumFeature: true,
       reason: 'This guide is part of UfficioFacile Premium.',
-      upgradeTitle: 'Premium feature',
+      upgradeTitle: 'Premium',
       upgradeMessage:
-          'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+          'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
       recommendedPlan: UfficioPlan.premiumMonthly,
     );
   }
@@ -1055,9 +1124,9 @@ class UfficioPremiumEntitlementService {
     allowed: true,
     isPremiumFeature: isPremiumFeature,
     reason: reason,
-    upgradeTitle: 'Upgrade to keep going.',
+    upgradeTitle: 'Premium',
     upgradeMessage:
-        'Plus and Premium unlock expanded tools, premium guides, storage, and higher usage limits.',
+        'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
     blockedByBeta: blockedByBeta,
     used: used,
     limit: limit,
@@ -1075,12 +1144,10 @@ class UfficioPremiumEntitlementService {
     allowed: false,
     isPremiumFeature: true,
     reason: reason,
-    upgradeTitle: 'Upgrade to keep going.',
+    upgradeTitle: 'Premium',
     upgradeMessage:
-        'Plus and Premium unlock expanded tools, premium guides, storage, and higher usage limits.',
-    recommendedPlan: feature == FeatureKey.consultantMode
-        ? UfficioPlan.consultant
-        : UfficioPlan.premiumMonthly,
+        'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
+    recommendedPlan: UfficioPlan.premiumMonthly,
     used: used,
     limit: limit,
     remainingUsage: used != null && limit != null
@@ -1233,7 +1300,7 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     billingInterval: 'month',
     amountCents: 499,
     currency: 'EUR',
-    isActive: true,
+    isActive: false,
     sortOrder: 1,
     title: const {
       'en': 'Plus Monthly',
@@ -1268,7 +1335,7 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     billingInterval: 'year',
     amountCents: 3999,
     currency: 'EUR',
-    isActive: true,
+    isActive: false,
     sortOrder: 2,
     title: const {
       'en': 'Plus Yearly',
@@ -1314,20 +1381,31 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
       'ar': 'بريميوم شهري',
     },
     description: const {
-      'en': 'Full guides, tools, vault, and premium help.',
-      'it': 'Guide complete, strumenti, archivio e aiuto premium.',
-      'fr': 'Guides complets, outils, archivage et aide premium.',
-      'es': 'Guías completas, herramientas, archivo y ayuda premium.',
-      'fa': 'راهنماهای کامل، ابزارها، آرشیو و کمک پریمیوم.',
-      'ar': 'أدلة كاملة وأدوات وأرشيف ومساعدة بريميوم.',
+      'en':
+          'Full access to UfficioFacile guides, plus 2 problem requests and 2 private consultancies per month.',
+      'it':
+          'Accesso completo alle guide di UfficioFacile, più 2 richieste problema e 2 consulenze private al mese.',
+      'fr':
+          'Accès complet aux guides UfficioFacile, plus 2 demandes de problème et 2 consultations privées par mois.',
+      'es':
+          'Acceso completo a las guías de UfficioFacile, más 2 solicitudes de problema y 2 consultorías privadas al mes.',
+      'fa':
+          'دسترسی کامل به راهنماهای UfficioFacile، به‌علاوه ۲ درخواست مشکل و ۲ مشاوره خصوصی در هر ماه.',
+      'ar':
+          'وصول كامل إلى أدلة UfficioFacile، بالإضافة إلى طلبي مشكلة واستشارتين خاصتين كل شهر.',
     },
-    features: const {'premium_sections': true, 'priority_requests': true},
+    features: const {
+      'all_premium_guides': true,
+      'problem_requests_per_month': 2,
+      'private_consultancies_per_month': 2,
+    },
     limits: const {
       'generated_packs_per_month': 100,
       'saved_requests_limit': 500,
       'documents_limit': 500,
       'contacts_limit': 500,
       'cost_items_limit': 500,
+      'problem_requests_per_month': 2,
       'consultancy_included_per_month': 2,
     },
     providerMetadata: const {},
@@ -1349,20 +1427,31 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
       'ar': 'بريميوم سنوي',
     },
     description: const {
-      'en': 'Full premium access with better yearly value.',
-      'it': 'Accesso premium completo con prezzo annuale migliore.',
-      'fr': 'Accès premium complet avec meilleure valeur annuelle.',
-      'es': 'Acceso premium completo con mejor valor anual.',
-      'fa': 'دسترسی کامل پریمیوم با ارزش بهتر سالانه.',
-      'ar': 'وصول بريميوم كامل بقيمة سنوية أفضل.',
+      'en':
+          'Full access to UfficioFacile guides, plus 2 problem requests and 2 private consultancies per month.',
+      'it':
+          'Accesso completo alle guide di UfficioFacile, più 2 richieste problema e 2 consulenze private al mese.',
+      'fr':
+          'Accès complet aux guides UfficioFacile, plus 2 demandes de problème et 2 consultations privées par mois.',
+      'es':
+          'Acceso completo a las guías de UfficioFacile, más 2 solicitudes de problema y 2 consultorías privadas al mes.',
+      'fa':
+          'دسترسی کامل به راهنماهای UfficioFacile، به‌علاوه ۲ درخواست مشکل و ۲ مشاوره خصوصی در هر ماه.',
+      'ar':
+          'وصول كامل إلى أدلة UfficioFacile، بالإضافة إلى طلبي مشكلة واستشارتين خاصتين كل شهر.',
     },
-    features: const {'premium_sections': true, 'priority_requests': true},
+    features: const {
+      'all_premium_guides': true,
+      'problem_requests_per_month': 2,
+      'private_consultancies_per_month': 2,
+    },
     limits: const {
       'generated_packs_per_month': 100,
       'saved_requests_limit': 500,
       'documents_limit': 500,
       'contacts_limit': 500,
       'cost_items_limit': 500,
+      'problem_requests_per_month': 2,
       'consultancy_included_per_month': 2,
     },
     providerMetadata: const {},
@@ -1373,7 +1462,7 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     billingInterval: 'one_time',
     amountCents: 1499,
     currency: 'EUR',
-    isActive: true,
+    isActive: false,
     sortOrder: 6,
     title: const {
       'en': 'One-shot Consultancy',
@@ -1401,7 +1490,7 @@ final List<PlanProduct> _defaultPlanProducts = <PlanProduct>[
     billingInterval: 'one_time',
     amountCents: 399,
     currency: 'EUR',
-    isActive: true,
+    isActive: false,
     sortOrder: 5,
     title: const {
       'en': 'Single Guide Unlock',

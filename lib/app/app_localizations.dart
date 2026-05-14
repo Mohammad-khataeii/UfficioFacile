@@ -197,6 +197,24 @@ class AppLocalizations {
       'checklist_progress': 'Checklist progress',
       'deadlines_short': 'Deadlines',
       'city_pack_title': 'City pack',
+      'city_catalog_label': 'Catalog city',
+      'city_catalog_chip_prefix': 'City',
+      'city_catalog_selector': 'Guide city',
+      'city_catalog_selector_help':
+          'Choose the city whose verified local guides you want to browse.',
+      'city_catalog_status_available': 'available',
+      'city_catalog_status_coming_soon': 'coming soon',
+      'city_catalog_unavailable_title': 'City guides are not available yet',
+      'city_catalog_unavailable_body':
+          'We do not have verified local guides for {city} yet.',
+      'city_catalog_request_cta': 'Request this city',
+      'city_catalog_request_saved': 'City request saved.',
+      'city_catalog_change_city': 'Change city',
+      'city_catalog_select_warning':
+          '{city} is not fully available yet. You can save it now, and local guides will appear when verified data is added.',
+      'city_catalog_search_unavailable': 'No verified results for {city} yet.',
+      'city_catalog_premium_unavailable':
+          'Premium is active, but {city} guides are not available yet.',
       'estimated_expenses': 'Estimated expenses',
       'cost_dashboard_summary':
           'Track fees, refunds, installments, and disputed amounts.',
@@ -234,6 +252,8 @@ class AppLocalizations {
       'city_label': 'City',
       'plan_title': 'Your plan',
       'plan_intro': 'Choose the level of help that fits your situation.',
+      'plan_screenshot_limit_note':
+          'Free accounts cannot take screenshots. Premium removes screenshot blocking on this device.',
       'current_plan_label': 'Current plan',
       'free_plan_label': 'Free',
       'plus_plan_label': 'Plus',
@@ -255,6 +275,8 @@ class AppLocalizations {
       'paywall_maybe_later': 'Maybe later',
       'payment_setup_message':
           'Purchase options appear when billing is configured for your workspace.',
+      'sync_same_device_notice':
+          'Sign in to sync your UfficioFacile data with the same verified device.',
       'already_unlocked': 'Already unlocked',
       'of_label': 'of',
       'packs_used_this_month': 'packs used this month',
@@ -455,6 +477,26 @@ class AppLocalizations {
       'checklist_progress': 'Avanzamento checklist',
       'deadlines_short': 'Scadenze',
       'city_pack_title': 'Pacchetto città',
+      'city_catalog_label': 'Città del catalogo',
+      'city_catalog_chip_prefix': 'Città',
+      'city_catalog_selector': 'Città delle guide',
+      'city_catalog_selector_help':
+          'Scegli la città di cui vuoi consultare le guide locali verificate.',
+      'city_catalog_status_available': 'disponibile',
+      'city_catalog_status_coming_soon': 'in arrivo',
+      'city_catalog_unavailable_title':
+          'Le guide per questa città non sono ancora disponibili',
+      'city_catalog_unavailable_body':
+          'Non abbiamo ancora guide locali verificate per {city}.',
+      'city_catalog_request_cta': 'Richiedi questa città',
+      'city_catalog_request_saved': 'Richiesta città salvata.',
+      'city_catalog_change_city': 'Cambia città',
+      'city_catalog_select_warning':
+          '{city} non è ancora disponibile in modo completo. Puoi salvarla ora e le guide locali appariranno quando aggiungeremo dati verificati.',
+      'city_catalog_search_unavailable':
+          'Non ci sono ancora risultati verificati per {city}.',
+      'city_catalog_premium_unavailable':
+          'Premium è attivo, ma le guide per {city} non sono ancora disponibili.',
       'estimated_expenses': 'Spese stimate',
       'cost_dashboard_summary':
           'Controlla costi, rimborsi, rate e importi contestati.',
@@ -493,6 +535,8 @@ class AppLocalizations {
       'plan_title': 'Il tuo piano',
       'plan_intro':
           'Scegli il livello di aiuto più adatto alla tua situazione.',
+      'plan_screenshot_limit_note':
+          'Gli account gratuiti non possono fare screenshot. Premium rimuove il blocco screenshot su questo dispositivo.',
       'current_plan_label': 'Piano attuale',
       'free_plan_label': 'Free',
       'plus_plan_label': 'Plus',
@@ -514,6 +558,8 @@ class AppLocalizations {
       'paywall_maybe_later': 'Forse più tardi',
       'payment_setup_message':
           'Le opzioni di acquisto compaiono quando la fatturazione è configurata per il tuo workspace.',
+      'sync_same_device_notice':
+          'Accedi per sincronizzare i dati di UfficioFacile con questo stesso dispositivo verificato.',
       'already_unlocked': 'Già sbloccato',
       'of_label': 'di',
       'packs_used_this_month': 'pack usati questo mese',
@@ -712,6 +758,25 @@ class AppLocalizations {
       'checklist_progress': 'پیشرفت چک‌لیست',
       'deadlines_short': 'مهلت‌ها',
       'city_pack_title': 'بسته شهر',
+      'city_catalog_label': 'شهر کاتالوگ',
+      'city_catalog_chip_prefix': 'شهر',
+      'city_catalog_selector': 'شهر راهنماها',
+      'city_catalog_selector_help':
+          'شهری را انتخاب کنید که می‌خواهید راهنماهای محلی تاییدشده آن را ببینید.',
+      'city_catalog_status_available': 'موجود',
+      'city_catalog_status_coming_soon': 'به‌زودی',
+      'city_catalog_unavailable_title': 'راهنماهای این شهر هنوز آماده نیست',
+      'city_catalog_unavailable_body':
+          'هنوز راهنمای محلی تاییدشده‌ای برای {city} نداریم.',
+      'city_catalog_request_cta': 'درخواست این شهر',
+      'city_catalog_request_saved': 'درخواست شهر ذخیره شد.',
+      'city_catalog_change_city': 'تغییر شهر',
+      'city_catalog_select_warning':
+          '{city} هنوز کامل در دسترس نیست. می‌توانید آن را ذخیره کنید و وقتی داده تاییدشده اضافه شد راهنماها نمایش داده می‌شوند.',
+      'city_catalog_search_unavailable':
+          'هنوز نتیجه تاییدشده‌ای برای {city} نداریم.',
+      'city_catalog_premium_unavailable':
+          'پریمیوم فعال است، اما راهنماهای {city} هنوز در دسترس نیستند.',
       'estimated_expenses': 'هزینه‌های تخمینی',
       'cost_dashboard_summary':
           'کارمزدها، بازپرداخت‌ها، قسط‌ها و مبالغ مورد اختلاف را پیگیری کن.',
@@ -748,6 +813,8 @@ class AppLocalizations {
       'city_label': 'شهر',
       'plan_title': 'پلن شما',
       'plan_intro': 'سطح کمکی را انتخاب کن که با وضعیت تو هماهنگ باشد.',
+      'plan_screenshot_limit_note':
+          'حساب‌های رایگان نمی‌توانند اسکرین‌شات بگیرند. پریمیوم محدودیت اسکرین‌شات را روی این دستگاه برمی‌دارد.',
       'current_plan_label': 'پلن فعلی',
       'free_plan_label': 'رایگان',
       'plus_plan_label': 'پلاس',
@@ -770,6 +837,8 @@ class AppLocalizations {
       'paywall_maybe_later': 'بعداً',
       'payment_setup_message':
           'وقتی پرداخت برای این محیط فعال شود، گزینه‌های خرید اینجا نمایش داده می‌شوند.',
+      'sync_same_device_notice':
+          'برای همگام‌سازی داده‌های UfficioFacile با همین دستگاه تأییدشده وارد شوید.',
       'already_unlocked': 'قبلاً باز شده',
       'of_label': 'از',
       'packs_used_this_month': 'بسته استفاده شده در این ماه',
@@ -970,6 +1039,26 @@ class AppLocalizations {
       'checklist_progress': 'Progression de la checklist',
       'deadlines_short': 'Délais',
       'city_pack_title': 'Pack ville',
+      'city_catalog_label': 'Ville du catalogue',
+      'city_catalog_chip_prefix': 'Ville',
+      'city_catalog_selector': 'Ville des guides',
+      'city_catalog_selector_help':
+          'Choisissez la ville dont vous voulez consulter les guides locaux vérifiés.',
+      'city_catalog_status_available': 'disponible',
+      'city_catalog_status_coming_soon': 'bientôt disponible',
+      'city_catalog_unavailable_title':
+          'Les guides pour cette ville ne sont pas encore disponibles',
+      'city_catalog_unavailable_body':
+          'Nous n’avons pas encore de guides locaux vérifiés pour {city}.',
+      'city_catalog_request_cta': 'Demander cette ville',
+      'city_catalog_request_saved': 'Demande de ville enregistrée.',
+      'city_catalog_change_city': 'Changer de ville',
+      'city_catalog_select_warning':
+          '{city} n’est pas encore entièrement disponible. Vous pouvez l’enregistrer maintenant et les guides locaux apparaîtront quand des données vérifiées seront ajoutées.',
+      'city_catalog_search_unavailable':
+          'Aucun résultat vérifié pour {city} pour le moment.',
+      'city_catalog_premium_unavailable':
+          'Premium est actif, mais les guides pour {city} ne sont pas encore disponibles.',
       'estimated_expenses': 'Dépenses estimées',
       'cost_dashboard_summary':
           'Suivez les frais, remboursements, mensualités et montants contestés.',
@@ -1009,6 +1098,8 @@ class AppLocalizations {
       'plan_title': 'Votre offre',
       'plan_intro':
           'Choisissez le niveau d’aide qui convient à votre situation.',
+      'plan_screenshot_limit_note':
+          'Les comptes gratuits ne peuvent pas faire de captures d’écran. Premium retire ce blocage sur cet appareil.',
       'current_plan_label': 'Offre actuelle',
       'free_plan_label': 'Gratuit',
       'plus_plan_label': 'Plus',
@@ -1030,6 +1121,8 @@ class AppLocalizations {
       'paywall_maybe_later': 'Plus tard',
       'payment_setup_message':
           'Les options d’achat apparaissent quand la facturation est configurée pour votre espace.',
+      'sync_same_device_notice':
+          'Connectez-vous pour synchroniser vos données UfficioFacile avec ce même appareil vérifié.',
       'already_unlocked': 'Déjà débloqué',
       'of_label': 'sur',
       'packs_used_this_month': 'packs utilisés ce mois-ci',
@@ -1119,6 +1212,26 @@ class AppLocalizations {
       'checklist_progress': 'Progreso de la lista',
       'deadlines_short': 'Plazos',
       'city_pack_title': 'Paquete de ciudad',
+      'city_catalog_label': 'Ciudad del catálogo',
+      'city_catalog_chip_prefix': 'Ciudad',
+      'city_catalog_selector': 'Ciudad de las guías',
+      'city_catalog_selector_help':
+          'Elige la ciudad cuyas guías locales verificadas quieres consultar.',
+      'city_catalog_status_available': 'disponible',
+      'city_catalog_status_coming_soon': 'próximamente',
+      'city_catalog_unavailable_title':
+          'Las guías de esta ciudad todavía no están disponibles',
+      'city_catalog_unavailable_body':
+          'Todavía no tenemos guías locales verificadas para {city}.',
+      'city_catalog_request_cta': 'Solicitar esta ciudad',
+      'city_catalog_request_saved': 'Solicitud de ciudad guardada.',
+      'city_catalog_change_city': 'Cambiar ciudad',
+      'city_catalog_select_warning':
+          '{city} todavía no está disponible por completo. Puedes guardarla ahora y las guías locales aparecerán cuando añadamos datos verificados.',
+      'city_catalog_search_unavailable':
+          'Todavía no hay resultados verificados para {city}.',
+      'city_catalog_premium_unavailable':
+          'Premium está activo, pero las guías de {city} todavía no están disponibles.',
       'estimated_expenses': 'Gastos estimados',
       'cost_dashboard_summary':
           'Sigue tasas, reembolsos, cuotas e importes en disputa.',
@@ -1161,6 +1274,8 @@ class AppLocalizations {
       'plan_title': 'Tu plan',
       'plan_intro':
           'Elige el nivel de ayuda que mejor se adapte a tu situación.',
+      'plan_screenshot_limit_note':
+          'Las cuentas gratuitas no pueden hacer capturas de pantalla. Premium elimina ese bloqueo en este dispositivo.',
       'current_plan_label': 'Plan actual',
       'free_plan_label': 'Gratis',
       'plus_plan_label': 'Plus',
@@ -1183,6 +1298,8 @@ class AppLocalizations {
       'paywall_maybe_later': 'Quizá más tarde',
       'payment_setup_message':
           'Las opciones de compra aparecen cuando la facturación está configurada para tu espacio.',
+      'sync_same_device_notice':
+          'Inicia sesión para sincronizar tus datos de UfficioFacile con este mismo dispositivo verificado.',
       'already_unlocked': 'Ya desbloqueado',
       'of_label': 'de',
       'packs_used_this_month': 'packs usados este mes',
@@ -1379,6 +1496,25 @@ class AppLocalizations {
       'checklist_progress': 'تقدم القائمة',
       'deadlines_short': 'المواعيد',
       'city_pack_title': 'حزمة المدينة',
+      'city_catalog_label': 'مدينة الدليل',
+      'city_catalog_chip_prefix': 'المدينة',
+      'city_catalog_selector': 'مدينة الأدلة',
+      'city_catalog_selector_help':
+          'اختر المدينة التي تريد تصفح أدلتها المحلية الموثقة.',
+      'city_catalog_status_available': 'متاح',
+      'city_catalog_status_coming_soon': 'قريبًا',
+      'city_catalog_unavailable_title': 'أدلة هذه المدينة غير متاحة بعد',
+      'city_catalog_unavailable_body':
+          'لا نملك أدلة محلية موثقة لمدينة {city} حتى الآن.',
+      'city_catalog_request_cta': 'اطلب هذه المدينة',
+      'city_catalog_request_saved': 'تم حفظ طلب المدينة.',
+      'city_catalog_change_city': 'تغيير المدينة',
+      'city_catalog_select_warning':
+          '{city} غير متاحة بالكامل بعد. يمكنك حفظها الآن وستظهر الأدلة المحلية عندما نضيف بيانات موثقة.',
+      'city_catalog_search_unavailable':
+          'لا توجد نتائج موثقة لمدينة {city} بعد.',
+      'city_catalog_premium_unavailable':
+          'الاشتراك المميز نشط، لكن أدلة {city} غير متاحة بعد.',
       'estimated_expenses': 'المصاريف المقدرة',
       'cost_dashboard_summary':
           'تابع الرسوم والاستردادات والأقساط والمبالغ المتنازع عليها.',
@@ -1417,6 +1553,8 @@ class AppLocalizations {
       'auth_email': 'البريد الإلكتروني',
       'plan_title': 'خطتك',
       'plan_intro': 'اختر مستوى المساعدة المناسب لوضعك.',
+      'plan_screenshot_limit_note':
+          'الحسابات المجانية لا يمكنها التقاط لقطات شاشة. يزيل Premium هذا الحظر على هذا الجهاز.',
       'current_plan_label': 'الخطة الحالية',
       'free_plan_label': 'مجاني',
       'plus_plan_label': 'Plus',
@@ -1437,6 +1575,8 @@ class AppLocalizations {
       'paywall_maybe_later': 'ربما لاحقاً',
       'payment_setup_message':
           'تظهر خيارات الشراء عندما يتم تفعيل الفوترة لمساحة العمل الخاصة بك.',
+      'sync_same_device_notice':
+          'سجّل الدخول لمزامنة بيانات UfficioFacile مع هذا الجهاز الموثق نفسه.',
       'already_unlocked': 'مفتوح بالفعل',
       'of_label': 'من',
       'packs_used_this_month': 'حزم مستخدمة هذا الشهر',

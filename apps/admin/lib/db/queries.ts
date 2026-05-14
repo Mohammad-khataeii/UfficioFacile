@@ -154,7 +154,7 @@ export async function getDashboardMetrics(supabase: any) {
     userCount,
     premiumCount,
     problemCount,
-    consultancyCount,
+    consultancyRows,
     auditRows,
     categoryCount,
     procedureCount,
@@ -170,10 +170,9 @@ export async function getDashboardMetrics(supabase: any) {
       column: "status",
       value: "new",
     }),
-    safeCountRows(supabase, "ufficio_consultancy_requests", {
-      column: "status",
-      value: "newRequest",
-    }),
+    safeSelectRows(supabase, "ufficio_consultancy_requests", (query) =>
+      query.in("status", ["newRequest", "new", "reviewing", "waitingPayment"]).limit(200),
+    ),
     safeSelectRows(supabase, "ufficio_admin_audit_logs", (query) =>
       query.order("created_at", { ascending: false }).limit(10),
     ),
@@ -187,7 +186,7 @@ export async function getDashboardMetrics(supabase: any) {
     userCount.warning,
     premiumCount.warning,
     problemCount.warning,
-    consultancyCount.warning,
+    consultancyRows.warning,
     auditRows.warning,
     categoryCount.warning,
     procedureCount.warning,
@@ -200,7 +199,11 @@ export async function getDashboardMetrics(supabase: any) {
     premiumUsers: premiumCount.data,
     freeUsers: Math.max(userCount.data - premiumCount.data, 0),
     openProblemRequests: problemCount.data,
-    openConsultancyRequests: consultancyCount.data,
+    openConsultancyRequests: consultancyRows.data.filter((row) =>
+      ["newRequest", "new", "reviewing", "waitingPayment"].includes(
+        String(row?.status ?? ""),
+      ),
+    ).length,
     cmsCategories: categoryCount.data,
     cmsProcedures: procedureCount.data,
     cmsBlocks: blockCount.data,

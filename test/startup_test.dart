@@ -18,59 +18,67 @@ import 'package:ufficiofacile/features/italy_admin_copilot/data/onboarding_repos
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/admin_config.dart';
 import 'package:ufficiofacile/features/italy_admin_copilot/domain/onboarding_state.dart';
 
-const _localConfig = UfficcioFacileConfig(
+const _supabaseConfigMissingCredentials = UfficcioFacileConfig(
   appName: UfficcioFacileConfig.appNameValue,
   flavor: UfficioFacileFlavor.development,
-  backendMode: AppBackendMode.local,
+  backendMode: AppBackendMode.supabase,
   supabaseUrl: '',
   supabaseAnonKey: '',
   syncEnabledByDefault: false,
   adminDebugEnabled: false,
-  betaModeEnabled: true,
-  paywallEnabled: false,
+  betaModeEnabled: false,
+  paywallEnabled: true,
   analyticsEnabledByDefault: true,
-  allowLocalFallback: true,
+  allowLocalFallback: false,
 );
 
 void main() {
   group('startup config and service', () {
-    test('AppConfig falls back to local when Supabase env missing', () {
-      expect(UfficcioFacileConfig.fromEnv.backendLabel, 'local');
+    test('AppConfig defaults to supabase mode when env is missing', () {
+      expect(UfficcioFacileConfig.fromEnv.backendLabel, 'supabase');
       expect(UfficcioFacileConfig.fromEnv.hasSupabaseCredentials, isFalse);
     });
 
-    test('StartupService completes in local mode', () async {
-      SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
-      final result = await AppStartupService(
-        config: _localConfig,
-        onboardingRepository: LocalOnboardingRepository(prefs),
-        adminConfigRepository: LocalAdminConfigRepository(prefs),
-        languageRepository: LocalAppLanguageRepository(prefs),
-        analyticsService: LocalAnalyticsService(prefs),
-      ).initialize();
+    test(
+      'StartupService blocks startup when Supabase config is missing',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final result = await AppStartupService(
+          config: _supabaseConfigMissingCredentials,
+          onboardingRepository: LocalOnboardingRepository(prefs),
+          adminConfigRepository: LocalAdminConfigRepository(prefs),
+          languageRepository: LocalAppLanguageRepository(prefs),
+          analyticsService: LocalAnalyticsService(prefs),
+        ).initialize();
 
-      expect(result.onboardingState.completed, isFalse);
-      expect(result.languageCode, 'en');
-      expect(result.usedFallbackLocalMode, isFalse);
-      expect(result.supabaseConfigured, isFalse);
-    });
+        expect(result.onboardingState.completed, isFalse);
+        expect(result.languageCode, 'en');
+        expect(result.usedFallbackLocalMode, isFalse);
+        expect(result.supabaseConfigured, isFalse);
+        expect(result.errorMessage, 'App configuration is incomplete.');
+      },
+    );
 
-    test('StartupService does not require Supabase in local mode', () async {
-      final result = await AppStartupService(
-        config: _localConfig,
-        onboardingRepository: const _FakeOnboardingRepository(
-          state: OnboardingState(completed: true),
-        ),
-        adminConfigRepository: const _FakeAdminConfigRepository(),
-        languageRepository: _FakeLanguageRepository('it'),
-        analyticsService: _NoopAnalyticsService(),
-      ).initialize();
+    test(
+      'StartupService keeps onboarding state while reporting config error',
+      () async {
+        final result = await AppStartupService(
+          config: _supabaseConfigMissingCredentials,
+          onboardingRepository: const _FakeOnboardingRepository(
+            state: OnboardingState(completed: true),
+          ),
+          adminConfigRepository: const _FakeAdminConfigRepository(),
+          languageRepository: _FakeLanguageRepository('it'),
+          analyticsService: _NoopAnalyticsService(),
+        ).initialize();
 
-      expect(result.onboardingState.completed, isTrue);
-      expect(result.languageCode, 'it');
-      expect(result.usedFallbackLocalMode, isFalse);
-    });
+        expect(result.onboardingState.completed, isTrue);
+        expect(result.languageCode, 'it');
+        expect(result.usedFallbackLocalMode, isFalse);
+        expect(result.errorMessage, 'App configuration is incomplete.');
+      },
+    );
 
     test(
       'StartupService returns default onboarding state if local storage empty',
@@ -78,7 +86,7 @@ void main() {
         SharedPreferences.setMockInitialValues({});
         final prefs = await SharedPreferences.getInstance();
         final result = await AppStartupService(
-          config: _localConfig,
+          config: _supabaseConfigMissingCredentials,
           onboardingRepository: LocalOnboardingRepository(prefs),
           adminConfigRepository: LocalAdminConfigRepository(prefs),
           languageRepository: LocalAppLanguageRepository(prefs),
@@ -100,7 +108,7 @@ void main() {
         final prefs = await SharedPreferences.getInstance();
 
         final result = await AppStartupService(
-          config: _localConfig,
+          config: _supabaseConfigMissingCredentials,
           onboardingRepository: LocalOnboardingRepository(prefs),
           adminConfigRepository: LocalAdminConfigRepository(prefs),
           languageRepository: LocalAppLanguageRepository(prefs),
@@ -115,7 +123,7 @@ void main() {
 
     test('No startup test waits forever', () async {
       final result = await AppStartupService(
-        config: _localConfig,
+        config: _supabaseConfigMissingCredentials,
         onboardingRepository: const _NeverResolvingOnboardingRepository(),
         adminConfigRepository: const _FakeAdminConfigRepository(),
         languageRepository: _FakeLanguageRepository('en'),
@@ -154,7 +162,7 @@ void main() {
             isLoading: false,
             isReady: true,
             onboardingCompleted: false,
-            backendMode: 'local',
+            backendMode: 'supabase',
             flavor: 'development',
             languageCode: 'en',
             usedFallbackLocalMode: false,
@@ -176,7 +184,7 @@ void main() {
             isLoading: false,
             isReady: true,
             onboardingCompleted: true,
-            backendMode: 'local',
+            backendMode: 'supabase',
             flavor: 'development',
             languageCode: 'en',
             usedFallbackLocalMode: false,
@@ -198,7 +206,7 @@ void main() {
             isLoading: false,
             isReady: true,
             onboardingCompleted: false,
-            backendMode: 'local',
+            backendMode: 'supabase',
             flavor: 'development',
             languageCode: 'en',
             usedFallbackLocalMode: false,
@@ -213,11 +221,13 @@ void main() {
       );
     });
 
-    testWidgets('Loading screen timeout shows fallback state', (tester) async {
+    testWidgets('Loading screen timeout shows retry state only', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       final controller = ItalyAdminCopilotController(
-        appConfig: _localConfig,
+        appConfig: _supabaseConfigMissingCredentials,
         onboardingRepository: LocalOnboardingRepository(prefs),
         adminConfigRepository: LocalAdminConfigRepository(prefs),
         analyticsService: LocalAnalyticsService(prefs),
@@ -230,7 +240,7 @@ void main() {
 
       expect(find.text('Continue in local mode'), findsNothing);
       await tester.pump(const Duration(seconds: 6));
-      expect(find.text('Continue in local mode'), findsOneWidget);
+      expect(find.text('Continue in local mode'), findsNothing);
       expect(find.text('Retry'), findsOneWidget);
     });
   });

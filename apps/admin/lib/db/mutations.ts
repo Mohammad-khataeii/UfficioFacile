@@ -503,6 +503,7 @@ export async function upsertCmsProcedure(formData: FormData) {
   const admin = await requireAdmin("content.manage");
   const parsed = procedureSchema.parse({
     categorySlug: formData.get("categorySlug"),
+    subcategorySlug: formData.get("subcategorySlug"),
     slug: formData.get("slug"),
     titleEn: formData.get("titleEn"),
     titleIt: formData.get("titleIt"),
@@ -528,6 +529,7 @@ export async function upsertCmsProcedure(formData: FormData) {
 
   const payload = {
     category_slug: parsed.categorySlug,
+    subcategory_slug: String(parsed.subcategorySlug ?? "").trim() || null,
     slug: parsed.slug,
     title: localizedFromFormData(formData, "title"),
     subtitle: localizedFromFormData(formData, "subtitle"),
@@ -583,6 +585,7 @@ export async function upsertCmsProcedure(formData: FormData) {
   revalidatePath("/content/procedures");
   revalidatePath(`/content/procedures/${parsed.slug}`);
   revalidatePath(`/content/procedures/${parsed.categorySlug}/${parsed.slug}`);
+  revalidatePath(`/content/categories/${parsed.categorySlug}`);
 }
 
 export async function updatePublicConfig(

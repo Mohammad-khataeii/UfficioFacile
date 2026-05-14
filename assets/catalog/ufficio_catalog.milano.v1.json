@@ -1,0 +1,3193 @@
+{
+    "version": 1,
+    "updatedAt": "2026-05-13T21:30:00Z",
+    "city": {
+        "slug": "milano",
+        "label": "Milano",
+        "region": "Lombardia",
+        "country": "IT",
+        "status": "beta_verified_partial",
+        "notes": {
+            "en": "Milano beta catalog. General guides are usable. Local office details should be verified before sending documents.",
+            "it": "Catalogo beta Milano. Le guide generali sono utilizzabili. I dettagli degli uffici locali vanno verificati prima di inviare documenti.",
+            "fr": "Catalogue bêta Milan. Les guides généraux sont utilisables. Les détails locaux doivent être vérifiés avant l’envoi de documents.",
+            "fa": "کاتالوگ بتای میلان. راهنماهای عمومی قابل استفاده‌اند. جزئیات اداره‌های محلی قبل از ارسال مدارک باید بررسی شوند."
+        }
+    },
+    "languages": [
+        "en",
+        "it",
+        "fr",
+        "fa"
+    ],
+    "categories": [
+        {
+            "id": "health_asl",
+            "icon": "local_hospital",
+            "sortOrder": 10,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "Health / ASL",
+                "it": "Salute / ASL",
+                "fr": "Santé / ASL",
+                "fa": "سلامت / ASL"
+            },
+            "description": {
+                "en": "Public healthcare access, doctor choice, health card, and insurance options in Milano.",
+                "it": "Accesso alla sanità pubblica, scelta medico, tessera sanitaria e opzioni assicurative a Milano.",
+                "fr": "Accès aux soins publics, choix du médecin, carte de santé et assurances à Milan.",
+                "fa": "دسترسی به درمان عمومی، انتخاب پزشک، کارت سلامت و گزینه‌های بیمه در میلان."
+            },
+            "subcategories": [
+                {
+                    "id": "ssn_registration_and_doctor",
+                    "categoryId": "health_asl",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "SSN registration and doctor choice",
+                        "it": "Iscrizione SSN e scelta medico",
+                        "fr": "Inscription SSN et choix du médecin",
+                        "fa": "ثبت‌نام SSN و انتخاب پزشک"
+                    },
+                    "description": {
+                        "en": "Register with the public health system and choose or change a family doctor.",
+                        "it": "Iscriviti al sistema sanitario pubblico e scegli o cambia il medico di famiglia.",
+                        "fr": "Inscription au système public et choix ou changement de médecin.",
+                        "fa": "ثبت‌نام در سیستم درمانی عمومی و انتخاب یا تغییر پزشک خانواده."
+                    },
+                    "procedures": [
+                        {
+                            "id": "choose_or_change_doctor_milano",
+                            "categoryId": "health_asl",
+                            "subcategoryId": "ssn_registration_and_doctor",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Choose or change your family doctor",
+                                "it": "Scegliere o cambiare il medico di famiglia",
+                                "fr": "Choisir ou changer de médecin généraliste",
+                                "fa": "انتخاب یا تغییر پزشک خانواده"
+                            },
+                            "shortDescription": {
+                                "en": "Use Lombardia health services or ATS Milano channels to choose or change your doctor.",
+                                "it": "Usa i servizi sanitari lombardi o i canali ATS Milano per scegliere o cambiare medico.",
+                                "fr": "Utilise les services de santé lombards ou ATS Milano.",
+                                "fa": "از خدمات درمانی لومباردیا یا ATS Milano برای انتخاب یا تغییر پزشک استفاده کن."
+                            },
+                            "tags": [
+                                "health",
+                                "doctor",
+                                "ssn",
+                                "ats_milano",
+                                "lombardia"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "steps",
+                                    "key": "main_steps",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "What to do",
+                                        "it": "Cosa fare",
+                                        "fr": "Que faire",
+                                        "fa": "چه کاری انجام دهی"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Check that your residence or health domicile is in Lombardia.",
+                                            "Use SPID, CIE, or CNS when the regional portal asks for digital login.",
+                                            "Search for an available family doctor or pediatrician.",
+                                            "Save the confirmation or screenshot after the choice.",
+                                            "If the online flow fails, contact ATS Milano or the competent health office."
+                                        ],
+                                        "it": [
+                                            "Verifica che residenza o domicilio sanitario siano in Lombardia.",
+                                            "Usa SPID, CIE o CNS quando il portale regionale richiede accesso digitale.",
+                                            "Cerca un medico di famiglia o pediatra disponibile.",
+                                            "Salva la conferma o uno screenshot dopo la scelta.",
+                                            "Se la procedura online non funziona, contatta ATS Milano o l’ufficio sanitario competente."
+                                        ],
+                                        "fr": [
+                                            "Vérifie que ta résidence ou ton domicile sanitaire est en Lombardie.",
+                                            "Utilise SPID, CIE ou CNS si le portail le demande.",
+                                            "Recherche un médecin ou pédiatre disponible.",
+                                            "Garde la confirmation ou une capture d’écran.",
+                                            "Si la procédure échoue, contacte ATS Milano."
+                                        ],
+                                        "fa": [
+                                            "بررسی کن محل اقامت یا domicilio sanitario تو در لومباردیا باشد.",
+                                            "اگر پورتال خواست با SPID، CIE یا CNS وارد شو.",
+                                            "پزشک خانواده یا پزشک کودکان موجود را جستجو کن.",
+                                            "بعد از انتخاب، تأییدیه یا اسکرین‌شات را ذخیره کن.",
+                                            "اگر روند آنلاین کار نکرد با ATS Milano یا دفتر مربوطه تماس بگیر."
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "checklist",
+                                    "key": "documents",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Usually needed",
+                                        "it": "Di solito servono",
+                                        "fr": "Souvent nécessaires",
+                                        "fa": "معمولاً لازم است"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Identity document.",
+                                            "Codice fiscale.",
+                                            "Residence permit or receipt if non-EU.",
+                                            "Proof of residence or health domicile when requested.",
+                                            "Previous doctor details if you are changing doctor."
+                                        ],
+                                        "it": [
+                                            "Documento d’identità.",
+                                            "Codice fiscale.",
+                                            "Permesso di soggiorno o ricevuta se extra UE.",
+                                            "Prova di residenza o domicilio sanitario quando richiesta.",
+                                            "Dati del medico precedente se stai cambiando medico."
+                                        ],
+                                        "fr": [
+                                            "Document d’identité.",
+                                            "Codice fiscale.",
+                                            "Permis de séjour ou reçu si hors UE.",
+                                            "Preuve de résidence ou domicile sanitaire si demandée.",
+                                            "Données du médecin précédent si changement."
+                                        ],
+                                        "fa": [
+                                            "مدرک هویتی.",
+                                            "کد مالیاتی.",
+                                            "اجازه اقامت یا رسید برای افراد خارج از اتحادیه اروپا.",
+                                            "مدرک محل اقامت یا domicilio sanitario در صورت درخواست.",
+                                            "اطلاعات پزشک قبلی اگر در حال تغییر پزشک هستی."
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "warning",
+                                    "key": "verify_channels",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Verify before sending",
+                                        "it": "Verifica prima di inviare",
+                                        "fr": "Vérifie avant d’envoyer",
+                                        "fa": "قبل از ارسال بررسی کن"
+                                    },
+                                    "body": {
+                                        "en": "Doctor availability and local channels change often. Do not send identity or health documents to unofficial addresses.",
+                                        "it": "Disponibilità dei medici e canali locali cambiano spesso. Non inviare documenti sanitari o d’identità a indirizzi non ufficiali.",
+                                        "fr": "La disponibilité et les canaux changent souvent. N’envoie pas de documents à des adresses non officielles.",
+                                        "fa": "ظرفیت پزشکان و کانال‌های محلی زیاد تغییر می‌کند. مدارک درمانی یا هویتی را به آدرس غیررسمی نفرست."
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ATS Milano",
+                                        "it": "ATS Milano",
+                                        "fr": "ATS Milano",
+                                        "fa": "ATS Milano"
+                                    },
+                                    "url": "https://www.ats-milano.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Fascicolo Sanitario Lombardia",
+                                        "it": "Fascicolo Sanitario Lombardia",
+                                        "fr": "Dossier santé Lombardie",
+                                        "fa": "پرونده سلامت لومباردیا"
+                                    },
+                                    "url": "https://www.fascicolosanitario.regione.lombardia.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [
+                                {
+                                    "label": {
+                                        "en": "ATS Milano switchboard",
+                                        "it": "Centralino ATS Milano",
+                                        "fr": "Standard ATS Milano",
+                                        "fa": "تلفن مرکزی ATS Milano"
+                                    },
+                                    "value": "02-85781",
+                                    "type": "phone",
+                                    "notes": {
+                                        "en": "Use it to ask which office is competent for your case before sending documents.",
+                                        "it": "Usalo per capire quale ufficio è competente prima di inviare documenti.",
+                                        "fr": "À utiliser pour vérifier le bureau compétent.",
+                                        "fa": "قبل از ارسال مدارک، برای فهمیدن دفتر مربوطه استفاده کن."
+                                    }
+                                }
+                            ],
+                            "warnings": {
+                                "en": "Always verify the latest official instructions before submitting health documents.",
+                                "it": "Verifica sempre le istruzioni ufficiali aggiornate prima di inviare documenti sanitari.",
+                                "fr": "Vérifie toujours les instructions officielles avant l’envoi.",
+                                "fa": "قبل از ارسال مدارک درمانی، دستورالعمل رسمی جدید را بررسی کن."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        },
+                        {
+                            "id": "health_card_tessera_sanitaria_milano",
+                            "categoryId": "health_asl",
+                            "subcategoryId": "ssn_registration_and_doctor",
+                            "sortOrder": 20,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Health card / Tessera Sanitaria",
+                                "it": "Tessera sanitaria",
+                                "fr": "Carte de santé italienne",
+                                "fa": "کارت سلامت / Tessera Sanitaria"
+                            },
+                            "shortDescription": {
+                                "en": "What to check if your health card is missing, expired, or not delivered.",
+                                "it": "Cosa controllare se la tessera sanitaria manca, è scaduta o non arriva.",
+                                "fr": "Que vérifier si la carte de santé manque, expire ou n’arrive pas.",
+                                "fa": "اگر کارت سلامتت نیامده، گم شده یا منقضی شده چه چیزهایی را بررسی کنی."
+                            },
+                            "tags": [
+                                "health_card",
+                                "tessera_sanitaria",
+                                "codice_fiscale"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "check_first",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Check these first",
+                                        "it": "Controlla prima questi punti",
+                                        "fr": "Vérifie d’abord ceci",
+                                        "fa": "اول این موارد را بررسی کن"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Your codice fiscale is correct.",
+                                            "Your registered address is updated.",
+                                            "Your SSN registration is active if required.",
+                                            "Your mailbox name matches the registered address.",
+                                            "You are using official Agenzia Entrate or health service channels."
+                                        ],
+                                        "it": [
+                                            "Il codice fiscale è corretto.",
+                                            "L’indirizzo registrato è aggiornato.",
+                                            "L’iscrizione SSN è attiva se richiesta.",
+                                            "Il nome sulla cassetta postale coincide con l’indirizzo registrato.",
+                                            "Stai usando canali ufficiali Agenzia Entrate o sanitari."
+                                        ],
+                                        "fr": [
+                                            "Ton codice fiscale est correct.",
+                                            "Ton adresse enregistrée est à jour.",
+                                            "Ton inscription SSN est active si nécessaire.",
+                                            "Le nom sur la boîte aux lettres correspond.",
+                                            "Tu utilises des canaux officiels."
+                                        ],
+                                        "fa": [
+                                            "کد مالیاتی‌ات درست باشد.",
+                                            "آدرس ثبت‌شده‌ات به‌روز باشد.",
+                                            "ثبت‌نام SSN در صورت نیاز فعال باشد.",
+                                            "نام روی صندوق پست با آدرس ثبت‌شده بخواند.",
+                                            "از کانال‌های رسمی استفاده کنی."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Agenzia Entrate",
+                                        "it": "Agenzia Entrate",
+                                        "fr": "Agenzia Entrate",
+                                        "fa": "Agenzia Entrate"
+                                    },
+                                    "url": "https://www.agenziaentrate.gov.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Fascicolo Sanitario Lombardia",
+                                        "it": "Fascicolo Sanitario Lombardia",
+                                        "fr": "Dossier santé Lombardie",
+                                        "fa": "پرونده سلامت لومباردیا"
+                                    },
+                                    "url": "https://www.fascicolosanitario.regione.lombardia.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Wrong registered address is a common reason for delivery problems.",
+                                "it": "Un indirizzo registrato errato è una causa frequente di problemi di consegna.",
+                                "fr": "Une adresse enregistrée erronée cause souvent des problèmes de livraison.",
+                                "fa": "آدرس ثبت‌شده اشتباه یکی از دلایل رایج مشکل تحویل است."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        },
+                        {
+                            "id": "ssn_registration_students_milano",
+                            "categoryId": "health_asl",
+                            "subcategoryId": "ssn_registration_and_doctor",
+                            "sortOrder": 30,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "SSN registration for students",
+                                "it": "Iscrizione SSN per studenti",
+                                "fr": "Inscription SSN pour étudiants",
+                                "fa": "ثبت‌نام SSN برای دانشجویان"
+                            },
+                            "shortDescription": {
+                                "en": "Basic checks before paying or choosing an insurance option.",
+                                "it": "Controlli base prima di pagare o scegliere un’assicurazione.",
+                                "fr": "Contrôles de base avant paiement ou assurance.",
+                                "fa": "بررسی‌های اصلی قبل از پرداخت یا انتخاب بیمه."
+                            },
+                            "tags": [
+                                "student",
+                                "ssn",
+                                "insurance",
+                                "health"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "student_status",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Before you pay",
+                                        "it": "Prima di pagare",
+                                        "fr": "Avant de payer",
+                                        "fa": "قبل از پرداخت"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Check if you are EU or non-EU.",
+                                            "Check your residence or domicile status.",
+                                            "Check whether you need full SSN registration or private coverage.",
+                                            "Keep university enrollment proof ready.",
+                                            "Keep permit/residence documents ready if non-EU."
+                                        ],
+                                        "it": [
+                                            "Verifica se sei UE o extra UE.",
+                                            "Controlla residenza o domicilio.",
+                                            "Capisci se serve iscrizione SSN o copertura privata.",
+                                            "Tieni pronta l’iscrizione universitaria.",
+                                            "Tieni pronti permesso o ricevuta se extra UE."
+                                        ],
+                                        "fr": [
+                                            "Vérifie si tu es UE ou hors UE.",
+                                            "Vérifie résidence ou domicile.",
+                                            "Comprends si tu as besoin du SSN ou d’une assurance privée.",
+                                            "Garde la preuve d’inscription universitaire.",
+                                            "Garde permis/reçu si hors UE."
+                                        ],
+                                        "fa": [
+                                            "بررسی کن شهروند اتحادیه اروپا هستی یا نه.",
+                                            "وضعیت اقامت یا domicilio را بررسی کن.",
+                                            "بفهم آیا SSN لازم داری یا بیمه خصوصی کافی است.",
+                                            "مدرک ثبت‌نام دانشگاه را آماده نگه دار.",
+                                            "اگر خارج از اتحادیه اروپا هستی، اجازه اقامت یا رسید را آماده کن."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ATS Milano",
+                                        "it": "ATS Milano",
+                                        "fr": "ATS Milano",
+                                        "fa": "ATS Milano"
+                                    },
+                                    "url": "https://www.ats-milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not pay before confirming the correct route for your nationality and permit status.",
+                                "it": "Non pagare prima di confermare il percorso corretto per cittadinanza e permesso.",
+                                "fr": "Ne paie pas avant de confirmer le bon parcours.",
+                                "fa": "قبل از تأیید مسیر درست بر اساس ملیت و وضعیت اقامت پرداخت نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "insurance_options",
+                    "categoryId": "health_asl",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "Insurance options",
+                        "it": "Opzioni assicurative",
+                        "fr": "Options d’assurance",
+                        "fa": "گزینه‌های بیمه"
+                    },
+                    "description": {
+                        "en": "Compare public SSN access, student payment, and private insurance options.",
+                        "it": "Confronta SSN, contributo studenti e assicurazioni private.",
+                        "fr": "Compare SSN, paiement étudiant et assurances privées.",
+                        "fa": "SSN، پرداخت دانشجویی و بیمه خصوصی را مقایسه کن."
+                    },
+                    "procedures": [
+                        {
+                            "id": "compare_health_insurance_milano",
+                            "categoryId": "health_asl",
+                            "subcategoryId": "insurance_options",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Compare health insurance options",
+                                "it": "Confrontare le opzioni di assicurazione sanitaria",
+                                "fr": "Comparer les options d’assurance santé",
+                                "fa": "مقایسه گزینه‌های بیمه درمانی"
+                            },
+                            "shortDescription": {
+                                "en": "Decide whether SSN registration or private coverage makes sense for your case.",
+                                "it": "Capisci se conviene iscrizione SSN o copertura privata nel tuo caso.",
+                                "fr": "Choisis entre inscription SSN et couverture privée.",
+                                "fa": "تصمیم بگیر SSN بهتر است یا بیمه خصوصی."
+                            },
+                            "tags": [
+                                "premium",
+                                "insurance",
+                                "students",
+                                "workers",
+                                "ssn"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "text",
+                                    "key": "premium_scope",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "What Premium helps you decide",
+                                        "it": "Cosa ti aiuta a decidere Premium",
+                                        "fr": "Ce que Premium aide à décider",
+                                        "fa": "پرمیوم به چه تصمیمی کمک می‌کند"
+                                    },
+                                    "body": {
+                                        "en": "Use this when you are unsure whether to pay for SSN registration, use private insurance, or ask for a personal case review.",
+                                        "it": "Usalo se non sai se pagare l’iscrizione SSN, usare un’assicurazione privata o chiedere una verifica personale.",
+                                        "fr": "À utiliser si tu hésites entre SSN, assurance privée ou revue personnelle.",
+                                        "fa": "اگر بین پرداخت SSN، بیمه خصوصی یا بررسی شخصی مردد هستی، از این استفاده کن."
+                                    }
+                                },
+                                {
+                                    "type": "checklist",
+                                    "key": "decision_inputs",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Inputs to compare",
+                                        "it": "Dati da confrontare",
+                                        "fr": "Données à comparer",
+                                        "fa": "مواردی که باید مقایسه شوند"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Nationality.",
+                                            "Residence or domicile.",
+                                            "Permit type and duration.",
+                                            "Student or worker status.",
+                                            "Existing private policy coverage.",
+                                            "Need for family doctor, prescriptions, and local public healthcare."
+                                        ],
+                                        "it": [
+                                            "Cittadinanza.",
+                                            "Residenza o domicilio.",
+                                            "Tipo e durata del permesso.",
+                                            "Status studente o lavoratore.",
+                                            "Copertura della polizza privata esistente.",
+                                            "Necessità di medico di base, ricette e sanità pubblica locale."
+                                        ],
+                                        "fr": [
+                                            "Nationalité.",
+                                            "Résidence ou domicile.",
+                                            "Type et durée du permis.",
+                                            "Statut étudiant ou travailleur.",
+                                            "Couverture privée existante.",
+                                            "Besoin de médecin, prescriptions et soins publics."
+                                        ],
+                                        "fa": [
+                                            "ملیت.",
+                                            "اقامت یا domicilio.",
+                                            "نوع و مدت اجازه اقامت.",
+                                            "وضعیت دانشجویی یا کاری.",
+                                            "پوشش بیمه خصوصی موجود.",
+                                            "نیاز به پزشک خانواده، نسخه و درمان عمومی."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ATS Milano",
+                                        "it": "ATS Milano",
+                                        "fr": "ATS Milano",
+                                        "fa": "ATS Milano"
+                                    },
+                                    "url": "https://www.ats-milano.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Fascicolo Sanitario Lombardia",
+                                        "it": "Fascicolo Sanitario Lombardia",
+                                        "fr": "Dossier santé Lombardie",
+                                        "fa": "پرونده سلامت لومباردیا"
+                                    },
+                                    "url": "https://www.fascicolosanitario.regione.lombardia.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Coverage rules depend on nationality, residence, permit type, work status, and university status.",
+                                "it": "Le regole dipendono da cittadinanza, residenza, permesso, lavoro e status universitario.",
+                                "fr": "Les règles dépendent de nationalité, résidence, permis, travail et université.",
+                                "fa": "قوانین به ملیت، اقامت، نوع اجازه، وضعیت کاری و دانشگاه بستگی دارد."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps you compare options before paying.",
+                                "it": "Premium ti aiuta a confrontare le opzioni prima di pagare.",
+                                "fr": "Premium t’aide à comparer avant de payer.",
+                                "fa": "پرمیوم قبل از پرداخت به مقایسه گزینه‌ها کمک می‌کند."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "public_office_comune",
+            "icon": "account_balance",
+            "sortOrder": 20,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "Comune / Public office",
+                "it": "Comune / Uffici pubblici",
+                "fr": "Commune / Administration",
+                "fa": "شهرداری / اداره‌های عمومی"
+            },
+            "description": {
+                "en": "Residence, certificates, appointments, identity documents, and Comune procedures.",
+                "it": "Residenza, certificati, appuntamenti, documenti e pratiche comunali.",
+                "fr": "Résidence, certificats, rendez-vous, identité et démarches communales.",
+                "fa": "اقامت، گواهی‌ها، نوبت‌ها، مدارک هویتی و کارهای شهرداری."
+            },
+            "subcategories": [
+                {
+                    "id": "residence_and_registry",
+                    "categoryId": "public_office_comune",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "Residence and registry",
+                        "it": "Residenza e anagrafe",
+                        "fr": "Résidence et état civil",
+                        "fa": "اقامت و ثبت احوال"
+                    },
+                    "description": {
+                        "en": "Basic registry procedures with Comune di Milano.",
+                        "it": "Pratiche anagrafiche di base con il Comune di Milano.",
+                        "fr": "Démarches d’état civil avec la commune de Milan.",
+                        "fa": "فرایندهای ثبت احوال با شهرداری میلان."
+                    },
+                    "procedures": [
+                        {
+                            "id": "change_residence_milano",
+                            "categoryId": "public_office_comune",
+                            "subcategoryId": "residence_and_registry",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Change residence in Milano",
+                                "it": "Cambio di residenza a Milano",
+                                "fr": "Changement de résidence à Milan",
+                                "fa": "تغییر محل اقامت در میلان"
+                            },
+                            "shortDescription": {
+                                "en": "Prepare before submitting a residence change request.",
+                                "it": "Preparati prima di inviare una richiesta di cambio residenza.",
+                                "fr": "Prépare-toi avant la demande de changement de résidence.",
+                                "fa": "قبل از ارسال درخواست تغییر اقامت آماده شو."
+                            },
+                            "tags": [
+                                "residence",
+                                "comune",
+                                "milano",
+                                "anagrafe"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "documents",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Documents to prepare",
+                                        "it": "Documenti da preparare",
+                                        "fr": "Documents à préparer",
+                                        "fa": "مدارکی که باید آماده کنی"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Identity document.",
+                                            "Codice fiscale.",
+                                            "Rental contract, property deed, or hospitality declaration.",
+                                            "Residence permit or receipt if non-EU.",
+                                            "Data of family members moving with you.",
+                                            "Proof that the address and house number are correct."
+                                        ],
+                                        "it": [
+                                            "Documento d’identità.",
+                                            "Codice fiscale.",
+                                            "Contratto di affitto, proprietà o dichiarazione di ospitalità.",
+                                            "Permesso di soggiorno o ricevuta se extra UE.",
+                                            "Dati dei familiari che si trasferiscono con te.",
+                                            "Prova che indirizzo e numero civico siano corretti."
+                                        ],
+                                        "fr": [
+                                            "Document d’identité.",
+                                            "Codice fiscale.",
+                                            "Contrat, propriété ou déclaration d’hospitalité.",
+                                            "Permis de séjour ou reçu si hors UE.",
+                                            "Données des membres de famille.",
+                                            "Preuve que l’adresse est correcte."
+                                        ],
+                                        "fa": [
+                                            "مدرک هویتی.",
+                                            "کد مالیاتی.",
+                                            "قرارداد اجاره، سند مالکیت یا اعلامیه میزبانی.",
+                                            "اجازه اقامت یا رسید برای افراد خارج از اتحادیه اروپا.",
+                                            "اطلاعات اعضای خانواده‌ای که با تو منتقل می‌شوند.",
+                                            "مدرک درست بودن آدرس و شماره پلاک."
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "warning",
+                                    "key": "housing_proof_warning",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Common issue",
+                                        "it": "Problema frequente",
+                                        "fr": "Problème fréquent",
+                                        "fa": "مشکل رایج"
+                                    },
+                                    "body": {
+                                        "en": "Incomplete housing documents are one of the most common reasons for integration requests or delays.",
+                                        "it": "Documenti abitativi incompleti sono una causa frequente di richieste di integrazione o ritardi.",
+                                        "fr": "Des documents logement incomplets causent souvent des retards.",
+                                        "fa": "مدارک ناقص محل سکونت یکی از دلایل رایج تأخیر یا درخواست تکمیل است."
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "ANPR",
+                                        "it": "ANPR",
+                                        "fr": "ANPR",
+                                        "fa": "ANPR"
+                                    },
+                                    "url": "https://www.anagrafenazionale.interno.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not submit incomplete housing proof. The Comune may ask for integration or reject the request.",
+                                "it": "Non inviare prove abitative incomplete. Il Comune può chiedere integrazioni o respingere la pratica.",
+                                "fr": "N’envoie pas de preuve logement incomplète.",
+                                "fa": "مدرک ناقص محل سکونت نفرست؛ شهرداری ممکن است تکمیل بخواهد یا رد کند."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        },
+                        {
+                            "id": "cie_milano",
+                            "categoryId": "public_office_comune",
+                            "subcategoryId": "residence_and_registry",
+                            "sortOrder": 20,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Electronic identity card / CIE",
+                                "it": "Carta d’identità elettronica / CIE",
+                                "fr": "Carte d’identité électronique / CIE",
+                                "fa": "کارت هویت الکترونیکی / CIE"
+                            },
+                            "shortDescription": {
+                                "en": "What to know before booking or renewing your CIE.",
+                                "it": "Cosa sapere prima di prenotare o rinnovare la CIE.",
+                                "fr": "À savoir avant de réserver ou renouveler la CIE.",
+                                "fa": "قبل از رزرو یا تمدید CIE چه چیزهایی را بدانی."
+                            },
+                            "tags": [
+                                "cie",
+                                "identity",
+                                "comune",
+                                "document"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "steps",
+                                    "key": "basic_flow",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Basic flow",
+                                        "it": "Flusso base",
+                                        "fr": "Parcours de base",
+                                        "fa": "روند اصلی"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Check whether you are resident in Milano and eligible for CIE.",
+                                            "Book through the official channel if an appointment is required.",
+                                            "Bring photo, tax code, and valid document.",
+                                            "If lost or stolen, bring the police report.",
+                                            "Keep the receipt until delivery."
+                                        ],
+                                        "it": [
+                                            "Verifica se sei residente a Milano e puoi richiedere la CIE.",
+                                            "Prenota dal canale ufficiale se serve appuntamento.",
+                                            "Porta fototessera, codice fiscale e documento valido.",
+                                            "In caso di furto o smarrimento, porta la denuncia.",
+                                            "Conserva la ricevuta fino alla consegna."
+                                        ],
+                                        "fr": [
+                                            "Vérifie si tu es résident à Milan et éligible.",
+                                            "Réserve via le canal officiel si nécessaire.",
+                                            "Apporte photo, codice fiscale et document valide.",
+                                            "En cas de perte/vol, apporte la déclaration.",
+                                            "Garde le reçu jusqu’à livraison."
+                                        ],
+                                        "fa": [
+                                            "بررسی کن ساکن میلان هستی و شرایط CIE را داری.",
+                                            "اگر نوبت لازم است از کانال رسمی رزرو کن.",
+                                            "عکس، کد مالیاتی و مدرک معتبر همراه داشته باش.",
+                                            "در صورت گم‌شدن یا سرقت، گزارش پلیس بیاور.",
+                                            "رسید را تا زمان تحویل نگه دار."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Official CIE portal",
+                                        "it": "Portale ufficiale CIE",
+                                        "fr": "Portail officiel CIE",
+                                        "fa": "پورتال رسمی CIE"
+                                    },
+                                    "url": "https://www.cartaidentita.interno.gov.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "CIE costs and appointment rules can change. Check the official page before booking.",
+                                "it": "Costi CIE e regole di prenotazione possono cambiare. Controlla la pagina ufficiale prima di prenotare.",
+                                "fr": "Les coûts et règles de rendez-vous peuvent changer.",
+                                "fa": "هزینه و قوانین نوبت CIE ممکن است تغییر کند؛ قبل از رزرو صفحه رسمی را بررسی کن."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        },
+                        {
+                            "id": "certificates_anpr_milano",
+                            "categoryId": "public_office_comune",
+                            "subcategoryId": "residence_and_registry",
+                            "sortOrder": 30,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Registry certificates / ANPR",
+                                "it": "Certificati anagrafici / ANPR",
+                                "fr": "Certificats d’état civil / ANPR",
+                                "fa": "گواهی‌های ثبت احوال / ANPR"
+                            },
+                            "shortDescription": {
+                                "en": "Download or request common registry certificates.",
+                                "it": "Scarica o richiedi certificati anagrafici comuni.",
+                                "fr": "Télécharge ou demande des certificats courants.",
+                                "fa": "گواهی‌های رایج ثبت احوال را دریافت یا درخواست کن."
+                            },
+                            "tags": [
+                                "certificate",
+                                "anpr",
+                                "comune",
+                                "residence"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "steps",
+                                    "key": "online_flow",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Online first",
+                                        "it": "Prima online",
+                                        "fr": "D’abord en ligne",
+                                        "fa": "اول آنلاین"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Try ANPR with SPID, CIE, or CNS.",
+                                            "Choose the certificate type.",
+                                            "Check if stamp duty is required.",
+                                            "Download and save the PDF.",
+                                            "If the certificate is not available online, check Comune di Milano channels."
+                                        ],
+                                        "it": [
+                                            "Prova da ANPR con SPID, CIE o CNS.",
+                                            "Scegli il tipo di certificato.",
+                                            "Controlla se serve marca da bollo.",
+                                            "Scarica e salva il PDF.",
+                                            "Se non è disponibile online, controlla i canali del Comune di Milano."
+                                        ],
+                                        "fr": [
+                                            "Essaie ANPR avec SPID, CIE ou CNS.",
+                                            "Choisis le type de certificat.",
+                                            "Vérifie le timbre fiscal.",
+                                            "Télécharge le PDF.",
+                                            "Si indisponible, vérifie Comune di Milano."
+                                        ],
+                                        "fa": [
+                                            "با SPID، CIE یا CNS وارد ANPR شو.",
+                                            "نوع گواهی را انتخاب کن.",
+                                            "بررسی کن marca da bollo لازم است یا نه.",
+                                            "PDF را دانلود و ذخیره کن.",
+                                            "اگر آنلاین نبود، کانال‌های Comune di Milano را بررسی کن."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ANPR",
+                                        "it": "ANPR",
+                                        "fr": "ANPR",
+                                        "fa": "ANPR"
+                                    },
+                                    "url": "https://www.anagrafenazionale.interno.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Some certificates may require stamp duty depending on use.",
+                                "it": "Alcuni certificati possono richiedere marca da bollo secondo l’uso.",
+                                "fr": "Certains certificats peuvent nécessiter un timbre fiscal.",
+                                "fa": "بعضی گواهی‌ها بسته به کاربرد ممکن است marca da bollo بخواهند."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "advanced_comune_cases",
+                    "categoryId": "public_office_comune",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "Advanced Comune cases",
+                        "it": "Casi avanzati con il Comune",
+                        "fr": "Cas avancés avec la commune",
+                        "fa": "پرونده‌های پیچیده شهرداری"
+                    },
+                    "description": {
+                        "en": "Rejected requests, unclear documents, blocked appointments, and case review.",
+                        "it": "Pratiche respinte, documenti poco chiari, appuntamenti bloccati e verifica del caso.",
+                        "fr": "Demandes rejetées, documents incertains, rendez-vous bloqués et revue de cas.",
+                        "fa": "درخواست‌های ردشده، مدارک نامشخص، نوبت‌های مشکل‌دار و بررسی پرونده."
+                    },
+                    "procedures": [
+                        {
+                            "id": "rejected_residence_request_milano",
+                            "categoryId": "public_office_comune",
+                            "subcategoryId": "advanced_comune_cases",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Residence request rejected or blocked",
+                                "it": "Cambio residenza respinto o bloccato",
+                                "fr": "Demande de résidence rejetée ou bloquée",
+                                "fa": "درخواست اقامت رد یا متوقف شده"
+                            },
+                            "shortDescription": {
+                                "en": "Understand what to check when a Milano residence request does not move forward.",
+                                "it": "Capisci cosa controllare quando una pratica di residenza a Milano non va avanti.",
+                                "fr": "Comprends quoi vérifier quand une demande est bloquée.",
+                                "fa": "وقتی درخواست اقامت در میلان جلو نمی‌رود چه چیزهایی را بررسی کنی."
+                            },
+                            "tags": [
+                                "premium",
+                                "residence",
+                                "rejected",
+                                "documents"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "premium_review",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Premium review checklist",
+                                        "it": "Checklist Premium",
+                                        "fr": "Checklist Premium",
+                                        "fa": "چک‌لیست پرمیوم"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Reason for rejection or integration request.",
+                                            "Housing proof quality.",
+                                            "Contract registration details.",
+                                            "Host declaration if applicable.",
+                                            "Permit status and personal data mismatch.",
+                                            "Whether correction or a new request is safer."
+                                        ],
+                                        "it": [
+                                            "Motivo del rigetto o richiesta di integrazione.",
+                                            "Qualità della prova abitativa.",
+                                            "Dettagli di registrazione del contratto.",
+                                            "Dichiarazione di ospitalità se applicabile.",
+                                            "Permesso e incongruenze nei dati personali.",
+                                            "Se conviene correzione o nuova domanda."
+                                        ],
+                                        "fr": [
+                                            "Motif du rejet ou intégration demandée.",
+                                            "Qualité de la preuve logement.",
+                                            "Enregistrement du contrat.",
+                                            "Déclaration d’hospitalité si applicable.",
+                                            "Permis et incohérences de données.",
+                                            "Correction ou nouvelle demande."
+                                        ],
+                                        "fa": [
+                                            "دلیل رد یا درخواست تکمیل.",
+                                            "کیفیت مدرک محل سکونت.",
+                                            "جزئیات ثبت قرارداد.",
+                                            "اعلامیه میزبانی در صورت نیاز.",
+                                            "وضعیت اجازه اقامت و مغایرت اطلاعات.",
+                                            "اینکه اصلاح بهتر است یا درخواست جدید."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not resend the same incomplete request without understanding the block.",
+                                "it": "Non reinviare la stessa pratica incompleta senza capire il blocco.",
+                                "fr": "Ne renvoie pas la même demande incomplète.",
+                                "fa": "بدون فهمیدن دلیل توقف، همان درخواست ناقص را دوباره ارسال نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps you understand why the request failed and what to fix.",
+                                "it": "Premium ti aiuta a capire perché la pratica è fallita e cosa correggere.",
+                                "fr": "Premium aide à comprendre le blocage.",
+                                "fa": "پرمیوم کمک می‌کند دلیل رد و مسیر اصلاح را بفهمی."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "housing_rent",
+            "icon": "home_work",
+            "sortOrder": 30,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "Housing / Rent",
+                "it": "Casa / Affitto",
+                "fr": "Logement / Location",
+                "fa": "خانه / اجاره"
+            },
+            "description": {
+                "en": "Rental contracts, deposit return, maintenance problems, and written requests.",
+                "it": "Contratti d’affitto, cauzione, manutenzione e richieste scritte.",
+                "fr": "Contrats de location, caution, réparations et demandes écrites.",
+                "fa": "قرارداد اجاره، ودیعه، تعمیرات و درخواست‌های کتبی."
+            },
+            "subcategories": [
+                {
+                    "id": "rent_basics",
+                    "categoryId": "housing_rent",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "Rent basics",
+                        "it": "Base affitto",
+                        "fr": "Bases de location",
+                        "fa": "اصول اجاره"
+                    },
+                    "description": {
+                        "en": "Basic checks before writing to the landlord or agency.",
+                        "it": "Controlli base prima di scrivere a proprietario o agenzia.",
+                        "fr": "Contrôles de base avant d’écrire au propriétaire ou à l’agence.",
+                        "fa": "بررسی‌های پایه قبل از نوشتن به صاحبخانه یا آژانس."
+                    },
+                    "procedures": [
+                        {
+                            "id": "deposit_return_milano",
+                            "categoryId": "housing_rent",
+                            "subcategoryId": "rent_basics",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Ask for deposit return",
+                                "it": "Chiedere la restituzione della cauzione",
+                                "fr": "Demander le retour de la caution",
+                                "fa": "درخواست بازگشت ودیعه"
+                            },
+                            "shortDescription": {
+                                "en": "Prepare a clear written request after leaving the apartment.",
+                                "it": "Prepara una richiesta chiara dopo aver lasciato casa.",
+                                "fr": "Prépare une demande claire après le départ.",
+                                "fa": "بعد از تحویل خانه، درخواست کتبی واضح آماده کن."
+                            },
+                            "tags": [
+                                "rent",
+                                "deposit",
+                                "landlord"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "proof",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Keep proof",
+                                        "it": "Conserva le prove",
+                                        "fr": "Garde les preuves",
+                                        "fa": "مدارک را نگه دار"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Rental contract.",
+                                            "Proof of deposit payment.",
+                                            "Check-out photos or handover report.",
+                                            "Messages with landlord or agency.",
+                                            "IBAN for refund.",
+                                            "Date keys were returned."
+                                        ],
+                                        "it": [
+                                            "Contratto d’affitto.",
+                                            "Prova del pagamento della cauzione.",
+                                            "Foto o verbale di riconsegna.",
+                                            "Messaggi con proprietario o agenzia.",
+                                            "IBAN per rimborso.",
+                                            "Data di riconsegna chiavi."
+                                        ],
+                                        "fr": [
+                                            "Contrat de location.",
+                                            "Preuve du dépôt.",
+                                            "Photos ou état des lieux de sortie.",
+                                            "Messages avec propriétaire/agence.",
+                                            "IBAN pour remboursement.",
+                                            "Date de remise des clés."
+                                        ],
+                                        "fa": [
+                                            "قرارداد اجاره.",
+                                            "مدرک پرداخت ودیعه.",
+                                            "عکس یا صورتجلسه تحویل.",
+                                            "پیام‌ها با صاحبخانه یا آژانس.",
+                                            "IBAN برای بازپرداخت.",
+                                            "تاریخ تحویل کلیدها."
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "steps",
+                                    "key": "request_flow",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Simple request flow",
+                                        "it": "Flusso semplice",
+                                        "fr": "Parcours simple",
+                                        "fa": "روند ساده"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Send a polite written request.",
+                                            "Attach proof of payment and handover if useful.",
+                                            "Give a clear deadline.",
+                                            "Keep all replies.",
+                                            "Escalate only after you have written proof."
+                                        ],
+                                        "it": [
+                                            "Invia una richiesta scritta e cortese.",
+                                            "Allega prove di pagamento e riconsegna se utili.",
+                                            "Indica una scadenza chiara.",
+                                            "Conserva tutte le risposte.",
+                                            "Alza il livello solo dopo avere prove scritte."
+                                        ],
+                                        "fr": [
+                                            "Envoie une demande écrite et polie.",
+                                            "Ajoute les preuves utiles.",
+                                            "Indique un délai clair.",
+                                            "Garde toutes les réponses.",
+                                            "Escalade seulement avec preuves écrites."
+                                        ],
+                                        "fa": [
+                                            "یک درخواست کتبی و محترمانه بفرست.",
+                                            "مدارک پرداخت و تحویل را در صورت مفید بودن ضمیمه کن.",
+                                            "مهلت روشن بده.",
+                                            "همه پاسخ‌ها را نگه دار.",
+                                            "فقط بعد از داشتن مدرک کتبی پیگیری را جدی‌تر کن."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Keep messages formal and written. Avoid verbal-only agreements.",
+                                "it": "Mantieni le comunicazioni formali e scritte. Evita accordi solo verbali.",
+                                "fr": "Garde les échanges écrits et formels.",
+                                "fa": "ارتباطات را رسمی و کتبی نگه دار؛ به توافق شفاهی اکتفا نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        },
+                        {
+                            "id": "rental_contract_registration_check_milano",
+                            "categoryId": "housing_rent",
+                            "subcategoryId": "rent_basics",
+                            "sortOrder": 20,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Rental contract registration check",
+                                "it": "Controllo registrazione contratto d’affitto",
+                                "fr": "Vérifier l’enregistrement du contrat",
+                                "fa": "بررسی ثبت قرارداد اجاره"
+                            },
+                            "shortDescription": {
+                                "en": "Basic checks to understand whether the contract looks properly registered.",
+                                "it": "Controlli base per capire se il contratto sembra registrato correttamente.",
+                                "fr": "Contrôles de base sur l’enregistrement du contrat.",
+                                "fa": "بررسی‌های پایه برای فهمیدن اینکه قرارداد درست ثبت شده یا نه."
+                            },
+                            "tags": [
+                                "rent",
+                                "contract",
+                                "agenzia_entrate"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "contract_data",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Look for",
+                                        "it": "Cerca",
+                                        "fr": "Cherche",
+                                        "fa": "دنبال این‌ها بگرد"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Registration date.",
+                                            "Registration number or receipt.",
+                                            "Landlord and tenant data.",
+                                            "Address and cadastral data.",
+                                            "Rent amount and duration.",
+                                            "Cedolare secca clause if present."
+                                        ],
+                                        "it": [
+                                            "Data di registrazione.",
+                                            "Numero o ricevuta di registrazione.",
+                                            "Dati di proprietario e inquilino.",
+                                            "Indirizzo e dati catastali.",
+                                            "Importo affitto e durata.",
+                                            "Clausola cedolare secca se presente."
+                                        ],
+                                        "fr": [
+                                            "Date d’enregistrement.",
+                                            "Numéro ou reçu.",
+                                            "Données propriétaire/locataire.",
+                                            "Adresse et données cadastrales.",
+                                            "Montant et durée.",
+                                            "Clause cedolare secca si présente."
+                                        ],
+                                        "fa": [
+                                            "تاریخ ثبت.",
+                                            "شماره یا رسید ثبت.",
+                                            "اطلاعات صاحبخانه و مستأجر.",
+                                            "آدرس و اطلاعات کاداستر.",
+                                            "مبلغ اجاره و مدت.",
+                                            "بند cedolare secca در صورت وجود."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Agenzia Entrate",
+                                        "it": "Agenzia Entrate",
+                                        "fr": "Agenzia Entrate",
+                                        "fa": "Agenzia Entrate"
+                                    },
+                                    "url": "https://www.agenziaentrate.gov.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "A signed contract alone is not the same as a registered contract.",
+                                "it": "Un contratto firmato non equivale sempre a un contratto registrato.",
+                                "fr": "Un contrat signé n’est pas toujours un contrat enregistré.",
+                                "fa": "قرارداد امضاشده همیشه به معنی قرارداد ثبت‌شده نیست."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "rent_disputes",
+                    "categoryId": "housing_rent",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "Rent disputes",
+                        "it": "Problemi con l’affitto",
+                        "fr": "Litiges locatifs",
+                        "fa": "اختلافات اجاره"
+                    },
+                    "description": {
+                        "en": "Premium support for blocked deposit, serious repairs, or unclear contract problems.",
+                        "it": "Supporto premium per cauzione bloccata, riparazioni gravi o problemi contrattuali.",
+                        "fr": "Support premium pour caution, réparations ou contrat.",
+                        "fa": "پشتیبانی پرمیوم برای ودیعه، تعمیرات جدی یا مشکل قراردادی."
+                    },
+                    "procedures": [
+                        {
+                            "id": "landlord_maintenance_problem_milano",
+                            "categoryId": "housing_rent",
+                            "subcategoryId": "rent_disputes",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Landlord does not fix a serious problem",
+                                "it": "Il proprietario non risolve un problema serio",
+                                "fr": "Le propriétaire ne répare pas un problème sérieux",
+                                "fa": "صاحبخانه مشکل جدی را برطرف نمی‌کند"
+                            },
+                            "shortDescription": {
+                                "en": "Prepare a documented written request before escalation.",
+                                "it": "Prepara una richiesta scritta documentata prima di alzare il livello.",
+                                "fr": "Prépare une demande documentée avant d’escalader.",
+                                "fa": "قبل از پیگیری جدی‌تر، درخواست کتبی همراه با مدرک آماده کن."
+                            },
+                            "tags": [
+                                "premium",
+                                "rent",
+                                "maintenance",
+                                "landlord"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "text",
+                                    "key": "premium_strategy",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "What to prepare",
+                                        "it": "Cosa preparare",
+                                        "fr": "Que préparer",
+                                        "fa": "چه چیزی آماده کنی"
+                                    },
+                                    "body": {
+                                        "en": "Collect photos, dates, messages, contract clauses, and a clear deadline before escalating the request.",
+                                        "it": "Raccogli foto, date, messaggi, clausole del contratto e una scadenza chiara prima di alzare il livello della richiesta.",
+                                        "fr": "Rassemble photos, dates, messages, clauses et délai clair.",
+                                        "fa": "قبل از جدی‌تر کردن درخواست، عکس‌ها، تاریخ‌ها، پیام‌ها، بندهای قرارداد و مهلت واضح جمع کن."
+                                    }
+                                },
+                                {
+                                    "type": "checklist",
+                                    "key": "risk_check",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Risk check",
+                                        "it": "Controllo rischi",
+                                        "fr": "Contrôle des risques",
+                                        "fa": "بررسی ریسک"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Is the problem urgent or dangerous?",
+                                            "Is the repair landlord responsibility or tenant responsibility?",
+                                            "Did you notify in writing?",
+                                            "Did the landlord reply?",
+                                            "Do you have proof of damage or non-use?"
+                                        ],
+                                        "it": [
+                                            "Il problema è urgente o pericoloso?",
+                                            "La riparazione è responsabilità del proprietario o dell’inquilino?",
+                                            "Hai avvisato per iscritto?",
+                                            "Il proprietario ha risposto?",
+                                            "Hai prove del danno o del mancato uso?"
+                                        ],
+                                        "fr": [
+                                            "Le problème est-il urgent ou dangereux ?",
+                                            "Responsabilité propriétaire ou locataire ?",
+                                            "As-tu écrit ?",
+                                            "Le propriétaire a-t-il répondu ?",
+                                            "As-tu des preuves ?"
+                                        ],
+                                        "fa": [
+                                            "مشکل فوری یا خطرناک است؟",
+                                            "تعمیر وظیفه صاحبخانه است یا مستأجر؟",
+                                            "کتبی اطلاع داده‌ای؟",
+                                            "صاحبخانه پاسخ داده؟",
+                                            "مدرک آسیب یا عدم امکان استفاده داری؟"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not stop paying rent without legal advice.",
+                                "it": "Non smettere di pagare l’affitto senza consulenza legale.",
+                                "fr": "N’arrête pas de payer le loyer sans avis juridique.",
+                                "fa": "بدون مشاوره حقوقی پرداخت اجاره را قطع نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps structure your request and proof.",
+                                "it": "Premium ti aiuta a strutturare richiesta e prove.",
+                                "fr": "Premium aide à organiser demande et preuves.",
+                                "fa": "پرمیوم به تنظیم درخواست و مدارک کمک می‌کند."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "utilities_energy_gas",
+            "icon": "bolt",
+            "sortOrder": 40,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "Utilities / Energy and gas",
+                "it": "Utenze / Luce e gas",
+                "fr": "Énergie / Électricité et gaz",
+                "fa": "قبوض / برق و گاز"
+            },
+            "description": {
+                "en": "Bills, supplier switch, voltura, subentro, high bill complaints, and payment plans.",
+                "it": "Bollette, cambio fornitore, voltura, subentro, reclami e rateizzazioni.",
+                "fr": "Factures, changement fournisseur, voltura, subentro, réclamations et plans de paiement.",
+                "fa": "قبض‌ها، تغییر تأمین‌کننده، ولتورا، سوبنترو، شکایت قبض بالا و قسط‌بندی."
+            },
+            "subcategories": [
+                {
+                    "id": "basic_utility_flows",
+                    "categoryId": "utilities_energy_gas",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "Basic utility flows",
+                        "it": "Pratiche base utenze",
+                        "fr": "Démarches énergie de base",
+                        "fa": "کارهای پایه قبض و انشعاب"
+                    },
+                    "description": {
+                        "en": "Understand common electricity and gas procedures.",
+                        "it": "Capisci le pratiche comuni per luce e gas.",
+                        "fr": "Comprendre les démarches électricité et gaz.",
+                        "fa": "روندهای رایج برق و گاز را بفهم."
+                    },
+                    "procedures": [
+                        {
+                            "id": "voltura_subentro_milano",
+                            "categoryId": "utilities_energy_gas",
+                            "subcategoryId": "basic_utility_flows",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Voltura or subentro",
+                                "it": "Voltura o subentro",
+                                "fr": "Voltura ou subentro",
+                                "fa": "ولتورا یا سوبنترو"
+                            },
+                            "shortDescription": {
+                                "en": "Understand the difference before activating utilities in a new home.",
+                                "it": "Capisci la differenza prima di attivare le utenze in una nuova casa.",
+                                "fr": "Comprends la différence avant d’activer les services.",
+                                "fa": "قبل از فعال‌سازی قبض خانه جدید تفاوت را بفهم."
+                            },
+                            "tags": [
+                                "energy",
+                                "gas",
+                                "voltura",
+                                "subentro"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "text",
+                                    "key": "difference",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Difference",
+                                        "it": "Differenza",
+                                        "fr": "Différence",
+                                        "fa": "تفاوت"
+                                    },
+                                    "body": {
+                                        "en": "Voltura usually changes the account holder while supply is active. Subentro is usually used when the meter exists but supply is not active.",
+                                        "it": "La voltura di solito cambia intestatario con fornitura attiva. Il subentro si usa di solito quando il contatore esiste ma la fornitura non è attiva.",
+                                        "fr": "La voltura change souvent le titulaire avec fourniture active. Le subentro sert quand le compteur existe mais la fourniture est inactive.",
+                                        "fa": "ولتورا معمولاً تغییر نام صاحب قرارداد است وقتی انشعاب فعال است. سوبنترو وقتی است که کنتور هست ولی انشعاب فعال نیست."
+                                    }
+                                },
+                                {
+                                    "type": "checklist",
+                                    "key": "needed_data",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Data you may need",
+                                        "it": "Dati che possono servire",
+                                        "fr": "Données utiles",
+                                        "fa": "اطلاعات موردنیاز"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Name and tax code.",
+                                            "Address.",
+                                            "POD for electricity or PDR for gas.",
+                                            "Meter reading.",
+                                            "Rental contract or ownership proof.",
+                                            "IBAN if direct debit is required."
+                                        ],
+                                        "it": [
+                                            "Nome e codice fiscale.",
+                                            "Indirizzo.",
+                                            "POD per luce o PDR per gas.",
+                                            "Lettura contatore.",
+                                            "Contratto d’affitto o prova proprietà.",
+                                            "IBAN se serve addebito diretto."
+                                        ],
+                                        "fr": [
+                                            "Nom et codice fiscale.",
+                                            "Adresse.",
+                                            "POD électricité ou PDR gaz.",
+                                            "Relevé compteur.",
+                                            "Contrat ou preuve propriété.",
+                                            "IBAN si prélèvement."
+                                        ],
+                                        "fa": [
+                                            "نام و کد مالیاتی.",
+                                            "آدرس.",
+                                            "POD برای برق یا PDR برای گاز.",
+                                            "عدد کنتور.",
+                                            "قرارداد اجاره یا مدرک مالکیت.",
+                                            "IBAN در صورت نیاز."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ARERA",
+                                        "it": "ARERA",
+                                        "fr": "ARERA",
+                                        "fa": "ARERA"
+                                    },
+                                    "url": "https://www.arera.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not sign a new offer before checking fixed costs, contract duration, and early-exit conditions.",
+                                "it": "Non firmare una nuova offerta senza controllare costi fissi, durata e condizioni di recesso.",
+                                "fr": "Ne signe pas sans vérifier coûts fixes, durée et sortie.",
+                                "fa": "قبل از بررسی هزینه ثابت، مدت قرارداد و شرایط خروج، قرارداد جدید امضا نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        },
+                        {
+                            "id": "understand_energy_bill_milano",
+                            "categoryId": "utilities_energy_gas",
+                            "subcategoryId": "basic_utility_flows",
+                            "sortOrder": 20,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Understand your energy bill",
+                                "it": "Capire la bolletta luce/gas",
+                                "fr": "Comprendre la facture énergie",
+                                "fa": "فهمیدن قبض برق/گاز"
+                            },
+                            "shortDescription": {
+                                "en": "Read the parts of the bill before complaining or switching supplier.",
+                                "it": "Leggi le parti della bolletta prima di reclamare o cambiare fornitore.",
+                                "fr": "Lis les parties de la facture avant réclamation ou changement.",
+                                "fa": "قبل از شکایت یا تغییر شرکت، بخش‌های قبض را بخوان."
+                            },
+                            "tags": [
+                                "bill",
+                                "energy",
+                                "gas",
+                                "arera"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "bill_parts",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Check these lines",
+                                        "it": "Controlla queste voci",
+                                        "fr": "Vérifie ces lignes",
+                                        "fa": "این موارد را بررسی کن"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Supply period.",
+                                            "Estimated or actual reading.",
+                                            "Energy/gas consumption.",
+                                            "Fixed costs.",
+                                            "Transport and meter charges.",
+                                            "Taxes and VAT.",
+                                            "Previous unpaid amounts or adjustments."
+                                        ],
+                                        "it": [
+                                            "Periodo di fornitura.",
+                                            "Lettura stimata o effettiva.",
+                                            "Consumi luce/gas.",
+                                            "Costi fissi.",
+                                            "Trasporto e gestione contatore.",
+                                            "Imposte e IVA.",
+                                            "Importi precedenti o conguagli."
+                                        ],
+                                        "fr": [
+                                            "Période de fourniture.",
+                                            "Relevé estimé ou réel.",
+                                            "Consommation.",
+                                            "Coûts fixes.",
+                                            "Transport et compteur.",
+                                            "Taxes et TVA.",
+                                            "Anciens montants ou régularisations."
+                                        ],
+                                        "fa": [
+                                            "دوره قبض.",
+                                            "قرائت تخمینی یا واقعی.",
+                                            "مصرف برق/گاز.",
+                                            "هزینه‌های ثابت.",
+                                            "هزینه انتقال و کنتور.",
+                                            "مالیات و VAT.",
+                                            "بدهی قبلی یا تعدیل."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ARERA",
+                                        "it": "ARERA",
+                                        "fr": "ARERA",
+                                        "fa": "ARERA"
+                                    },
+                                    "url": "https://www.arera.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Portale Offerte",
+                                        "it": "Portale Offerte",
+                                        "fr": "Portale Offerte",
+                                        "fa": "Portale Offerte"
+                                    },
+                                    "url": "https://www.ilportaleofferte.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "High bills can come from estimated readings, adjustments, old debt, or real consumption.",
+                                "it": "Una bolletta alta può dipendere da letture stimate, conguagli, vecchi debiti o consumo reale.",
+                                "fr": "Une facture élevée peut venir d’estimations, régularisations, dette ou consommation.",
+                                "fa": "قبض بالا می‌تواند از قرائت تخمینی، تعدیل، بدهی قدیمی یا مصرف واقعی باشد."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "utility_disputes_and_comparison",
+                    "categoryId": "utilities_energy_gas",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "Disputes and comparison",
+                        "it": "Reclami e confronto offerte",
+                        "fr": "Réclamations et comparaison",
+                        "fa": "شکایت و مقایسه پیشنهادها"
+                    },
+                    "description": {
+                        "en": "Premium tools for high bills, wrong charges, payment plans, and supplier comparison.",
+                        "it": "Strumenti premium per bollette alte, addebiti errati, rateizzazioni e confronto fornitori.",
+                        "fr": "Outils premium pour factures élevées, erreurs, paiement et comparaison.",
+                        "fa": "ابزارهای پرمیوم برای قبض بالا، هزینه اشتباه، قسط‌بندی و مقایسه شرکت‌ها."
+                    },
+                    "procedures": [
+                        {
+                            "id": "high_bill_complaint_milano",
+                            "categoryId": "utilities_energy_gas",
+                            "subcategoryId": "utility_disputes_and_comparison",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "High bill complaint",
+                                "it": "Reclamo per bolletta alta",
+                                "fr": "Réclamation pour facture élevée",
+                                "fa": "شکایت برای قبض بالا"
+                            },
+                            "shortDescription": {
+                                "en": "Build a complaint with readings, contract data, and clear refund/payment-plan request.",
+                                "it": "Prepara un reclamo con letture, dati contratto e richiesta chiara di rimborso o rateizzazione.",
+                                "fr": "Prépare une réclamation avec relevés, contrat et demande claire.",
+                                "fa": "شکایت را با عدد کنتور، اطلاعات قرارداد و درخواست روشن آماده کن."
+                            },
+                            "tags": [
+                                "premium",
+                                "energy",
+                                "complaint",
+                                "high_bill"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "evidence",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Evidence to collect",
+                                        "it": "Prove da raccogliere",
+                                        "fr": "Preuves à rassembler",
+                                        "fa": "مدارکی که جمع کنی"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Bill PDF.",
+                                            "Meter photo with date.",
+                                            "Previous bills.",
+                                            "Contract offer sheet.",
+                                            "Payment history.",
+                                            "Messages already sent to supplier."
+                                        ],
+                                        "it": [
+                                            "PDF della bolletta.",
+                                            "Foto contatore con data.",
+                                            "Bollette precedenti.",
+                                            "Scheda offerta del contratto.",
+                                            "Storico pagamenti.",
+                                            "Messaggi già inviati al fornitore."
+                                        ],
+                                        "fr": [
+                                            "PDF de la facture.",
+                                            "Photo compteur datée.",
+                                            "Anciennes factures.",
+                                            "Offre/contrat.",
+                                            "Historique paiements.",
+                                            "Messages déjà envoyés."
+                                        ],
+                                        "fa": [
+                                            "PDF قبض.",
+                                            "عکس کنتور با تاریخ.",
+                                            "قبض‌های قبلی.",
+                                            "برگه پیشنهاد قرارداد.",
+                                            "سوابق پرداخت.",
+                                            "پیام‌های قبلی به شرکت."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ARERA",
+                                        "it": "ARERA",
+                                        "fr": "ARERA",
+                                        "fa": "ARERA"
+                                    },
+                                    "url": "https://www.arera.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Pay attention to deadlines. Some complaints and conciliation steps depend on previous written contact.",
+                                "it": "Attenzione alle scadenze. Alcuni reclami e conciliazioni dipendono da contatti scritti precedenti.",
+                                "fr": "Attention aux délais. Certaines étapes dépendent d’un contact écrit préalable.",
+                                "fa": "به مهلت‌ها توجه کن؛ بعضی شکایت‌ها و سازش‌ها به مکاتبه کتبی قبلی وابسته‌اند."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps organize the complaint and evidence.",
+                                "it": "Premium ti aiuta a organizzare reclamo e prove.",
+                                "fr": "Premium aide à organiser réclamation et preuves.",
+                                "fa": "پرمیوم به تنظیم شکایت و مدارک کمک می‌کند."
+                            }
+                        },
+                        {
+                            "id": "compare_energy_offer_milano",
+                            "categoryId": "utilities_energy_gas",
+                            "subcategoryId": "utility_disputes_and_comparison",
+                            "sortOrder": 20,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Compare electricity or gas offers",
+                                "it": "Confrontare offerte luce o gas",
+                                "fr": "Comparer offres électricité ou gaz",
+                                "fa": "مقایسه پیشنهادهای برق یا گاز"
+                            },
+                            "shortDescription": {
+                                "en": "Premium checklist before switching supplier.",
+                                "it": "Checklist premium prima di cambiare fornitore.",
+                                "fr": "Checklist premium avant changement fournisseur.",
+                                "fa": "چک‌لیست پرمیوم قبل از تغییر شرکت."
+                            },
+                            "tags": [
+                                "premium",
+                                "comparison",
+                                "portale_offerte"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "compare_inputs",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Compare using",
+                                        "it": "Confronta usando",
+                                        "fr": "Compare avec",
+                                        "fa": "با این موارد مقایسه کن"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Annual consumption.",
+                                            "Fixed monthly cost.",
+                                            "Variable energy/gas price.",
+                                            "Contract duration.",
+                                            "Discount expiry date.",
+                                            "Early termination or extra services.",
+                                            "Payment method and deposit."
+                                        ],
+                                        "it": [
+                                            "Consumo annuo.",
+                                            "Costo fisso mensile.",
+                                            "Prezzo variabile energia/gas.",
+                                            "Durata contratto.",
+                                            "Scadenza sconto.",
+                                            "Recesso o servizi extra.",
+                                            "Metodo di pagamento e deposito."
+                                        ],
+                                        "fr": [
+                                            "Consommation annuelle.",
+                                            "Coût fixe mensuel.",
+                                            "Prix variable.",
+                                            "Durée contrat.",
+                                            "Fin remise.",
+                                            "Sortie ou services extra.",
+                                            "Paiement et dépôt."
+                                        ],
+                                        "fa": [
+                                            "مصرف سالانه.",
+                                            "هزینه ثابت ماهانه.",
+                                            "قیمت متغیر برق/گاز.",
+                                            "مدت قرارداد.",
+                                            "تاریخ پایان تخفیف.",
+                                            "شرایط خروج یا خدمات اضافی.",
+                                            "روش پرداخت و ودیعه."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Portale Offerte",
+                                        "it": "Portale Offerte",
+                                        "fr": "Portale Offerte",
+                                        "fa": "Portale Offerte"
+                                    },
+                                    "url": "https://www.ilportaleofferte.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "ARERA",
+                                        "it": "ARERA",
+                                        "fr": "ARERA",
+                                        "fa": "ARERA"
+                                    },
+                                    "url": "https://www.arera.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "A low first-month price can hide fixed costs or expiring discounts.",
+                                "it": "Un prezzo basso iniziale può nascondere costi fissi o sconti in scadenza.",
+                                "fr": "Un prix initial bas peut cacher des coûts fixes ou remises limitées.",
+                                "fa": "قیمت پایین اول ممکن است هزینه ثابت یا تخفیف کوتاه‌مدت پنهان داشته باشد."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps compare the real monthly cost.",
+                                "it": "Premium ti aiuta a confrontare il costo mensile reale.",
+                                "fr": "Premium aide à comparer le coût mensuel réel.",
+                                "fa": "پرمیوم به مقایسه هزینه واقعی ماهانه کمک می‌کند."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "telecom_internet_mobile",
+            "icon": "wifi",
+            "sortOrder": 50,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "Internet / Mobile",
+                "it": "Internet / Mobile",
+                "fr": "Internet / Mobile",
+                "fa": "اینترنت / موبایل"
+            },
+            "description": {
+                "en": "Internet cancellation, wrong bills, poor service, modem return, and complaints.",
+                "it": "Disdetta internet, bollette errate, disservizi, restituzione modem e reclami.",
+                "fr": "Résiliation internet, factures erronées, service défaillant, retour modem et réclamations.",
+                "fa": "لغو اینترنت، قبض اشتباه، خرابی سرویس، بازگرداندن مودم و شکایت."
+            },
+            "subcategories": [
+                {
+                    "id": "telecom_basics",
+                    "categoryId": "telecom_internet_mobile",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "Basic telecom flows",
+                        "it": "Pratiche telecom base",
+                        "fr": "Démarches télécom de base",
+                        "fa": "کارهای پایه اینترنت و موبایل"
+                    },
+                    "description": {
+                        "en": "Basic steps for cancellation, transfer, and service issues.",
+                        "it": "Passaggi base per disdetta, trasloco e problemi di servizio.",
+                        "fr": "Étapes de base pour résiliation, déménagement et problèmes.",
+                        "fa": "مراحل پایه برای لغو، انتقال و مشکلات سرویس."
+                    },
+                    "procedures": [
+                        {
+                            "id": "internet_cancellation_milano",
+                            "categoryId": "telecom_internet_mobile",
+                            "subcategoryId": "telecom_basics",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Cancel internet contract",
+                                "it": "Disdire un contratto internet",
+                                "fr": "Résilier un contrat internet",
+                                "fa": "لغو قرارداد اینترنت"
+                            },
+                            "shortDescription": {
+                                "en": "Prepare a cancellation request and keep proof.",
+                                "it": "Prepara una disdetta e conserva le prove.",
+                                "fr": "Prépare la résiliation et garde les preuves.",
+                                "fa": "درخواست لغو آماده کن و مدرک نگه دار."
+                            },
+                            "tags": [
+                                "internet",
+                                "cancellation",
+                                "pec",
+                                "raccomandata"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "before_cancel",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Before cancellation",
+                                        "it": "Prima della disdetta",
+                                        "fr": "Avant résiliation",
+                                        "fa": "قبل از لغو"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Check minimum contract duration.",
+                                            "Check modem return rules.",
+                                            "Check if you are switching or closing line.",
+                                            "Keep customer code and contract number.",
+                                            "Send cancellation through official provider channel.",
+                                            "Keep PEC/raccomandata receipt or ticket number."
+                                        ],
+                                        "it": [
+                                            "Controlla durata minima del contratto.",
+                                            "Controlla regole restituzione modem.",
+                                            "Verifica se stai cambiando operatore o chiudendo linea.",
+                                            "Tieni codice cliente e numero contratto.",
+                                            "Invia disdetta dal canale ufficiale del fornitore.",
+                                            "Conserva ricevuta PEC/raccomandata o numero ticket."
+                                        ],
+                                        "fr": [
+                                            "Vérifie durée minimale.",
+                                            "Vérifie retour modem.",
+                                            "Changement opérateur ou fermeture ligne ?",
+                                            "Garde code client et contrat.",
+                                            "Utilise le canal officiel.",
+                                            "Garde preuve PEC/recommandé ou ticket."
+                                        ],
+                                        "fa": [
+                                            "مدت حداقل قرارداد را بررسی کن.",
+                                            "قوانین بازگرداندن مودم را بررسی کن.",
+                                            "ببین تغییر اپراتور است یا بستن خط.",
+                                            "کد مشتری و شماره قرارداد را نگه دار.",
+                                            "از کانال رسمی شرکت لغو کن.",
+                                            "رسید PEC/پست سفارشی یا شماره تیکت را نگه دار."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "AGCOM",
+                                        "it": "AGCOM",
+                                        "fr": "AGCOM",
+                                        "fa": "AGCOM"
+                                    },
+                                    "url": "https://www.agcom.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Modem return deadlines can create extra charges.",
+                                "it": "Le scadenze per restituire il modem possono generare addebiti extra.",
+                                "fr": "Les délais de retour modem peuvent créer des frais.",
+                                "fa": "مهلت بازگرداندن مودم می‌تواند باعث هزینه اضافه شود."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "telecom_disputes",
+                    "categoryId": "telecom_internet_mobile",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "Disputes and refunds",
+                        "it": "Reclami e rimborsi",
+                        "fr": "Réclamations et remboursements",
+                        "fa": "شکایت و بازپرداخت"
+                    },
+                    "description": {
+                        "en": "Premium help for wrong charges, poor service, modem charges, and conciliation.",
+                        "it": "Aiuto premium per addebiti errati, disservizi, modem e conciliazione.",
+                        "fr": "Aide premium pour frais erronés, service, modem et conciliation.",
+                        "fa": "کمک پرمیوم برای هزینه اشتباه، خرابی سرویس، مودم و سازش."
+                    },
+                    "procedures": [
+                        {
+                            "id": "wrong_telecom_bill_milano",
+                            "categoryId": "telecom_internet_mobile",
+                            "subcategoryId": "telecom_disputes",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Wrong telecom bill complaint",
+                                "it": "Reclamo per bolletta telecom errata",
+                                "fr": "Réclamation facture télécom erronée",
+                                "fa": "شکایت برای قبض اشتباه اینترنت/موبایل"
+                            },
+                            "shortDescription": {
+                                "en": "Prepare a documented complaint before escalation.",
+                                "it": "Prepara un reclamo documentato prima di alzare il livello.",
+                                "fr": "Prépare une réclamation documentée.",
+                                "fa": "قبل از پیگیری جدی‌تر، شکایت مستند آماده کن."
+                            },
+                            "tags": [
+                                "premium",
+                                "telecom",
+                                "bill",
+                                "agcom"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "evidence",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Evidence",
+                                        "it": "Prove",
+                                        "fr": "Preuves",
+                                        "fa": "مدارک"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Bill PDF.",
+                                            "Contract or offer sheet.",
+                                            "Previous bills.",
+                                            "Cancellation or switch proof.",
+                                            "Modem return receipt if relevant.",
+                                            "Written complaint already sent."
+                                        ],
+                                        "it": [
+                                            "PDF bolletta.",
+                                            "Contratto o scheda offerta.",
+                                            "Bollette precedenti.",
+                                            "Prova disdetta o cambio operatore.",
+                                            "Ricevuta restituzione modem se rilevante.",
+                                            "Reclamo scritto già inviato."
+                                        ],
+                                        "fr": [
+                                            "PDF facture.",
+                                            "Contrat ou offre.",
+                                            "Anciennes factures.",
+                                            "Preuve résiliation/changement.",
+                                            "Preuve retour modem si utile.",
+                                            "Réclamation écrite déjà envoyée."
+                                        ],
+                                        "fa": [
+                                            "PDF قبض.",
+                                            "قرارداد یا برگه پیشنهاد.",
+                                            "قبض‌های قبلی.",
+                                            "مدرک لغو یا تغییر اپراتور.",
+                                            "رسید بازگشت مودم اگر مرتبط است.",
+                                            "شکایت کتبی قبلی."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "AGCOM",
+                                        "it": "AGCOM",
+                                        "fr": "AGCOM",
+                                        "fa": "AGCOM"
+                                    },
+                                    "url": "https://www.agcom.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "ConciliaWeb",
+                                        "it": "ConciliaWeb",
+                                        "fr": "ConciliaWeb",
+                                        "fa": "ConciliaWeb"
+                                    },
+                                    "url": "https://conciliaweb.agcom.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Formal conciliation usually requires a previous written complaint to the operator.",
+                                "it": "La conciliazione di solito richiede un reclamo scritto precedente all’operatore.",
+                                "fr": "La conciliation exige souvent une réclamation écrite préalable.",
+                                "fa": "سازش رسمی معمولاً نیاز به شکایت کتبی قبلی به اپراتور دارد."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps prepare the complaint timeline and evidence.",
+                                "it": "Premium ti aiuta a preparare cronologia e prove del reclamo.",
+                                "fr": "Premium aide à préparer chronologie et preuves.",
+                                "fa": "پرمیوم به آماده‌سازی زمان‌بندی و مدارک شکایت کمک می‌کند."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "tari_taxes",
+            "icon": "receipt_long",
+            "sortOrder": 60,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "TARI / Local taxes",
+                "it": "TARI / Tributi locali",
+                "fr": "TARI / Taxes locales",
+                "fa": "TARI / مالیات‌های محلی"
+            },
+            "description": {
+                "en": "Waste tax declarations, changes, payment notices, and local tax problems.",
+                "it": "Dichiarazioni tassa rifiuti, variazioni, avvisi di pagamento e problemi con tributi locali.",
+                "fr": "Déclarations taxe déchets, changements, avis de paiement et problèmes locaux.",
+                "fa": "اعلامیه مالیات پسماند، تغییرات، اخطار پرداخت و مشکلات مالیات محلی."
+            },
+            "subcategories": [
+                {
+                    "id": "tari_basics",
+                    "categoryId": "tari_taxes",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "TARI basics",
+                        "it": "Base TARI",
+                        "fr": "Bases TARI",
+                        "fa": "اصول TARI"
+                    },
+                    "description": {
+                        "en": "Understand when to declare, change, or close a waste tax position.",
+                        "it": "Capisci quando dichiarare, variare o chiudere una posizione TARI.",
+                        "fr": "Comprendre déclaration, changement ou clôture TARI.",
+                        "fa": "بفهم چه زمانی باید TARI را اعلام، تغییر یا ببندی."
+                    },
+                    "procedures": [
+                        {
+                            "id": "tari_new_home_milano",
+                            "categoryId": "tari_taxes",
+                            "subcategoryId": "tari_basics",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "TARI for a new home",
+                                "it": "TARI per una nuova casa",
+                                "fr": "TARI pour un nouveau logement",
+                                "fa": "TARI برای خانه جدید"
+                            },
+                            "shortDescription": {
+                                "en": "Check what to prepare when you start occupying a home.",
+                                "it": "Cosa preparare quando inizi a occupare una casa.",
+                                "fr": "Que préparer quand tu occupes un logement.",
+                                "fa": "وقتی وارد خانه جدید می‌شوی چه چیزی آماده کنی."
+                            },
+                            "tags": [
+                                "tari",
+                                "waste_tax",
+                                "comune",
+                                "milano"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "needed_data",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Information to prepare",
+                                        "it": "Informazioni da preparare",
+                                        "fr": "Informations à préparer",
+                                        "fa": "اطلاعاتی که آماده کنی"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Start date of occupancy.",
+                                            "Address and apartment details.",
+                                            "Square meters if requested.",
+                                            "Number of occupants.",
+                                            "Rental contract or ownership proof.",
+                                            "Previous TARI position if you moved inside Milano."
+                                        ],
+                                        "it": [
+                                            "Data inizio occupazione.",
+                                            "Indirizzo e dettagli appartamento.",
+                                            "Metri quadri se richiesti.",
+                                            "Numero occupanti.",
+                                            "Contratto d’affitto o prova proprietà.",
+                                            "Posizione TARI precedente se ti sei spostato dentro Milano."
+                                        ],
+                                        "fr": [
+                                            "Date de début occupation.",
+                                            "Adresse et détails logement.",
+                                            "Mètres carrés si demandés.",
+                                            "Nombre d’occupants.",
+                                            "Contrat ou preuve propriété.",
+                                            "Ancienne position TARI si déménagement interne."
+                                        ],
+                                        "fa": [
+                                            "تاریخ شروع سکونت.",
+                                            "آدرس و جزئیات خانه.",
+                                            "متراژ در صورت درخواست.",
+                                            "تعداد ساکنان.",
+                                            "قرارداد اجاره یا مدرک مالکیت.",
+                                            "پرونده قبلی TARI اگر داخل میلان جابه‌جا شده‌ای."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "TARI is usually linked to occupancy, not only ownership. Do not ignore it if you rent.",
+                                "it": "La TARI di solito è collegata all’occupazione, non solo alla proprietà. Non ignorarla se sei in affitto.",
+                                "fr": "La TARI dépend souvent de l’occupation, pas seulement de la propriété.",
+                                "fa": "TARI معمولاً به استفاده از ملک مربوط است نه فقط مالکیت؛ اگر مستأجری نادیده نگیر."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "tari_disputes",
+                    "categoryId": "tari_taxes",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "TARI disputes",
+                        "it": "Problemi TARI",
+                        "fr": "Problèmes TARI",
+                        "fa": "مشکلات TARI"
+                    },
+                    "description": {
+                        "en": "Premium help for wrong amounts, old notices, double positions, or missed changes.",
+                        "it": "Aiuto premium per importi errati, avvisi vecchi, doppie posizioni o variazioni mancate.",
+                        "fr": "Aide premium pour montants erronés, avis anciens ou doubles positions.",
+                        "fa": "کمک پرمیوم برای مبلغ اشتباه، اخطار قدیمی، پرونده دوبل یا تغییر ثبت‌نشده."
+                    },
+                    "procedures": [
+                        {
+                            "id": "wrong_tari_notice_milano",
+                            "categoryId": "tari_taxes",
+                            "subcategoryId": "tari_disputes",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Wrong TARI notice",
+                                "it": "Avviso TARI errato",
+                                "fr": "Avis TARI erroné",
+                                "fa": "اخطار TARI اشتباه"
+                            },
+                            "shortDescription": {
+                                "en": "Premium review before asking for correction.",
+                                "it": "Verifica premium prima di chiedere correzione.",
+                                "fr": "Revue premium avant demande de correction.",
+                                "fa": "بررسی پرمیوم قبل از درخواست اصلاح."
+                            },
+                            "tags": [
+                                "premium",
+                                "tari",
+                                "tax",
+                                "correction"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "evidence",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Evidence to collect",
+                                        "it": "Prove da raccogliere",
+                                        "fr": "Preuves à rassembler",
+                                        "fa": "مدارکی که جمع کنی"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Payment notice.",
+                                            "Start/end occupancy dates.",
+                                            "Rental contract.",
+                                            "Residence change receipt if relevant.",
+                                            "Previous payments.",
+                                            "Any communication already sent."
+                                        ],
+                                        "it": [
+                                            "Avviso di pagamento.",
+                                            "Date inizio/fine occupazione.",
+                                            "Contratto d’affitto.",
+                                            "Ricevuta cambio residenza se rilevante.",
+                                            "Pagamenti precedenti.",
+                                            "Comunicazioni già inviate."
+                                        ],
+                                        "fr": [
+                                            "Avis de paiement.",
+                                            "Dates occupation.",
+                                            "Contrat.",
+                                            "Reçu changement résidence si utile.",
+                                            "Paiements précédents.",
+                                            "Communications déjà envoyées."
+                                        ],
+                                        "fa": [
+                                            "اخطار پرداخت.",
+                                            "تاریخ شروع/پایان سکونت.",
+                                            "قرارداد اجاره.",
+                                            "رسید تغییر اقامت اگر مرتبط است.",
+                                            "پرداخت‌های قبلی.",
+                                            "مکاتبات قبلی."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Check deadlines before waiting. Tax notices may have appeal or correction time limits.",
+                                "it": "Controlla le scadenze prima di aspettare. Gli avvisi possono avere termini per ricorso o correzione.",
+                                "fr": "Vérifie les délais avant d’attendre.",
+                                "fa": "قبل از صبر کردن مهلت‌ها را بررسی کن؛ اخطارهای مالیاتی ممکن است زمان محدود برای اصلاح یا اعتراض داشته باشند."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps check whether the notice looks wrong and what to contest.",
+                                "it": "Premium ti aiuta a capire se l’avviso sembra errato e cosa contestare.",
+                                "fr": "Premium aide à vérifier l’erreur et quoi contester.",
+                                "fa": "پرمیوم کمک می‌کند بفهمی اخطار اشتباه است یا نه و به چه چیزی اعتراض کنی."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "work_inps_patronato",
+            "icon": "work",
+            "sortOrder": 70,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "Work / INPS / Patronato",
+                "it": "Lavoro / INPS / Patronato",
+                "fr": "Travail / INPS / Patronato",
+                "fa": "کار / INPS / پاتروناتو"
+            },
+            "description": {
+                "en": "Unemployment, family benefits, contribution checks, and patronato preparation.",
+                "it": "Disoccupazione, bonus famiglia, contributi e preparazione per patronato.",
+                "fr": "Chômage, aides familiales, cotisations et préparation patronato.",
+                "fa": "بیکاری، کمک‌هزینه خانواده، سوابق بیمه و آماده‌سازی برای پاتروناتو."
+            },
+            "subcategories": [
+                {
+                    "id": "inps_basics",
+                    "categoryId": "work_inps_patronato",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "INPS basics",
+                        "it": "Base INPS",
+                        "fr": "Bases INPS",
+                        "fa": "اصول INPS"
+                    },
+                    "description": {
+                        "en": "Prepare before submitting or checking an INPS request.",
+                        "it": "Preparati prima di inviare o controllare una domanda INPS.",
+                        "fr": "Prépare-toi avant une demande INPS.",
+                        "fa": "قبل از ارسال یا بررسی درخواست INPS آماده شو."
+                    },
+                    "procedures": [
+                        {
+                            "id": "naspi_document_check_milano",
+                            "categoryId": "work_inps_patronato",
+                            "subcategoryId": "inps_basics",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "NASpI document check",
+                                "it": "Controllo documenti NASpI",
+                                "fr": "Vérification documents NASpI",
+                                "fa": "بررسی مدارک NASpI"
+                            },
+                            "shortDescription": {
+                                "en": "Prepare documents before applying or visiting a patronato.",
+                                "it": "Prepara i documenti prima della domanda o del patronato.",
+                                "fr": "Prépare les documents avant demande ou patronato.",
+                                "fa": "قبل از درخواست یا مراجعه به پاتروناتو مدارک را آماده کن."
+                            },
+                            "tags": [
+                                "inps",
+                                "naspi",
+                                "work",
+                                "unemployment"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "documents",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Usually useful",
+                                        "it": "Di solito utili",
+                                        "fr": "Souvent utiles",
+                                        "fa": "معمولاً مفید"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Identity document.",
+                                            "Codice fiscale.",
+                                            "SPID/CIE/CNS access.",
+                                            "Last employment contract.",
+                                            "Termination letter or end date.",
+                                            "IBAN.",
+                                            "Payslips if available."
+                                        ],
+                                        "it": [
+                                            "Documento d’identità.",
+                                            "Codice fiscale.",
+                                            "Accesso SPID/CIE/CNS.",
+                                            "Ultimo contratto di lavoro.",
+                                            "Lettera di cessazione o data fine rapporto.",
+                                            "IBAN.",
+                                            "Buste paga se disponibili."
+                                        ],
+                                        "fr": [
+                                            "Document d’identité.",
+                                            "Codice fiscale.",
+                                            "Accès SPID/CIE/CNS.",
+                                            "Dernier contrat.",
+                                            "Lettre ou date de fin.",
+                                            "IBAN.",
+                                            "Bulletins de paie si disponibles."
+                                        ],
+                                        "fa": [
+                                            "مدرک هویتی.",
+                                            "کد مالیاتی.",
+                                            "دسترسی SPID/CIE/CNS.",
+                                            "آخرین قرارداد کار.",
+                                            "نامه پایان کار یا تاریخ پایان.",
+                                            "IBAN.",
+                                            "فیش حقوقی در صورت وجود."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "INPS",
+                                        "it": "INPS",
+                                        "fr": "INPS",
+                                        "fa": "INPS"
+                                    },
+                                    "url": "https://www.inps.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "NASpI timing matters. Do not wait too long before checking eligibility.",
+                                "it": "I tempi NASpI contano. Non aspettare troppo prima di verificare i requisiti.",
+                                "fr": "Les délais NASpI comptent.",
+                                "fa": "زمان‌بندی NASpI مهم است؛ برای بررسی شرایط خیلی دیر اقدام نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "inps_problem_cases",
+                    "categoryId": "work_inps_patronato",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "INPS problem cases",
+                        "it": "Problemi INPS",
+                        "fr": "Problèmes INPS",
+                        "fa": "مشکلات INPS"
+                    },
+                    "description": {
+                        "en": "Premium review for rejected, suspended, or unclear INPS requests.",
+                        "it": "Verifica premium per domande INPS respinte, sospese o poco chiare.",
+                        "fr": "Revue premium pour demandes INPS rejetées ou suspendues.",
+                        "fa": "بررسی پرمیوم برای درخواست‌های INPS ردشده، معلق یا نامشخص."
+                    },
+                    "procedures": [
+                        {
+                            "id": "naspi_rejected_or_blocked_milano",
+                            "categoryId": "work_inps_patronato",
+                            "subcategoryId": "inps_problem_cases",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "NASpI rejected or blocked",
+                                "it": "NASpI respinta o bloccata",
+                                "fr": "NASpI rejetée ou bloquée",
+                                "fa": "NASpI رد یا متوقف شده"
+                            },
+                            "shortDescription": {
+                                "en": "Premium checklist for understanding the block before contacting INPS or patronato.",
+                                "it": "Checklist premium per capire il blocco prima di contattare INPS o patronato.",
+                                "fr": "Checklist premium pour comprendre le blocage.",
+                                "fa": "چک‌لیست پرمیوم برای فهمیدن دلیل توقف قبل از تماس با INPS یا پاتروناتو."
+                            },
+                            "tags": [
+                                "premium",
+                                "inps",
+                                "naspi",
+                                "rejected"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "review",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Check",
+                                        "it": "Controlla",
+                                        "fr": "Vérifie",
+                                        "fa": "بررسی کن"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Rejection reason.",
+                                            "Application date.",
+                                            "Work end date.",
+                                            "Contribution history.",
+                                            "Any missing communication.",
+                                            "Whether patronato correction is safer than self-submission."
+                                        ],
+                                        "it": [
+                                            "Motivo del rigetto.",
+                                            "Data domanda.",
+                                            "Data fine lavoro.",
+                                            "Storico contributivo.",
+                                            "Comunicazioni mancanti.",
+                                            "Se conviene correzione tramite patronato invece di invio autonomo."
+                                        ],
+                                        "fr": [
+                                            "Motif du rejet.",
+                                            "Date demande.",
+                                            "Date fin travail.",
+                                            "Historique cotisations.",
+                                            "Communications manquantes.",
+                                            "Correction via patronato ou seul."
+                                        ],
+                                        "fa": [
+                                            "دلیل رد.",
+                                            "تاریخ درخواست.",
+                                            "تاریخ پایان کار.",
+                                            "سوابق بیمه.",
+                                            "مکاتبات ناقص.",
+                                            "اینکه اصلاح از طریق پاتروناتو بهتر است یا ارسال شخصی."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "INPS",
+                                        "it": "INPS",
+                                        "fr": "INPS",
+                                        "fa": "INPS"
+                                    },
+                                    "url": "https://www.inps.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not submit random corrections without understanding the reason for rejection.",
+                                "it": "Non inviare correzioni casuali senza capire il motivo del rigetto.",
+                                "fr": "N’envoie pas de corrections au hasard.",
+                                "fa": "بدون فهمیدن دلیل رد، اصلاحات تصادفی ارسال نکن."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps organize the timeline and missing pieces.",
+                                "it": "Premium ti aiuta a ordinare cronologia e parti mancanti.",
+                                "fr": "Premium aide à organiser chronologie et pièces manquantes.",
+                                "fa": "پرمیوم به مرتب کردن زمان‌بندی و موارد ناقص کمک می‌کند."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "university_student",
+            "icon": "school",
+            "sortOrder": 80,
+            "isPremiumOnly": false,
+            "hasPremiumContent": true,
+            "title": {
+                "en": "University / Student",
+                "it": "Università / Studenti",
+                "fr": "Université / Étudiants",
+                "fa": "دانشگاه / دانشجو"
+            },
+            "description": {
+                "en": "Student documents, residence, health insurance, housing, and common admin problems.",
+                "it": "Documenti studenti, residenza, assicurazione sanitaria, casa e problemi amministrativi comuni.",
+                "fr": "Documents étudiants, résidence, assurance, logement et problèmes administratifs.",
+                "fa": "مدارک دانشجویی، اقامت، بیمه درمانی، خانه و مشکلات اداری رایج."
+            },
+            "subcategories": [
+                {
+                    "id": "student_basics",
+                    "categoryId": "university_student",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "Student basics",
+                        "it": "Base studenti",
+                        "fr": "Bases étudiants",
+                        "fa": "اصول دانشجویی"
+                    },
+                    "description": {
+                        "en": "Documents and first checks for students living in Milano.",
+                        "it": "Documenti e controlli iniziali per studenti che vivono a Milano.",
+                        "fr": "Documents et premiers contrôles pour étudiants à Milan.",
+                        "fa": "مدارک و بررسی‌های اولیه برای دانشجویان ساکن میلان."
+                    },
+                    "procedures": [
+                        {
+                            "id": "student_document_pack_milano",
+                            "categoryId": "university_student",
+                            "subcategoryId": "student_basics",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Student document pack",
+                                "it": "Pacchetto documenti studente",
+                                "fr": "Dossier documents étudiant",
+                                "fa": "بسته مدارک دانشجو"
+                            },
+                            "shortDescription": {
+                                "en": "Keep these documents ready for health, housing, residence, and university tasks.",
+                                "it": "Tieni pronti questi documenti per sanità, casa, residenza e università.",
+                                "fr": "Prépare ces documents pour santé, logement, résidence et université.",
+                                "fa": "این مدارک را برای درمان، خانه، اقامت و دانشگاه آماده نگه دار."
+                            },
+                            "tags": [
+                                "student",
+                                "documents",
+                                "university"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "documents",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Keep ready",
+                                        "it": "Tieni pronti",
+                                        "fr": "Garde prêts",
+                                        "fa": "آماده نگه دار"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Passport or ID.",
+                                            "Codice fiscale.",
+                                            "University enrollment certificate.",
+                                            "Permit of stay or receipt if non-EU.",
+                                            "Rental contract or hospitality declaration.",
+                                            "Health insurance or SSN registration proof."
+                                        ],
+                                        "it": [
+                                            "Passaporto o carta d’identità.",
+                                            "Codice fiscale.",
+                                            "Certificato iscrizione universitaria.",
+                                            "Permesso di soggiorno o ricevuta se extra UE.",
+                                            "Contratto d’affitto o dichiarazione di ospitalità.",
+                                            "Assicurazione sanitaria o prova iscrizione SSN."
+                                        ],
+                                        "fr": [
+                                            "Passeport ou ID.",
+                                            "Codice fiscale.",
+                                            "Certificat d’inscription université.",
+                                            "Permis ou reçu si hors UE.",
+                                            "Contrat ou déclaration d’hospitalité.",
+                                            "Assurance santé ou preuve SSN."
+                                        ],
+                                        "fa": [
+                                            "پاسپورت یا کارت هویت.",
+                                            "کد مالیاتی.",
+                                            "گواهی ثبت‌نام دانشگاه.",
+                                            "اجازه اقامت یا رسید برای خارج از اتحادیه اروپا.",
+                                            "قرارداد اجاره یا اعلامیه میزبانی.",
+                                            "بیمه درمانی یا مدرک ثبت‌نام SSN."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Do not rely on screenshots only. Keep downloadable PDFs when possible.",
+                                "it": "Non affidarti solo agli screenshot. Conserva PDF scaricabili quando possibile.",
+                                "fr": "Ne garde pas seulement des captures. Télécharge les PDF si possible.",
+                                "fa": "فقط به اسکرین‌شات اکتفا نکن؛ اگر ممکن است PDF نگه دار."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "student_complex_cases",
+                    "categoryId": "university_student",
+                    "sortOrder": 20,
+                    "isPremiumOnly": true,
+                    "hasPremiumContent": true,
+                    "title": {
+                        "en": "Complex student cases",
+                        "it": "Casi studenti complessi",
+                        "fr": "Cas étudiants complexes",
+                        "fa": "پرونده‌های پیچیده دانشجویی"
+                    },
+                    "description": {
+                        "en": "Premium help when health, residence, permit, or housing choices overlap.",
+                        "it": "Aiuto premium quando sanità, residenza, permesso o casa si sovrappongono.",
+                        "fr": "Aide premium quand santé, résidence, permis ou logement se croisent.",
+                        "fa": "کمک پرمیوم وقتی درمان، اقامت، اجازه و خانه به هم وابسته می‌شوند."
+                    },
+                    "procedures": [
+                        {
+                            "id": "student_health_residence_decision_milano",
+                            "categoryId": "university_student",
+                            "subcategoryId": "student_complex_cases",
+                            "sortOrder": 10,
+                            "isPremiumOnly": true,
+                            "requiresAuth": true,
+                            "title": {
+                                "en": "Student health and residence decision",
+                                "it": "Decisione sanità e residenza per studenti",
+                                "fr": "Décision santé et résidence étudiant",
+                                "fa": "تصمیم درمان و اقامت برای دانشجو"
+                            },
+                            "shortDescription": {
+                                "en": "Premium guide for students unsure about residence, SSN, private insurance, and documents.",
+                                "it": "Guida premium per studenti incerti su residenza, SSN, assicurazione privata e documenti.",
+                                "fr": "Guide premium pour résidence, SSN, assurance et documents.",
+                                "fa": "راهنمای پرمیوم برای دانشجویانی که درباره اقامت، SSN، بیمه خصوصی و مدارک مرددند."
+                            },
+                            "tags": [
+                                "premium",
+                                "student",
+                                "health",
+                                "residence"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "decision_tree_inputs",
+                                    "isPremiumOnly": true,
+                                    "title": {
+                                        "en": "Decision inputs",
+                                        "it": "Dati decisionali",
+                                        "fr": "Données de décision",
+                                        "fa": "اطلاعات تصمیم‌گیری"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "EU or non-EU status.",
+                                            "Permit duration.",
+                                            "University enrollment status.",
+                                            "Housing contract type.",
+                                            "Need for family doctor.",
+                                            "Budget for SSN or private insurance.",
+                                            "Whether residence registration is planned."
+                                        ],
+                                        "it": [
+                                            "Status UE o extra UE.",
+                                            "Durata permesso.",
+                                            "Iscrizione universitaria.",
+                                            "Tipo contratto casa.",
+                                            "Necessità medico di base.",
+                                            "Budget per SSN o assicurazione privata.",
+                                            "Se prevedi iscrizione anagrafica."
+                                        ],
+                                        "fr": [
+                                            "Statut UE ou hors UE.",
+                                            "Durée permis.",
+                                            "Inscription universitaire.",
+                                            "Type logement.",
+                                            "Besoin médecin.",
+                                            "Budget SSN/assurance.",
+                                            "Résidence prévue ou non."
+                                        ],
+                                        "fa": [
+                                            "وضعیت اتحادیه اروپا یا خارج از آن.",
+                                            "مدت اجازه اقامت.",
+                                            "وضعیت ثبت‌نام دانشگاه.",
+                                            "نوع قرارداد خانه.",
+                                            "نیاز به پزشک خانواده.",
+                                            "بودجه SSN یا بیمه خصوصی.",
+                                            "آیا ثبت اقامت برنامه‌ریزی شده است یا نه."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ATS Milano",
+                                        "it": "ATS Milano",
+                                        "fr": "ATS Milano",
+                                        "fa": "ATS Milano"
+                                    },
+                                    "url": "https://www.ats-milano.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "Comune di Milano",
+                                        "it": "Comune di Milano",
+                                        "fr": "Comune di Milano",
+                                        "fa": "Comune di Milano"
+                                    },
+                                    "url": "https://www.comune.milano.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "One wrong assumption can affect residence, healthcare, and permit paperwork.",
+                                "it": "Un presupposto sbagliato può influire su residenza, sanità e permesso.",
+                                "fr": "Une mauvaise hypothèse peut affecter résidence, santé et permis.",
+                                "fa": "یک فرض اشتباه می‌تواند روی اقامت، درمان و اجازه اقامت اثر بگذارد."
+                            },
+                            "premiumTeaser": {
+                                "en": "Premium helps connect the pieces before you pay or submit.",
+                                "it": "Premium ti aiuta a collegare i pezzi prima di pagare o inviare.",
+                                "fr": "Premium aide à relier les éléments avant paiement ou envoi.",
+                                "fa": "پرمیوم قبل از پرداخت یا ارسال، بخش‌ها را به هم وصل می‌کند."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "documents_identity",
+            "icon": "badge",
+            "sortOrder": 90,
+            "isPremiumOnly": false,
+            "hasPremiumContent": false,
+            "title": {
+                "en": "Documents",
+                "it": "Documenti",
+                "fr": "Documents",
+                "fa": "مدارک"
+            },
+            "description": {
+                "en": "Identity, tax code, permit, residence, and document packs for Italian procedures.",
+                "it": "Identità, codice fiscale, permesso, residenza e pacchetti documenti per pratiche italiane.",
+                "fr": "Identité, codice fiscale, permis, résidence et dossiers documents.",
+                "fa": "مدارک هویتی، کد مالیاتی، اجازه اقامت، اقامت و بسته مدارک برای کارهای اداری."
+            },
+            "subcategories": [
+                {
+                    "id": "essential_documents",
+                    "categoryId": "documents_identity",
+                    "sortOrder": 10,
+                    "isPremiumOnly": false,
+                    "hasPremiumContent": false,
+                    "title": {
+                        "en": "Essential documents",
+                        "it": "Documenti essenziali",
+                        "fr": "Documents essentiels",
+                        "fa": "مدارک ضروری"
+                    },
+                    "description": {
+                        "en": "Documents to keep ready before starting public-office, health, housing, or university requests.",
+                        "it": "Documenti da tenere pronti prima di pratiche uffici pubblici, salute, casa o università.",
+                        "fr": "Documents à préparer avant démarches publiques, santé, logement ou université.",
+                        "fa": "مدارکی که قبل از کارهای اداری، درمانی، خانه یا دانشگاه باید آماده باشند."
+                    },
+                    "procedures": [
+                        {
+                            "id": "basic_document_pack_milano",
+                            "categoryId": "documents_identity",
+                            "subcategoryId": "essential_documents",
+                            "sortOrder": 10,
+                            "isPremiumOnly": false,
+                            "requiresAuth": false,
+                            "title": {
+                                "en": "Basic document pack",
+                                "it": "Pacchetto documenti base",
+                                "fr": "Dossier documents de base",
+                                "fa": "بسته مدارک پایه"
+                            },
+                            "shortDescription": {
+                                "en": "A simple checklist before Comune, ASL, housing, university, or INPS procedures.",
+                                "it": "Checklist semplice prima di pratiche Comune, ASL, casa, università o INPS.",
+                                "fr": "Checklist simple avant Comune, ASL, logement, université ou INPS.",
+                                "fa": "چک‌لیست ساده قبل از شهرداری، ASL، خانه، دانشگاه یا INPS."
+                            },
+                            "tags": [
+                                "documents",
+                                "checklist",
+                                "basic"
+                            ],
+                            "sections": [
+                                {
+                                    "type": "checklist",
+                                    "key": "base_documents",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Usually useful",
+                                        "it": "Di solito utili",
+                                        "fr": "Souvent utiles",
+                                        "fa": "معمولاً مفید"
+                                    },
+                                    "items": {
+                                        "en": [
+                                            "Passport or ID card.",
+                                            "Codice fiscale.",
+                                            "Residence permit or receipt if applicable.",
+                                            "Rental contract or hospitality declaration.",
+                                            "University enrollment or work contract when relevant.",
+                                            "IBAN.",
+                                            "SPID, CIE, or CNS access."
+                                        ],
+                                        "it": [
+                                            "Passaporto o carta d’identità.",
+                                            "Codice fiscale.",
+                                            "Permesso di soggiorno o ricevuta se applicabile.",
+                                            "Contratto d’affitto o dichiarazione di ospitalità.",
+                                            "Iscrizione universitaria o contratto di lavoro quando rilevante.",
+                                            "IBAN.",
+                                            "Accesso SPID, CIE o CNS."
+                                        ],
+                                        "fr": [
+                                            "Passeport ou carte d’identité.",
+                                            "Codice fiscale.",
+                                            "Permis ou reçu si applicable.",
+                                            "Contrat ou déclaration d’hospitalité.",
+                                            "Inscription université ou contrat travail si utile.",
+                                            "IBAN.",
+                                            "Accès SPID, CIE ou CNS."
+                                        ],
+                                        "fa": [
+                                            "پاسپورت یا کارت هویت.",
+                                            "کد مالیاتی.",
+                                            "اجازه اقامت یا رسید در صورت نیاز.",
+                                            "قرارداد اجاره یا اعلامیه میزبانی.",
+                                            "ثبت‌نام دانشگاه یا قرارداد کار در صورت مرتبط بودن.",
+                                            "IBAN.",
+                                            "دسترسی SPID، CIE یا CNS."
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "warning",
+                                    "key": "privacy",
+                                    "isPremiumOnly": false,
+                                    "title": {
+                                        "en": "Document safety",
+                                        "it": "Sicurezza documenti",
+                                        "fr": "Sécurité documents",
+                                        "fa": "امنیت مدارک"
+                                    },
+                                    "body": {
+                                        "en": "Never upload sensitive documents to unofficial websites or send them to unverified email addresses.",
+                                        "it": "Non caricare documenti sensibili su siti non ufficiali e non inviarli a email non verificate.",
+                                        "fr": "N’envoie jamais de documents sensibles à des sites ou emails non vérifiés.",
+                                        "fa": "مدارک حساس را در سایت‌های غیررسمی آپلود نکن و به ایمیل تأییدنشده نفرست."
+                                    }
+                                }
+                            ],
+                            "officialLinks": [
+                                {
+                                    "label": {
+                                        "en": "ANPR",
+                                        "it": "ANPR",
+                                        "fr": "ANPR",
+                                        "fa": "ANPR"
+                                    },
+                                    "url": "https://www.anagrafenazionale.interno.it/",
+                                    "type": "official"
+                                },
+                                {
+                                    "label": {
+                                        "en": "CIE official portal",
+                                        "it": "Portale ufficiale CIE",
+                                        "fr": "Portail officiel CIE",
+                                        "fa": "پورتال رسمی CIE"
+                                    },
+                                    "url": "https://www.cartaidentita.interno.gov.it/",
+                                    "type": "official"
+                                }
+                            ],
+                            "contacts": [],
+                            "warnings": {
+                                "en": "Keep PDFs and receipts. Screenshots are useful but not always accepted.",
+                                "it": "Conserva PDF e ricevute. Gli screenshot sono utili ma non sempre accettati.",
+                                "fr": "Garde PDF et reçus. Les captures ne sont pas toujours acceptées.",
+                                "fa": "PDF و رسیدها را نگه دار؛ اسکرین‌شات همیشه کافی نیست."
+                            },
+                            "premiumTeaser": {
+                                "en": "",
+                                "it": "",
+                                "fr": "",
+                                "fa": ""
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

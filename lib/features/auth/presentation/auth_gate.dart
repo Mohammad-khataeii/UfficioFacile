@@ -33,7 +33,7 @@ class AuthRequiredScreen extends StatelessWidget {
   const AuthRequiredScreen({
     super.key,
     this.featureTitle = 'this area',
-    this.showContinueBrowsing = true,
+    this.showContinueBrowsing = false,
   });
 
   final String featureTitle;
@@ -69,14 +69,6 @@ class AuthRequiredScreen extends StatelessWidget {
                           Navigator.pushNamed(context, AppRoutes.auth),
                       child: Text(context.l10n.t('auth_login_or_signup')),
                     ),
-                    if (showContinueBrowsing) ...[
-                      const SizedBox(height: 10),
-                      OutlinedButton(
-                        onPressed: () =>
-                            Navigator.pushNamed(context, AppRoutes.home),
-                        child: Text(context.l10n.t('auth_continue_public')),
-                      ),
-                    ],
                   ],
                 ),
               ),

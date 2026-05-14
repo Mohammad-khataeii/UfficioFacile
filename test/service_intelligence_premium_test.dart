@@ -380,25 +380,32 @@ void main() {
         analytics: LocalAnalyticsService(prefs),
       );
 
-      final publicPlans = (await service.getPlanProducts()).where(
-        (item) => <String>{
-          'free',
-          'plus_monthly',
-          'plus_yearly',
-          'premium_monthly',
-          'premium_yearly',
-          'consultancy_one_shot',
-        }.contains(item.productKey),
-      );
+      final plans = await service.getPlanProducts();
+      final publicPlans = plans.where(isPubliclyVisiblePlanForTesting).toList();
 
-      expect(publicPlans, isNotEmpty);
+      expect(publicPlans.map((item) => item.productKey).toList(), [
+        'premium_monthly',
+        'premium_yearly',
+      ]);
       for (final plan in publicPlans) {
         expect(plan.title['en'], isNotEmpty);
         expect(plan.currency, isNotEmpty);
-        if (plan.productKey != 'free') {
-          expect(plan.amountCents, greaterThan(0));
-        }
+        expect(plan.amountCents, greaterThan(0));
       }
+      expect(
+        plans
+            .where((item) => item.productKey == 'consultancy_one_shot')
+            .single
+            .isActive,
+        isFalse,
+      );
+      expect(
+        plans
+            .where((item) => item.productKey == 'subcategory_unlock')
+            .single
+            .isActive,
+        isFalse,
+      );
     });
 
     test(
@@ -634,6 +641,99 @@ void main() {
         expect((await service.canAccessProcedure(procedure)).allowed, isTrue);
       },
     );
+
+    test(
+      'locked premium guides no longer expose single unlock option',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final service = UfficioPremiumEntitlementService(
+          LocalUfficcioEntitlementRepository(prefs),
+          LocalPremiumConfigRepository(prefs),
+          analytics: LocalAnalyticsService(prefs),
+        );
+
+        final procedure = UfficioProcedure.fromJson(
+          const {
+            'id': 'premium-proc',
+            'sortOrder': 1,
+            'isPremiumOnly': true,
+            'requiresAuth': false,
+            'title': {'en': 'Premium procedure'},
+            'shortDescription': {'en': 'Locked for free users'},
+            'sections': [],
+          },
+          categoryId: 'premium-cat',
+          subcategoryId: 'premium-sub',
+        );
+
+        final access = await service.canAccessCatalogProcedure(procedure);
+        expect(access.allowed, isFalse);
+        expect(
+          access.unlockOptions,
+          isNot(contains(UnlockOption.singlePurchase)),
+        );
+        expect(access.singleUnlockPriceCents, isNull);
+      },
+    );
+
+    test(
+      'premium user can submit 2 problem requests per month and third is blocked',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final repository = LocalUfficcioEntitlementRepository(prefs);
+        final service = UfficioPremiumEntitlementService(
+          repository,
+          LocalPremiumConfigRepository(prefs),
+          analytics: LocalAnalyticsService(prefs),
+        );
+        await repository.saveEntitlement(
+          (await service.getCurrentEntitlement()).copyWith(
+            plan: UfficioPlan.premiumMonthly,
+            premiumAccess: true,
+            status: EntitlementStatus.active,
+          ),
+        );
+
+        expect((await service.canSubmitProblemRequest()).allowed, isTrue);
+        await service.recordProblemRequestSubmitted();
+        expect((await service.canSubmitProblemRequest()).allowed, isTrue);
+        await service.recordProblemRequestSubmitted();
+        final blocked = await service.canSubmitProblemRequest();
+        expect(blocked.allowed, isFalse);
+        expect(blocked.reason, contains('Your limit resets next month'));
+      },
+    );
+
+    test(
+      'premium user can submit 2 consultancy requests per month and third is blocked',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final repository = LocalUfficcioEntitlementRepository(prefs);
+        final service = UfficioPremiumEntitlementService(
+          repository,
+          LocalPremiumConfigRepository(prefs),
+          analytics: LocalAnalyticsService(prefs),
+        );
+        await repository.saveEntitlement(
+          (await service.getCurrentEntitlement()).copyWith(
+            plan: UfficioPlan.premiumYearly,
+            premiumAccess: true,
+            status: EntitlementStatus.active,
+          ),
+        );
+
+        expect((await service.canSubmitConsultancyRequest()).allowed, isTrue);
+        await service.recordConsultancyRequestSubmitted();
+        expect((await service.canSubmitConsultancyRequest()).allowed, isTrue);
+        await service.recordConsultancyRequestSubmitted();
+        final blocked = await service.canSubmitConsultancyRequest();
+        expect(blocked.allowed, isFalse);
+        expect(blocked.reason, contains('Your limit resets next month'));
+      },
+    );
   });
 
   group('generated pack enrichment', () {
@@ -666,7 +766,7 @@ void main() {
       );
     });
 
-    test('plus monthly entitlement maps only to plus monthly', () {
+    test('legacy plus monthly entitlement maps to premium monthly', () {
       expect(
         resolvedCurrentPlanProductKeyForTesting(
           const UfficcioEntitlement(
@@ -675,11 +775,11 @@ void main() {
             premiumAccess: true,
           ),
         ),
-        'plus_monthly',
+        'premium_monthly',
       );
     });
 
-    test('plus yearly entitlement maps only to plus yearly', () {
+    test('legacy plus yearly entitlement maps to premium yearly', () {
       expect(
         resolvedCurrentPlanProductKeyForTesting(
           const UfficcioEntitlement(
@@ -688,7 +788,7 @@ void main() {
             premiumAccess: true,
           ),
         ),
-        'plus_yearly',
+        'premium_yearly',
       );
     });
 
@@ -740,6 +840,19 @@ void main() {
           ),
         ),
         'free',
+      );
+    });
+
+    test('admin grant still resolves to a premium current plan', () {
+      expect(
+        resolvedCurrentPlanProductKeyForTesting(
+          const UfficcioEntitlement(
+            plan: UfficioPlan.adminGrant,
+            status: EntitlementStatus.active,
+            premiumAccess: true,
+          ),
+        ),
+        'premium_monthly',
       );
     });
   });
@@ -954,7 +1067,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Choose the level of help that fits your situation.'),
+        find.text(
+          'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
+        ),
         findsOneWidget,
       );
     });

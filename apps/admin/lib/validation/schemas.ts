@@ -68,6 +68,7 @@ export const categorySchema = z.object({
 
 export const procedureSchema = z.object({
   categorySlug: z.string().min(1),
+  subcategorySlug: z.string().optional(),
   slug: z.string().regex(/^[a-z0-9_/-]+$/),
   titleEn: z.string().min(1),
   titleIt: z.string().optional(),

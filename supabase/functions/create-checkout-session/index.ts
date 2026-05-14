@@ -8,6 +8,8 @@ type CheckoutRequest = {
   procedure_slug?: string;
 };
 
+const allowedPlanProductKeys = new Set(["premium_monthly", "premium_yearly"]);
+
 const corsHeaders = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers":
@@ -66,6 +68,9 @@ serve(async (request) => {
   if (!productKey) {
     return json({ error: "product_key is required" }, 400);
   }
+  if (!allowedPlanProductKeys.has(productKey)) {
+    return json({ error: "This product is not available for checkout." }, 400);
+  }
 
   const { data: product, error: productError } = await supabase
     .from("ufficio_plan_products")
@@ -92,15 +97,6 @@ serve(async (request) => {
     product.billing_interval === "year"
       ? "subscription"
       : "payment";
-
-  if (productKey === "subcategory_unlock") {
-    if (!body.category_slug || !body.procedure_slug) {
-      return json(
-        { error: "category_slug and procedure_slug are required for a single unlock." },
-        400,
-      );
-    }
-  }
 
   const { data: entitlement } = await supabase
     .from("ufficio_user_entitlements")

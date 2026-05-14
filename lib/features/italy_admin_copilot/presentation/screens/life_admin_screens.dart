@@ -31,10 +31,11 @@ import '../../data/service_intelligence_quality_service.dart';
 import '../../data/service_terms_dictionary.dart';
 import '../../data/telecom_guidance_definitions.dart';
 import '../../data/ufficio_product_services.dart';
+import '../../data/ufficio_catalog_repository.dart';
+import '../../data/ufficio_city_registry.dart';
 import '../../data/university_student_guidance_definitions.dart';
 import '../../data/utilities_electricity_gas_guidance_definitions.dart';
 import '../../data/work_inps_patronato_guidance_definitions.dart';
-import '../../domain/admin_copilot_profile.dart';
 import '../../domain/admin_procedure.dart';
 import '../../domain/admin_request.dart';
 import '../../domain/bill_analysis.dart';
@@ -57,6 +58,7 @@ import '../../domain/ufficio_catalog.dart';
 import '../../domain/ufficcio_entitlement.dart';
 import '../../domain/utility_comparison.dart';
 import '../../domain/utility_offer.dart';
+import '../../domain/ufficio_city.dart';
 import '../widgets/cms_interactive_tools.dart';
 import 'catalog_screens.dart';
 import 'life_admin_phase5_screens.dart';
@@ -76,6 +78,40 @@ class GeneratedRouteArgs {
   final AdminProcedure procedure;
   final Map<String, dynamic> inputData;
   final GeneratedPack pack;
+}
+
+Future<void> showCityCatalogRequestSheet(
+  BuildContext context, {
+  required UfficioCity city,
+}) async {
+  final scope = AppScope.of(context);
+  final entitlements = await scope.entitlementService.getCurrentEntitlement();
+  if (!context.mounted) return;
+  final request = await _showProblemRequestSheet(
+    context,
+    categoryId: 'city_catalog_request',
+    sourcePage: 'city_catalog_request',
+    subcategoryId: city.slug,
+    isPremiumUser: entitlements.hasActivePremiumEntitlement,
+    initialTitle: 'Add ${city.label} guides',
+    initialDescription: 'Please add verified local guides for ${city.label}.',
+    initialCity: city.label,
+    initialRegion: city.region,
+  );
+  if (request == null) return;
+  try {
+    await scope.problemRequestsService.submitProblemRequest(request);
+  } on RequestLimitExceededException catch (error) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(error.message)));
+    return;
+  }
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(context.l10n.t('city_catalog_request_saved'))),
+  );
 }
 
 class RequestRouteArgs {
@@ -129,16 +165,16 @@ String? _resolvedCurrentPlanProductKey(UfficcioEntitlement entitlement) {
   }
   return switch (entitlement.plan) {
     UfficioPlan.free => 'free',
-    UfficioPlan.plusMonthly => 'plus_monthly',
-    UfficioPlan.plusYearly => 'plus_yearly',
+    UfficioPlan.plusMonthly => 'premium_monthly',
+    UfficioPlan.plusYearly => 'premium_yearly',
     UfficioPlan.premiumMonthly => 'premium_monthly',
     UfficioPlan.premiumYearly => 'premium_yearly',
     UfficioPlan.trial => 'premium_monthly',
     UfficioPlan.pro => 'premium_monthly',
     UfficioPlan.consultancyOneShot => null,
-    UfficioPlan.adminGrant => null,
-    UfficioPlan.lifetime => null,
-    UfficioPlan.consultant => null,
+    UfficioPlan.adminGrant => 'premium_monthly',
+    UfficioPlan.lifetime => 'premium_yearly',
+    UfficioPlan.consultant => 'premium_monthly',
   };
 }
 
@@ -166,15 +202,15 @@ String _planPriceLabel(PlanProduct product) {
 bool _isPubliclyVisiblePlan(PlanProduct product) {
   if (!product.isActive) return false;
   return switch (product.productKey) {
-    'free' => true,
-    'plus_monthly' => true,
-    'plus_yearly' => true,
     'premium_monthly' => true,
     'premium_yearly' => true,
-    'consultancy_one_shot' => true,
     _ => false,
   };
 }
+
+@visibleForTesting
+bool isPubliclyVisiblePlanForTesting(PlanProduct product) =>
+    _isPubliclyVisiblePlan(product);
 
 String _planLabel(BuildContext context, UfficioPlan plan) {
   switch (plan) {
@@ -182,19 +218,51 @@ String _planLabel(BuildContext context, UfficioPlan plan) {
       return context.l10n.t('free_plan_label');
     case UfficioPlan.plusMonthly:
     case UfficioPlan.plusYearly:
-      return context.l10n.t('plus_plan_label');
     case UfficioPlan.premiumMonthly:
     case UfficioPlan.premiumYearly:
       return context.l10n.t('premium_plan_label');
     case UfficioPlan.consultancyOneShot:
-      return context.l10n.t('one_shot_consultancy_label');
+      return context.l10n.t('premium_plan_label');
     case UfficioPlan.adminGrant:
     case UfficioPlan.lifetime:
     case UfficioPlan.trial:
-      return context.l10n.t('admin_grant_label');
+      return context.l10n.t('premium_plan_label');
     case UfficioPlan.consultant:
     case UfficioPlan.pro:
       return context.l10n.t('premium_plan_label');
+  }
+}
+
+List<String> _userFacingPlanFeatures(
+  BuildContext context,
+  PlanProduct product,
+) {
+  final code = context.l10n.languageCode;
+  switch (code) {
+    case 'it':
+      return const <String>[
+        'Tutte le guide e sottocategorie Premium',
+        '2 richieste problema al mese',
+        '2 consulenze private al mese',
+      ];
+    case 'fr':
+      return const <String>[
+        'Tous les guides et sous-catégories Premium',
+        '2 demandes de problème par mois',
+        '2 consultations privées par mois',
+      ];
+    case 'fa':
+      return const <String>[
+        'همه راهنماها و زیردسته‌های پریمیوم',
+        '۲ درخواست مشکل در هر ماه',
+        '۲ مشاوره خصوصی در هر ماه',
+      ];
+    default:
+      return const <String>[
+        'All premium guides and subcategories',
+        '2 problem requests per month',
+        '2 private consultancies per month',
+      ];
   }
 }
 
@@ -217,9 +285,10 @@ class LifeAdminHomeScreen extends StatefulWidget {
 
 class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   Future<List<HouseholdContract>>? _contractsFuture;
-  Future<UfficioCatalog>? _catalogFuture;
+  Future<UfficioCatalogLoadResult>? _catalogFuture;
   final TextEditingController _heroSearchController = TextEditingController();
   List<ProblemMatchResult> _heroMatches = const [];
+  String? _resolvedCatalogCitySlug;
 
   @override
   void dispose() {
@@ -231,9 +300,22 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _contractsFuture ??= AppScope.of(context).contractsRepository.list();
-    _catalogFuture ??= AppScope.of(
-      context,
-    ).ufficioCatalogRepository.loadCatalog();
+    _refreshCatalogFutureIfNeeded();
+  }
+
+  void _refreshCatalogFutureIfNeeded() {
+    final scope = AppScope.of(context);
+    final nextCitySlug = UfficioCityRegistry.normalizeSlug(
+      scope.profileController.profile.selectedCityPackId,
+    );
+    if (_catalogFuture != null && _resolvedCatalogCitySlug == nextCitySlug) {
+      return;
+    }
+    if (_resolvedCatalogCitySlug != nextCitySlug) {
+      _heroMatches = const [];
+    }
+    _resolvedCatalogCitySlug = nextCitySlug;
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
   }
 
   @override
@@ -241,6 +323,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
     final scope = AppScope.of(context);
     final requests = scope.requestController.requests;
     final profile = scope.profileController.profile;
+    _refreshCatalogFutureIfNeeded();
     final dueReminders = requests
         .expand((item) => item.reminders.map((reminder) => (item, reminder)))
         .where((tuple) => !tuple.$2.isDone)
@@ -264,6 +347,9 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
         }
       }
     }
+    final selectedCatalogCity = UfficioCityRegistry.baseCityForSlug(
+      profile.selectedCityPackId,
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.t('app_title')),
@@ -312,7 +398,10 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
       ),
       body: SafeArea(
         child: AnimatedBuilder(
-          animation: scope.cmsContentController,
+          animation: Listenable.merge([
+            scope.cmsContentController,
+            scope.profileController,
+          ]),
           builder: (context, _) => ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -367,16 +456,72 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      controller: _heroSearchController,
-                      decoration: InputDecoration(
-                        hintText: context.l10n.t('what_help'),
-                        prefixIcon: const Icon(Icons.search),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _heroMatches = router.findMatches(value, limit: 3);
-                        });
+                    FutureBuilder<UfficioCatalogLoadResult>(
+                      future: _catalogFuture,
+                      builder: (context, snapshot) {
+                        final result = snapshot.data;
+                        final cityUnavailable =
+                            result?.isUnavailable == true &&
+                            result?.city.slug == selectedCatalogCity.slug;
+                        final cityCatalog = result?.catalog;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: _heroSearchController,
+                              decoration: InputDecoration(
+                                hintText: cityUnavailable
+                                    ? context.l10n
+                                          .t('city_catalog_search_unavailable')
+                                          .replaceAll(
+                                            '{city}',
+                                            selectedCatalogCity.label,
+                                          )
+                                    : context.l10n.t('what_help'),
+                                prefixIcon: const Icon(Icons.search),
+                              ),
+                              onChanged: cityUnavailable
+                                  ? null
+                                  : (value) {
+                                      setState(() {
+                                        _heroMatches = cityCatalog == null
+                                            ? router.findMatches(
+                                                value,
+                                                limit: 3,
+                                              )
+                                            : _searchBundledCatalogMatches(
+                                                cityCatalog,
+                                                languageCode:
+                                                    context.l10n.languageCode,
+                                                query: value,
+                                                limit: 3,
+                                              );
+                                      });
+                                    },
+                            ),
+                            if (cityUnavailable) ...[
+                              const SizedBox(height: 12),
+                              Text(
+                                context.l10n
+                                    .t('city_catalog_unavailable_body')
+                                    .replaceAll(
+                                      '{city}',
+                                      selectedCatalogCity.label,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () => showCityCatalogRequestSheet(
+                                  context,
+                                  city: result!.city,
+                                ),
+                                child: Text(
+                                  context.l10n.t('city_catalog_request_cta'),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
                       },
                     ),
                     if (_heroMatches.isNotEmpty) ...[
@@ -478,6 +623,36 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                   ),
                 ),
               const SizedBox(height: 16),
+              _SectionCard(
+                title: context.l10n.t('city_catalog_label'),
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(selectedCatalogCity.label),
+                  subtitle: Text(
+                    selectedCatalogCity.region.isEmpty
+                        ? context.l10n.t('city_catalog_status_coming_soon')
+                        : selectedCatalogCity.region,
+                  ),
+                  trailing: FutureBuilder<UfficioCatalogLoadResult>(
+                    future: _catalogFuture,
+                    builder: (context, snapshot) {
+                      final result = snapshot.data;
+                      final label =
+                          result?.city.slug == selectedCatalogCity.slug &&
+                              result?.city.isAvailable == false
+                          ? context.l10n.t('city_catalog_status_coming_soon')
+                          : context.l10n.t('city_catalog_status_available');
+                      return Chip(
+                        label: Text(
+                          '${context.l10n.t('city_catalog_chip_prefix')}: ${selectedCatalogCity.label}${label == context.l10n.t('city_catalog_status_available') ? '' : ' — $label'}',
+                        ),
+                      );
+                    },
+                  ),
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                ),
+              ),
+              const SizedBox(height: 16),
               if (cityPack != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -515,7 +690,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              FutureBuilder<UfficioCatalog>(
+              FutureBuilder<UfficioCatalogLoadResult>(
                 future: _catalogFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
@@ -524,7 +699,8 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
-                  if (snapshot.hasError || !snapshot.hasData) {
+                  final result = snapshot.data;
+                  if (snapshot.hasError || result == null) {
                     return _SectionCard(
                       title: context.l10n.t('browse_procedures'),
                       child: Column(
@@ -536,7 +712,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             onPressed: () => setState(
                               () => _catalogFuture = scope
                                   .ufficioCatalogRepository
-                                  .loadCatalog(),
+                                  .loadCatalogResult(),
                             ),
                             child: Text(context.l10n.t('retry')),
                           ),
@@ -544,7 +720,58 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                       ),
                     );
                   }
-                  final catalog = snapshot.data!;
+                  if (result.isUnavailable) {
+                    return _SectionCard(
+                      title: context.l10n.t('browse_procedures'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n
+                                .t('city_catalog_unavailable_body')
+                                .replaceAll('{city}', result.city.label),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n
+                                .t('city_catalog_premium_unavailable')
+                                .replaceAll('{city}', result.city.label),
+                          ),
+                          const SizedBox(height: 12),
+                          FilledButton(
+                            onPressed: () => showCityCatalogRequestSheet(
+                              context,
+                              city: result.city,
+                            ),
+                            child: Text(
+                              context.l10n.t('city_catalog_request_cta'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  if (result.catalog == null) {
+                    return _SectionCard(
+                      title: context.l10n.t('browse_procedures'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(context.l10n.t('catalog_load_error')),
+                          const SizedBox(height: 12),
+                          FilledButton(
+                            onPressed: () => setState(
+                              () => _catalogFuture = scope
+                                  .ufficioCatalogRepository
+                                  .loadCatalogResult(),
+                            ),
+                            child: Text(context.l10n.t('retry')),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  final catalog = result.catalog!;
                   return Wrap(
                     spacing: 12,
                     runSpacing: 12,
@@ -807,6 +1034,9 @@ class _ProblemIntakeScreenState extends State<ProblemIntakeScreen> {
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
+    final selectedCity = UfficioCityRegistry.baseCityForSlug(
+      scope.profileController.profile.selectedCityPackId,
+    );
     final router = IntelligentProblemRouter(
       categories: scope.cmsContentController.categories,
       procedures: scope.cmsContentController.procedures,
@@ -832,9 +1062,17 @@ class _ProblemIntakeScreenState extends State<ProblemIntakeScreen> {
                   hintText: context.l10n.t('problem_input_placeholder'),
                 ),
                 onChanged: (value) {
-                  setState(() {
-                    _recommendations = router.findMatches(value);
-                  });
+                  unawaited(() async {
+                    final city = await UfficioCityRegistry.resolveCity(
+                      selectedCity.slug,
+                    );
+                    if (!mounted) return;
+                    setState(() {
+                      _recommendations = city.isAvailable
+                          ? router.findMatches(value)
+                          : const [];
+                    });
+                  }());
                 },
               ),
               const SizedBox(height: 12),
@@ -864,29 +1102,61 @@ class _ProblemIntakeScreenState extends State<ProblemIntakeScreen> {
                         .toList(),
               ),
               const SizedBox(height: 16),
-              if (_recommendations.isEmpty)
-                Text(context.l10n.t('no_results'))
-              else
-                ..._recommendations.map((item) {
-                  return Card(
-                    child: ListTile(
-                      title: Text(item.procedureTitle ?? item.categoryTitle),
-                      subtitle: Text('${item.reason}\n${item.categoryTitle}'),
-                      trailing: Text(item.confidence.name.toUpperCase()),
-                      onTap: () {
-                        if (item.procedureSlug != null) {
-                          _openCatalogProcedureFromSlugs(
-                            context,
-                            categorySlug: item.categorySlug,
-                            procedureSlug: item.procedureSlug!,
-                          );
-                          return;
-                        }
-                        _openCategoryFromSlug(context, item.categorySlug);
-                      },
-                    ),
+              FutureBuilder<UfficioCity>(
+                future: UfficioCityRegistry.resolveCity(selectedCity.slug),
+                builder: (context, citySnapshot) {
+                  final city = citySnapshot.data ?? selectedCity;
+                  if (!city.isAvailable) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n
+                              .t('city_catalog_search_unavailable')
+                              .replaceAll('{city}', city.label),
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: () =>
+                              showCityCatalogRequestSheet(context, city: city),
+                          child: Text(
+                            context.l10n.t('city_catalog_request_cta'),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  if (_recommendations.isEmpty) {
+                    return Text(context.l10n.t('no_results'));
+                  }
+                  return Column(
+                    children: _recommendations.map((item) {
+                      return Card(
+                        child: ListTile(
+                          title: Text(
+                            item.procedureTitle ?? item.categoryTitle,
+                          ),
+                          subtitle: Text(
+                            '${item.reason}\n${item.categoryTitle}',
+                          ),
+                          trailing: Text(item.confidence.name.toUpperCase()),
+                          onTap: () {
+                            if (item.procedureSlug != null) {
+                              _openCatalogProcedureFromSlugs(
+                                context,
+                                categorySlug: item.categorySlug,
+                                procedureSlug: item.procedureSlug!,
+                              );
+                              return;
+                            }
+                            _openCategoryFromSlug(context, item.categorySlug);
+                          },
+                        ),
+                      );
+                    }).toList(),
                   );
-                }),
+                },
+              ),
             ],
           ),
         ),
@@ -907,14 +1177,21 @@ class _ProcedureSelectionScreenState extends State<ProcedureSelectionScreen> {
   String query = '';
   ProcedureCategory? category;
   String? cmsCategorySlug;
-  Future<UfficioCatalog>? _catalogFuture;
+  Future<UfficioCatalogLoadResult>? _catalogFuture;
+  String? _resolvedCitySlug;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _catalogFuture ??= AppScope.of(
-      context,
-    ).ufficioCatalogRepository.loadCatalog();
+    final scope = AppScope.of(context);
+    final nextCitySlug = UfficioCityRegistry.normalizeSlug(
+      scope.profileController.profile.selectedCityPackId,
+    );
+    if (_catalogFuture != null && _resolvedCitySlug == nextCitySlug) {
+      return;
+    }
+    _resolvedCitySlug = nextCitySlug;
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
   }
 
   @override
@@ -938,13 +1215,42 @@ class _ProcedureSelectionScreenState extends State<ProcedureSelectionScreen> {
               ),
             ),
             Expanded(
-              child: FutureBuilder<UfficioCatalog>(
+              child: FutureBuilder<UfficioCatalogLoadResult>(
                 future: _catalogFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  final catalogData = snapshot.data;
+                  final result = snapshot.data;
+                  if (result?.isUnavailable == true) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              context.l10n
+                                  .t('city_catalog_search_unavailable')
+                                  .replaceAll('{city}', result!.city.label),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            FilledButton(
+                              onPressed: () => showCityCatalogRequestSheet(
+                                context,
+                                city: result.city,
+                              ),
+                              child: Text(
+                                context.l10n.t('city_catalog_request_cta'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  final catalogData = result?.catalog;
                   if (catalogData != null) {
                     final categories = List<UfficioCategory>.from(
                       catalogData.categories,
@@ -1007,13 +1313,6 @@ class _ProcedureSelectionScreenState extends State<ProcedureSelectionScreen> {
                                     _iconForCategorySlug(item.id),
                                     () =>
                                         _openCategoryFromSlug(context, item.id),
-                                    trailing: item.hasPremiumContent
-                                        ? PremiumBadge(
-                                            label: context.l10n.t(
-                                              'premium_plan_label',
-                                            ),
-                                          )
-                                        : null,
                                   ),
                                 ),
                               ),
@@ -1766,31 +2065,11 @@ class _CmsProcedureDetailScreenState extends State<CmsProcedureDetailScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(access.message),
-                          if (access.singleUnlockPriceCents != null) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              '${context.l10n.t('unlock_this_guide_only')}: ${_formatCurrencyCents(access.singleUnlockPriceCents!, access.singleUnlockCurrency)}',
-                            ),
-                          ],
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              if (access.unlockOptions.contains(
-                                UnlockOption.singlePurchase,
-                              ))
-                                OutlinedButton(
-                                  onPressed: () => startCheckoutFlow(
-                                    context,
-                                    productKey: 'subcategory_unlock',
-                                    categorySlug: procedure!.categorySlug,
-                                    procedureSlug: procedure.slug,
-                                  ),
-                                  child: Text(
-                                    context.l10n.t('unlock_this_guide_only'),
-                                  ),
-                                ),
                               FilledButton(
                                 onPressed: () => Navigator.pushNamed(
                                   context,
@@ -3182,19 +3461,106 @@ IconData _iconForCategorySlug(String slug) {
   }
 }
 
-Future<void> _openCategoryFromSlug(BuildContext context, String slug) async {
-  final scope = AppScope.of(context);
-  final catalog = await scope.ufficioCatalogRepository.loadCatalog();
-  final category = catalog.findCategory(slug);
-  if (!context.mounted) return;
-  if (category == null) {
-    Navigator.pushNamed(
-      context,
-      AppRoutes.category,
-      arguments: CatalogCategoryRouteArgs(slug),
-    );
-    return;
+List<ProblemMatchResult> _searchBundledCatalogMatches(
+  UfficioCatalog catalog, {
+  required String languageCode,
+  required String query,
+  int limit = 6,
+}) {
+  final normalizedQuery = query.trim().toLowerCase();
+  if (normalizedQuery.isEmpty) return const [];
+  final matches = <({ProblemMatchResult result, int score})>[];
+
+  int scoreText(String text) {
+    final normalized = text.toLowerCase();
+    if (normalized.contains(normalizedQuery)) return 50;
+    return normalizedQuery
+            .split(' ')
+            .where((token) => token.isNotEmpty && normalized.contains(token))
+            .length *
+        12;
   }
+
+  for (final category in catalog.categories) {
+    final categoryTitle = ufficioLocalizedValue(
+      category.title,
+      languageCode,
+      fallback: category.id,
+    );
+    final categoryDescription = ufficioLocalizedValue(
+      category.description,
+      languageCode,
+    );
+    final categoryScore = scoreText('$categoryTitle $categoryDescription');
+    if (categoryScore > 0) {
+      matches.add((
+        result: ProblemMatchResult(
+          categorySlug: category.id,
+          categoryTitle: categoryTitle,
+          confidence: ProblemMatchConfidence.low,
+          reason: 'Matched "$query" in $categoryTitle',
+          matchedTerms: <String>[query],
+          isPremium: category.isPremiumOnly || category.hasPremiumContent,
+          source: 'bundled_catalog',
+        ),
+        score: categoryScore,
+      ));
+    }
+    for (final subcategory in category.subcategories) {
+      for (final procedure in subcategory.procedures) {
+        final procedureTitle = ufficioLocalizedValue(
+          procedure.title,
+          languageCode,
+          fallback: procedure.id,
+        );
+        final procedureSummary = ufficioLocalizedValue(
+          procedure.shortDescription,
+          languageCode,
+        );
+        final procedureScore = scoreText(
+          '$categoryTitle ${ufficioLocalizedValue(subcategory.title, languageCode, fallback: subcategory.id)} $procedureTitle $procedureSummary',
+        );
+        if (procedureScore <= 0) continue;
+        final confidence = procedureScore >= 50
+            ? ProblemMatchConfidence.high
+            : procedureScore >= 24
+            ? ProblemMatchConfidence.medium
+            : ProblemMatchConfidence.low;
+        matches.add((
+          result: ProblemMatchResult(
+            categorySlug: category.id,
+            categoryTitle: categoryTitle,
+            procedureSlug: procedure.id,
+            procedureTitle: procedureTitle,
+            confidence: confidence,
+            reason: 'Matched "$query" in $procedureTitle',
+            matchedTerms: <String>[query],
+            isPremium:
+                procedure.isPremiumOnly ||
+                subcategory.isPremiumOnly ||
+                category.isPremiumOnly,
+            source: 'bundled_catalog',
+          ),
+          score: procedureScore + 10,
+        ));
+      }
+    }
+  }
+
+  matches.sort((a, b) => b.score.compareTo(a.score));
+  final deduped = <String>{};
+  final results = <ProblemMatchResult>[];
+  for (final match in matches) {
+    final key =
+        '${match.result.categorySlug}::${match.result.procedureSlug ?? 'category'}';
+    if (!deduped.add(key)) continue;
+    results.add(match.result);
+    if (results.length == limit) break;
+  }
+  return results;
+}
+
+Future<void> _openCategoryFromSlug(BuildContext context, String slug) async {
   Navigator.pushNamed(
     context,
     AppRoutes.category,
@@ -3209,34 +3575,43 @@ Future<void> _openCatalogProcedureFromSlugs(
   String? subcategorySlug,
 }) async {
   final scope = AppScope.of(context);
-  final procedure = await scope.ufficioCatalogRepository.loadProcedureDetail(
-    categoryId: categorySlug,
-    subcategoryId: subcategorySlug ?? procedureSlug,
-    procedureId: procedureSlug,
-  );
-  if (!context.mounted) return;
-  if (procedure != null) {
-    final access = await scope.entitlementService.canAccessProcedure(procedure);
+  try {
+    final procedure = await scope.ufficioCatalogRepository.loadProcedureDetail(
+      categoryId: categorySlug,
+      subcategoryId: subcategorySlug ?? procedureSlug,
+      procedureId: procedureSlug,
+    );
     if (!context.mounted) return;
-    if (!access.allowed) {
-      await showPremiumPaywallSheet(
-        context,
-        decision: access,
-        featureLabel: _localizedCatalogText(
-          context,
-          procedure.title,
-          fallback: procedure.id,
-        ),
-        teaser: _localizedCatalogText(
-          context,
-          procedure.premiumTeaser.isNotEmpty
-              ? procedure.premiumTeaser
-              : procedure.shortDescription,
-        ),
+    if (procedure != null) {
+      final access = await scope.entitlementService.canAccessProcedure(
+        procedure,
       );
-      return;
+      if (!context.mounted) return;
+      if (!access.allowed) {
+        await showPremiumPaywallSheet(
+          context,
+          decision: access,
+          featureLabel: _localizedCatalogText(
+            context,
+            procedure.title,
+            fallback: procedure.id,
+          ),
+          teaser: _localizedCatalogText(
+            context,
+            procedure.premiumTeaser.isNotEmpty
+                ? procedure.premiumTeaser
+                : procedure.shortDescription,
+          ),
+        );
+        return;
+      }
     }
+  } on UfficioCatalogUnavailableException catch (error) {
+    if (!context.mounted) return;
+    await showCityCatalogRequestSheet(context, city: error.city);
+    return;
   }
+  if (!context.mounted) return;
   Navigator.pushNamed(
     context,
     AppRoutes.catalogProcedure,
@@ -4690,7 +5065,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _initializedFromProfile = false;
   bool _isSaving = false;
   String _city = 'Torino';
+  String _catalogCitySlug = 'torino';
   String _languageCode = 'en';
+  Future<List<UfficioCity>>? _catalogCitiesFuture;
 
   void _applyProfile(AppScope scope) {
     final profile = scope.profileController.profile;
@@ -4703,6 +5080,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ? (scope.authController.user?.email ?? '')
         : profile.email!;
     _city = (profile.city ?? '').isEmpty ? 'Torino' : profile.city!;
+    _catalogCitySlug = UfficioCityRegistry.normalizeSlug(
+      profile.selectedCityPackId,
+    );
     _languageCode = LocalAppLanguageRepository.sanitize(
       profile.preferredLanguage.isEmpty
           ? currentLanguage
@@ -4715,6 +5095,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.didChangeDependencies();
     if (_initializedFromProfile) return;
     final scope = AppScope.of(context);
+    _catalogCitiesFuture ??= UfficioCityRegistry.resolveKnownCities();
     _applyProfile(scope);
     _initializedFromProfile = true;
     unawaited(() async {
@@ -4773,6 +5154,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 initialValue: _city,
                 items: const [
                   DropdownMenuItem(value: 'Torino', child: Text('Torino')),
+                  DropdownMenuItem(value: 'Milano', child: Text('Milano')),
+                  DropdownMenuItem(value: 'Roma', child: Text('Roma')),
+                  DropdownMenuItem(value: 'Bologna', child: Text('Bologna')),
                 ],
                 onChanged: (value) {
                   if (value == null) return;
@@ -4781,6 +5165,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 decoration: InputDecoration(
                   labelText: context.l10n.t('profile_city'),
                 ),
+              ),
+              const SizedBox(height: 12),
+              FutureBuilder<List<UfficioCity>>(
+                future: _catalogCitiesFuture,
+                builder: (context, snapshot) {
+                  final cities =
+                      snapshot.data ?? UfficioCityRegistry.knownCities;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        initialValue: _catalogCitySlug,
+                        items: cities
+                            .map(
+                              (city) => DropdownMenuItem(
+                                value: city.slug,
+                                child: Text(
+                                  city.isAvailable
+                                      ? city.label
+                                      : '${city.label} — ${context.l10n.t('city_catalog_status_coming_soon')}',
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) async {
+                          if (value == null) return;
+                          final resolved =
+                              await UfficioCityRegistry.resolveCity(value);
+                          if (!mounted) return;
+                          setState(() => _catalogCitySlug = value);
+                          if (!resolved.isAvailable && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  context.l10n
+                                      .t('city_catalog_select_warning')
+                                      .replaceAll('{city}', resolved.label),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: context.l10n.t('city_catalog_selector'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(context.l10n.t('city_catalog_selector_help')),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 12),
               TextField(
@@ -4832,12 +5267,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         setState(() => _isSaving = true);
                         try {
                           await scope.profileController.save(
-                            AdminCopilotProfile(
+                            scope.profileController.profile.copyWith(
                               fullName: _name.text.trim(),
                               codiceFiscale: _cf.text.trim(),
                               city: _city,
                               email: _email.text.trim(),
                               preferredLanguage: _languageCode,
+                              selectedCityPackId: _catalogCitySlug,
                             ),
                           );
                           await scope.profileController.load();
@@ -5837,15 +6273,6 @@ class _CmsProcedureCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(_localizedCmsText(context, procedure.summary)),
                 ],
-                if (procedure.isPremium &&
-                    access != null &&
-                    !access.allowed &&
-                    access.singleUnlockPriceCents != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    '${context.l10n.t('single_unlock_available')}: ${_formatCurrencyCents(access.singleUnlockPriceCents!, access.singleUnlockCurrency)}',
-                  ),
-                ],
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -6076,9 +6503,16 @@ class GlobalProblemRequestCard extends StatelessWidget {
                           isPremiumUser: entitlements.isPremium,
                         );
                         if (request == null) return;
-                        await scope.problemRequestsService.submitProblemRequest(
-                          request,
-                        );
+                        try {
+                          await scope.problemRequestsService
+                              .submitProblemRequest(request);
+                        } on RequestLimitExceededException catch (error) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(error.message)),
+                          );
+                          return;
+                        }
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -6145,15 +6579,23 @@ class PrivateConsultancyCard extends StatelessWidget {
                                   : UfficioPlan.free.name,
                             );
                             if (request == null) return;
-                            await scope.consultancyService
-                                .submitConsultancyRequest(request);
+                            try {
+                              await scope.consultancyService
+                                  .submitConsultancyRequest(request);
+                            } on RequestLimitExceededException catch (error) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.message)),
+                              );
+                              return;
+                            }
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
                                   entitlements.canUsePrivateConsultancyForFree
                                       ? 'Consultancy request saved.'
-                                      : 'Consultancy request saved. Payment is still required before review starts.',
+                                      : 'Consultancy request saved.',
                                 ),
                               ),
                             );
@@ -6177,7 +6619,9 @@ class PrivateConsultancyCard extends StatelessWidget {
               ),
               if (entitlements?.canUsePrivateConsultancyForFree != true) ...[
                 const SizedBox(height: 8),
-                Text(context.l10n.t('cta_payment_unavailable')),
+                const Text(
+                  'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
+                ),
               ],
             ],
           ),
@@ -6236,15 +6680,34 @@ Future<ProblemRequestRecord?> _showProblemRequestSheet(
   required String sourcePage,
   required bool isPremiumUser,
   String? subcategoryId,
+  String? initialTitle,
+  String? initialDescription,
+  String? initialCity,
+  String? initialRegion,
 }) {
   final scope = AppScope.of(context);
   final profile = scope.profileController.profile;
-  final titleController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final cityController = TextEditingController(
-    text: (profile.city ?? '').isEmpty ? 'Torino' : profile.city!,
+  final selectedCatalogCity = UfficioCityRegistry.baseCityForSlug(
+    profile.selectedCityPackId,
   );
-  final regionController = TextEditingController(text: 'Piemonte');
+  final titleController = TextEditingController(text: initialTitle ?? '');
+  final descriptionController = TextEditingController(
+    text: initialDescription ?? '',
+  );
+  final cityController = TextEditingController(
+    text:
+        initialCity ??
+        ((profile.city ?? '').isEmpty
+            ? selectedCatalogCity.label
+            : profile.city!),
+  );
+  final regionController = TextEditingController(
+    text:
+        initialRegion ??
+        (selectedCatalogCity.region.isEmpty
+            ? 'Piemonte'
+            : selectedCatalogCity.region),
+  );
   final emailController = TextEditingController(text: profile.email ?? '');
   var urgency = 'normal';
   var language = 'English';
@@ -6405,15 +6868,24 @@ Future<ConsultancyRequestRecord?> _showConsultancyRequestSheet(
 }) {
   final scope = AppScope.of(context);
   final profile = scope.profileController.profile;
+  final selectedCatalogCity = UfficioCityRegistry.baseCityForSlug(
+    profile.selectedCityPackId,
+  );
   final nameController = TextEditingController(text: profile.fullName ?? '');
   final emailController = TextEditingController(text: profile.email ?? '');
   final problemTypeController = TextEditingController();
   final descriptionController = TextEditingController();
   final resultController = TextEditingController();
   final cityController = TextEditingController(
-    text: (profile.city ?? '').isEmpty ? 'Torino' : profile.city!,
+    text: (profile.city ?? '').isEmpty
+        ? selectedCatalogCity.label
+        : profile.city!,
   );
-  final regionController = TextEditingController(text: 'Piemonte');
+  final regionController = TextEditingController(
+    text: selectedCatalogCity.region.isEmpty
+        ? 'Piemonte'
+        : selectedCatalogCity.region,
+  );
   final documentsController = TextEditingController();
   var consent = false;
 
@@ -7233,7 +7705,6 @@ class _CategoryTile extends StatelessWidget {
     this.label,
     this.icon,
     this.onTap, {
-    this.trailing,
     this.subtitle,
     this.footer,
   });
@@ -7241,7 +7712,6 @@ class _CategoryTile extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-  final Widget? trailing;
   final String? subtitle;
   final String? footer;
 
@@ -7280,7 +7750,6 @@ class _CategoryTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (trailing != null) ...[const SizedBox(width: 8), trailing!],
               const SizedBox(width: 8),
               const Icon(Icons.chevron_right),
             ],
@@ -8020,9 +8489,11 @@ class PlanScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               Text(
-                context.l10n.t('plan_intro'),
+                'Premium gives you full access to all guides, plus 2 problem requests and 2 private consultancies every month.',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
+              const SizedBox(height: 8),
+              Text(context.l10n.t('plan_screenshot_limit_note')),
               const SizedBox(height: 12),
               Text(
                 [
@@ -8068,9 +8539,10 @@ class PlanScreen extends StatelessWidget {
                               label: context.l10n.t('current_plan_label'),
                             ),
                           ),
-                        ...plan.features.entries
-                            .where((entry) => entry.value == true)
-                            .map((entry) => Text('• ${entry.key}')),
+                        ..._userFacingPlanFeatures(
+                          context,
+                          plan,
+                        ).map((item) => Text('• $item')),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 8,
@@ -8087,16 +8559,6 @@ class PlanScreen extends StatelessWidget {
                               OutlinedButton(
                                 onPressed: null,
                                 child: Text(context.l10n.t('free_plan_label')),
-                              )
-                            else if (plan.productKey == 'consultancy_one_shot')
-                              FilledButton(
-                                onPressed: () => startCheckoutFlow(
-                                  context,
-                                  productKey: plan.productKey,
-                                ),
-                                child: Text(
-                                  context.l10n.t('request_consultancy'),
-                                ),
                               )
                             else
                               FilledButton(

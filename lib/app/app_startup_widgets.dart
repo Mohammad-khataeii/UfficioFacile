@@ -17,14 +17,14 @@ class StartupLoadingScreen extends StatefulWidget {
 
 class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
   Timer? _timer;
-  bool _showFallback = false;
+  bool _showRecovery = false;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer(const Duration(seconds: 5), () {
       if (mounted) {
-        setState(() => _showFallback = true);
+        setState(() => _showRecovery = true);
       }
     });
   }
@@ -38,7 +38,6 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     final state = widget.controller.startupState;
-    final canFallback = widget.controller.canContinueWithFallbackLocalMode;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -53,10 +52,6 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
                 const SizedBox(height: 8),
                 Text('Backend mode: ${state.backendMode}'),
                 Text('Flavor: ${state.flavor}'),
-                if (state.usedFallbackLocalMode) ...[
-                  const SizedBox(height: 8),
-                  Text(context.l10n.t('startup_continuing_local')),
-                ],
                 if (kDebugMode) ...[
                   const SizedBox(height: 16),
                   ExpansionTile(
@@ -75,17 +70,8 @@ class _StartupLoadingScreenState extends State<StartupLoadingScreen> {
                     ],
                   ),
                 ],
-                if (_showFallback) ...[
+                if (_showRecovery) ...[
                   const SizedBox(height: 24),
-                  if (canFallback)
-                    ElevatedButton(
-                      onPressed:
-                          widget.controller.continueWithFallbackLocalMode,
-                      child: Text(
-                        context.l10n.t('startup_continue_local_mode'),
-                      ),
-                    ),
-                  const SizedBox(height: 8),
                   OutlinedButton(
                     onPressed: widget.controller.retryStartup,
                     child: const Text('Retry'),
@@ -113,7 +99,6 @@ class StartupErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = controller.startupState;
-    final canFallback = controller.canContinueWithFallbackLocalMode;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -159,13 +144,6 @@ class StartupErrorScreen extends StatelessWidget {
                   child: const Text('Retry'),
                 ),
                 const SizedBox(height: 8),
-                if (canFallback) ...[
-                  OutlinedButton(
-                    onPressed: controller.continueWithFallbackLocalMode,
-                    child: Text(context.l10n.t('startup_continue_local_only')),
-                  ),
-                  const SizedBox(height: 8),
-                ],
                 OutlinedButton(
                   onPressed: controller.resetStartupData,
                   child: Text(context.l10n.t('startup_reset_data')),
