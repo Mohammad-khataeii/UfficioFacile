@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/external_actions.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
@@ -714,6 +715,12 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                         .map(
                                           (item) => ListTile(
                                             contentPadding: EdgeInsets.zero,
+                                            onTap: () =>
+                                                ExternalActionService.open(
+                                                  context,
+                                                  item.url,
+                                                  ExternalValueKind.website,
+                                                ),
                                             title: Text(
                                               ufficioLocalizedValue(
                                                 item.label,
@@ -721,7 +728,10 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                                 fallback: item.url,
                                               ),
                                             ),
-                                            subtitle: Text(item.url),
+                                            subtitle: ExternalValueText(
+                                              item.url,
+                                              kind: ExternalValueKind.website,
+                                            ),
                                           ),
                                         )
                                         .toList(),
@@ -750,7 +760,10 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                         fallback: item.value,
                                       ),
                                     ),
-                                    subtitle: Text(item.value),
+                                    subtitle: ExternalValueText(
+                                      item.value,
+                                      kind: ExternalValueKind.auto,
+                                    ),
                                   ),
                                 )
                                 .toList(),

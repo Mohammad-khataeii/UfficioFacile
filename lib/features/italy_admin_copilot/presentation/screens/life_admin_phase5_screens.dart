@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../app/external_actions.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
@@ -1412,19 +1412,36 @@ class _OfficialLinksDirectoryScreenState
           final builtIns = snapshot.data ?? const [];
           return ListView(
             padding: const EdgeInsets.all(16),
-            children: builtIns
-                .map(
-                  (item) => Card(
-                    child: ListTile(
-                      title: Text(item.title),
-                      subtitle: Text(
-                        '${item.verificationStatus.name}\n${item.sourceUrl ?? item.url}',
-                      ),
-                      trailing: Text(item.category),
-                    ),
+            children: builtIns.map((item) {
+              final targetUrl =
+                  item.sourceUrl?.trim().isNotEmpty == true
+                  ? item.sourceUrl!
+                  : item.url;
+              return Card(
+                child: ListTile(
+                  onTap: targetUrl.trim().isEmpty
+                      ? null
+                      : () => ExternalActionService.open(
+                          context,
+                          targetUrl,
+                          ExternalValueKind.website,
+                        ),
+                  title: Text(item.title),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.verificationStatus.name),
+                      if (targetUrl.trim().isNotEmpty)
+                        ExternalValueText(
+                          targetUrl,
+                          kind: ExternalValueKind.website,
+                        ),
+                    ],
                   ),
-                )
-                .toList(),
+                  trailing: Text(item.category),
+                ),
+              );
+            }).toList(),
           );
         },
       ),
@@ -1531,24 +1548,17 @@ class _ContactDirectoryCard extends StatelessWidget {
                 .map(
                   (entry) => Padding(
                     padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text('${entry.$1}: ${entry.$2}')),
-                        IconButton(
-                          tooltip: 'Copy ${entry.$1}',
-                          onPressed: () async {
-                            await Clipboard.setData(
-                              ClipboardData(text: entry.$2!),
-                            );
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('${entry.$1} copied')),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.copy_outlined),
-                        ),
-                      ],
+                    child: ExternalValueRow(
+                      label: entry.$1,
+                      value: entry.$2!,
+                      kind: switch (entry.$1) {
+                        'Phone' => ExternalValueKind.phone,
+                        'Email' => ExternalValueKind.email,
+                        'PEC' => ExternalValueKind.pec,
+                        'Address' => ExternalValueKind.address,
+                        'Website' => ExternalValueKind.website,
+                        _ => ExternalValueKind.auto,
+                      },
                     ),
                   ),
                 ),

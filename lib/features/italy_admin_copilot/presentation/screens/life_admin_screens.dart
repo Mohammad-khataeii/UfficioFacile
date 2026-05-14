@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../app/external_actions.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
@@ -1680,9 +1681,38 @@ class ProcedureDetailScreen extends StatelessWidget {
                                 .map(
                                   (item) => ListTile(
                                     contentPadding: EdgeInsets.zero,
+                                    onTap:
+                                        (item.value ?? item.displayValue)
+                                            .trim()
+                                            .isEmpty
+                                        ? null
+                                        : () => ExternalActionService.open(
+                                            context,
+                                            (item.value ?? item.displayValue)
+                                                .trim(),
+                                            _externalKindForContactType(
+                                              item.contactType,
+                                            ),
+                                          ),
                                     title: Text(item.label),
-                                    subtitle: Text(
-                                      '${item.displayValue}\n${item.sourceUrl ?? item.sourceLabel ?? ''}',
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ExternalValueText(
+                                          item.displayValue,
+                                          kind: _externalKindForContactType(
+                                            item.contactType,
+                                          ),
+                                        ),
+                                        if ((item.sourceUrl ?? item.sourceLabel)
+                                                ?.trim()
+                                                .isNotEmpty ==
+                                            true)
+                                          AutoLinkText(
+                                            item.sourceUrl ?? item.sourceLabel!,
+                                          ),
+                                      ],
                                     ),
                                     trailing: Text(
                                       item.verificationStatus.name,
@@ -1731,13 +1761,22 @@ class ProcedureDetailScreen extends StatelessWidget {
                                       if ((item.websiteUrl ?? '')
                                           .isNotEmpty) ...[
                                         const SizedBox(height: 4),
-                                        Text(item.websiteUrl!),
+                                        ExternalValueText(
+                                          item.websiteUrl!,
+                                          kind: ExternalValueKind.website,
+                                        ),
                                       ],
                                       if ((item.customerAreaUrl ?? '')
                                           .isNotEmpty) ...[
                                         const SizedBox(height: 4),
-                                        Text(
-                                          'Customer area: ${item.customerAreaUrl}',
+                                        Wrap(
+                                          children: [
+                                            const Text('Customer area: '),
+                                            ExternalValueText(
+                                              item.customerAreaUrl!,
+                                              kind: ExternalValueKind.website,
+                                            ),
+                                          ],
                                         ),
                                       ],
                                       const SizedBox(height: 8),
@@ -1752,9 +1791,10 @@ class ProcedureDetailScreen extends StatelessWidget {
                                         ...item.contactOptions
                                             .take(3)
                                             .map(
-                                              (option) => Text(
-                                                '- ${option.label}: ${option.value ?? option.url ?? _localizedCatalogText(context, option.description)}',
-                                              ),
+                                              (option) =>
+                                                  _ProviderContactOptionLine(
+                                                    option: option,
+                                                  ),
                                             ),
                                       ],
                                       if (item.forms.isNotEmpty) ...[
@@ -1762,7 +1802,7 @@ class ProcedureDetailScreen extends StatelessWidget {
                                         ...item.forms
                                             .take(2)
                                             .map(
-                                              (form) => Text(
+                                              (form) => AutoLinkText(
                                                 '- Form: ${form.title}${form.url != null ? '\n  ${form.url}' : ''}',
                                               ),
                                             ),
@@ -1840,8 +1880,15 @@ class ProcedureDetailScreen extends StatelessWidget {
                         ...sourceRefs.map(
                           (item) => ListTile(
                             contentPadding: EdgeInsets.zero,
+                            onTap: (item.url ?? '').trim().isEmpty
+                                ? null
+                                : () => ExternalActionService.open(
+                                    context,
+                                    item.url!,
+                                    ExternalValueKind.website,
+                                  ),
                             title: Text(item.title),
-                            subtitle: Text(
+                            subtitle: AutoLinkText(
                               '${_localizedCatalogText(context, item.explanation)}\n${item.url ?? ''}',
                             ),
                             trailing: Text(item.verificationStatus.name),
@@ -2894,17 +2941,43 @@ class _HealthContactCard extends StatelessWidget {
             ],
             if ((contact.address ?? '').isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(contact.address!),
+              ExternalValueText(
+                contact.address!,
+                kind: ExternalValueKind.address,
+              ),
             ],
             if ((contact.phone ?? '').isNotEmpty)
-              Text('Phone: ${contact.phone}'),
+              ExternalValueRow(
+                label: 'Phone',
+                value: contact.phone!,
+                kind: ExternalValueKind.phone,
+              ),
             if (contact.phones.isNotEmpty)
-              Text('Phones: ${contact.phones.join(', ')}'),
+              ...contact.phones.map(
+                (item) => ExternalValueRow(
+                  label: 'Phone',
+                  value: item,
+                  kind: ExternalValueKind.phone,
+                ),
+              ),
             if ((contact.email ?? '').isNotEmpty)
-              Text('Email: ${contact.email}'),
-            if ((contact.pec ?? '').isNotEmpty) Text('PEC: ${contact.pec}'),
+              ExternalValueRow(
+                label: 'Email',
+                value: contact.email!,
+                kind: ExternalValueKind.email,
+              ),
+            if ((contact.pec ?? '').isNotEmpty)
+              ExternalValueRow(
+                label: 'PEC',
+                value: contact.pec!,
+                kind: ExternalValueKind.pec,
+              ),
             if ((contact.cupRegionale ?? '').isNotEmpty)
-              Text('CUP regionale: ${contact.cupRegionale}'),
+              ExternalValueRow(
+                label: 'CUP regionale',
+                value: contact.cupRegionale!,
+                kind: ExternalValueKind.phone,
+              ),
             if ((contact.openingHours ?? '').isNotEmpty)
               Text('Hours: ${contact.openingHours}'),
             if ((contact.accessMode ?? '').isNotEmpty)
@@ -2948,13 +3021,29 @@ class _HousingContactCard extends StatelessWidget {
             Text(contact.name, style: Theme.of(context).textTheme.titleSmall),
             if ((contact.address ?? '').isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(contact.address!),
+              ExternalValueText(
+                contact.address!,
+                kind: ExternalValueKind.address,
+              ),
             ],
             if ((contact.phone ?? '').isNotEmpty)
-              Text('Phone: ${contact.phone}'),
+              ExternalValueRow(
+                label: 'Phone',
+                value: contact.phone!,
+                kind: ExternalValueKind.phone,
+              ),
             if ((contact.email ?? '').isNotEmpty)
-              Text('Email: ${contact.email}'),
-            if ((contact.pec ?? '').isNotEmpty) Text('PEC: ${contact.pec}'),
+              ExternalValueRow(
+                label: 'Email',
+                value: contact.email!,
+                kind: ExternalValueKind.email,
+              ),
+            if ((contact.pec ?? '').isNotEmpty)
+              ExternalValueRow(
+                label: 'PEC',
+                value: contact.pec!,
+                kind: ExternalValueKind.pec,
+              ),
             if ((contact.openingHours ?? '').isNotEmpty)
               Text('Hours: ${contact.openingHours}'),
             if (contact.useFor.isNotEmpty)
@@ -3303,41 +3392,6 @@ class _RichContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lines = <String>[
-      if ((contact.address ?? '').isNotEmpty) contact.address!,
-      if ((contact.postalAddress ?? '').isNotEmpty)
-        'Postal: ${contact.postalAddress!}',
-      if ((contact.physicalOfficeAddress ?? '').isNotEmpty)
-        'Office: ${contact.physicalOfficeAddress!}',
-      if ((contact.phone ?? '').isNotEmpty) 'Phone: ${contact.phone!}',
-      if ((contact.phoneHours ?? '').isNotEmpty)
-        'Phone hours: ${contact.phoneHours!}',
-      if ((contact.phoneSupportLegacy ?? '').isNotEmpty)
-        'Legacy phone: ${contact.phoneSupportLegacy!}',
-      if ((contact.phoneFixedLine ?? '').isNotEmpty)
-        'Phone: ${contact.phoneFixedLine!}',
-      if ((contact.phoneMobileOrAbroad ?? '').isNotEmpty)
-        'Mobile/abroad: ${contact.phoneMobileOrAbroad!}',
-      if ((contact.conciliationFreeNumber ?? '').isNotEmpty)
-        'Free number: ${contact.conciliationFreeNumber!}',
-      if ((contact.conciliationFreeNumberHours ?? '').isNotEmpty)
-        'Free number hours: ${contact.conciliationFreeNumberHours!}',
-      if ((contact.consumerPhone ?? '').isNotEmpty)
-        'Consumer phone: ${contact.consumerPhone!}',
-      if ((contact.email ?? '').isNotEmpty) 'Email: ${contact.email!}',
-      if ((contact.pec ?? '').isNotEmpty) 'PEC: ${contact.pec!}',
-      if ((contact.permessoSupportPec ?? '').isNotEmpty)
-        'Permesso support PEC: ${contact.permessoSupportPec!}',
-      if ((contact.url ?? '').isNotEmpty) 'URL: ${contact.url!}',
-      if ((contact.howToFind ?? '').isNotEmpty) contact.howToFind!,
-      if ((contact.access ?? '').isNotEmpty) 'Access: ${contact.access!}',
-      if ((contact.requiredBeforeUse ?? '').isNotEmpty)
-        'Before use: ${contact.requiredBeforeUse!}',
-      if ((contact.openingHours ?? '').isNotEmpty)
-        'Hours: ${contact.openingHours!}',
-      if ((contact.publicHours ?? '').isNotEmpty)
-        'Public hours: ${contact.publicHours!}',
-    ];
     final crossLinkRoute = _routeForCategoryLink(contact.categoryId);
 
     return Card(
@@ -3358,14 +3412,9 @@ class _RichContactCard extends StatelessWidget {
             ],
             if ((contact.officeCode ?? '').isNotEmpty)
               Text('Office code: ${contact.officeCode!}'),
-            if (lines.isNotEmpty) ...[
+            if (_hasRichContactDetails(contact)) ...[
               const SizedBox(height: 6),
-              ...lines.map(
-                (line) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(line),
-                ),
-              ),
+              ..._buildRichContactDetailWidgets(contact),
             ],
             if (contact.useFor.isNotEmpty)
               _DetailExpansionSection(
@@ -3408,6 +3457,158 @@ class _RichContactCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+bool _hasRichContactDetails(RichCategoryContact contact) {
+  return <String?>[
+    contact.address,
+    contact.postalAddress,
+    contact.physicalOfficeAddress,
+    contact.phone,
+    contact.phoneHours,
+    contact.phoneSupportLegacy,
+    contact.phoneFixedLine,
+    contact.phoneMobileOrAbroad,
+    contact.conciliationFreeNumber,
+    contact.conciliationFreeNumberHours,
+    contact.consumerPhone,
+    contact.email,
+    contact.pec,
+    contact.permessoSupportPec,
+    contact.url,
+    contact.howToFind,
+    contact.access,
+    contact.requiredBeforeUse,
+    contact.openingHours,
+    contact.publicHours,
+  ].any((item) => (item ?? '').trim().isNotEmpty);
+}
+
+List<Widget> _buildRichContactDetailWidgets(RichCategoryContact contact) {
+  final widgets = <Widget>[];
+
+  void addRow(String label, String? value, ExternalValueKind kind) {
+    if ((value ?? '').trim().isEmpty) return;
+    widgets.add(
+      Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: ExternalValueRow(label: label, value: value!.trim(), kind: kind),
+      ),
+    );
+  }
+
+  void addPlain(String value) {
+    if (value.trim().isEmpty) return;
+    widgets.add(
+      Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: AutoLinkText(value),
+      ),
+    );
+  }
+
+  addRow('Address', contact.address, ExternalValueKind.address);
+  addRow('Postal', contact.postalAddress, ExternalValueKind.address);
+  addRow('Office', contact.physicalOfficeAddress, ExternalValueKind.address);
+  addRow('Phone', contact.phone, ExternalValueKind.phone);
+  addPlain('Phone hours: ${contact.phoneHours ?? ''}'.trim());
+  addRow('Legacy phone', contact.phoneSupportLegacy, ExternalValueKind.phone);
+  addRow('Phone', contact.phoneFixedLine, ExternalValueKind.phone);
+  addRow('Mobile/abroad', contact.phoneMobileOrAbroad, ExternalValueKind.phone);
+  addRow(
+    'Free number',
+    contact.conciliationFreeNumber,
+    ExternalValueKind.phone,
+  );
+  addPlain(
+    'Free number hours: ${contact.conciliationFreeNumberHours ?? ''}'.trim(),
+  );
+  addRow('Consumer phone', contact.consumerPhone, ExternalValueKind.phone);
+  addRow('Email', contact.email, ExternalValueKind.email);
+  addRow('PEC', contact.pec, ExternalValueKind.pec);
+  addRow(
+    'Permesso support PEC',
+    contact.permessoSupportPec,
+    ExternalValueKind.pec,
+  );
+  addRow('URL', contact.url, ExternalValueKind.website);
+  addPlain(contact.howToFind ?? '');
+  addPlain('Access: ${contact.access ?? ''}'.trim());
+  addPlain('Before use: ${contact.requiredBeforeUse ?? ''}'.trim());
+  addPlain('Hours: ${contact.openingHours ?? ''}'.trim());
+  addPlain('Public hours: ${contact.publicHours ?? ''}'.trim());
+
+  return widgets;
+}
+
+ExternalValueKind _externalKindForContactType(String? contactType) {
+  switch (contactType?.trim().toLowerCase()) {
+    case 'email':
+      return ExternalValueKind.email;
+    case 'pec':
+      return ExternalValueKind.pec;
+    case 'phone':
+    case 'telefono':
+      return ExternalValueKind.phone;
+    case 'address':
+    case 'indirizzo':
+    case 'office':
+    case 'sportello':
+      return ExternalValueKind.address;
+    case 'portal':
+    case 'website':
+    case 'web':
+    case 'link':
+    case 'officefinder':
+    case 'office_finder':
+      return ExternalValueKind.website;
+    default:
+      return ExternalValueKind.auto;
+  }
+}
+
+ExternalValueKind _externalKindForProviderContactOption(
+  catalog.ProviderContactOption option,
+) {
+  final kind = _externalKindForContactType(option.contactType);
+  if (kind != ExternalValueKind.auto) {
+    return kind;
+  }
+  if ((option.url ?? '').trim().isNotEmpty) {
+    return ExternalValueKind.website;
+  }
+  return ExternalValueKind.auto;
+}
+
+class _ProviderContactOptionLine extends StatelessWidget {
+  const _ProviderContactOptionLine({required this.option});
+
+  final catalog.ProviderContactOption option;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = option.value?.trim().isNotEmpty == true
+        ? option.value!.trim()
+        : option.url?.trim().isNotEmpty == true
+        ? option.url!.trim()
+        : _localizedCatalogText(context, option.description);
+    final kind = _externalKindForProviderContactOption(option);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${option.label}: '),
+          Expanded(
+            child: kind == ExternalValueKind.auto
+                ? AutoLinkText(value)
+                : ExternalValueText(value, kind: kind),
+          ),
+        ],
       ),
     );
   }
@@ -3812,7 +4013,15 @@ Future<void> _showHealthOfficesSheet(
           ...guidance.aslAdministrativeOffices.offices.map(
             (office) => Card(
               child: ListTile(
-                title: Text(office.address),
+                onTap: () => ExternalActionService.open(
+                  context,
+                  office.address,
+                  ExternalValueKind.address,
+                ),
+                title: ExternalValueText(
+                  office.address,
+                  kind: ExternalValueKind.address,
+                ),
                 subtitle: Text(
                   '${office.district} • Circoscrizione ${office.circoscrizione}\n${office.areas.join(', ')}${office.notes != null ? '\n${office.notes}' : ''}',
                 ),
@@ -3975,11 +4184,19 @@ Future<void> _showRichChannelSheet(
           Text('Priority: ${channel.priority}'),
           if ((channel.address ?? '').isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text('Address: ${channel.address}'),
+            ExternalValueRow(
+              label: 'Address',
+              value: channel.address!,
+              kind: ExternalValueKind.address,
+            ),
           ],
           if ((channel.pec ?? '').isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text('PEC: ${channel.pec}'),
+            ExternalValueRow(
+              label: 'PEC',
+              value: channel.pec!,
+              kind: ExternalValueKind.pec,
+            ),
           ],
           if (channel.useWhen.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -4019,7 +4236,11 @@ Future<void> _showRichOutputSheet(
           ],
           if ((output.address ?? '').isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text('Address: ${output.address}'),
+            ExternalValueRow(
+              label: 'Address',
+              value: output.address!,
+              kind: ExternalValueKind.address,
+            ),
           ],
           if (output.sendToOptions.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -4299,11 +4520,20 @@ class _GuidedFormScreenState extends State<GuidedFormScreen> {
                                         Text(selected.name),
                                         if ((selected.websiteUrl ?? '')
                                             .isNotEmpty)
-                                          Text(selected.websiteUrl!),
+                                          ExternalValueText(
+                                            selected.websiteUrl!,
+                                            kind: ExternalValueKind.website,
+                                          ),
                                         if ((selected.customerAreaUrl ?? '')
                                             .isNotEmpty)
-                                          Text(
-                                            'Customer area: ${selected.customerAreaUrl}',
+                                          Wrap(
+                                            children: [
+                                              const Text('Customer area: '),
+                                              ExternalValueText(
+                                                selected.customerAreaUrl!,
+                                                kind: ExternalValueKind.website,
+                                              ),
+                                            ],
                                           ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -4333,9 +4563,10 @@ class _GuidedFormScreenState extends State<GuidedFormScreen> {
                                           ...selected.contactOptions
                                               .take(4)
                                               .map(
-                                                (option) => Text(
-                                                  '- ${option.label}: ${option.value ?? option.url ?? _localizedCatalogText(context, option.description)}',
-                                                ),
+                                                (option) =>
+                                                    _ProviderContactOptionLine(
+                                                      option: option,
+                                                    ),
                                               ),
                                         ],
                                         if (selected.forms.isNotEmpty) ...[
@@ -4350,7 +4581,7 @@ class _GuidedFormScreenState extends State<GuidedFormScreen> {
                                           ...selected.forms
                                               .take(3)
                                               .map(
-                                                (form) => Text(
+                                                (form) => AutoLinkText(
                                                   '- ${form.title}${form.url != null ? '\n  ${form.url}' : ''}',
                                                 ),
                                               ),
@@ -4593,14 +4824,20 @@ class GeneratedPackScreen extends StatelessWidget {
                       if ((pack.selectedContactSnapshot['recipientEmail'] ?? '')
                           .toString()
                           .isNotEmpty)
-                        Text(
-                          'Email: ${pack.selectedContactSnapshot['recipientEmail']}',
+                        ExternalValueRow(
+                          label: 'Email',
+                          value:
+                              '${pack.selectedContactSnapshot['recipientEmail']}',
+                          kind: ExternalValueKind.email,
                         ),
                       if ((pack.selectedContactSnapshot['recipientPec'] ?? '')
                           .toString()
                           .isNotEmpty)
-                        Text(
-                          'PEC: ${pack.selectedContactSnapshot['recipientPec']}',
+                        ExternalValueRow(
+                          label: 'PEC',
+                          value:
+                              '${pack.selectedContactSnapshot['recipientPec']}',
+                          kind: ExternalValueKind.pec,
                         ),
                       const SizedBox(height: 8),
                       Text('Submission method: ${pack.submissionMethod}'),
@@ -4669,7 +4906,7 @@ class GeneratedPackScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: pack.officialLinksToCheck
-                          .map((item) => Text('- $item'))
+                          .map((item) => AutoLinkText('- $item'))
                           .toList(),
                     ),
                   ),
@@ -5134,7 +5371,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Current authenticated email'),
-                  subtitle: Text(scope.authController.user!.email),
+                  subtitle: ExternalValueText(
+                    scope.authController.user!.email,
+                    kind: ExternalValueKind.email,
+                  ),
                 ),
               TextField(
                 controller: _name,
@@ -8089,11 +8329,22 @@ class OfficialLinkCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
+        onTap: ((link.url as String?) ?? '').trim().isEmpty
+            ? null
+            : () => ExternalActionService.open(
+                context,
+                (link.url as String?) ?? '',
+                ExternalValueKind.website,
+              ),
         title: Text(link.title as String),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text((link.url as String?) ?? ''),
+            if (((link.url as String?) ?? '').trim().isNotEmpty)
+              ExternalValueText(
+                (link.url as String?) ?? '',
+                kind: ExternalValueKind.website,
+              ),
             const SizedBox(height: 4),
             Text(warning),
           ],
@@ -8139,7 +8390,11 @@ class OnlineOptionsCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(item.description),
-                    if ((item.url ?? '').isNotEmpty) Text(item.url!),
+                    if ((item.url ?? '').isNotEmpty)
+                      ExternalValueText(
+                        item.url!,
+                        kind: ExternalValueKind.website,
+                      ),
                     const SizedBox(height: 4),
                     Wrap(
                       spacing: 8,
@@ -8195,9 +8450,21 @@ class InPersonOptionsCard extends StatelessWidget {
                   children: [
                     Text(item.description),
                     if ((item.address ?? '').isNotEmpty)
-                      Text('Address: ${item.address}'),
+                      ExternalValueRow(
+                        label: 'Address',
+                        value: item.address!,
+                        kind: ExternalValueKind.address,
+                      ),
                     if ((item.officeFinderLink ?? '').isNotEmpty)
-                      Text('Office finder: ${item.officeFinderLink}'),
+                      Wrap(
+                        children: [
+                          const Text('Office finder: '),
+                          ExternalValueText(
+                            item.officeFinderLink!,
+                            kind: ExternalValueKind.website,
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 4),
                     ...item.documentsToBring.map((doc) => Text('- $doc')),
                     const SizedBox(height: 4),
