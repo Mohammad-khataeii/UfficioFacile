@@ -76,8 +76,6 @@ void main() {
     final categoryIds = <String>{};
     final duplicateCategoryIds = <String>{};
     var subcategoryCount = 0;
-    var premiumOnlySubcategoryCount = 0;
-
     for (final category in categories) {
       totalCategories++;
       final categoryId = '${category['id'] ?? ''}';
@@ -143,9 +141,6 @@ void main() {
                 .whereType<Map>()
                 .map((item) => Map<String, dynamic>.from(item))
                 .toList();
-        if (subcategory['isPremiumOnly'] == true) {
-          premiumOnlySubcategoryCount++;
-        }
         final procedureIds = <String>{};
         for (final procedure in procedures) {
           final procedureId = '${procedure['id'] ?? ''}';

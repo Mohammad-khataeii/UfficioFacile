@@ -9359,7 +9359,7 @@
           "id": "refund_wrong_charge",
           "categoryId": "canone_rai",
           "sortOrder": 60,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Refunds and wrong charges",

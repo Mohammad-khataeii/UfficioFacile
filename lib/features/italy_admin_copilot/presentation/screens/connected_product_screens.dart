@@ -10,6 +10,8 @@ import '../../data/connected_product_data.dart';
 import '../../data/ufficio_city_registry.dart';
 import '../../domain/ufficio_catalog.dart';
 import '../screens/catalog_screens.dart';
+import '../screens/life_admin_screens.dart'
+    show GlobalProblemRequestCard, PrivateConsultancyCard;
 import 'notification_and_monetization_screens.dart';
 
 String _premiumLabel(UfficioPremiumVisibility visibility) {
@@ -693,6 +695,18 @@ class _ConnectedSubcategoryBody extends StatelessWidget {
             ),
           );
         }),
+        const SizedBox(height: 12),
+        GlobalProblemRequestCard(
+          categoryId: category.id,
+          subcategoryId: subcategory.id,
+          sourcePage: subcategory.id,
+        ),
+        const SizedBox(height: 12),
+        PrivateConsultancyCard(
+          categoryId: category.id,
+          subcategoryId: subcategory.id,
+          sourcePage: subcategory.id,
+        ),
       ],
     );
   }
@@ -1802,6 +1816,16 @@ class _ConnectedProfileFolderScreenState
                           ? 'Premium'
                           : 'Free'),
                 subtitle: 'Public procedures stay available in both plans.',
+              ),
+              const SizedBox(height: 12),
+              const GlobalProblemRequestCard(
+                categoryId: 'general',
+                sourcePage: 'profile_folder',
+              ),
+              const SizedBox(height: 12),
+              const PrivateConsultancyCard(
+                categoryId: 'general',
+                sourcePage: 'profile_folder',
               ),
               const SizedBox(height: 12),
               const AppMonetizationEntryTile(),
