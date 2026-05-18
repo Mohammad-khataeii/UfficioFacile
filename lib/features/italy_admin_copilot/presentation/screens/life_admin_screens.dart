@@ -605,22 +605,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                           icon: const Icon(Icons.inventory_outlined),
                           label: Text(context.l10n.t('proof_folder')),
                         ),
-                        OutlinedButton.icon(
-                          onPressed: () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.notifications,
-                          ),
-                          icon: const Icon(Icons.notifications_outlined),
-                          label: const Text('Notifications'),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.promoCodes,
-                          ),
-                          icon: const Icon(Icons.local_offer_outlined),
-                          label: const Text('Promo codes'),
-                        ),
                       ],
                     ),
                   ],
@@ -645,11 +629,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                         .toList(),
                   ),
                 ),
-              const SizedBox(height: 16),
-              const _SectionCard(
-                title: 'Notifications and codes',
-                child: AppMonetizationEntryTile(),
-              ),
               const SizedBox(height: 16),
               const FreeUserBannerAdCard(screen: 'home'),
               const SizedBox(height: 16),
@@ -3804,10 +3783,6 @@ Future<void> _openCatalogProcedureFromSlugs(
     );
     if (!context.mounted) return;
     if (procedure != null) {
-      final access = await scope.entitlementService.canAccessProcedure(
-        procedure,
-      );
-      if (!context.mounted) return;
       final citySlug = UfficioCityRegistry.normalizeSlug(
         scope.profileController.profile.selectedCityPackId,
       );
@@ -3819,11 +3794,13 @@ Future<void> _openCatalogProcedureFromSlugs(
         categorySlug,
         subcategorySlug ?? procedureSlug,
       );
-      final lockedByParent =
-          procedure.isPremiumOnly ||
-          (subcategory?.isPremiumOnly ?? false) ||
-          (category?.isPremiumOnly ?? false);
-      if (!access.allowed || lockedByParent) {
+      final access = await scope.entitlementService.canAccessCatalogPath(
+        category: category,
+        subcategory: subcategory,
+        procedure: procedure,
+      );
+      if (!context.mounted) return;
+      if (!access.allowed) {
         final featureLabel = _localizedCatalogText(
           context,
           procedure.title,
@@ -3835,20 +3812,9 @@ Future<void> _openCatalogProcedureFromSlugs(
               ? procedure.premiumTeaser
               : procedure.shortDescription,
         );
-        final decision = !access.allowed
-            ? access
-            : const EntitlementDecision(
-                allowed: false,
-                isPremiumFeature: true,
-                reason: 'This guide is part of UfficioFacile Premium.',
-                upgradeTitle: 'Premium feature',
-                upgradeMessage:
-                    'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
-                recommendedPlan: UfficioPlan.premiumMonthly,
-              );
         await showPremiumPaywallSheet(
           context,
-          decision: decision,
+          decision: access,
           featureLabel: featureLabel,
           teaser: teaser,
         );

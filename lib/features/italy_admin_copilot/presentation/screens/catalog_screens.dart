@@ -20,44 +20,69 @@ import 'life_admin_screens.dart'
 
 PremiumBadge _subcategoryAccessBadge(
   BuildContext context,
+  UfficioCategory category,
   UfficioSubcategory subcategory,
 ) {
-  final isPremium = subcategory.isPremiumOnly;
+  final isPremium = category.isPremiumOnly || subcategory.isPremiumOnly;
   return PremiumBadge(
     label: context.l10n.t(isPremium ? 'premium_plan_label' : 'free_plan_label'),
     tone: isPremium ? PremiumBadgeTone.premium : PremiumBadgeTone.free,
   );
 }
 
-Future<bool> _isPremiumHierarchyLocked(
+PremiumBadge _procedureAccessBadge(
   BuildContext context, {
-  required String categoryId,
-  required String subcategoryId,
+  required UfficioCategory category,
+  required UfficioSubcategory subcategory,
   required UfficioProcedure procedure,
+}) {
+  final isPremium =
+      category.isPremiumOnly ||
+      subcategory.isPremiumOnly ||
+      procedure.isPremiumOnly;
+  return PremiumBadge(
+    label: context.l10n.t(isPremium ? 'premium_plan_label' : 'free_plan_label'),
+    tone: isPremium ? PremiumBadgeTone.premium : PremiumBadgeTone.free,
+  );
+}
+
+Future<EntitlementDecision> _accessForCatalogPath(
+  BuildContext context, {
+  UfficioCategory? category,
+  UfficioSubcategory? subcategory,
+  UfficioProcedure? procedure,
+  UfficioContentSection? section,
+}) {
+  return AppScope.of(context).entitlementService.canAccessCatalogPath(
+    category: category,
+    subcategory: subcategory,
+    procedure: procedure,
+    section: section,
+  );
+}
+
+Future<void> _showCatalogPremiumPaywall(
+  BuildContext context, {
+  required String featureLabel,
+  String? teaser,
+  EntitlementDecision? decision,
 }) async {
-  final scope = AppScope.of(context);
-  final config = await scope.entitlementService.getConfig();
-  if (!config.paywallEnabled) {
-    return false;
-  }
-  final citySlug = UfficioCityRegistry.normalizeSlug(
-    scope.profileController.profile.selectedCityPackId,
+  await showPremiumPaywallSheet(
+    context,
+    decision:
+        decision ??
+        const EntitlementDecision(
+          allowed: false,
+          isPremiumFeature: true,
+          reason: 'This guide is part of UfficioFacile Premium.',
+          upgradeTitle: 'Premium feature',
+          upgradeMessage:
+              'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+          recommendedPlan: UfficioPlan.premiumMonthly,
+        ),
+    featureLabel: featureLabel,
+    teaser: teaser,
   );
-  final result = await scope.ufficioCatalogRepository.loadCatalogResult(
-    citySlug: citySlug,
-  );
-  final catalog = result.catalog;
-  final category = catalog?.findCategory(categoryId);
-  final subcategory = catalog?.findSubcategory(categoryId, subcategoryId);
-  final hasPremiumPath =
-      procedure.isPremiumOnly ||
-      (subcategory?.isPremiumOnly ?? false) ||
-      (category?.isPremiumOnly ?? false);
-  if (!hasPremiumPath) {
-    return false;
-  }
-  final entitlement = await scope.entitlementService.getCurrentEntitlement();
-  return !entitlement.isProLike;
 }
 
 class CatalogCategoryRouteArgs {
@@ -176,113 +201,134 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
             if (category == null) {
               return const _CatalogNotFoundState();
             }
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _CatalogHeaderCard(
-                  title: ufficioLocalizedValue(
-                    category.title,
-                    context.l10n.languageCode,
-                    fallback: category.id,
-                  ),
-                  description: ufficioLocalizedValue(
-                    category.description,
-                    context.l10n.languageCode,
-                  ),
-                  icon: _iconForCategory(category.icon, category.id),
-                ),
-                const SizedBox(height: 12),
-                ...category.subcategories.map(
-                  (subcategory) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Card(
-                      child: ListTile(
-                        leading: Icon(
-                          _iconForCategory(category.icon, category.id),
-                        ),
-                        title: Text(
-                          ufficioLocalizedValue(
-                            subcategory.title,
-                            context.l10n.languageCode,
-                            fallback: subcategory.id,
-                          ),
-                        ),
-                        subtitle: Text(
-                          ufficioLocalizedValue(
-                            subcategory.description,
-                            context.l10n.languageCode,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _subcategoryAccessBadge(context, subcategory),
-                            const SizedBox(width: 8),
-                            Text('${subcategory.procedures.length}'),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                        onTap: () async {
-                          final featureLabel = ufficioLocalizedValue(
-                            subcategory.title,
-                            context.l10n.languageCode,
-                            fallback: subcategory.id,
-                          );
-
-                          final subcategoryAccess = await AppScope.of(context)
-                              .entitlementService
-                              .canAccessSubcategory(subcategory);
-
-                          if (!context.mounted) return;
-
-                          final mustLock =
-                              subcategory.isPremiumOnly &&
-                              !subcategoryAccess.allowed;
-
-                          if (mustLock) {
-                            await showPremiumPaywallSheet(
-                              context,
-                              decision: const EntitlementDecision(
-                                allowed: false,
-                                isPremiumFeature: true,
-                                reason:
-                                    'This guide is part of UfficioFacile Premium.',
-                                upgradeTitle: 'Premium feature',
-                                upgradeMessage:
-                                    'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
-                                recommendedPlan: UfficioPlan.premiumMonthly,
-                              ),
-                              featureLabel: featureLabel,
-                            );
-                            return;
-                          }
-
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.subcategory,
-                            arguments: CatalogSubcategoryRouteArgs(
-                              categoryId: category.id,
-                              subcategoryId: subcategory.id,
-                            ),
-                          );
-                        },
+            return FutureBuilder<EntitlementDecision>(
+              future: _accessForCatalogPath(context, category: category),
+              builder: (context, accessSnapshot) {
+                if (!accessSnapshot.hasData) {
+                  return const _CatalogLoadingState();
+                }
+                final categoryAccess = accessSnapshot.data!;
+                if (!categoryAccess.allowed) {
+                  return _CatalogLockedState(
+                    decision: categoryAccess,
+                    description: ufficioLocalizedValue(
+                      category.description,
+                      context.l10n.languageCode,
+                    ),
+                  );
+                }
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _CatalogHeaderCard(
+                      title: ufficioLocalizedValue(
+                        category.title,
+                        context.l10n.languageCode,
+                        fallback: category.id,
+                      ),
+                      description: ufficioLocalizedValue(
+                        category.description,
+                        context.l10n.languageCode,
+                      ),
+                      icon: _iconForCategory(category.icon, category.id),
+                      badge: context.l10n.t(
+                        category.isPremiumOnly
+                            ? 'premium_plan_label'
+                            : 'free_plan_label',
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GlobalProblemRequestCard(
-                  categoryId: category.id,
-                  sourcePage: category.id,
-                ),
-                const SizedBox(height: 12),
-                PrivateConsultancyCard(
-                  categoryId: category.id,
-                  sourcePage: category.id,
-                ),
-              ],
+                    const SizedBox(height: 12),
+                    ...category.subcategories.map(
+                      (subcategory) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Card(
+                          child: ListTile(
+                            leading: Icon(
+                              _iconForCategory(category.icon, category.id),
+                            ),
+                            title: Text(
+                              ufficioLocalizedValue(
+                                subcategory.title,
+                                context.l10n.languageCode,
+                                fallback: subcategory.id,
+                              ),
+                            ),
+                            subtitle: Text(
+                              ufficioLocalizedValue(
+                                subcategory.description,
+                                context.l10n.languageCode,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _subcategoryAccessBadge(
+                                  context,
+                                  category,
+                                  subcategory,
+                                ),
+                                const SizedBox(width: 8),
+                                Text('${subcategory.procedures.length}'),
+                                const Icon(Icons.chevron_right),
+                              ],
+                            ),
+                            onTap: () async {
+                              final featureLabel = ufficioLocalizedValue(
+                                subcategory.title,
+                                context.l10n.languageCode,
+                                fallback: subcategory.id,
+                              );
+
+                              final subcategoryAccess =
+                                  await _accessForCatalogPath(
+                                    context,
+                                    category: category,
+                                    subcategory: subcategory,
+                                  );
+
+                              if (!context.mounted) return;
+
+                              if (!subcategoryAccess.allowed) {
+                                await _showCatalogPremiumPaywall(
+                                  context,
+                                  decision: subcategoryAccess,
+                                  featureLabel: featureLabel,
+                                  teaser: ufficioLocalizedValue(
+                                    subcategory.description,
+                                    context.l10n.languageCode,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.subcategory,
+                                arguments: CatalogSubcategoryRouteArgs(
+                                  categoryId: category.id,
+                                  subcategoryId: subcategory.id,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GlobalProblemRequestCard(
+                      categoryId: category.id,
+                      sourcePage: category.id,
+                    ),
+                    const SizedBox(height: 12),
+                    PrivateConsultancyCard(
+                      categoryId: category.id,
+                      sourcePage: category.id,
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -391,9 +437,11 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
               return const _CatalogNotFoundState();
             }
             return FutureBuilder(
-              future: AppScope.of(
+              future: _accessForCatalogPath(
                 context,
-              ).entitlementService.canAccessSubcategory(subcategory),
+                category: category,
+                subcategory: subcategory,
+              ),
               builder: (context, accessSnapshot) {
                 if (!accessSnapshot.hasData) {
                   return const _CatalogLoadingState();
@@ -422,7 +470,7 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                         context.l10n.languageCode,
                       ),
                       badge: context.l10n.t(
-                        subcategory.isPremiumOnly
+                        category.isPremiumOnly || subcategory.isPremiumOnly
                             ? 'premium_plan_label'
                             : 'free_plan_label',
                       ),
@@ -455,7 +503,16 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
-                                  children: [const Icon(Icons.chevron_right)],
+                                  children: [
+                                    _procedureAccessBadge(
+                                      context,
+                                      category: category,
+                                      subcategory: subcategory,
+                                      procedure: procedure,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.chevron_right),
+                                  ],
                                 ),
                                 onTap: () async {
                                   final featureLabel = ufficioLocalizedValue(
@@ -465,9 +522,12 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                   );
 
                                   final procedureAccess =
-                                      await AppScope.of(context)
-                                          .entitlementService
-                                          .canAccessProcedure(procedure);
+                                      await _accessForCatalogPath(
+                                        context,
+                                        category: category,
+                                        subcategory: subcategory,
+                                        procedure: procedure,
+                                      );
 
                                   if (!context.mounted) return;
                                   final languageCode =
@@ -479,31 +539,12 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                     languageCode,
                                   );
 
-                                  final mustLock =
-                                      !procedureAccess.allowed ||
-                                      await _isPremiumHierarchyLocked(
-                                        context,
-                                        categoryId: widget.categoryId,
-                                        subcategoryId: widget.subcategoryId,
-                                        procedure: procedure,
-                                      );
-
                                   if (!context.mounted) return;
 
-                                  if (mustLock) {
-                                    await showPremiumPaywallSheet(
+                                  if (!procedureAccess.allowed) {
+                                    await _showCatalogPremiumPaywall(
                                       context,
-                                      decision: const EntitlementDecision(
-                                        allowed: false,
-                                        isPremiumFeature: true,
-                                        reason:
-                                            'This guide is part of UfficioFacile Premium.',
-                                        upgradeTitle: 'Premium feature',
-                                        upgradeMessage:
-                                            'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
-                                        recommendedPlan:
-                                            UfficioPlan.premiumMonthly,
-                                      ),
+                                      decision: procedureAccess,
                                       featureLabel: featureLabel,
                                       teaser: teaserText,
                                     );
@@ -630,26 +671,33 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
             if (procedure == null) {
               return const _CatalogNotFoundState();
             }
-            return FutureBuilder(
-              future: scope.entitlementService.canAccessProcedure(procedure),
-              builder: (context, accessSnapshot) {
-                if (!accessSnapshot.hasData) {
+            return FutureBuilder<UfficioCatalogLoadResult>(
+              future: scope.ufficioCatalogRepository.loadCatalogResult(
+                citySlug: _resolvedCitySlug,
+              ),
+              builder: (context, catalogSnapshot) {
+                if (!catalogSnapshot.hasData) {
                   return const _CatalogLoadingState();
                 }
-                final access = accessSnapshot.data!;
-                return FutureBuilder<bool>(
-                  future: _isPremiumHierarchyLocked(
+                final catalog = catalogSnapshot.data!.catalog;
+                final category = catalog?.findCategory(widget.categoryId);
+                final subcategory = catalog?.findSubcategory(
+                  widget.categoryId,
+                  widget.subcategoryId,
+                );
+                return FutureBuilder<EntitlementDecision>(
+                  future: _accessForCatalogPath(
                     context,
-                    categoryId: widget.categoryId,
-                    subcategoryId: widget.subcategoryId,
+                    category: category,
+                    subcategory: subcategory,
                     procedure: procedure,
                   ),
-                  builder: (context, premiumSnapshot) {
-                    if (!premiumSnapshot.hasData) {
+                  builder: (context, accessSnapshot) {
+                    if (!accessSnapshot.hasData) {
                       return const _CatalogLoadingState();
                     }
-                    final showLockedPremiumShell =
-                        !access.allowed || premiumSnapshot.data == true;
+                    final access = accessSnapshot.data!;
+                    final showLockedPremiumShell = !access.allowed;
                     return ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
@@ -662,6 +710,13 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                           description: ufficioLocalizedValue(
                             procedure.shortDescription,
                             context.l10n.languageCode,
+                          ),
+                          badge: context.l10n.t(
+                            ((category?.isPremiumOnly ?? false) ||
+                                    (subcategory?.isPremiumOnly ?? false) ||
+                                    procedure.isPremiumOnly)
+                                ? 'premium_plan_label'
+                                : 'free_plan_label',
                           ),
                         ),
                         if (showLockedPremiumShell) ...[
@@ -743,25 +798,38 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                 ...procedure.sections.map(
                                   (section) => Padding(
                                     padding: const EdgeInsets.only(bottom: 12),
-                                    child:
-                                        section.isPremiumOnly && !access.allowed
-                                        ? _CatalogLockedSectionCard(
-                                            title: ufficioLocalizedValue(
-                                              section.title,
-                                              context.l10n.languageCode,
-                                              fallback: section.key,
-                                            ),
-                                          )
-                                        : _CatalogSectionCard(
-                                            title: ufficioLocalizedValue(
-                                              section.title,
-                                              context.l10n.languageCode,
-                                              fallback: section.key,
-                                            ),
-                                            child: _CatalogSectionBody(
-                                              section: section,
-                                            ),
+                                    child: FutureBuilder<EntitlementDecision>(
+                                      future: _accessForCatalogPath(
+                                        context,
+                                        category: category,
+                                        subcategory: subcategory,
+                                        procedure: procedure,
+                                        section: section,
+                                      ),
+                                      builder: (context, sectionSnapshot) {
+                                        if (!sectionSnapshot.hasData) {
+                                          return const _CatalogLoadingCard();
+                                        }
+                                        final sectionAccess =
+                                            sectionSnapshot.data!;
+                                        final title = ufficioLocalizedValue(
+                                          section.title,
+                                          context.l10n.languageCode,
+                                          fallback: section.key,
+                                        );
+                                        if (!sectionAccess.allowed) {
+                                          return _CatalogLockedSectionCard(
+                                            title: title,
+                                          );
+                                        }
+                                        return _CatalogSectionCard(
+                                          title: title,
+                                          child: _CatalogSectionBody(
+                                            section: section,
                                           ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                                 if (procedure.officialLinks.isNotEmpty)
@@ -922,6 +990,20 @@ class _CatalogSectionCard extends StatelessWidget {
             child,
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CatalogLoadingCard extends StatelessWidget {
+  const _CatalogLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Card(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
       ),
     );
   }

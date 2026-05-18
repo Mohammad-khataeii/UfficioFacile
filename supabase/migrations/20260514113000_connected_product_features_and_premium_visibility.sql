@@ -12,7 +12,6 @@ update public.ufficio_cms_categories
 set premium_visibility = coalesce(
   premium_visibility,
   metadata->>'premium_visibility',
-  premium_visibility_rule,
   case
     when is_active = false then 'hidden'
     when is_premium = true then 'premium_only'
@@ -84,6 +83,7 @@ end $$;
 
 create index if not exists idx_ufficio_cms_categories_premium_visibility
   on public.ufficio_cms_categories(premium_visibility);
+
 create index if not exists idx_ufficio_cms_procedures_premium_visibility
   on public.ufficio_cms_procedures(premium_visibility);
 
@@ -164,14 +164,93 @@ alter table if exists public.ufficio_cost_items
   add column if not exists provider_name text,
   add column if not exists official_link text;
 
-update public.ufficio_cost_items
-set amount_min = coalesce(amount_min, amount, 0),
-    amount_max = coalesce(amount_max, amount, 0),
-    frequency = coalesce(frequency, recurrence, 'unknown'),
-    source_type = coalesce(source_type, source, 'manual'),
-    category_slug = coalesce(category_slug, category_id),
-    provider_name = coalesce(provider_name, provider_or_authority)
-where true;
+do $$
+declare
+  has_amount boolean;
+  has_recurrence boolean;
+  has_source boolean;
+  has_category_id boolean;
+  has_provider_or_authority boolean;
+begin
+  if to_regclass('public.ufficio_cost_items') is null then
+    return;
+  end if;
+
+  select exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ufficio_cost_items'
+      and column_name = 'amount'
+  ) into has_amount;
+
+  select exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ufficio_cost_items'
+      and column_name = 'recurrence'
+  ) into has_recurrence;
+
+  select exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ufficio_cost_items'
+      and column_name = 'source'
+  ) into has_source;
+
+  select exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ufficio_cost_items'
+      and column_name = 'category_id'
+  ) into has_category_id;
+
+  select exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ufficio_cost_items'
+      and column_name = 'provider_or_authority'
+  ) into has_provider_or_authority;
+
+  execute format(
+    'update public.ufficio_cost_items set
+      amount_min = %s,
+      amount_max = %s,
+      frequency = %s,
+      source_type = %s,
+      category_slug = %s,
+      provider_name = %s
+    where true',
+    case
+      when has_amount then 'coalesce(amount_min, amount, 0)'
+      else 'coalesce(amount_min, 0)'
+    end,
+    case
+      when has_amount then 'coalesce(amount_max, amount, 0)'
+      else 'coalesce(amount_max, 0)'
+    end,
+    case
+      when has_recurrence then 'coalesce(frequency, recurrence, ''unknown'')'
+      else 'coalesce(frequency, ''unknown'')'
+    end,
+    case
+      when has_source then 'coalesce(source_type, source, ''manual'')'
+      else 'coalesce(source_type, ''manual'')'
+    end,
+    case
+      when has_category_id then 'coalesce(category_slug, category_id)'
+      else 'category_slug'
+    end,
+    case
+      when has_provider_or_authority then 'coalesce(provider_name, provider_or_authority)'
+      else 'provider_name'
+    end
+  );
+end $$;
 
 drop trigger if exists ufficio_situation_scans_updated_at on public.ufficio_situation_scans;
 create trigger ufficio_situation_scans_updated_at
@@ -284,11 +363,15 @@ using (user_id = auth.uid());
 
 create index if not exists idx_ufficio_situation_scans_user_updated
   on public.ufficio_situation_scans(user_id, updated_at desc);
+
 create index if not exists idx_ufficio_checklist_items_user_status
   on public.ufficio_checklist_items(user_id, status, due_date);
+
 create index if not exists idx_ufficio_deadlines_user_due
   on public.ufficio_deadlines(user_id, due_date);
+
 create index if not exists idx_ufficio_saved_procedures_user_created
   on public.ufficio_saved_procedures(user_id, created_at desc);
+
 create index if not exists idx_ufficio_cost_items_user_due
   on public.ufficio_cost_items(user_id, due_date);

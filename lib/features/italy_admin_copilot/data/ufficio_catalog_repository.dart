@@ -407,8 +407,8 @@ class UfficioCatalogRepository {
       id: bundled.id,
       icon: remote?.iconName ?? bundled.icon,
       sortOrder: remote?.sortOrder ?? bundled.sortOrder,
-      isPremiumOnly: remote?.isPremium ?? bundled.isPremiumOnly,
-      hasPremiumContent: hasPremiumContent,
+      isPremiumOnly: bundled.isPremiumOnly || (remote?.isPremium ?? false),
+      hasPremiumContent: bundled.hasPremiumContent || hasPremiumContent,
       title: title,
       description: description,
       subcategories: nextSubcategories,
@@ -456,8 +456,12 @@ class UfficioCatalogRepository {
       id: bundled.id,
       categoryId: bundled.categoryId,
       sortOrder: remoteGroup.first.sortOrder,
-      isPremiumOnly: procedures.every((item) => item.isPremiumOnly),
-      hasPremiumContent: procedures.any((item) => item.hasPremiumContent),
+      isPremiumOnly:
+          bundled.isPremiumOnly ||
+          procedures.every((item) => item.isPremiumOnly),
+      hasPremiumContent:
+          bundled.hasPremiumContent ||
+          procedures.any((item) => item.hasPremiumContent),
       title: bundled.title,
       description: bundled.description,
       procedures: procedures,
@@ -569,7 +573,7 @@ class UfficioCatalogRepository {
       categoryId: remote.categorySlug,
       subcategoryId: subcategoryId,
       sortOrder: remote.sortOrder,
-      isPremiumOnly: remote.isPremium,
+      isPremiumOnly: remote.isPremium || (bundled?.isPremiumOnly ?? false),
       requiresAuth: false,
       title: Map<String, String>.from(
         remote.title.map((key, value) => MapEntry(key, value.toString())),
@@ -760,5 +764,4 @@ class UfficioCatalogRepository {
         .where((item) => item.value.trim().isNotEmpty)
         .toList();
   }
-
 }

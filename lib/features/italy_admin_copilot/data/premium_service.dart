@@ -554,49 +554,73 @@ class UfficioPremiumEntitlementService {
   Future<EntitlementDecision> canAccessCategory(
     UfficioCategory category,
   ) async {
-    return _allowedDecision(
-      reason: category.hasPremiumContent || category.isPremiumOnly
-          ? 'This category contains Premium content.'
-          : 'Free category.',
-      isPremiumFeature: category.hasPremiumContent || category.isPremiumOnly,
-    );
+    return canAccessCatalogPath(category: category);
   }
 
   Future<EntitlementDecision> canAccessSubcategory(
     UfficioSubcategory subcategory,
   ) async {
-    if (!subcategory.isPremiumOnly) {
-      return _allowedDecision(
-        reason: subcategory.hasPremiumContent
-            ? 'Free subcategory with some Premium content inside.'
-            : 'Free subcategory.',
-        isPremiumFeature: subcategory.hasPremiumContent,
-      );
-    }
-    return _catalogLockedDecision();
+    return canAccessCatalogPath(subcategory: subcategory);
   }
 
   Future<EntitlementDecision> canAccessProcedure(
     UfficioProcedure procedure,
   ) async {
-    if (!procedure.isPremiumOnly) {
-      return _allowedDecision(
-        reason: procedure.hasPremiumContent
-            ? 'Free guide with some Premium content inside.'
-            : 'Free guide.',
-        isPremiumFeature: procedure.hasPremiumContent,
-      );
-    }
-    return _catalogLockedDecision();
+    return canAccessCatalogPath(procedure: procedure);
   }
 
   Future<EntitlementDecision> canAccessSection(
     UfficioContentSection section,
   ) async {
-    if (!section.isPremiumOnly) {
+    return canAccessCatalogPath(section: section);
+  }
+
+  Future<EntitlementDecision> canAccessCatalogPath({
+    UfficioCategory? category,
+    UfficioSubcategory? subcategory,
+    UfficioProcedure? procedure,
+    UfficioContentSection? section,
+  }) async {
+    final isLocked =
+        (category?.isPremiumOnly ?? false) ||
+        (subcategory?.isPremiumOnly ?? false) ||
+        (procedure?.isPremiumOnly ?? false) ||
+        (section?.isPremiumOnly ?? false);
+    if (isLocked) {
+      return _catalogLockedDecision();
+    }
+    final hasPremiumContent =
+        (category?.hasPremiumContent ?? false) ||
+        (subcategory?.hasPremiumContent ?? false) ||
+        (procedure?.hasPremiumContent ?? false);
+    if (section != null) {
       return _allowedDecision(reason: 'Free section');
     }
-    return _catalogLockedDecision();
+    if (procedure != null) {
+      return _allowedDecision(
+        reason: hasPremiumContent
+            ? 'Free guide with some Premium content inside.'
+            : 'Free guide.',
+        isPremiumFeature: hasPremiumContent,
+      );
+    }
+    if (subcategory != null) {
+      return _allowedDecision(
+        reason: hasPremiumContent
+            ? 'Free subcategory with some Premium content inside.'
+            : 'Free subcategory.',
+        isPremiumFeature: hasPremiumContent,
+      );
+    }
+    if (category != null) {
+      return _allowedDecision(
+        reason: hasPremiumContent
+            ? 'This category contains Premium content.'
+            : 'Free category.',
+        isPremiumFeature: hasPremiumContent,
+      );
+    }
+    return _allowedDecision(reason: 'Free content');
   }
 
   Future<EntitlementDecision> canUseProcedure(String procedureId) async {

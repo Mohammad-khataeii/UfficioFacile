@@ -23,6 +23,51 @@ String ufficioLocalizedValue(
   String fallback = '',
 }) => resolveLocalizedTextValue(values, languageCode, fallback: fallback);
 
+bool _readPremiumFlag(Map<String, dynamic> json, {bool defaultValue = false}) {
+  for (final key in const [
+    'isPremiumOnly',
+    'is_premium_only',
+    'isPremium',
+    'is_premium',
+    'ispremium',
+    'premium',
+  ]) {
+    final value = json[key];
+    if (value is bool) return value;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      if (normalized == 'true') return true;
+      if (normalized == 'false') return false;
+    }
+    if (value is num) {
+      if (value == 1) return true;
+      if (value == 0) return false;
+    }
+  }
+  return defaultValue;
+}
+
+bool _readBoolFlag(
+  Map<String, dynamic> json,
+  List<String> keys, {
+  bool defaultValue = false,
+}) {
+  for (final key in keys) {
+    final value = json[key];
+    if (value is bool) return value;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      if (normalized == 'true') return true;
+      if (normalized == 'false') return false;
+    }
+    if (value is num) {
+      if (value == 1) return true;
+      if (value == 0) return false;
+    }
+  }
+  return defaultValue;
+}
+
 class UfficioCatalog {
   const UfficioCatalog({
     required this.version,
@@ -158,10 +203,10 @@ class UfficioCategory {
             )
             .toList()
           ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final hasPremiumContent =
-        json['hasPremiumContent'] as bool? ??
-        json['has_premium_content'] as bool? ??
-        subcategories.any((item) => item.hasPremiumContent);
+    final hasPremiumContent = _readBoolFlag(json, const [
+      'hasPremiumContent',
+      'has_premium_content',
+    ], defaultValue: subcategories.any((item) => item.hasPremiumContent));
     return UfficioCategory(
       id: json['id']?.toString() ?? '',
       icon: json['icon']?.toString() ?? 'folder_open',
@@ -169,10 +214,7 @@ class UfficioCategory {
           (json['sortOrder'] as num?)?.toInt() ??
           (json['sort_order'] as num?)?.toInt() ??
           0,
-      isPremiumOnly:
-          json['isPremiumOnly'] as bool? ??
-          json['is_premium_only'] as bool? ??
-          false,
+      isPremiumOnly: _readPremiumFlag(json),
       hasPremiumContent: hasPremiumContent,
       title: ufficioLocalizedTextFromJson(json['title']),
       description: ufficioLocalizedTextFromJson(json['description']),
@@ -246,10 +288,10 @@ class UfficioSubcategory {
             )
             .toList()
           ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final hasPremiumContent =
-        json['hasPremiumContent'] as bool? ??
-        json['has_premium_content'] as bool? ??
-        procedures.any((item) => item.hasPremiumContent);
+    final hasPremiumContent = _readBoolFlag(json, const [
+      'hasPremiumContent',
+      'has_premium_content',
+    ], defaultValue: procedures.any((item) => item.hasPremiumContent));
     return UfficioSubcategory(
       id: json['id']?.toString() ?? '',
       categoryId: categoryId,
@@ -257,10 +299,7 @@ class UfficioSubcategory {
           (json['sortOrder'] as num?)?.toInt() ??
           (json['sort_order'] as num?)?.toInt() ??
           0,
-      isPremiumOnly:
-          json['isPremiumOnly'] as bool? ??
-          json['is_premium_only'] as bool? ??
-          false,
+      isPremiumOnly: _readPremiumFlag(json),
       hasPremiumContent: hasPremiumContent,
       title: ufficioLocalizedTextFromJson(json['title']),
       description: ufficioLocalizedTextFromJson(json['description']),
@@ -336,14 +375,11 @@ class UfficioProcedure {
           (json['sortOrder'] as num?)?.toInt() ??
           (json['sort_order'] as num?)?.toInt() ??
           0,
-      isPremiumOnly:
-          json['isPremiumOnly'] as bool? ??
-          json['is_premium_only'] as bool? ??
-          false,
-      requiresAuth:
-          json['requiresAuth'] as bool? ??
-          json['requires_auth'] as bool? ??
-          false,
+      isPremiumOnly: _readPremiumFlag(json),
+      requiresAuth: _readBoolFlag(json, const [
+        'requiresAuth',
+        'requires_auth',
+      ]),
       title: ufficioLocalizedTextFromJson(json['title']),
       shortDescription: ufficioLocalizedTextFromJson(
         json['shortDescription'] ?? json['short_description'],
@@ -428,10 +464,7 @@ class UfficioContentSection {
       title: ufficioLocalizedTextFromJson(json['title']),
       body: ufficioLocalizedTextFromJson(json['body']),
       items: rawItems,
-      isPremiumOnly:
-          json['isPremiumOnly'] as bool? ??
-          json['is_premium_only'] as bool? ??
-          false,
+      isPremiumOnly: _readPremiumFlag(json),
     );
   }
 

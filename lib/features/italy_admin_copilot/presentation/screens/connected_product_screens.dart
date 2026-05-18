@@ -70,10 +70,6 @@ Future<bool> _canOpenPremiumContent(
     return true;
   }
   final scope = AppScope.of(context);
-  final config = await scope.entitlementService.getConfig();
-  if (!config.paywallEnabled) {
-    return true;
-  }
   final entitlement = await scope.entitlementService.getCurrentEntitlement();
   return entitlement.isProLike;
 }
@@ -574,13 +570,13 @@ class ConnectedSubcategoryScreen extends StatelessWidget {
           if (category == null || subcategory == null) {
             return const Center(child: Text('Subcategory not found.'));
           }
-          if (subcategory.premiumVisibility ==
-              UfficioPremiumVisibility.premiumOnly) {
+          final effectiveVisibility = _effectivePremiumVisibility([
+            category.premiumVisibility,
+            subcategory.premiumVisibility,
+          ]);
+          if (effectiveVisibility == UfficioPremiumVisibility.premiumOnly) {
             return FutureBuilder<bool>(
-              future: _canOpenPremiumContent(
-                context,
-                subcategory.premiumVisibility,
-              ),
+              future: _canOpenPremiumContent(context, effectiveVisibility),
               builder: (context, accessSnapshot) {
                 if (accessSnapshot.connectionState != ConnectionState.done) {
                   return const Center(child: CircularProgressIndicator());
@@ -590,7 +586,7 @@ class ConnectedSubcategoryScreen extends StatelessWidget {
                     title: subcategory.title,
                     description:
                         '${category.title}\n${subcategory.description}',
-                    visibility: subcategory.premiumVisibility,
+                    visibility: effectiveVisibility,
                   );
                 }
                 return _ConnectedSubcategoryBody(
@@ -625,6 +621,10 @@ class _ConnectedSubcategoryBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveVisibility = _effectivePremiumVisibility([
+      category.premiumVisibility,
+      subcategory.premiumVisibility,
+    ]);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -635,7 +635,7 @@ class _ConnectedSubcategoryBody extends StatelessWidget {
             title: Text(subcategory.title),
             subtitle: Text('${category.title}\n${subcategory.description}'),
             isThreeLine: true,
-            trailing: _PremiumPill(visibility: subcategory.premiumVisibility),
+            trailing: _PremiumPill(visibility: effectiveVisibility),
           ),
         ),
         const SizedBox(height: 12),
@@ -825,6 +825,11 @@ class _ConnectedProcedureDetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveVisibility = _effectivePremiumVisibility([
+      category.premiumVisibility,
+      subcategory.premiumVisibility,
+      procedure.premiumVisibility,
+    ]);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -841,7 +846,7 @@ class _ConnectedProcedureDetailBody extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                _PremiumPill(visibility: procedure.premiumVisibility),
+                _PremiumPill(visibility: effectiveVisibility),
                 const SizedBox(height: 8),
                 Text('${category.title} / ${subcategory.title}'),
                 const SizedBox(height: 12),
