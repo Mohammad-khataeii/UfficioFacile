@@ -54,6 +54,14 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('Could not load notifications right now.'),
+                ),
+              );
+            }
             final data = snapshot.data ?? const <dynamic>[];
             final preferences = data.isNotEmpty ? data[0] : null;
             final items = data.length > 1 ? data[1] as List<dynamic> : const [];
@@ -246,6 +254,14 @@ class _PromoCodesScreenState extends State<PromoCodesScreen> {
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('Could not load promo codes right now.'),
+                ),
+              );
             }
             final data = snapshot.data ?? const <dynamic>[];
             final history = data.isNotEmpty

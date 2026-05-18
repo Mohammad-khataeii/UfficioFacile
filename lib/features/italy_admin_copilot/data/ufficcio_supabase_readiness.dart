@@ -1130,107 +1130,124 @@ class SupabaseUfficcioEntitlementRepository
 
   @override
   Future<UfficcioEntitlement> getEntitlement() async {
-    final periodKey = _currentUsagePeriodKey();
-    final results = await Future.wait<dynamic>([
-      _client
-          .from('ufficio_user_entitlements')
-          .select()
-          .eq('user_id', _userId)
-          .maybeSingle(),
-      _client
-          .from('ufficio_usage_counters')
-          .select()
-          .eq('user_id', _userId)
-          .eq('period_key', periodKey)
-          .maybeSingle(),
-    ]);
-    final row = results[0] as Map<String, dynamic>?;
-    final usageRow = results[1] as Map<String, dynamic>?;
-    final isAdmin = await _client.rpc('is_ufficio_admin') == true;
-    if (row == null) {
+    try {
+      final periodKey = _currentUsagePeriodKey();
+      final results = await Future.wait<dynamic>([
+        _client
+            .from('ufficio_user_entitlements')
+            .select()
+            .eq('user_id', _userId)
+            .maybeSingle(),
+        _client
+            .from('ufficio_usage_counters')
+            .select()
+            .eq('user_id', _userId)
+            .eq('period_key', periodKey)
+            .maybeSingle(),
+      ]);
+      final row = results[0] as Map<String, dynamic>?;
+      final usageRow = results[1] as Map<String, dynamic>?;
+      var isAdmin = false;
+      try {
+        isAdmin = await _client.rpc('is_ufficio_admin') == true;
+      } catch (_) {}
+      if (row == null) {
+        return UfficcioEntitlement(
+          userId: _userId,
+          plan: isAdmin ? UfficioPlan.adminGrant : UfficioPlan.free,
+          premiumAccess: isAdmin,
+          currentPeriodStart: DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+          ),
+          generatedPacksUsedThisMonth:
+              (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
+          problemRequestsUsedThisMonth:
+              (usageRow?['problem_requests_used'] as num?)?.toInt() ?? 0,
+          consultancyRequestsUsedThisMonth:
+              (usageRow?['consultancy_requests_used'] as num?)?.toInt() ?? 0,
+          utilityComparisonsUsedThisMonth:
+              (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
+          billAnalysesUsedThisMonth:
+              (usageRow?['bill_analyses_used'] as num?)?.toInt() ?? 0,
+          savedRequestsCount:
+              (usageRow?['saved_requests_used'] as num?)?.toInt() ?? 0,
+          remindersCount: (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
+          documentsCount: (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
+          contactsCount: (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
+          costItemsCount:
+              (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
+          householdMembersCount:
+              (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
+          proofCasesCount:
+              (usageRow?['proof_cases_used'] as num?)?.toInt() ?? 0,
+        );
+      }
+      final planName = row['plan'] as String? ?? 'free';
+      final statusName = row['status'] as String? ?? 'active';
+      final status = _entitlementStatusFromDatabase(statusName);
+      final premiumFlag = (row['premium_access'] as bool? ?? false) || isAdmin;
+      final plan = _planFromDatabase(
+        isAdmin && planName == 'free' ? 'admin_grant' : planName,
+        premiumAccess: premiumFlag,
+      );
+      final currentPeriodEnd = DateTime.tryParse(
+        row['current_period_end'] as String? ?? '',
+      );
+      final revokedAt = DateTime.tryParse(row['revoked_at'] as String? ?? '');
+      final premiumAccess = _resolvePremiumAccess(
+        plan: plan,
+        status: status,
+        premiumAccess: premiumFlag,
+        currentPeriodEnd: currentPeriodEnd,
+        revokedAt: revokedAt,
+      );
+      return UfficcioEntitlement.fromJson({
+        'id': row['id'],
+        'userId': row['user_id'],
+        'plan': plan.name,
+        'status': status.name,
+        'premiumAccess': premiumAccess,
+        'source': row['source'],
+        'currentPeriodStart': row['current_period_start'],
+        'currentPeriodEnd': row['current_period_end'],
+        'trialEnd': row['trial_end'],
+        'cancelledAt': row['cancelled_at'],
+        'revokedAt': row['revoked_at'],
+        'provider': row['provider'] ?? row['source'],
+        'providerCustomerId':
+            row['provider_customer_id'] ?? row['stripe_customer_id'],
+        'providerSubscriptionId':
+            row['provider_subscription_id'] ?? row['stripe_subscription_id'],
+        'createdAt': row['created_at'],
+        'updatedAt': row['updated_at'],
+        'generatedPacksUsedThisMonth':
+            (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
+        'problemRequestsUsedThisMonth':
+            (usageRow?['problem_requests_used'] as num?)?.toInt() ?? 0,
+        'consultancyRequestsUsedThisMonth':
+            (usageRow?['consultancy_requests_used'] as num?)?.toInt() ?? 0,
+        'utilityComparisonsUsedThisMonth':
+            (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
+        'billAnalysesUsedThisMonth':
+            (usageRow?['bill_analyses_used'] as num?)?.toInt() ?? 0,
+        'savedRequestsCount':
+            (usageRow?['saved_requests_used'] as num?)?.toInt() ?? 0,
+        'remindersCount': (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
+        'documentsCount': (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
+        'contactsCount': (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
+        'costItemsCount': (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
+        'householdMembersCount':
+            (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
+        'proofCasesCount':
+            (usageRow?['proof_cases_used'] as num?)?.toInt() ?? 0,
+      });
+    } catch (_) {
       return UfficcioEntitlement(
         userId: _userId,
-        plan: isAdmin ? UfficioPlan.adminGrant : UfficioPlan.free,
-        premiumAccess: isAdmin,
         currentPeriodStart: DateTime(DateTime.now().year, DateTime.now().month),
-        generatedPacksUsedThisMonth:
-            (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
-        problemRequestsUsedThisMonth:
-            (usageRow?['problem_requests_used'] as num?)?.toInt() ?? 0,
-        consultancyRequestsUsedThisMonth:
-            (usageRow?['consultancy_requests_used'] as num?)?.toInt() ?? 0,
-        utilityComparisonsUsedThisMonth:
-            (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
-        billAnalysesUsedThisMonth:
-            (usageRow?['bill_analyses_used'] as num?)?.toInt() ?? 0,
-        savedRequestsCount:
-            (usageRow?['saved_requests_used'] as num?)?.toInt() ?? 0,
-        remindersCount: (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
-        documentsCount: (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
-        contactsCount: (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
-        costItemsCount: (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
-        householdMembersCount:
-            (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
-        proofCasesCount: (usageRow?['proof_cases_used'] as num?)?.toInt() ?? 0,
       );
     }
-    final planName = row['plan'] as String? ?? 'free';
-    final statusName = row['status'] as String? ?? 'active';
-    final status = _entitlementStatusFromDatabase(statusName);
-    final plan = _planFromDatabase(
-      isAdmin && planName == 'free' ? 'admin_grant' : planName,
-      premiumAccess: row['premium_access'] as bool? ?? false || isAdmin,
-    );
-    final currentPeriodEnd = DateTime.tryParse(
-      row['current_period_end'] as String? ?? '',
-    );
-    final revokedAt = DateTime.tryParse(row['revoked_at'] as String? ?? '');
-    final premiumAccess = _resolvePremiumAccess(
-      plan: plan,
-      status: status,
-      premiumAccess: (row['premium_access'] as bool? ?? false) || isAdmin,
-      currentPeriodEnd: currentPeriodEnd,
-      revokedAt: revokedAt,
-    );
-    return UfficcioEntitlement.fromJson({
-      'id': row['id'],
-      'userId': row['user_id'],
-      'plan': plan.name,
-      'status': status.name,
-      'premiumAccess': premiumAccess,
-      'source': row['source'],
-      'currentPeriodStart': row['current_period_start'],
-      'currentPeriodEnd': row['current_period_end'],
-      'trialEnd': row['trial_end'],
-      'cancelledAt': row['cancelled_at'],
-      'revokedAt': row['revoked_at'],
-      'provider': row['provider'] ?? row['source'],
-      'providerCustomerId':
-          row['provider_customer_id'] ?? row['stripe_customer_id'],
-      'providerSubscriptionId':
-          row['provider_subscription_id'] ?? row['stripe_subscription_id'],
-      'createdAt': row['created_at'],
-      'updatedAt': row['updated_at'],
-      'generatedPacksUsedThisMonth':
-          (usageRow?['generated_packs_used'] as num?)?.toInt() ?? 0,
-      'problemRequestsUsedThisMonth':
-          (usageRow?['problem_requests_used'] as num?)?.toInt() ?? 0,
-      'consultancyRequestsUsedThisMonth':
-          (usageRow?['consultancy_requests_used'] as num?)?.toInt() ?? 0,
-      'utilityComparisonsUsedThisMonth':
-          (usageRow?['utility_comparisons_used'] as num?)?.toInt() ?? 0,
-      'billAnalysesUsedThisMonth':
-          (usageRow?['bill_analyses_used'] as num?)?.toInt() ?? 0,
-      'savedRequestsCount':
-          (usageRow?['saved_requests_used'] as num?)?.toInt() ?? 0,
-      'remindersCount': (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
-      'documentsCount': (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
-      'contactsCount': (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
-      'costItemsCount': (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
-      'householdMembersCount':
-          (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
-      'proofCasesCount': (usageRow?['proof_cases_used'] as num?)?.toInt() ?? 0,
-    });
   }
 
   @override
