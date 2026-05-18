@@ -8,12 +8,18 @@ class PromoRedemptionResult {
     required this.message,
     this.plan,
     this.expiresAt,
+    this.promoKind,
+    this.discountPercent,
+    this.targetPlanKeys = const <String>[],
   });
 
   final bool ok;
   final String message;
   final String? plan;
   final DateTime? expiresAt;
+  final String? promoKind;
+  final int? discountPercent;
+  final List<String> targetPlanKeys;
 }
 
 class PromoRedemptionRecord {
@@ -23,6 +29,8 @@ class PromoRedemptionRecord {
     required this.status,
     required this.message,
     required this.createdAt,
+    this.promoKind,
+    this.discountPercent,
   });
 
   final String id;
@@ -30,6 +38,24 @@ class PromoRedemptionRecord {
   final String status;
   final String message;
   final DateTime createdAt;
+  final String? promoKind;
+  final int? discountPercent;
+}
+
+class PromoAccountStatus {
+  const PromoAccountStatus({
+    this.activeCheckoutDiscountPercent,
+    this.activeCheckoutPromoCode,
+    this.activeCheckoutTargetPlanKeys = const <String>[],
+  });
+
+  final int? activeCheckoutDiscountPercent;
+  final String? activeCheckoutPromoCode;
+  final List<String> activeCheckoutTargetPlanKeys;
+
+  bool get hasActiveCheckoutDiscount =>
+      activeCheckoutDiscountPercent != null &&
+      activeCheckoutDiscountPercent! > 0;
 }
 
 class UfficioPromoCodeService {
@@ -73,6 +99,12 @@ class UfficioPromoCodeService {
             (map['ok'] == true ? 'Code applied.' : 'Code was not applied.'),
         plan: map['plan'] as String?,
         expiresAt: DateTime.tryParse(map['expires_at'] as String? ?? ''),
+        promoKind: map['promo_kind'] as String?,
+        discountPercent: (map['discount_percent'] as num?)?.toInt(),
+        targetPlanKeys:
+            (map['target_plan_keys'] as List<dynamic>? ?? const <dynamic>[])
+                .map((item) => item.toString())
+                .toList(),
       );
     } catch (error) {
       return PromoRedemptionResult(
@@ -104,11 +136,49 @@ class UfficioPromoCodeService {
               createdAt:
                   DateTime.tryParse(item['created_at'] as String? ?? '') ??
                   DateTime.now(),
+              promoKind:
+                  (item['metadata'] as Map?)?['promo_kind'] as String? ??
+                  item['promo_kind'] as String?,
+              discountPercent:
+                  ((item['metadata'] as Map?)?['discount_percent'] as num?)
+                      ?.toInt(),
             ),
           )
           .toList();
     } catch (_) {
       return const <PromoRedemptionRecord>[];
+    }
+  }
+
+  Future<PromoAccountStatus> getAccountStatus() async {
+    final client = _client;
+    if (client == null || !_isAuthenticated) {
+      return const PromoAccountStatus();
+    }
+    try {
+      final row = await client
+          .from('ufficio_user_entitlements')
+          .select('metadata')
+          .eq('user_id', client.auth.currentUser!.id)
+          .maybeSingle();
+      final metadata = row == null
+          ? const <String, dynamic>{}
+          : Map<String, dynamic>.from((row['metadata'] as Map?) ?? const {});
+      final activeDiscount = Map<String, dynamic>.from(
+        (metadata['active_checkout_discount'] as Map?) ?? const {},
+      );
+      return PromoAccountStatus(
+        activeCheckoutDiscountPercent:
+            (activeDiscount['discount_percent'] as num?)?.toInt(),
+        activeCheckoutPromoCode: activeDiscount['promo_code'] as String?,
+        activeCheckoutTargetPlanKeys:
+            (activeDiscount['target_plan_keys'] as List<dynamic>? ??
+                    const <dynamic>[])
+                .map((item) => item.toString())
+                .toList(),
+      );
+    } catch (_) {
+      return const PromoAccountStatus();
     }
   }
 }

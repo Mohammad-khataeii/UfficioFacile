@@ -255,6 +255,60 @@ serve(async (request) => {
         { onConflict: "user_id,category_slug,procedure_slug" },
       );
     }
+    const promoCodeId = session.metadata?.promo_code_id?.trim();
+    if (userId && promoCodeId) {
+      const { data: entitlement } = await supabase
+        .from("ufficio_user_entitlements")
+        .select("metadata")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const entitlementMetadata =
+        entitlement?.metadata && typeof entitlement.metadata === "object"
+          ? { ...(entitlement.metadata as Record<string, unknown>) }
+          : {};
+      const activeDiscount =
+        entitlementMetadata.active_checkout_discount &&
+        typeof entitlementMetadata.active_checkout_discount === "object"
+          ? (entitlementMetadata.active_checkout_discount as Record<string, unknown>)
+          : null;
+      if (`${activeDiscount?.promo_code_id ?? ""}` === promoCodeId) {
+        delete entitlementMetadata.active_checkout_discount;
+        await supabase
+          .from("ufficio_user_entitlements")
+          .update({
+            metadata: entitlementMetadata,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId);
+      }
+
+      const { data: redemption } = await supabase
+        .from("ufficio_promo_redemptions")
+        .select("id,metadata")
+        .eq("promo_code_id", promoCodeId)
+        .eq("user_id", userId)
+        .eq("status", "redeemed")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (redemption?.id) {
+        const redemptionMetadata =
+          redemption.metadata && typeof redemption.metadata === "object"
+            ? redemption.metadata
+            : {};
+        await supabase
+          .from("ufficio_promo_redemptions")
+          .update({
+            metadata: {
+              ...redemptionMetadata,
+              applied_checkout_session_id: session.id,
+              applied_at: new Date().toISOString(),
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", redemption.id);
+      }
+    }
     return json({ received: true });
   }
 

@@ -110,6 +110,7 @@ export const promoCodeSchema = z.object({
   code: z.string().trim().min(3).max(64),
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().optional(),
+  promoKind: z.enum(["grant_entitlement", "percent_discount"]),
   planKey: z.enum([
     "premium_monthly",
     "premium_yearly",
@@ -117,9 +118,23 @@ export const promoCodeSchema = z.object({
     "admin_grant",
   ]),
   durationDays: z.coerce.number().int().positive().max(3650),
+  discountPercent: z.coerce.number().int().min(1).max(100).optional(),
+  targetPlanKeys: z
+    .array(z.enum(["premium_monthly", "premium_yearly"]))
+    .min(1)
+    .default(["premium_monthly", "premium_yearly"]),
   maxRedemptions: z.coerce.number().int().positive().optional(),
   startsAt: z.string().trim().optional(),
   endsAt: z.string().trim().optional(),
   assignedUserId: z.string().uuid().optional().or(z.literal("")),
+  successMessage: z.string().trim().optional(),
   isActive: z.boolean().optional().default(true),
+}).superRefine((value, ctx) => {
+  if (value.promoKind === "percent_discount" && value.discountPercent == null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["discountPercent"],
+      message: "Discount percent is required for percentage promos.",
+    });
+  }
 });

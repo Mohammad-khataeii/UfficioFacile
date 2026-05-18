@@ -241,6 +241,7 @@ class _PromoCodesScreenState extends State<PromoCodesScreen> {
           future: Future.wait<dynamic>([
             scope.promoCodeService.listHistory(),
             scope.entitlementService.getCurrentEntitlement(),
+            scope.promoCodeService.getAccountStatus(),
           ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
@@ -251,6 +252,7 @@ class _PromoCodesScreenState extends State<PromoCodesScreen> {
                 ? (data[0] as List<dynamic>)
                 : const <dynamic>[];
             final entitlement = data.length > 1 ? data[1] : null;
+            final accountStatus = data.length > 2 ? data[2] : null;
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -273,6 +275,13 @@ class _PromoCodesScreenState extends State<PromoCodesScreen> {
                               ? 'Sign in to redeem a code.'
                               : 'Current plan: ${_planLabelForUi(entitlement.plan)}',
                         ),
+                        if (accountStatus != null &&
+                            accountStatus.hasActiveCheckoutDiscount) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            '${accountStatus.activeCheckoutDiscountPercent}% off saved for ${accountStatus.activeCheckoutTargetPlanKeys.join(' and ')}. It will be used on your next Premium checkout.',
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         TextField(
                           controller: _controller,
@@ -323,7 +332,17 @@ class _PromoCodesScreenState extends State<PromoCodesScreen> {
                               contentPadding: EdgeInsets.zero,
                               leading: const Icon(Icons.local_offer_outlined),
                               title: Text(entry.code as String),
-                              subtitle: Text(entry.message as String),
+                              subtitle: Text(
+                                [
+                                  entry.message as String,
+                                  if (entry.promoKind == 'percent_discount' &&
+                                      entry.discountPercent != null)
+                                    '${entry.discountPercent}% off',
+                                ].join('\n'),
+                              ),
+                              isThreeLine:
+                                  entry.promoKind == 'percent_discount' &&
+                                  entry.discountPercent != null,
                               trailing: Text(
                                 DateFormat(
                                   'dd MMM',
@@ -354,6 +373,17 @@ class _PromoCodesScreenState extends State<PromoCodesScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(result.message)));
       if (result.ok) {
+        if (result.promoKind == 'grant_entitlement') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result.expiresAt == null
+                    ? 'Premium started successfully.'
+                    : 'Premium started successfully and is active until ${DateFormat('dd MMM').format(result.expiresAt!)}.',
+              ),
+            ),
+          );
+        }
         _controller.clear();
         unawaited(
           AppScope.of(context).notificationService.syncScheduledNotifications(),

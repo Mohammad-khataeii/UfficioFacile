@@ -10,6 +10,20 @@ function formatDate(value: string | null | undefined) {
   return parsed.toLocaleString();
 }
 
+const promoKindOptions = [
+  { value: "grant_entitlement", label: "Grant premium now" },
+  { value: "percent_discount", label: "Percent off next checkout" },
+] as const;
+
+const planOptions = [
+  "premium_monthly",
+  "premium_yearly",
+  "trial",
+  "admin_grant",
+] as const;
+
+const checkoutTargetOptions = ["premium_monthly", "premium_yearly"] as const;
+
 export default async function PromoCodesPage() {
   const admin = await requireAdmin("premium.read");
   const { codes, redemptions, warnings } = await getPromoCodeOverview(
@@ -37,17 +51,32 @@ export default async function PromoCodesPage() {
               <input name="title" required className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
             </div>
             <div>
+              <label className="text-sm font-medium text-slate-700">Promo type</label>
+              <select name="promoKind" defaultValue="grant_entitlement" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
+                {promoKindOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="text-sm font-medium text-slate-700">Plan</label>
               <select name="planKey" defaultValue="premium_monthly" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
-                <option value="premium_monthly">premium_monthly</option>
-                <option value="premium_yearly">premium_yearly</option>
-                <option value="trial">trial</option>
-                <option value="admin_grant">admin_grant</option>
+                {planOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700">Duration days</label>
               <input name="durationDays" type="number" min="1" defaultValue="30" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700">Discount percent</label>
+              <input name="discountPercent" type="number" min="1" max="100" placeholder="30" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700">Max redemptions</label>
@@ -65,6 +94,23 @@ export default async function PromoCodesPage() {
               <label className="text-sm font-medium text-slate-700">Ends at</label>
               <input name="endsAt" type="datetime-local" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
             </div>
+            <div className="md:col-span-2 xl:col-span-3">
+              <span className="text-sm font-medium text-slate-700">Checkout targets</span>
+              <div className="mt-2 flex flex-wrap gap-4">
+                {checkoutTargetOptions.map((option) => (
+                  <label key={option} className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      name="targetPlanKeys"
+                      type="checkbox"
+                      value={option}
+                      defaultChecked
+                      className="h-4 w-4"
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
+            </div>
             <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
               <input name="isActive" type="checkbox" defaultChecked className="h-4 w-4" />
               Active
@@ -72,6 +118,15 @@ export default async function PromoCodesPage() {
             <div className="md:col-span-2 xl:col-span-3">
               <label className="text-sm font-medium text-slate-700">Description</label>
               <textarea name="description" rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
+            </div>
+            <div className="md:col-span-2 xl:col-span-3">
+              <label className="text-sm font-medium text-slate-700">Success message</label>
+              <textarea
+                name="successMessage"
+                rows={2}
+                placeholder="Example: 30% off saved. It will be used on your next Premium checkout."
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+              />
             </div>
             <div className="md:col-span-2 xl:col-span-3">
               <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
@@ -97,17 +152,39 @@ export default async function PromoCodesPage() {
                     <input name="title" defaultValue={code.title} required className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
                   </div>
                   <div>
+                    <label className="text-sm font-medium text-slate-700">Promo type</label>
+                    <select name="promoKind" defaultValue={code.promo_kind ?? "grant_entitlement"} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
+                      {promoKindOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                     <label className="text-sm font-medium text-slate-700">Plan</label>
                     <select name="planKey" defaultValue={code.plan_key ?? "premium_monthly"} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
-                      <option value="premium_monthly">premium_monthly</option>
-                      <option value="premium_yearly">premium_yearly</option>
-                      <option value="trial">trial</option>
-                      <option value="admin_grant">admin_grant</option>
+                      {planOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700">Duration days</label>
                     <input name="durationDays" type="number" min="1" defaultValue={String(code.duration_days ?? 30)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">Discount percent</label>
+                    <input
+                      name="discountPercent"
+                      type="number"
+                      min="1"
+                      max="100"
+                      defaultValue={code.discount_percent ?? ""}
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700">Max redemptions</label>
@@ -126,8 +203,39 @@ export default async function PromoCodesPage() {
                     <input name="endsAt" type="datetime-local" defaultValue={code.ends_at ? new Date(code.ends_at).toISOString().slice(0, 16) : ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
                   </div>
                 </div>
+                <div className="mt-4">
+                  <span className="text-sm font-medium text-slate-700">Checkout targets</span>
+                  <div className="mt-2 flex flex-wrap gap-4">
+                    {checkoutTargetOptions.map((option) => {
+                      const selected = Array.isArray(code.target_plan_keys)
+                        ? code.target_plan_keys.includes(option)
+                        : true;
+                      return (
+                        <label key={option} className="flex items-center gap-2 text-sm text-slate-700">
+                          <input
+                            name="targetPlanKeys"
+                            type="checkbox"
+                            value={option}
+                            defaultChecked={selected}
+                            className="h-4 w-4"
+                          />
+                          {option}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto_auto]">
-                  <textarea name="description" rows={2} defaultValue={code.description ?? ""} className="rounded-xl border border-slate-200 px-3 py-2" />
+                  <div className="space-y-3">
+                    <textarea name="description" rows={2} defaultValue={code.description ?? ""} className="w-full rounded-xl border border-slate-200 px-3 py-2" />
+                    <textarea
+                      name="successMessage"
+                      rows={2}
+                      defaultValue={code.success_message ?? ""}
+                      placeholder="Success message shown in the app"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2"
+                    />
+                  </div>
                   <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
                     <input name="isActive" type="checkbox" defaultChecked={code.is_active !== false} className="h-4 w-4" />
                     Active
@@ -137,6 +245,8 @@ export default async function PromoCodesPage() {
                   </button>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
+                  <span>Type: {code.promo_kind ?? "grant_entitlement"}</span>
+                  {code.discount_percent ? <span>Discount: {code.discount_percent}%</span> : null}
                   <span>Redeemed: {code.redeemed_count ?? 0}</span>
                   <span>Updated: {formatDate(code.updated_at)}</span>
                 </div>

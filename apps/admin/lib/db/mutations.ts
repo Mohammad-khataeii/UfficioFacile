@@ -1000,8 +1000,17 @@ export async function upsertPromoCode(formData: FormData) {
     code: String(formData.get("code") ?? ""),
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
+    promoKind: String(formData.get("promoKind") ?? "grant_entitlement"),
     planKey: String(formData.get("planKey") ?? "premium_monthly"),
     durationDays: formData.get("durationDays"),
+    discountPercent:
+      String(formData.get("discountPercent") ?? "").trim() === ""
+        ? undefined
+        : formData.get("discountPercent"),
+    targetPlanKeys: formData
+      .getAll("targetPlanKeys")
+      .map((item) => String(item))
+      .filter(Boolean),
     maxRedemptions:
       String(formData.get("maxRedemptions") ?? "").trim() === ""
         ? undefined
@@ -1009,6 +1018,7 @@ export async function upsertPromoCode(formData: FormData) {
     startsAt: String(formData.get("startsAt") ?? ""),
     endsAt: String(formData.get("endsAt") ?? ""),
     assignedUserId: String(formData.get("assignedUserId") ?? ""),
+    successMessage: String(formData.get("successMessage") ?? ""),
     isActive: formData.get("isActive") === "on",
   });
 
@@ -1017,12 +1027,16 @@ export async function upsertPromoCode(formData: FormData) {
     code: parsed.code.toUpperCase(),
     title: parsed.title,
     description: parsed.description?.trim() || null,
+    promo_kind: parsed.promoKind,
     plan_key: parsed.planKey,
     duration_days: parsed.durationDays,
+    discount_percent: parsed.discountPercent ?? null,
+    target_plan_keys: parsed.targetPlanKeys,
     max_redemptions: parsed.maxRedemptions ?? null,
     starts_at: parseOptionalDate(parsed.startsAt),
     ends_at: parseOptionalDate(parsed.endsAt),
     assigned_user_id: parsed.assignedUserId || null,
+    success_message: parsed.successMessage?.trim() || null,
     is_active: parsed.isActive,
   };
 

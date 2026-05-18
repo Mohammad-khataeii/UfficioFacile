@@ -8730,6 +8730,7 @@ class PlanScreen extends StatelessWidget {
           entitlementService.getCurrentEntitlement(),
           entitlementService.getUsageSummary(),
           entitlementService.getPlanProducts(),
+          AppScope.of(context).promoCodeService.getAccountStatus(),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -8766,6 +8767,7 @@ class PlanScreen extends StatelessWidget {
                   .where(_isPubliclyVisiblePlan)
                   .toList()
                 ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+          final promoAccountStatus = values[3] as dynamic;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -8782,6 +8784,12 @@ class PlanScreen extends StatelessWidget {
                   currentPlanLabel,
                 ].join(': '),
               ),
+              if (promoAccountStatus.hasActiveCheckoutDiscount) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '${promoAccountStatus.activeCheckoutDiscountPercent}% off is saved on this account for ${promoAccountStatus.activeCheckoutTargetPlanKeys.join(' and ')}.',
+                ),
+              ],
               const SizedBox(height: 16),
               Wrap(
                 spacing: 12,

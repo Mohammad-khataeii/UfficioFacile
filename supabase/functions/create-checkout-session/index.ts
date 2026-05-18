@@ -8,6 +8,15 @@ type CheckoutRequest = {
   procedure_slug?: string;
 };
 
+type ActiveCheckoutDiscount = {
+  promo_code?: string;
+  promo_code_id?: string;
+  promo_kind?: string;
+  discount_percent?: number;
+  target_plan_keys?: string[];
+  redeemed_at?: string;
+};
+
 const allowedPlanProductKeys = new Set(["premium_monthly", "premium_yearly"]);
 
 const corsHeaders = {
@@ -25,6 +34,37 @@ function json(body: unknown, status = 200) {
       ...corsHeaders,
     },
   });
+}
+
+function readActiveCheckoutDiscount(raw: unknown): ActiveCheckoutDiscount | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return null;
+  }
+  const record = raw as Record<string, unknown>;
+  const discountPercent =
+    typeof record.discount_percent === "number"
+      ? Math.trunc(record.discount_percent)
+      : null;
+  const targetPlanKeys = Array.isArray(record.target_plan_keys)
+    ? record.target_plan_keys
+        .map((item) => `${item}`.trim())
+        .filter((item) => item.length > 0)
+    : [];
+  if (!discountPercent || discountPercent < 1 || discountPercent > 100) {
+    return null;
+  }
+  if (targetPlanKeys.length === 0) {
+    return null;
+  }
+  return {
+    promo_code: typeof record.promo_code === "string" ? record.promo_code : undefined,
+    promo_code_id:
+      typeof record.promo_code_id === "string" ? record.promo_code_id : undefined,
+    promo_kind: typeof record.promo_kind === "string" ? record.promo_kind : undefined,
+    discount_percent: discountPercent,
+    target_plan_keys: targetPlanKeys,
+    redeemed_at: typeof record.redeemed_at === "string" ? record.redeemed_at : undefined,
+  };
 }
 
 serve(async (request) => {
@@ -100,15 +140,32 @@ serve(async (request) => {
 
   const { data: entitlement } = await supabase
     .from("ufficio_user_entitlements")
-    .select("stripe_customer_id")
+    .select("stripe_customer_id,metadata")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  const entitlementMetadata =
+    entitlement?.metadata && typeof entitlement.metadata === "object"
+      ? entitlement.metadata
+      : {};
+  const activeCheckoutDiscount = readActiveCheckoutDiscount(
+    (entitlementMetadata as Record<string, unknown>).active_checkout_discount,
+  );
+  const applicableDiscount =
+    activeCheckoutDiscount &&
+    activeCheckoutDiscount.target_plan_keys?.includes(productKey)
+      ? activeCheckoutDiscount
+      : null;
 
   const metadata = {
     user_id: user.id,
     product_key: productKey,
     category_slug: body.category_slug ?? "",
     procedure_slug: body.procedure_slug ?? "",
+    promo_code: applicableDiscount?.promo_code ?? "",
+    promo_code_id: applicableDiscount?.promo_code_id ?? "",
+    promo_redemption_kind: applicableDiscount?.promo_kind ?? "",
+    promo_discount_percent: `${applicableDiscount?.discount_percent ?? ""}`,
   };
 
   const lineItems = stripePriceId
@@ -135,6 +192,29 @@ serve(async (request) => {
         },
       ];
 
+  const discounts =
+    applicableDiscount && applicableDiscount.discount_percent
+      ? [
+          {
+            coupon: (
+              await stripe.coupons.create({
+                percent_off: applicableDiscount.discount_percent,
+                duration: "once",
+                name: applicableDiscount.promo_code
+                  ? `Promo ${applicableDiscount.promo_code}`
+                  : "Ufficio promo",
+                metadata: {
+                  user_id: user.id,
+                  product_key: productKey,
+                  promo_code: applicableDiscount.promo_code ?? "",
+                  promo_code_id: applicableDiscount.promo_code_id ?? "",
+                },
+              })
+            ).id,
+          },
+        ]
+      : undefined;
+
   const session = await stripe.checkout.sessions.create({
     mode,
     success_url: `${appBaseUrl}/?checkout=success`,
@@ -147,11 +227,12 @@ serve(async (request) => {
     client_reference_id: user.id,
     line_items: lineItems,
     metadata,
+    discounts,
     subscription_data:
       mode === "subscription"
         ? {
-            metadata,
-          }
+          metadata,
+        }
         : undefined,
     payment_intent_data:
       mode === "payment"
@@ -177,6 +258,8 @@ serve(async (request) => {
       mode,
       checkout_url: session.url,
       stripe_price_id: stripePriceId || null,
+      applied_discount_percent: applicableDiscount?.discount_percent ?? null,
+      applied_promo_code: applicableDiscount?.promo_code ?? null,
     },
     processed_at: new Date().toISOString(),
   });
