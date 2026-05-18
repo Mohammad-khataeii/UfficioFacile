@@ -4,6 +4,15 @@ import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
 
+String buildEmailConfirmationRedirectUri() {
+  final scheme = Uri.base.scheme;
+  final origin = scheme == 'http' || scheme == 'https' ? Uri.base.origin : '';
+  if (origin.isNotEmpty) {
+    return '$origin${AppRoutes.confirmEmail}';
+  }
+  return 'https://ufficio-facile.vercel.app${AppRoutes.confirmEmail}';
+}
+
 String buildPasswordResetRedirectUri() {
   final scheme = Uri.base.scheme;
   final origin = scheme == 'http' || scheme == 'https' ? Uri.base.origin : '';
@@ -11,6 +20,74 @@ String buildPasswordResetRedirectUri() {
     return '$origin${AppRoutes.resetPassword}';
   }
   return 'https://ufficio-facile.vercel.app${AppRoutes.resetPassword}';
+}
+
+class EmailConfirmationSuccessScreen extends StatefulWidget {
+  const EmailConfirmationSuccessScreen({super.key});
+
+  @override
+  State<EmailConfirmationSuccessScreen> createState() =>
+      _EmailConfirmationSuccessScreenState();
+}
+
+class _EmailConfirmationSuccessScreenState
+    extends State<EmailConfirmationSuccessScreen> {
+  bool _signOutRequested = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_signOutRequested) return;
+    _signOutRequested = true;
+    final scope = AppScope.of(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await scope.authController.signOut();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(context.l10n.t('auth_email_confirmed_title'))),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Card(
+              margin: const EdgeInsets.all(24),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.t('auth_email_confirmed_title'),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      context.l10n.t('auth_email_confirmed_body'),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.auth,
+                        (route) => false,
+                      ),
+                      child: Text(context.l10n.t('auth_login')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ForgotPasswordScreen extends StatefulWidget {

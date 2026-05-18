@@ -17,7 +17,11 @@ class AuthFailure implements Exception {
 abstract class AuthRepository {
   AuthUser? get currentUser;
   Stream<AuthUser?> authStateChanges();
-  Future<AuthUser> signUp({required String email, required String password});
+  Future<AuthUser> signUp({
+    required String email,
+    required String password,
+    String? emailRedirectTo,
+  });
   Future<AuthUser> signIn({required String email, required String password});
   Future<void> signOut();
   Future<void> sendPasswordResetEmail(String email, {String? redirectTo});
@@ -75,8 +79,11 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthUser> signUp({required String email, required String password}) =>
-      signIn(email: email, password: password);
+  Future<AuthUser> signUp({
+    required String email,
+    required String password,
+    String? emailRedirectTo,
+  }) => signIn(email: email, password: password);
 
   @override
   Future<void> signOut() async {

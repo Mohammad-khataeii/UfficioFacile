@@ -18,25 +18,35 @@ export async function getAdminCatalogTreeNormalized(
 ): Promise<AdminCatalogTree> {
   const tree = await getAdminContentTree(supabase, options);
   const procedures = tree.procedures.map(normalizeProcedure);
+  const normalizedCategories = tree.categories.map((rawCategory) =>
+    normalizeCategory(rawCategory),
+  );
 
-  const categories = tree.categories.map((rawCategory) => {
-    const categoryProcedures = procedures.filter(
-      (procedure) => procedure.categorySlug === rawCategory.slug,
-    );
-    const derived = buildAdminSubcategories(
-      normalizeCategory(rawCategory),
-      categoryProcedures,
-    );
-    return normalizeCategory(rawCategory, {
-      procedureCount: categoryProcedures.length,
-      subcategoryCount: derived.subcategories.length,
+  const categories = tree.categories
+    .filter((rawCategory) => !rawCategory.parent_slug)
+    .map((rawCategory) => {
+      const categoryProcedures = procedures.filter(
+        (procedure) => procedure.categorySlug === rawCategory.slug,
+      );
+      const explicitSubcategories = normalizedCategories.filter(
+        (item) => item.raw.parent_slug === rawCategory.slug,
+      );
+      const derived = buildAdminSubcategories(
+        normalizeCategory(rawCategory),
+        categoryProcedures,
+        explicitSubcategories,
+      );
+      return normalizeCategory(rawCategory, {
+        procedureCount: categoryProcedures.length,
+        subcategoryCount: derived.subcategories.length,
+      });
     });
-  });
 
   const subcategories = categories.flatMap((category) =>
     buildAdminSubcategories(
       category,
       procedures.filter((procedure) => procedure.categorySlug === category.slug),
+      normalizedCategories.filter((item) => item.raw.parent_slug === category.slug),
     ).subcategories,
   );
 
@@ -63,6 +73,10 @@ export async function getAdminCategoryDetailNormalized(
     slug,
     options,
   )).map(normalizeProcedure);
+  const allCategories = await getAdminCategories(supabase, options);
+  const explicitSubcategories = allCategories
+    .filter((item) => item.parent_slug === slug)
+    .map((item) => normalizeCategory(item));
   const category = normalizeCategory(rawCategory, {
     procedureCount: procedures.length,
     subcategoryCount: new Set(
@@ -72,6 +86,7 @@ export async function getAdminCategoryDetailNormalized(
   const { subcategories, uncategorizedProcedures } = buildAdminSubcategories(
     category,
     procedures,
+    explicitSubcategories,
   );
 
   return {

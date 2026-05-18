@@ -42,6 +42,7 @@ export type AdminContentSource = "supabase" | "bundled";
 
 export type AdminCategoryRecord = {
   slug: string;
+  parent_slug?: string | null;
   internal_label: string | null;
   title: LocalizedText;
   subtitle?: LocalizedText;
@@ -51,6 +52,8 @@ export type AdminCategoryRecord = {
   sort_order: number;
   is_active: boolean;
   is_premium: boolean;
+  premium_visibility?: string | null;
+  required_plan?: string | null;
   verification_status: string;
   tags?: string[];
   synonyms?: string[];
@@ -88,6 +91,8 @@ export type AdminProcedureRecord = {
   sort_order: number;
   is_active: boolean;
   is_premium: boolean;
+  premium_visibility?: string | null;
+  required_plan?: string | null;
   verification_status: string;
   tags?: string[];
   synonyms?: string[];

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
+import 'password_screens.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -21,6 +24,36 @@ class _AuthScreenState extends State<AuthScreen>
   final _passwordController = TextEditingController();
   final _signupEmailController = TextEditingController();
   final _signupPasswordController = TextEditingController();
+  bool _rememberMe = true;
+  bool _loginPasswordVisible = false;
+  bool _signupPasswordVisible = false;
+
+  static const _rememberedEmailKey = 'ufficiofacile_auth_remembered_email_v1';
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreRememberedEmail();
+  }
+
+  Future<void> _restoreRememberedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rememberedEmail = prefs.getString(_rememberedEmailKey) ?? '';
+    if (!mounted || rememberedEmail.isEmpty) return;
+    setState(() {
+      _emailController.text = rememberedEmail;
+      _rememberMe = true;
+    });
+  }
+
+  Future<void> _persistRememberedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString(_rememberedEmailKey, _emailController.text.trim());
+    } else {
+      await prefs.remove(_rememberedEmailKey);
+    }
+  }
 
   @override
   void dispose() {
@@ -67,15 +100,30 @@ class _AuthScreenState extends State<AuthScreen>
                               subtitle: context.l10n.t('auth_login_subtitle'),
                               emailController: _emailController,
                               passwordController: _passwordController,
+                              passwordVisible: _loginPasswordVisible,
+                              onTogglePasswordVisibility: () {
+                                setState(
+                                  () => _loginPasswordVisible =
+                                      !_loginPasswordVisible,
+                                );
+                              },
                               isLoading: controller.isLoading,
                               errorMessage: controller.errorMessage,
                               primaryLabel: context.l10n.t('auth_login'),
+                              rememberMe: _rememberMe,
+                              onRememberMeChanged: (value) {
+                                setState(() => _rememberMe = value);
+                              },
                               onPrimary: () async {
                                 final ok = await controller.signIn(
                                   email: _emailController.text,
                                   password: _passwordController.text,
                                 );
                                 if (ok && context.mounted) {
+                                  TextInput.finishAutofillContext(
+                                    shouldSave: true,
+                                  );
+                                  await _persistRememberedEmail();
                                   await scope.profileController.load();
                                   await scope.entitlementService
                                       .getCurrentEntitlement();
@@ -102,6 +150,13 @@ class _AuthScreenState extends State<AuthScreen>
                               subtitle: context.l10n.t('auth_signup_subtitle'),
                               emailController: _signupEmailController,
                               passwordController: _signupPasswordController,
+                              passwordVisible: _signupPasswordVisible,
+                              onTogglePasswordVisibility: () {
+                                setState(
+                                  () => _signupPasswordVisible =
+                                      !_signupPasswordVisible,
+                                );
+                              },
                               isLoading: controller.isLoading,
                               errorMessage: controller.errorMessage,
                               primaryLabel: context.l10n.t(
@@ -111,9 +166,14 @@ class _AuthScreenState extends State<AuthScreen>
                                 final ok = await controller.signUp(
                                   email: _signupEmailController.text,
                                   password: _signupPasswordController.text,
+                                  emailRedirectTo:
+                                      buildEmailConfirmationRedirectUri(),
                                 );
                                 if (ok && context.mounted) {
                                   if (controller.isAuthenticated) {
+                                    TextInput.finishAutofillContext(
+                                      shouldSave: true,
+                                    );
                                     await scope.profileController.load();
                                     await scope.entitlementService
                                         .getCurrentEntitlement();
@@ -159,10 +219,14 @@ class _AuthFormCard extends StatelessWidget {
     required this.subtitle,
     required this.emailController,
     required this.passwordController,
+    required this.passwordVisible,
+    required this.onTogglePasswordVisibility,
     required this.isLoading,
     required this.errorMessage,
     required this.primaryLabel,
     required this.onPrimary,
+    this.rememberMe,
+    this.onRememberMeChanged,
     this.onSecondary,
     this.secondaryLabel,
   });
@@ -171,10 +235,14 @@ class _AuthFormCard extends StatelessWidget {
   final String subtitle;
   final TextEditingController emailController;
   final TextEditingController passwordController;
+  final bool passwordVisible;
+  final VoidCallback onTogglePasswordVisibility;
   final bool isLoading;
   final String? errorMessage;
   final String primaryLabel;
   final Future<void> Function() onPrimary;
+  final bool? rememberMe;
+  final ValueChanged<bool>? onRememberMeChanged;
   final Future<void> Function()? onSecondary;
   final String? secondaryLabel;
 
@@ -189,21 +257,53 @@ class _AuthFormCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(subtitle),
             const SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: context.l10n.t('auth_email'),
+            AutofillGroup(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [
+                      AutofillHints.username,
+                      AutofillHints.email,
+                    ],
+                    decoration: InputDecoration(
+                      labelText: context.l10n.t('auth_email'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: !passwordVisible,
+                    autofillHints: const [AutofillHints.password],
+                    decoration: InputDecoration(
+                      labelText: context.l10n.t('auth_password'),
+                      suffixIcon: IconButton(
+                        onPressed: onTogglePasswordVisibility,
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: context.l10n.t('auth_password'),
+            if (rememberMe != null && onRememberMeChanged != null) ...[
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                value: rememberMe,
+                onChanged: isLoading
+                    ? null
+                    : (value) => onRememberMeChanged!(value ?? false),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text(context.l10n.t('auth_remember_me')),
+                subtitle: Text(context.l10n.t('auth_remember_me_hint')),
               ),
-            ),
+            ],
             if (errorMessage != null && errorMessage!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(

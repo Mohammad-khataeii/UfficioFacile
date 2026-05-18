@@ -64,7 +64,11 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<bool> signUp({required String email, required String password}) async {
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    String? emailRedirectTo,
+  }) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -73,6 +77,7 @@ class AuthController extends ChangeNotifier {
       final createdUser = await _repository.signUp(
         email: email,
         password: password,
+        emailRedirectTo: emailRedirectTo,
       );
       final sessionUser = _repository.currentUser;
       if (!createdUser.isAuthenticated || sessionUser == null) {

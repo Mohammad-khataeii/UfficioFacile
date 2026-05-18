@@ -16,6 +16,7 @@ import '../features/auth/presentation/password_screens.dart';
 import '../features/italy_admin_copilot/application/italy_admin_copilot_controller.dart';
 import '../features/italy_admin_copilot/domain/life_admin_mode.dart';
 import '../features/italy_admin_copilot/presentation/screens/catalog_screens.dart';
+import '../features/italy_admin_copilot/presentation/screens/connected_product_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_phase5_screens.dart';
@@ -120,6 +121,10 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => const AuthScreen(),
                     );
+                  case AppRoutes.confirmEmail:
+                    return MaterialPageRoute(
+                      builder: (_) => const EmailConfirmationSuccessScreen(),
+                    );
                   case AppRoutes.forgotPassword:
                     return MaterialPageRoute(
                       builder: (_) => const ForgotPasswordScreen(),
@@ -134,11 +139,11 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.start:
                     return MaterialPageRoute(
-                      builder: (_) => const ProblemIntakeScreen(),
+                      builder: (_) => const ConnectedProblemIntakeScreen(),
                     );
                   case AppRoutes.scan:
                     return MaterialPageRoute(
-                      builder: (_) => const ScanMySituationScreen(),
+                      builder: (_) => const ConnectedSituationScanScreen(),
                     );
                   case AppRoutes.cityPacks:
                     return MaterialPageRoute(
@@ -156,7 +161,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.checklist:
                     return MaterialPageRoute(
-                      builder: (_) => const ItalyLifeChecklistScreen(),
+                      builder: (_) => const ConnectedChecklistScreen(),
                     );
                   case AppRoutes.attachmentsHelper:
                     return MaterialPageRoute(
@@ -172,7 +177,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.deadlines:
                     return MaterialPageRoute(
-                      builder: (_) => const DeadlineWatchScreen(),
+                      builder: (_) => const ConnectedDeadlinesScreen(),
                     );
                   case AppRoutes.templates:
                     return MaterialPageRoute(
@@ -180,13 +185,16 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.proofFolder:
                     return MaterialPageRoute(
-                      builder: (_) => const ProofFolderScreen(),
+                      builder: (_) => const AuthGate(
+                        featureTitle: 'your profile folder',
+                        child: ConnectedProfileFolderScreen(),
+                      ),
                     );
                   case AppRoutes.costs:
                     return MaterialPageRoute(
                       builder: (_) => const AuthGate(
                         featureTitle: 'the cost dashboard',
-                        child: CostSavingDashboardScreen(),
+                        child: ConnectedCostDashboardScreen(),
                       ),
                     );
                   case AppRoutes.officialLinks:
@@ -216,7 +224,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.procedures:
                     return MaterialPageRoute(
-                      builder: (_) => const ProcedureSelectionScreen(),
+                      builder: (_) => const ConnectedBrowseProceduresScreen(),
                     );
                   case AppRoutes.cmsCategoryDetail:
                     final args = settings.arguments! as CmsCategoryRouteArgs;
@@ -229,13 +237,13 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                         settings.arguments! as CatalogCategoryRouteArgs;
                     return MaterialPageRoute(
                       builder: (_) =>
-                          CatalogCategoryScreen(categoryId: args.categoryId),
+                          ConnectedCategoryScreen(categoryId: args.categoryId),
                     );
                   case AppRoutes.subcategory:
                     final args =
                         settings.arguments! as CatalogSubcategoryRouteArgs;
                     return MaterialPageRoute(
-                      builder: (_) => CatalogSubcategoryScreen(
+                      builder: (_) => ConnectedSubcategoryScreen(
                         categoryId: args.categoryId,
                         subcategoryId: args.subcategoryId,
                       ),
@@ -244,7 +252,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     final args =
                         settings.arguments! as CatalogProcedureRouteArgs;
                     return MaterialPageRoute(
-                      builder: (_) => CatalogProcedureScreen(
+                      builder: (_) => ConnectedProcedureDetailScreen(
                         categoryId: args.categoryId,
                         subcategoryId: args.subcategoryId,
                         procedureId: args.procedureId,
@@ -306,7 +314,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => const AuthGate(
                         featureTitle: 'your profile',
-                        child: ProfileScreen(),
+                        child: ConnectedProfileFolderScreen(),
                       ),
                     );
                   case AppRoutes.account:
@@ -344,7 +352,8 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.utilityCompare:
                     return MaterialPageRoute(
-                      builder: (_) => const UtilityComparisonScreen(),
+                      builder: (_) =>
+                          const ConnectedComparisonScreen(mode: 'utilities'),
                     );
                   case AppRoutes.billAnalyzer:
                     return MaterialPageRoute(
@@ -360,7 +369,8 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.telecom:
                     return MaterialPageRoute(
-                      builder: (_) => const TelecomHubScreen(),
+                      builder: (_) =>
+                          const ConnectedComparisonScreen(mode: 'telecom'),
                     );
                   case AppRoutes.publicOffice:
                     return MaterialPageRoute(
@@ -412,6 +422,9 @@ class _EntryRouter extends StatelessWidget {
       animation: Listenable.merge([controller, authController]),
       builder: (context, _) {
         final path = Uri.base.path;
+        if (path == AppRoutes.confirmEmail) {
+          return const EmailConfirmationSuccessScreen();
+        }
         if (path == AppRoutes.resetPassword) {
           return const ResetPasswordScreen();
         }

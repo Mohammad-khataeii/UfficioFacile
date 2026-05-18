@@ -3,6 +3,7 @@ class AppRoutes {
   static const dashboard = '/life-admin/dashboard';
   static const onboarding = '/life-admin/onboarding';
   static const auth = '/life-admin/auth';
+  static const confirmEmail = '/auth/confirm-email';
   static const forgotPassword = '/auth/forgot-password';
   static const resetPassword = '/auth/reset-password';
   static const category = '/life-admin/category';

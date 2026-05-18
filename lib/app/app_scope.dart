@@ -24,6 +24,7 @@ import '../features/italy_admin_copilot/application/request_controller.dart';
 import '../features/italy_admin_copilot/application/utility_controller.dart';
 import '../features/italy_admin_copilot/data/generated_pack_quality_service.dart';
 import '../features/italy_admin_copilot/data/bundled_catalog_repository.dart';
+import '../features/italy_admin_copilot/data/connected_product_data.dart';
 import '../features/italy_admin_copilot/data/hybrid_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/local_admin_config_repository.dart';
 import '../features/italy_admin_copilot/data/local_analytics_service.dart';
@@ -140,6 +141,14 @@ class AppScope extends InheritedWidget {
       selectedCitySlugLoader: () async => UfficioCityRegistry.normalizeSlug(
         profileController.profile.selectedCityPackId,
       ),
+    );
+    connectedCatalogService = ConnectedCatalogService(
+      catalogRepository: ufficioCatalogRepository,
+      publicCatalogRepository: catalogRepository,
+    );
+    connectedUserDataRepository = ConnectedUserDataRepository(
+      prefs: prefs,
+      client: SupabaseBootstrap.client,
     );
     userSettingsRepository = LocalUfficcioUserSettingsRepository(prefs);
     entitlementRepository = LocalUfficcioEntitlementRepository(prefs);
@@ -265,6 +274,8 @@ class AppScope extends InheritedWidget {
   late final BundledCatalogRepository bundledCatalogRepository;
   late final HybridCatalogRepository catalogRepository;
   late final UfficioCatalogRepository ufficioCatalogRepository;
+  late final ConnectedCatalogService connectedCatalogService;
+  late final ConnectedUserDataRepository connectedUserDataRepository;
   late final UfficcioAuthFacade authFacade;
   late final AdminRepository adminRepository;
   late final AdminPanelController adminPanelController;

@@ -41,7 +41,6 @@ import '../../domain/admin_procedure.dart';
 import '../../domain/admin_request.dart';
 import '../../domain/bill_analysis.dart';
 import '../../domain/catalog_models.dart' as catalog;
-import '../../domain/city_pack.dart';
 import '../../domain/generated_pack.dart';
 import '../../domain/health_asl_guidance.dart';
 import '../../domain/housing_rent_guidance.dart';
@@ -290,9 +289,11 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   final TextEditingController _heroSearchController = TextEditingController();
   List<ProblemMatchResult> _heroMatches = const [];
   String? _resolvedCatalogCitySlug;
+  ChangeNotifier? _profileListenable;
 
   @override
   void dispose() {
+    _profileListenable?.removeListener(_handleProfileChanged);
     _heroSearchController.dispose();
     super.dispose();
   }
@@ -300,8 +301,19 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final nextListenable = AppScope.of(context).profileController;
+    if (!identical(_profileListenable, nextListenable)) {
+      _profileListenable?.removeListener(_handleProfileChanged);
+      _profileListenable = nextListenable;
+      _profileListenable?.addListener(_handleProfileChanged);
+    }
     _contractsFuture ??= AppScope.of(context).contractsRepository.list();
     _refreshCatalogFutureIfNeeded();
+  }
+
+  void _handleProfileChanged() {
+    if (!mounted) return;
+    setState(_refreshCatalogFutureIfNeeded);
   }
 
   void _refreshCatalogFutureIfNeeded() {
@@ -316,7 +328,9 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
       _heroMatches = const [];
     }
     _resolvedCatalogCitySlug = nextCitySlug;
-    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult(
+      citySlug: nextCitySlug,
+    );
   }
 
   @override
@@ -339,15 +353,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
       languageCode: context.l10n.languageCode,
     );
     final checklistProgress = scope.checklistService.progress(checklistItems);
-    CityPack? cityPack;
-    if (profile.selectedCityPackId != null) {
-      for (final item in scope.cityPackService.all()) {
-        if (item.id == profile.selectedCityPackId) {
-          cityPack = item;
-          break;
-        }
-      }
-    }
     final selectedCatalogCity = UfficioCityRegistry.baseCityForSlug(
       profile.selectedCityPackId,
     );
@@ -625,14 +630,14 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                 ),
               const SizedBox(height: 16),
               _SectionCard(
-                title: context.l10n.t('city_catalog_label'),
+                title: 'Selected city',
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(selectedCatalogCity.label),
                   subtitle: Text(
                     selectedCatalogCity.region.isEmpty
-                        ? context.l10n.t('city_catalog_status_coming_soon')
-                        : selectedCatalogCity.region,
+                        ? 'Used for local office links and procedure filters.'
+                        : '${selectedCatalogCity.region} • Used for local office links and procedure filters.',
                   ),
                   trailing: FutureBuilder<UfficioCatalogLoadResult>(
                     future: _catalogFuture,
@@ -645,7 +650,7 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                           : context.l10n.t('city_catalog_status_available');
                       return Chip(
                         label: Text(
-                          '${context.l10n.t('city_catalog_chip_prefix')}: ${selectedCatalogCity.label}${label == context.l10n.t('city_catalog_status_available') ? '' : ' — $label'}',
+                          '${selectedCatalogCity.label}${label == context.l10n.t('city_catalog_status_available') ? '' : ' — $label'}',
                         ),
                       );
                     },
@@ -654,21 +659,6 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (cityPack != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _SectionCard(
-                    title: context.l10n.t('city_pack_title'),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(cityPack.cityName),
-                      subtitle: Text(cityPack.region),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () =>
-                          Navigator.pushNamed(context, AppRoutes.cityPacks),
-                    ),
-                  ),
-                ),
               FutureBuilder<List<UfficioCostItem>>(
                 future: scope.costDashboardService.listCostItems(),
                 builder: (context, snapshot) {
@@ -713,7 +703,9 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             onPressed: () => setState(
                               () => _catalogFuture = scope
                                   .ufficioCatalogRepository
-                                  .loadCatalogResult(),
+                                  .loadCatalogResult(
+                                    citySlug: _resolvedCatalogCitySlug,
+                                  ),
                             ),
                             child: Text(context.l10n.t('retry')),
                           ),
@@ -764,7 +756,9 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                             onPressed: () => setState(
                               () => _catalogFuture = scope
                                   .ufficioCatalogRepository
-                                  .loadCatalogResult(),
+                                  .loadCatalogResult(
+                                    citySlug: _resolvedCatalogCitySlug,
+                                  ),
                             ),
                             child: Text(context.l10n.t('retry')),
                           ),
@@ -1192,7 +1186,9 @@ class _ProcedureSelectionScreenState extends State<ProcedureSelectionScreen> {
       return;
     }
     _resolvedCitySlug = nextCitySlug;
-    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult(
+      citySlug: nextCitySlug,
+    );
   }
 
   @override

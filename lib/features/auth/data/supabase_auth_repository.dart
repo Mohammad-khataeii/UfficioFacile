@@ -37,12 +37,14 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<app_auth.AuthUser> signUp({
     required String email,
     required String password,
+    String? emailRedirectTo,
   }) async {
     try {
       await _signOutIfNeeded();
       final response = await _client.auth.signUp(
         email: email.trim(),
         password: password,
+        emailRedirectTo: emailRedirectTo,
       );
       final user = response.session?.user;
       if (user == null && response.user != null) {

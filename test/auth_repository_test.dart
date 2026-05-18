@@ -135,7 +135,11 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> signOut() async {}
 
   @override
-  Future<AuthUser> signUp({required String email, required String password}) {
+  Future<AuthUser> signUp({
+    required String email,
+    required String password,
+    String? emailRedirectTo,
+  }) {
     throw const AuthFailure('Unable to create your account right now.');
   }
 
@@ -168,6 +172,7 @@ class _ConfirmationRequiredAuthRepository implements AuthRepository {
   Future<AuthUser> signUp({
     required String email,
     required String password,
+    String? emailRedirectTo,
   }) async {
     return const AuthUser(id: '', email: 'new@example.com', isAnonymous: false);
   }
@@ -209,7 +214,11 @@ class _SessionMismatchAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthUser> signUp({required String email, required String password}) {
+  Future<AuthUser> signUp({
+    required String email,
+    required String password,
+    String? emailRedirectTo,
+  }) {
     throw UnimplementedError();
   }
 

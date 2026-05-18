@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { canManageAdminTarget, type AdminRole } from "@/lib/auth/permissions";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -16,6 +17,104 @@ import {
   entitlementSchema,
   procedureSchema,
 } from "@/lib/validation/schemas";
+
+export type CmsActionResult =
+  | { ok: true; message: string; redirectTo?: string }
+  | {
+      ok: false;
+      message: string;
+      code?: string;
+      details?: string | null;
+      hint?: string | null;
+      redirectTo?: string;
+    };
+
+const allowedPremiumVisibility = new Set([
+  "free",
+  "premium_preview",
+  "premium_only",
+  "hidden",
+]);
+
+function splitTextarea(value: FormDataEntryValue | null): string[] {
+  return String(value ?? "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizePremiumInput(input: {
+  premiumVisibility: string;
+  requiredPlan?: string | null;
+  isPublished?: boolean;
+}) {
+  const premiumVisibility = allowedPremiumVisibility.has(input.premiumVisibility)
+    ? input.premiumVisibility
+    : "free";
+  const requiredPlan =
+    input.requiredPlan && input.requiredPlan.trim().length > 0
+      ? input.requiredPlan.trim()
+      : null;
+  if (requiredPlan && requiredPlan !== "premium") {
+    throw new Error("Required plan must be premium or empty.");
+  }
+  const isPremium = premiumVisibility === "premium_only";
+  const monetizationType =
+    premiumVisibility === "free" || premiumVisibility === "hidden"
+      ? "free"
+      : "premium";
+  const visibility =
+    premiumVisibility === "hidden"
+      ? "hidden"
+      : premiumVisibility === "premium_only"
+        ? "premium"
+        : "public";
+  return {
+    premiumVisibility,
+    requiredPlan,
+    isPremium,
+    monetizationType,
+    visibility,
+    isActive:
+      premiumVisibility === "hidden" ? false : Boolean(input.isPublished),
+  };
+}
+
+function buildCmsMetadata(formData: FormData, normalized: {
+  premiumVisibility: string;
+  requiredPlan: string | null;
+}) {
+  return {
+    premium_visibility: normalized.premiumVisibility,
+    required_plan: normalized.requiredPlan,
+    searchable_keywords: splitTextarea(formData.get("searchableKeywords")),
+    synonyms: splitTextarea(formData.get("synonyms")),
+    tags: splitTextarea(formData.get("tags")),
+  };
+}
+
+function serializeSupabaseError(error: any) {
+  return {
+    message: String(error?.message ?? "Save failed."),
+    code: typeof error?.code === "string" ? error.code : undefined,
+    details:
+      error?.details == null ? null : String(error.details),
+    hint: error?.hint == null ? null : String(error.hint),
+  };
+}
+
+function actionResultQuery(result: CmsActionResult) {
+  const params = new URLSearchParams({
+    cmsStatus: result.ok ? "ok" : "error",
+    cmsMessage: result.message,
+  });
+  if (!result.ok) {
+    if (result.code) params.set("cmsCode", result.code);
+    if (result.details) params.set("cmsDetails", result.details);
+    if (result.hint) params.set("cmsHint", result.hint);
+  }
+  return params.toString();
+}
 
 export async function logAdminAction(input: {
   action: string;
@@ -609,168 +708,256 @@ function localizedFromFormData(formData: FormData, prefix: string) {
   };
 }
 
+async function upsertCmsCategoryInternal(
+  formData: FormData,
+  options: { isSubcategory?: boolean } = {},
+): Promise<CmsActionResult> {
+  try {
+    const admin = await requireAdmin("content.manage");
+    const parsed = categorySchema.parse({
+      slug: formData.get("slug"),
+      parentSlug: formData.get("parentSlug"),
+      internalLabel: formData.get("internalLabel"),
+      titleEn: formData.get("titleEn"),
+      titleIt: formData.get("titleIt"),
+      titleFr: formData.get("titleFr"),
+      titleEs: formData.get("titleEs"),
+      titleFa: formData.get("titleFa"),
+      titleAr: formData.get("titleAr"),
+      descriptionEn: formData.get("descriptionEn"),
+      icon: formData.get("icon"),
+      color: formData.get("color"),
+      sortOrder: formData.get("sortOrder"),
+      isActive: formData.get("isActive") === "on",
+      premiumVisibility: formData.get("premiumVisibility"),
+      requiredPlan: formData.get("requiredPlan"),
+      verificationStatus: formData.get("verificationStatus"),
+      adminNotes: formData.get("adminNotes"),
+      tags: formData.get("tags"),
+      synonyms: formData.get("synonyms"),
+      searchableKeywords: formData.get("searchableKeywords"),
+      monetizationType: formData.get("monetizationType"),
+      allowSingleUnlock: formData.get("allowSingleUnlock") === "on",
+      singleUnlockPriceCents: formData.get("singleUnlockPriceCents"),
+    });
+    const normalized = normalizePremiumInput({
+      premiumVisibility: parsed.premiumVisibility,
+      requiredPlan: parsed.requiredPlan || null,
+      isPublished: parsed.isActive,
+    });
+    const metadata = buildCmsMetadata(formData, normalized);
+    const payload = {
+      slug: parsed.slug,
+      parent_slug: parsed.parentSlug?.trim() || null,
+      internal_label: parsed.internalLabel || null,
+      title: localizedFromFormData(formData, "title"),
+      subtitle: localizedFromFormData(formData, "subtitle"),
+      description: localizedFromFormData(formData, "description"),
+      icon: parsed.icon || null,
+      color: parsed.color || null,
+      sort_order: parsed.sortOrder,
+      is_active: normalized.isActive,
+      is_premium: normalized.isPremium,
+      premium_visibility_rule: normalized.premiumVisibility,
+      verification_status: parsed.verificationStatus,
+      tags: metadata.tags,
+      synonyms: metadata.synonyms,
+      searchable_keywords: metadata.searchable_keywords,
+      monetization_type: normalized.monetizationType,
+      allow_single_unlock: formData.get("allowSingleUnlock") === "on",
+      single_unlock_price_cents:
+        Number(formData.get("singleUnlockPriceCents") ?? "") || null,
+      single_unlock_currency: "EUR",
+      premium_reason: localizedFromFormData(formData, "premiumReason"),
+      premium_teaser: localizedFromFormData(formData, "premiumTeaser"),
+      admin_notes: parsed.adminNotes || null,
+      metadata,
+    };
+
+    const { data: before } = await admin.supabase
+      .from("ufficio_cms_categories")
+      .select("*")
+      .eq("slug", parsed.slug)
+      .maybeSingle();
+    const { error } = await admin.supabase
+      .from("ufficio_cms_categories")
+      .upsert(payload);
+    if (error) {
+      const serialized = serializeSupabaseError(error);
+      return {
+        ok: false,
+        ...serialized,
+        message: options.isSubcategory
+          ? "Save failed for this subcategory."
+          : "Save failed.",
+      };
+    }
+
+    await logAdminAction({
+      action: before
+        ? options.isSubcategory
+          ? "cms.subcategory.updated"
+          : "cms.category.updated"
+        : options.isSubcategory
+          ? "cms.subcategory.created"
+          : "cms.category.created",
+      targetTable: "ufficio_cms_categories",
+      targetId: before?.id ?? parsed.slug,
+      beforeValue: before ?? {},
+      afterValue: payload,
+    });
+    revalidatePath("/content/categories");
+    revalidatePath(`/content/categories/${parsed.parentSlug ?? parsed.slug}`);
+    return {
+      ok: true,
+      message: options.isSubcategory
+        ? "Subcategory saved."
+        : "Category saved.",
+    };
+  } catch (error) {
+    const serialized = serializeSupabaseError(error);
+    return { ok: false, ...serialized, message: "Save failed." };
+  }
+}
+
 export async function upsertCmsCategory(formData: FormData) {
-  const admin = await requireAdmin("content.manage");
-  const parsed = categorySchema.parse({
-    slug: formData.get("slug"),
-    internalLabel: formData.get("internalLabel"),
-    titleEn: formData.get("titleEn"),
-    titleIt: formData.get("titleIt"),
-    titleFr: formData.get("titleFr"),
-    titleEs: formData.get("titleEs"),
-    titleFa: formData.get("titleFa"),
-    titleAr: formData.get("titleAr"),
-    descriptionEn: formData.get("descriptionEn"),
-    icon: formData.get("icon"),
-    color: formData.get("color"),
-    sortOrder: formData.get("sortOrder"),
-    isActive: formData.get("isActive") === "on",
-    isPremium: formData.get("isPremium") === "on",
-    verificationStatus: formData.get("verificationStatus"),
-    adminNotes: formData.get("adminNotes"),
-    tags: formData.get("tags"),
-    synonyms: formData.get("synonyms"),
-    searchableKeywords: formData.get("searchableKeywords"),
-    monetizationType: formData.get("monetizationType"),
-    allowSingleUnlock: formData.get("allowSingleUnlock") === "on",
-    singleUnlockPriceCents: formData.get("singleUnlockPriceCents"),
+  const result = await upsertCmsCategoryInternal(formData);
+  const redirectTo =
+    String(formData.get("redirectTo") ?? "") ||
+    `/content/categories/${String(formData.get("slug") ?? "")}`;
+  revalidatePath(redirectTo.split("?")[0] || "/content/categories");
+  redirect(`${redirectTo}?${actionResultQuery(result)}`);
+}
+
+export async function upsertCmsSubcategory(formData: FormData) {
+  const result = await upsertCmsCategoryInternal(formData, {
+    isSubcategory: true,
   });
-
-  const payload = {
-    slug: parsed.slug,
-    internal_label: parsed.internalLabel || null,
-    title: localizedFromFormData(formData, "title"),
-    subtitle: localizedFromFormData(formData, "subtitle"),
-    description: localizedFromFormData(formData, "description"),
-    icon: parsed.icon || null,
-    color: parsed.color || null,
-    sort_order: parsed.sortOrder,
-    is_active: parsed.isActive,
-    is_premium: parsed.isPremium,
-    verification_status: parsed.verificationStatus,
-    tags: splitTextarea(formData.get("tags")),
-    synonyms: splitTextarea(formData.get("synonyms")),
-    searchable_keywords: splitTextarea(formData.get("searchableKeywords")),
-    monetization_type:
-      String(formData.get("monetizationType") ?? "") || "free",
-    allow_single_unlock: formData.get("allowSingleUnlock") === "on",
-    single_unlock_price_cents: Number(
-      formData.get("singleUnlockPriceCents") ?? "",
-    ) || null,
-    single_unlock_currency: "EUR",
-    premium_reason: localizedFromFormData(formData, "premiumReason"),
-    premium_teaser: localizedFromFormData(formData, "premiumTeaser"),
-    admin_notes: parsed.adminNotes || null,
-  };
-
-  const { data: before } = await admin.supabase
-    .from("ufficio_cms_categories")
-    .select("*")
-    .eq("slug", parsed.slug)
-    .maybeSingle();
-  const { error } = await admin.supabase
-    .from("ufficio_cms_categories")
-    .upsert(payload);
-  if (error) throw error;
-
-  await logAdminAction({
-    action: before ? "cms.category.updated" : "cms.category.created",
-    targetTable: "ufficio_cms_categories",
-    targetId: before?.id ?? parsed.slug,
-    beforeValue: before ?? {},
-    afterValue: payload,
-  });
-  revalidatePath("/content/categories");
-  revalidatePath(`/content/categories/${parsed.slug}`);
+  const redirectTo =
+    String(formData.get("redirectTo") ?? "") ||
+    `/content/categories/${String(formData.get("parentSlug") ?? "")}`;
+  revalidatePath(redirectTo.split("?")[0] || "/content/categories");
+  redirect(`${redirectTo}?${actionResultQuery(result)}`);
 }
 
 export async function upsertCmsProcedure(formData: FormData) {
-  const admin = await requireAdmin("content.manage");
-  const parsed = procedureSchema.parse({
-    categorySlug: formData.get("categorySlug"),
-    subcategorySlug: formData.get("subcategorySlug"),
-    slug: formData.get("slug"),
-    titleEn: formData.get("titleEn"),
-    titleIt: formData.get("titleIt"),
-    titleFr: formData.get("titleFr"),
-    titleEs: formData.get("titleEs"),
-    titleFa: formData.get("titleFa"),
-    titleAr: formData.get("titleAr"),
-    summaryEn: formData.get("summaryEn"),
-    whatIsItEn: formData.get("whatIsItEn"),
-    status: formData.get("status"),
-    sortOrder: formData.get("sortOrder"),
-    isActive: formData.get("isActive") === "on",
-    isPremium: formData.get("isPremium") === "on",
-    verificationStatus: formData.get("verificationStatus"),
-    adminNotes: formData.get("adminNotes"),
-    tags: formData.get("tags"),
-    synonyms: formData.get("synonyms"),
-    searchableKeywords: formData.get("searchableKeywords"),
-    monetizationType: formData.get("monetizationType"),
-    allowSingleUnlock: formData.get("allowSingleUnlock") === "on",
-    singleUnlockPriceCents: formData.get("singleUnlockPriceCents"),
-  });
+  let result: CmsActionResult;
+  try {
+    const admin = await requireAdmin("content.manage");
+    const parsed = procedureSchema.parse({
+      categorySlug: formData.get("categorySlug"),
+      subcategorySlug: formData.get("subcategorySlug"),
+      slug: formData.get("slug"),
+      titleEn: formData.get("titleEn"),
+      titleIt: formData.get("titleIt"),
+      titleFr: formData.get("titleFr"),
+      titleEs: formData.get("titleEs"),
+      titleFa: formData.get("titleFa"),
+      titleAr: formData.get("titleAr"),
+      summaryEn: formData.get("summaryEn"),
+      whatIsItEn: formData.get("whatIsItEn"),
+      status: formData.get("status"),
+      sortOrder: formData.get("sortOrder"),
+      isActive: formData.get("isActive") === "on",
+      premiumVisibility: formData.get("premiumVisibility"),
+      requiredPlan: formData.get("requiredPlan"),
+      verificationStatus: formData.get("verificationStatus"),
+      adminNotes: formData.get("adminNotes"),
+      tags: formData.get("tags"),
+      synonyms: formData.get("synonyms"),
+      searchableKeywords: formData.get("searchableKeywords"),
+      monetizationType: formData.get("monetizationType"),
+      allowSingleUnlock: formData.get("allowSingleUnlock") === "on",
+      singleUnlockPriceCents: formData.get("singleUnlockPriceCents"),
+    });
+    const normalized = normalizePremiumInput({
+      premiumVisibility: parsed.premiumVisibility,
+      requiredPlan: parsed.requiredPlan || null,
+      isPublished: parsed.isActive,
+    });
+    const metadata = buildCmsMetadata(formData, normalized);
+    const payload = {
+      category_slug: parsed.categorySlug,
+      subcategory_slug: String(parsed.subcategorySlug ?? "").trim() || null,
+      slug: parsed.slug,
+      title: localizedFromFormData(formData, "title"),
+      subtitle: localizedFromFormData(formData, "subtitle"),
+      summary: localizedFromFormData(formData, "summary"),
+      what_is_it: localizedFromFormData(formData, "whatIsIt"),
+      why_you_may_need_it: splitTextarea(formData.get("whyYouMayNeedIt")),
+      how_to_do_it: splitTextarea(formData.get("howToDoIt")),
+      required_documents: splitTextarea(formData.get("requiredDocuments")),
+      optional_documents: splitTextarea(formData.get("optionalDocuments")),
+      warnings: splitTextarea(formData.get("warnings")),
+      common_mistakes: splitTextarea(formData.get("commonMistakes")),
+      proof_to_keep: splitTextarea(formData.get("proofToKeep")),
+      faq: splitTextarea(formData.get("faq")),
+      official_links: splitTextarea(formData.get("officialLinks")),
+      status: parsed.status,
+      sort_order: parsed.sortOrder,
+      is_active: normalized.isActive,
+      is_premium: normalized.isPremium,
+      verification_status: parsed.verificationStatus,
+      tags: metadata.tags,
+      synonyms: metadata.synonyms,
+      searchable_keywords: metadata.searchable_keywords,
+      monetization_type: normalized.monetizationType,
+      allow_single_unlock: formData.get("allowSingleUnlock") === "on",
+      single_unlock_price_cents:
+        Number(formData.get("singleUnlockPriceCents") ?? "") || null,
+      single_unlock_currency: "EUR",
+      premium_reason: localizedFromFormData(formData, "premiumReason"),
+      premium_teaser: localizedFromFormData(formData, "premiumTeaser"),
+      admin_notes: parsed.adminNotes || null,
+      metadata: {
+        ...metadata,
+        premium_visibility: normalized.premiumVisibility,
+        required_plan: normalized.requiredPlan,
+        subcategory_slug: String(parsed.subcategorySlug ?? "").trim() || null,
+      },
+    };
 
-  const payload = {
-    category_slug: parsed.categorySlug,
-    subcategory_slug: String(parsed.subcategorySlug ?? "").trim() || null,
-    slug: parsed.slug,
-    title: localizedFromFormData(formData, "title"),
-    subtitle: localizedFromFormData(formData, "subtitle"),
-    summary: localizedFromFormData(formData, "summary"),
-    what_is_it: localizedFromFormData(formData, "whatIsIt"),
-    why_you_may_need_it: splitTextarea(formData.get("whyYouMayNeedIt")),
-    how_to_do_it: splitTextarea(formData.get("howToDoIt")),
-    required_documents: splitTextarea(formData.get("requiredDocuments")),
-    optional_documents: splitTextarea(formData.get("optionalDocuments")),
-    warnings: splitTextarea(formData.get("warnings")),
-    common_mistakes: splitTextarea(formData.get("commonMistakes")),
-    proof_to_keep: splitTextarea(formData.get("proofToKeep")),
-    faq: splitTextarea(formData.get("faq")),
-    official_links: splitTextarea(formData.get("officialLinks")),
-    status: parsed.status,
-    sort_order: parsed.sortOrder,
-    is_active: parsed.isActive,
-    is_premium: parsed.isPremium,
-    verification_status: parsed.verificationStatus,
-    tags: splitTextarea(formData.get("tags")),
-    synonyms: splitTextarea(formData.get("synonyms")),
-    searchable_keywords: splitTextarea(formData.get("searchableKeywords")),
-    monetization_type:
-      String(formData.get("monetizationType") ?? "") || "free",
-    allow_single_unlock: formData.get("allowSingleUnlock") === "on",
-    single_unlock_price_cents: Number(
-      formData.get("singleUnlockPriceCents") ?? "",
-    ) || null,
-    single_unlock_currency: "EUR",
-    premium_reason: localizedFromFormData(formData, "premiumReason"),
-    premium_teaser: localizedFromFormData(formData, "premiumTeaser"),
-    admin_notes: parsed.adminNotes || null,
-  };
-
-  const { data: before } = await admin.supabase
-    .from("ufficio_cms_procedures")
-    .select("*")
-    .eq("category_slug", parsed.categorySlug)
-    .eq("slug", parsed.slug)
-    .maybeSingle();
-  const { error } = await admin.supabase
-    .from("ufficio_cms_procedures")
-    .upsert(payload, { onConflict: "category_slug,slug" });
-  if (error) throw error;
-
-  await logAdminAction({
-    action: before ? "cms.procedure.updated" : "cms.procedure.created",
-    targetTable: "ufficio_cms_procedures",
-    targetId: before?.id ?? parsed.slug,
-    beforeValue: before ?? {},
-    afterValue: payload,
-  });
-  revalidatePath("/content/procedures");
-  revalidatePath(`/content/procedures/${parsed.slug}`);
-  revalidatePath(`/content/procedures/${parsed.categorySlug}/${parsed.slug}`);
-  revalidatePath(`/content/categories/${parsed.categorySlug}`);
+    const { data: before } = await admin.supabase
+      .from("ufficio_cms_procedures")
+      .select("*")
+      .eq("category_slug", parsed.categorySlug)
+      .eq("slug", parsed.slug)
+      .maybeSingle();
+    const { error } = await admin.supabase
+      .from("ufficio_cms_procedures")
+      .upsert(payload, { onConflict: "category_slug,slug" });
+    if (error) {
+      result = {
+        ok: false,
+        ...serializeSupabaseError(error),
+        message: "Save failed.",
+      };
+    } else {
+      await logAdminAction({
+        action: before ? "cms.procedure.updated" : "cms.procedure.created",
+        targetTable: "ufficio_cms_procedures",
+        targetId: before?.id ?? parsed.slug,
+        beforeValue: before ?? {},
+        afterValue: payload,
+      });
+      revalidatePath("/content/procedures");
+      revalidatePath(`/content/procedures/${parsed.slug}`);
+      revalidatePath(`/content/procedures/${parsed.categorySlug}/${parsed.slug}`);
+      revalidatePath(`/content/categories/${parsed.categorySlug}`);
+      result = { ok: true, message: "Procedure saved." };
+    }
+  } catch (error) {
+    result = {
+      ok: false,
+      ...serializeSupabaseError(error),
+      message: "Save failed.",
+    };
+  }
+  const redirectTo =
+    String(formData.get("redirectTo") ?? "") ||
+    `/content/procedures/${String(formData.get("categorySlug") ?? "")}/${String(formData.get("slug") ?? "")}`;
+  revalidatePath(redirectTo.split("?")[0] || "/content/procedures");
+  redirect(`${redirectTo}?${actionResultQuery(result)}`);
 }
 
 export async function updatePublicConfig(
@@ -827,11 +1014,4 @@ export async function upsertCatalogRow(formData: FormData) {
   if (id) {
     revalidatePath(`/catalog/${table}/${id}`);
   }
-}
-
-function splitTextarea(value: FormDataEntryValue | null) {
-  return String(value ?? "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
 }

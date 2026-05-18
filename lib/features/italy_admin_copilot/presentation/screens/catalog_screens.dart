@@ -103,7 +103,9 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
       return;
     }
     _resolvedCitySlug = nextCitySlug;
-    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult(
+      citySlug: nextCitySlug,
+    );
   }
 
   @override
@@ -121,9 +123,9 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
             if (snapshot.hasError || result == null) {
               return _CatalogErrorState(
                 onRetry: () => setState(
-                  () => _catalogFuture = AppScope.of(
-                    context,
-                  ).ufficioCatalogRepository.loadCatalogResult(),
+                  () => _catalogFuture = AppScope.of(context)
+                      .ufficioCatalogRepository
+                      .loadCatalogResult(citySlug: _resolvedCitySlug),
                 ),
               );
             }
@@ -133,9 +135,9 @@ class _CatalogCategoryScreenState extends State<CatalogCategoryScreen> {
             if (result.catalog == null) {
               return _CatalogErrorState(
                 onRetry: () => setState(
-                  () => _catalogFuture = AppScope.of(
-                    context,
-                  ).ufficioCatalogRepository.loadCatalogResult(),
+                  () => _catalogFuture = AppScope.of(context)
+                      .ufficioCatalogRepository
+                      .loadCatalogResult(citySlug: _resolvedCitySlug),
                 ),
               );
             }
@@ -310,7 +312,9 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
       return;
     }
     _resolvedCitySlug = nextCitySlug;
-    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult();
+    _catalogFuture = scope.ufficioCatalogRepository.loadCatalogResult(
+      citySlug: nextCitySlug,
+    );
   }
 
   @override
@@ -328,9 +332,9 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
             if (snapshot.hasError || result == null) {
               return _CatalogErrorState(
                 onRetry: () => setState(
-                  () => _catalogFuture = AppScope.of(
-                    context,
-                  ).ufficioCatalogRepository.loadCatalogResult(),
+                  () => _catalogFuture = AppScope.of(context)
+                      .ufficioCatalogRepository
+                      .loadCatalogResult(citySlug: _resolvedCitySlug),
                 ),
               );
             }
@@ -340,9 +344,9 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
             if (result.catalog == null) {
               return _CatalogErrorState(
                 onRetry: () => setState(
-                  () => _catalogFuture = AppScope.of(
-                    context,
-                  ).ufficioCatalogRepository.loadCatalogResult(),
+                  () => _catalogFuture = AppScope.of(context)
+                      .ufficioCatalogRepository
+                      .loadCatalogResult(citySlug: _resolvedCitySlug),
                 ),
               );
             }

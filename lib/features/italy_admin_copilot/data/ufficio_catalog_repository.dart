@@ -760,4 +760,5 @@ class UfficioCatalogRepository {
         .where((item) => item.value.trim().isNotEmpty)
         .toList();
   }
+
 }

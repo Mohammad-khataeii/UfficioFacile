@@ -304,6 +304,12 @@ class AppLocalizations {
       'change_password_title': 'Change password',
       'change_password_intro': 'Update the password for this account.',
       'auth_confirm_email_message': 'Check your email to confirm your account.',
+      'auth_email_confirmed_title': 'Email confirmed',
+      'auth_email_confirmed_body':
+          'Your account is confirmed. Go back to the app and log in there.',
+      'auth_remember_me': 'Remember me',
+      'auth_remember_me_hint':
+          'Keep this email on this device and let Android offer to save your password.',
       'account_change_password': 'Change password',
       'paywall_premium_body':
           'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
@@ -589,6 +595,12 @@ class AppLocalizations {
       'change_password_intro': 'Aggiorna la password di questo account.',
       'auth_confirm_email_message':
           'Controlla la tua email per confermare l’account.',
+      'auth_email_confirmed_title': 'Email confermata',
+      'auth_email_confirmed_body':
+          'Il tuo account è confermato. Torna nell’app e accedi lì.',
+      'auth_remember_me': 'Ricordami',
+      'auth_remember_me_hint':
+          'Tieni questa email su questo dispositivo e lascia che Android proponga di salvare la password.',
       'account_change_password': 'Cambia password',
       'paywall_premium_body':
           'Questa guida fa parte di UfficioFacile Premium. Puoi continuare a esplorare le guide gratuite oppure scegliere un piano per sbloccare checklist più approfondite, modelli e supporto privato.',

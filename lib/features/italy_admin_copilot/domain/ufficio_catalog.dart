@@ -127,6 +127,8 @@ class UfficioCategory {
     required this.hasPremiumContent,
     required this.title,
     required this.description,
+    this.officialLinks = const <UfficioOfficialLink>[],
+    this.contacts = const <UfficioContact>[],
     required this.subcategories,
   });
 
@@ -137,6 +139,8 @@ class UfficioCategory {
   final bool hasPremiumContent;
   final UfficioLocalizedText title;
   final UfficioLocalizedText description;
+  final List<UfficioOfficialLink> officialLinks;
+  final List<UfficioContact> contacts;
   final List<UfficioSubcategory> subcategories;
 
   int get procedureCount =>
@@ -172,6 +176,21 @@ class UfficioCategory {
       hasPremiumContent: hasPremiumContent,
       title: ufficioLocalizedTextFromJson(json['title']),
       description: ufficioLocalizedTextFromJson(json['description']),
+      officialLinks:
+          (json['officialLinks'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map>()
+              .map(
+                (item) => UfficioOfficialLink.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList(),
+      contacts: (json['contacts'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map(
+            (item) => UfficioContact.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList(),
       subcategories: subcategories,
     );
   }
@@ -184,6 +203,8 @@ class UfficioCategory {
     'hasPremiumContent': hasPremiumContent,
     'title': title,
     'description': description,
+    'officialLinks': officialLinks.map((item) => item.toJson()).toList(),
+    'contacts': contacts.map((item) => item.toJson()).toList(),
     'subcategories': subcategories.map((item) => item.toJson()).toList(),
   };
 }

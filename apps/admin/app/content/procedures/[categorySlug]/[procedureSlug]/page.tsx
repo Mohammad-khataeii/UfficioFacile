@@ -8,11 +8,14 @@ import { upsertCmsProcedure } from "@/lib/db/mutations";
 
 export default async function ContentProcedureDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ categorySlug: string; procedureSlug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const admin = await requireAdmin("content.read");
   const { categorySlug, procedureSlug } = await params;
+  const query = (await searchParams) ?? {};
   const procedure = await getAdminProcedureDetailNormalized(
     admin.supabase,
     categorySlug,
@@ -58,8 +61,33 @@ export default async function ContentProcedureDetailPage({
               Saving here will create the CMS row in Supabase.
             </div>
           ) : null}
+          {query.cmsMessage ? (
+            <div
+              className={`mt-4 rounded-2xl p-3 text-sm ${
+                query.cmsStatus === "ok"
+                  ? "bg-emerald-50 text-emerald-900"
+                  : "bg-rose-50 text-rose-900"
+              }`}
+            >
+              <div className="font-medium">
+                {query.cmsStatus === "ok" ? "Saved" : "Save failed"}
+              </div>
+              <div>{String(query.cmsMessage)}</div>
+              {query.cmsStatus === "error" && (query.cmsCode || query.cmsDetails || query.cmsHint) ? (
+                <details className="mt-3 rounded-xl border border-rose-200 bg-white/80 p-3 text-xs">
+                  <summary className="cursor-pointer font-medium">Debug details</summary>
+                  <div className="mt-2 space-y-1">
+                    {query.cmsCode ? <p><strong>Code:</strong> {String(query.cmsCode)}</p> : null}
+                    {query.cmsDetails ? <p><strong>Details:</strong> {String(query.cmsDetails)}</p> : null}
+                    {query.cmsHint ? <p><strong>Hint:</strong> {String(query.cmsHint)}</p> : null}
+                  </div>
+                </details>
+              ) : null}
+            </div>
+          ) : null}
           <form action={upsertCmsProcedure} className="mt-5 grid gap-6 xl:grid-cols-2">
             <div className="space-y-4">
+              <input type="hidden" name="redirectTo" value={`/content/procedures/${categorySlug}/${procedureSlug}`} />
               <div><label>Category slug</label><input name="categorySlug" defaultValue={procedure.categorySlug} required /></div>
               <div><label>Subcategory slug</label><input name="subcategorySlug" defaultValue={procedure.subcategorySlug ?? ""} /></div>
               <div><label>Slug</label><input name="slug" defaultValue={procedure.slug} required /></div>
@@ -67,8 +95,8 @@ export default async function ContentProcedureDetailPage({
               <div><label>Sort order</label><input name="sortOrder" defaultValue={procedure.sortOrder} /></div>
               <div><label>Verification</label><select name="verificationStatus" defaultValue={procedure.verificationStatus}><option value="verified">verified</option><option value="needsReview">needsReview</option><option value="unverified">unverified</option></select></div>
               <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="isActive" defaultChecked={procedure.raw.is_active} /><span>Published</span></label>
-              <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="isPremium" defaultChecked={procedure.premiumVisibility !== "free"} /><span>Premium gated</span></label>
-              <div><label>Monetization type</label><select name="monetizationType" defaultValue={procedure.monetizationType ?? (procedure.premiumVisibility !== "free" ? "premium_money_value" : "free")}><option value="free">free</option><option value="premium">premium</option><option value="premium_money_value">premium_money_value</option><option value="premium_financial_strategy">premium_financial_strategy</option><option value="premium_comparison_tool">premium_comparison_tool</option></select></div>
+              <div><label>Premium visibility</label><select name="premiumVisibility" defaultValue={procedure.premiumVisibility}><option value="free">free</option><option value="premium_preview">premium_preview</option><option value="premium_only">premium_only</option><option value="hidden">hidden</option></select></div>
+              <div><label>Required plan</label><select name="requiredPlan" defaultValue={procedure.requiredPlan ?? ""}><option value="">free</option><option value="premium">premium</option></select></div>
               <label className="flex items-center gap-3"><input className="h-4 w-4" type="checkbox" name="allowSingleUnlock" defaultChecked={procedure.allowSingleUnlock} /><span>Allow single unlock</span></label>
               <div><label>Single unlock price (cents)</label><input name="singleUnlockPriceCents" defaultValue={procedure.singleUnlockPriceCents ?? ""} /></div>
               <div><label>Tags</label><textarea name="tags" rows={4} defaultValue={procedure.tags.join("\n")} /></div>

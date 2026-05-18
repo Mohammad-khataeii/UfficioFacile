@@ -171,6 +171,21 @@ export function normalizeCategory(
   };
 }
 
+function mergeSubcategoryVisibility(
+  derived: AdminPremiumVisibility,
+  explicit?: AdminPremiumVisibility | null,
+): AdminPremiumVisibility {
+  if (
+    explicit === "free" ||
+    explicit === "premium_preview" ||
+    explicit === "premium_only" ||
+    explicit === "hidden"
+  ) {
+    return explicit;
+  }
+  return derived;
+}
+
 export function normalizeProcedure(raw: AdminProcedureRecord): AdminProcedure {
   const title = localizedTextValue(raw.title, humanizeSlug(raw.slug));
   const summary = localizedTextValue(raw.summary);
@@ -250,6 +265,7 @@ export function normalizeProcedure(raw: AdminProcedureRecord): AdminProcedure {
 export function buildAdminSubcategories(
   category: AdminCategory,
   procedures: AdminProcedure[],
+  explicitSubcategories: AdminCategory[] = [],
 ): {
   subcategories: AdminSubcategory[];
   uncategorizedProcedures: AdminProcedure[];
@@ -270,18 +286,27 @@ export function buildAdminSubcategories(
   const subcategories = Array.from(grouped.entries())
     .map(([slug, group]) => {
       const first = group[0];
+      const explicit = explicitSubcategories.find((item) => item.slug === slug);
       const metadataTitle = localizedTextValue(
-        first.metadata.subcategory_title ?? first.metadata.subcategoryTitle,
+        explicit?.title ??
+          first.metadata.subcategory_title ??
+          first.metadata.subcategoryTitle,
         humanizeSlug(slug),
       );
       const description = localizedTextValue(
-        first.metadata.subcategory_description ?? first.metadata.subcategoryDescription,
+        explicit?.description ??
+          first.metadata.subcategory_description ??
+          first.metadata.subcategoryDescription,
       );
-      const premiumVisibility = group.some(
+      const derivedPremiumVisibility = group.some(
         (procedure) => procedure.premiumVisibility !== "free",
       )
         ? "premium_only"
         : "free";
+      const premiumVisibility = mergeSubcategoryVisibility(
+        derivedPremiumVisibility,
+        explicit?.premiumVisibility,
+      );
 
       return {
         id: `${category.slug}:${slug}`,
@@ -290,11 +315,13 @@ export function buildAdminSubcategories(
         slug,
         title: metadataTitle,
         description,
-        sortOrder: Math.min(...group.map((procedure) => procedure.sortOrder)),
-        isPublished: group.some((procedure) => procedure.isPublished),
+        sortOrder:
+          explicit?.sortOrder ??
+          Math.min(...group.map((procedure) => procedure.sortOrder)),
+        isPublished: explicit?.isPublished ?? group.some((procedure) => procedure.isPublished),
         premiumVisibility,
-        createdAt: null,
-        updatedAt: null,
+        createdAt: explicit?.createdAt ?? null,
+        updatedAt: explicit?.updatedAt ?? null,
         procedureCount: group.length,
         translationCoverage: translationCoverage(metadataTitle),
         procedures: group.sort((a, b) => a.sortOrder - b.sortOrder),

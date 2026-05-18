@@ -43,6 +43,7 @@ export const localizedValueSchema = z.record(
 
 export const categorySchema = z.object({
   slug: z.string().regex(/^[a-z0-9_/-]+$/),
+  parentSlug: z.string().optional(),
   internalLabel: z.string().optional(),
   titleEn: z.string().min(1),
   titleIt: z.string().optional(),
@@ -55,7 +56,13 @@ export const categorySchema = z.object({
   color: z.string().optional(),
   sortOrder: z.coerce.number().int().default(0),
   isActive: z.boolean(),
-  isPremium: z.boolean(),
+  premiumVisibility: z.enum([
+    "free",
+    "premium_preview",
+    "premium_only",
+    "hidden",
+  ]),
+  requiredPlan: z.enum(["premium"]).optional().or(z.literal("")),
   verificationStatus: z.enum(["verified", "needsReview", "unverified"]),
   adminNotes: z.string().optional(),
   tags: z.string().optional(),
@@ -81,7 +88,13 @@ export const procedureSchema = z.object({
   status: z.enum(["draft", "published", "archived"]),
   sortOrder: z.coerce.number().int().default(0),
   isActive: z.boolean(),
-  isPremium: z.boolean(),
+  premiumVisibility: z.enum([
+    "free",
+    "premium_preview",
+    "premium_only",
+    "hidden",
+  ]),
+  requiredPlan: z.enum(["premium"]).optional().or(z.literal("")),
   verificationStatus: z.enum(["verified", "needsReview", "unverified"]),
   adminNotes: z.string().optional(),
   tags: z.string().optional(),
