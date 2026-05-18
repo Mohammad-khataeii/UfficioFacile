@@ -3,6 +3,27 @@ import 'package:flutter/material.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
+import '../../italy_admin_copilot/presentation/screens/notification_and_monetization_screens.dart';
+
+String _accountPlanLabel(dynamic plan) {
+  switch (plan?.toString()) {
+    case 'UfficioPlan.premiumMonthly':
+    case 'UfficioPlan.premiumYearly':
+    case 'UfficioPlan.plusMonthly':
+    case 'UfficioPlan.plusYearly':
+    case 'UfficioPlan.pro':
+    case 'UfficioPlan.trial':
+    case 'UfficioPlan.lifetime':
+    case 'UfficioPlan.adminGrant':
+    case 'UfficioPlan.consultant':
+      return 'Premium';
+    case 'UfficioPlan.consultancyOneShot':
+      return 'One-time support';
+    case 'UfficioPlan.free':
+    default:
+      return 'Free';
+  }
+}
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -36,7 +57,7 @@ class AccountScreen extends StatelessWidget {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(context.l10n.t('account_plan')),
-                      subtitle: Text(entitlement?.plan.name ?? 'free'),
+                      subtitle: Text(_accountPlanLabel(entitlement?.plan)),
                     ),
                     const SizedBox(height: 12),
                     FilledButton(
@@ -79,6 +100,8 @@ class AccountScreen extends StatelessWidget {
                           Navigator.pushNamed(context, AppRoutes.privacy),
                       child: Text(context.l10n.t('account_privacy')),
                     ),
+                    const SizedBox(height: 16),
+                    const Card(child: AppMonetizationEntryTile()),
                   ],
                 );
               },

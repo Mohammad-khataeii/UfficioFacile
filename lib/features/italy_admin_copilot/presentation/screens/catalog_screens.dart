@@ -29,6 +29,37 @@ PremiumBadge _subcategoryAccessBadge(
   );
 }
 
+Future<bool> _isPremiumHierarchyLocked(
+  BuildContext context, {
+  required String categoryId,
+  required String subcategoryId,
+  required UfficioProcedure procedure,
+}) async {
+  final scope = AppScope.of(context);
+  final config = await scope.entitlementService.getConfig();
+  if (!config.paywallEnabled) {
+    return false;
+  }
+  final citySlug = UfficioCityRegistry.normalizeSlug(
+    scope.profileController.profile.selectedCityPackId,
+  );
+  final result = await scope.ufficioCatalogRepository.loadCatalogResult(
+    citySlug: citySlug,
+  );
+  final catalog = result.catalog;
+  final category = catalog?.findCategory(categoryId);
+  final subcategory = catalog?.findSubcategory(categoryId, subcategoryId);
+  final hasPremiumPath =
+      procedure.isPremiumOnly ||
+      (subcategory?.isPremiumOnly ?? false) ||
+      (category?.isPremiumOnly ?? false);
+  if (!hasPremiumPath) {
+    return false;
+  }
+  final entitlement = await scope.entitlementService.getCurrentEntitlement();
+  return !entitlement.isProLike;
+}
+
 class CatalogCategoryRouteArgs {
   const CatalogCategoryRouteArgs(this.categoryId);
 
@@ -439,10 +470,25 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                           .canAccessProcedure(procedure);
 
                                   if (!context.mounted) return;
+                                  final languageCode =
+                                      context.l10n.languageCode;
+                                  final teaserText = ufficioLocalizedValue(
+                                    procedure.premiumTeaser.isNotEmpty
+                                        ? procedure.premiumTeaser
+                                        : procedure.shortDescription,
+                                    languageCode,
+                                  );
 
                                   final mustLock =
-                                      procedure.isPremiumOnly &&
-                                      !procedureAccess.allowed;
+                                      !procedureAccess.allowed ||
+                                      await _isPremiumHierarchyLocked(
+                                        context,
+                                        categoryId: widget.categoryId,
+                                        subcategoryId: widget.subcategoryId,
+                                        procedure: procedure,
+                                      );
+
+                                  if (!context.mounted) return;
 
                                   if (mustLock) {
                                     await showPremiumPaywallSheet(
@@ -459,12 +505,7 @@ class _CatalogSubcategoryScreenState extends State<CatalogSubcategoryScreen> {
                                             UfficioPlan.premiumMonthly,
                                       ),
                                       featureLabel: featureLabel,
-                                      teaser: ufficioLocalizedValue(
-                                        procedure.premiumTeaser.isNotEmpty
-                                            ? procedure.premiumTeaser
-                                            : procedure.shortDescription,
-                                        context.l10n.languageCode,
-                                      ),
+                                      teaser: teaserText,
                                     );
                                     return;
                                   }
@@ -596,197 +637,218 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                   return const _CatalogLoadingState();
                 }
                 final access = accessSnapshot.data!;
-                final showLockedPremiumShell =
-                    procedure.isPremiumOnly && !access.allowed;
-                return ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    _CatalogHeaderCard(
-                      title: ufficioLocalizedValue(
-                        procedure.title,
-                        context.l10n.languageCode,
-                        fallback: procedure.id,
-                      ),
-                      description: ufficioLocalizedValue(
-                        procedure.shortDescription,
-                        context.l10n.languageCode,
-                      ),
-                    ),
-                    if (showLockedPremiumShell) ...[
-                      const SizedBox(height: 12),
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.t('premium_locked_title'),
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                ufficioLocalizedValue(
-                                  procedure.premiumTeaser.isNotEmpty
-                                      ? procedure.premiumTeaser
-                                      : procedure.shortDescription,
-                                  context.l10n.languageCode,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(access.reason),
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                return FutureBuilder<bool>(
+                  future: _isPremiumHierarchyLocked(
+                    context,
+                    categoryId: widget.categoryId,
+                    subcategoryId: widget.subcategoryId,
+                    procedure: procedure,
+                  ),
+                  builder: (context, premiumSnapshot) {
+                    if (!premiumSnapshot.hasData) {
+                      return const _CatalogLoadingState();
+                    }
+                    final showLockedPremiumShell =
+                        !access.allowed || premiumSnapshot.data == true;
+                    return ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        _CatalogHeaderCard(
+                          title: ufficioLocalizedValue(
+                            procedure.title,
+                            context.l10n.languageCode,
+                            fallback: procedure.id,
+                          ),
+                          description: ufficioLocalizedValue(
+                            procedure.shortDescription,
+                            context.l10n.languageCode,
+                          ),
+                        ),
+                        if (showLockedPremiumShell) ...[
+                          const SizedBox(height: 12),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  FilledButton(
-                                    onPressed: () => Navigator.pushNamed(
+                                  Text(
+                                    context.l10n.t('premium_locked_title'),
+                                    style: Theme.of(
                                       context,
-                                      AppRoutes.plan,
-                                    ),
-                                    child: Text(
-                                      context.l10n.t('upgrade_to_premium'),
+                                    ).textTheme.titleMedium,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    ufficioLocalizedValue(
+                                      procedure.premiumTeaser.isNotEmpty
+                                          ? procedure.premiumTeaser
+                                          : procedure.shortDescription,
+                                      context.l10n.languageCode,
                                     ),
                                   ),
-                                  TextButton(
-                                    onPressed: () => showPremiumPaywallSheet(
-                                      context,
-                                      decision: EntitlementDecision(
-                                        allowed: false,
-                                        reason: access.reason,
-                                        upgradeTitle: context.l10n.t(
-                                          'cta_consultancy_title',
+                                  const SizedBox(height: 8),
+                                  Text(access.reason),
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      FilledButton(
+                                        onPressed: () => Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.plan,
                                         ),
-                                        upgradeMessage: context.l10n.t(
-                                          'cta_consultancy_body',
+                                        child: Text(
+                                          context.l10n.t('upgrade_to_premium'),
                                         ),
-                                        isPremiumFeature: true,
                                       ),
-                                      featureLabel: context.l10n.t(
-                                        'cta_consultancy_request',
+                                      TextButton(
+                                        onPressed: () =>
+                                            showPremiumPaywallSheet(
+                                              context,
+                                              decision: EntitlementDecision(
+                                                allowed: false,
+                                                reason: access.reason,
+                                                upgradeTitle: context.l10n.t(
+                                                  'cta_consultancy_title',
+                                                ),
+                                                upgradeMessage: context.l10n.t(
+                                                  'cta_consultancy_body',
+                                                ),
+                                                isPremiumFeature: true,
+                                              ),
+                                              featureLabel: context.l10n.t(
+                                                'cta_consultancy_request',
+                                              ),
+                                            ),
+                                        child: Text(
+                                          context.l10n.t(
+                                            'cta_consultancy_request',
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                    child: Text(
-                                      context.l10n.t('cta_consultancy_request'),
-                                    ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (!showLockedPremiumShell) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Column(
-                          children: [
-                            ...procedure.sections.map(
-                              (section) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: section.isPremiumOnly && !access.allowed
-                                    ? _CatalogLockedSectionCard(
-                                        title: ufficioLocalizedValue(
-                                          section.title,
-                                          context.l10n.languageCode,
-                                          fallback: section.key,
-                                        ),
-                                      )
-                                    : _CatalogSectionCard(
-                                        title: ufficioLocalizedValue(
-                                          section.title,
-                                          context.l10n.languageCode,
-                                          fallback: section.key,
-                                        ),
-                                        child: _CatalogSectionBody(
-                                          section: section,
-                                        ),
-                                      ),
-                              ),
                             ),
-                            if (procedure.officialLinks.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _CatalogSectionCard(
-                                  title: context.l10n.t('official_links'),
-                                  child: Column(
-                                    children: procedure.officialLinks
-                                        .where(
-                                          (item) => item.url.trim().isNotEmpty,
-                                        )
-                                        .map(
-                                          (item) => ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            onTap: () =>
-                                                ExternalActionService.open(
-                                                  context,
-                                                  item.url,
-                                                  ExternalValueKind.website,
-                                                ),
-                                            title: Text(
-                                              ufficioLocalizedValue(
-                                                item.label,
-                                                context.l10n.languageCode,
-                                                fallback: item.url,
-                                              ),
+                          ),
+                        ],
+                        if (!showLockedPremiumShell) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Column(
+                              children: [
+                                ...procedure.sections.map(
+                                  (section) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child:
+                                        section.isPremiumOnly && !access.allowed
+                                        ? _CatalogLockedSectionCard(
+                                            title: ufficioLocalizedValue(
+                                              section.title,
+                                              context.l10n.languageCode,
+                                              fallback: section.key,
                                             ),
-                                            subtitle: ExternalValueText(
-                                              item.url,
-                                              kind: ExternalValueKind.website,
+                                          )
+                                        : _CatalogSectionCard(
+                                            title: ufficioLocalizedValue(
+                                              section.title,
+                                              context.l10n.languageCode,
+                                              fallback: section.key,
+                                            ),
+                                            child: _CatalogSectionBody(
+                                              section: section,
                                             ),
                                           ),
-                                        )
-                                        .toList(),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    if (!showLockedPremiumShell &&
-                        procedure.contacts.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _CatalogSectionCard(
-                          title: context.l10n.t('contacts_directory'),
-                          child: Column(
-                            children: procedure.contacts
-                                .map(
-                                  (item) => ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    title: Text(
-                                      ufficioLocalizedValue(
-                                        item.label,
-                                        context.l10n.languageCode,
-                                        fallback: item.value,
+                                if (procedure.officialLinks.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: _CatalogSectionCard(
+                                      title: context.l10n.t('official_links'),
+                                      child: Column(
+                                        children: procedure.officialLinks
+                                            .where(
+                                              (item) =>
+                                                  item.url.trim().isNotEmpty,
+                                            )
+                                            .map(
+                                              (item) => ListTile(
+                                                contentPadding: EdgeInsets.zero,
+                                                onTap: () =>
+                                                    ExternalActionService.open(
+                                                      context,
+                                                      item.url,
+                                                      ExternalValueKind.website,
+                                                    ),
+                                                title: Text(
+                                                  ufficioLocalizedValue(
+                                                    item.label,
+                                                    context.l10n.languageCode,
+                                                    fallback: item.url,
+                                                  ),
+                                                ),
+                                                subtitle: ExternalValueText(
+                                                  item.url,
+                                                  kind:
+                                                      ExternalValueKind.website,
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
                                       ),
                                     ),
-                                    subtitle: ExternalValueText(
-                                      item.value,
-                                      kind: ExternalValueKind.auto,
-                                    ),
                                   ),
-                                )
-                                .toList(),
+                              ],
+                            ),
                           ),
+                        ],
+                        if (!showLockedPremiumShell &&
+                            procedure.contacts.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _CatalogSectionCard(
+                              title: context.l10n.t('contacts_directory'),
+                              child: Column(
+                                children: procedure.contacts
+                                    .map(
+                                      (item) => ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        title: Text(
+                                          ufficioLocalizedValue(
+                                            item.label,
+                                            context.l10n.languageCode,
+                                            fallback: item.value,
+                                          ),
+                                        ),
+                                        subtitle: ExternalValueText(
+                                          item.value,
+                                          kind: ExternalValueKind.auto,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        ],
+                        GlobalProblemRequestCard(
+                          categoryId: procedure.categoryId,
+                          subcategoryId: procedure.subcategoryId,
+                          sourcePage: procedure.id,
                         ),
-                      ),
-                    ],
-                    GlobalProblemRequestCard(
-                      categoryId: procedure.categoryId,
-                      subcategoryId: procedure.subcategoryId,
-                      sourcePage: procedure.id,
-                    ),
-                    const SizedBox(height: 12),
-                    PrivateConsultancyCard(
-                      categoryId: procedure.categoryId,
-                      subcategoryId: procedure.subcategoryId,
-                      sourcePage: procedure.id,
-                    ),
-                  ],
+                        const SizedBox(height: 12),
+                        PrivateConsultancyCard(
+                          categoryId: procedure.categoryId,
+                          subcategoryId: procedure.subcategoryId,
+                          sourcePage: procedure.id,
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             );

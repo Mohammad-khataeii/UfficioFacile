@@ -10,6 +10,7 @@ import '../../data/connected_product_data.dart';
 import '../../data/ufficio_city_registry.dart';
 import '../../domain/ufficio_catalog.dart';
 import '../screens/catalog_screens.dart';
+import 'notification_and_monetization_screens.dart';
 
 String _premiumLabel(UfficioPremiumVisibility visibility) {
   switch (visibility) {
@@ -57,6 +58,149 @@ class _PremiumPill extends StatelessWidget {
           context,
         ).textTheme.labelMedium?.copyWith(color: foregroundColor),
       ),
+    );
+  }
+}
+
+Future<bool> _canOpenPremiumContent(
+  BuildContext context,
+  UfficioPremiumVisibility visibility,
+) async {
+  if (visibility != UfficioPremiumVisibility.premiumOnly) {
+    return true;
+  }
+  final scope = AppScope.of(context);
+  final config = await scope.entitlementService.getConfig();
+  if (!config.paywallEnabled) {
+    return true;
+  }
+  final entitlement = await scope.entitlementService.getCurrentEntitlement();
+  return entitlement.isProLike;
+}
+
+Future<void> _showPremiumLockedMessage(BuildContext context) async {
+  await showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('This is part of Premium'),
+      content: const Text(
+        'Check out Premium: you can open all categories and ask for 2 private help requests per month.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Maybe later'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.pop(dialogContext);
+            Navigator.pushNamed(context, AppRoutes.plan);
+          },
+          child: const Text('Check out Premium'),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _openPremiumAwareRoute({
+  required BuildContext context,
+  required UfficioPremiumVisibility visibility,
+  required String routeName,
+  Object? arguments,
+}) async {
+  final allowed = await _canOpenPremiumContent(context, visibility);
+  if (!context.mounted) return;
+  if (!allowed) {
+    await _showPremiumLockedMessage(context);
+    return;
+  }
+  Navigator.pushNamed(context, routeName, arguments: arguments);
+}
+
+UfficioPremiumVisibility _effectivePremiumVisibility(
+  List<UfficioPremiumVisibility> values,
+) {
+  if (values.contains(UfficioPremiumVisibility.premiumOnly)) {
+    return UfficioPremiumVisibility.premiumOnly;
+  }
+  if (values.contains(UfficioPremiumVisibility.premiumPreview)) {
+    return UfficioPremiumVisibility.premiumPreview;
+  }
+  if (values.contains(UfficioPremiumVisibility.hidden)) {
+    return UfficioPremiumVisibility.hidden;
+  }
+  return UfficioPremiumVisibility.free;
+}
+
+class _PremiumLockedView extends StatelessWidget {
+  const _PremiumLockedView({
+    required this.title,
+    required this.description,
+    this.visibility = UfficioPremiumVisibility.premiumOnly,
+  });
+
+  final String title;
+  final String description;
+  final UfficioPremiumVisibility visibility;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _PremiumPill(visibility: visibility),
+                  ],
+                ),
+                if (description.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(description),
+                ],
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'This is part of Premium',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Check out Premium: you can open all categories and ask for 2 private help requests per month.',
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.plan),
+                  child: const Text('Check out Premium'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -228,9 +372,10 @@ class _ConnectedBrowseProceduresScreenState
                             Text('${category.subcategories.length} subcats'),
                           ],
                         ),
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.category,
+                        onTap: () => _openPremiumAwareRoute(
+                          context: context,
+                          visibility: category.premiumVisibility,
+                          routeName: AppRoutes.category,
                           arguments: CatalogCategoryRouteArgs(category.id),
                         ),
                       ),
@@ -277,9 +422,10 @@ class _ConnectedBrowseProceduresScreenState
                                       Text(item.locationLabel),
                                     ],
                                   ),
-                                  onTap: () => Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.catalogProcedure,
+                                  onTap: () => _openPremiumAwareRoute(
+                                    context: context,
+                                    visibility: item.premiumVisibility,
+                                    routeName: AppRoutes.catalogProcedure,
                                     arguments: CatalogProcedureRouteArgs(
                                       categoryId: item.categoryId,
                                       subcategoryId: item.subcategoryId,
@@ -347,8 +493,12 @@ class ConnectedCategoryScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              ...category.subcategories.map(
-                (subcategory) => Padding(
+              ...category.subcategories.map((subcategory) {
+                final effectiveVisibility = _effectivePremiumVisibility([
+                  category.premiumVisibility,
+                  subcategory.premiumVisibility,
+                ]);
+                return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Card(
                     child: ListTile(
@@ -358,16 +508,15 @@ class ConnectedCategoryScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _PremiumPill(
-                            visibility: subcategory.premiumVisibility,
-                          ),
+                          _PremiumPill(visibility: effectiveVisibility),
                           const SizedBox(height: 6),
                           Text('${subcategory.procedures.length} procedures'),
                         ],
                       ),
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.subcategory,
+                      onTap: () => _openPremiumAwareRoute(
+                        context: context,
+                        visibility: effectiveVisibility,
+                        routeName: AppRoutes.subcategory,
                         arguments: CatalogSubcategoryRouteArgs(
                           categoryId: category.id,
                           subcategoryId: subcategory.id,
@@ -375,8 +524,8 @@ class ConnectedCategoryScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }),
             ],
           );
         },
@@ -425,80 +574,126 @@ class ConnectedSubcategoryScreen extends StatelessWidget {
           if (category == null || subcategory == null) {
             return const Center(child: Text('Subcategory not found.'));
           }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _LocationSummaryCard(location: location),
-              const SizedBox(height: 12),
-              Card(
-                child: ListTile(
-                  title: Text(subcategory.title),
-                  subtitle: Text(
-                    '${category.title}\n${subcategory.description}',
-                  ),
-                  isThreeLine: true,
-                  trailing: _PremiumPill(
+          if (subcategory.premiumVisibility ==
+              UfficioPremiumVisibility.premiumOnly) {
+            return FutureBuilder<bool>(
+              future: _canOpenPremiumContent(
+                context,
+                subcategory.premiumVisibility,
+              ),
+              builder: (context, accessSnapshot) {
+                if (accessSnapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (accessSnapshot.data != true) {
+                  return _PremiumLockedView(
+                    title: subcategory.title,
+                    description:
+                        '${category.title}\n${subcategory.description}',
                     visibility: subcategory.premiumVisibility,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ...subcategory.procedures.map(
-                (procedure) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Card(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.catalogProcedure,
-                        arguments: CatalogProcedureRouteArgs(
-                          categoryId: category.id,
-                          subcategoryId: subcategory.id,
-                          procedureId: procedure.slug,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    procedure.title,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                const Icon(Icons.chevron_right),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            _PremiumPill(
-                              visibility: procedure.premiumVisibility,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              procedure.summary,
-                              maxLines: 4,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+                  );
+                }
+                return _ConnectedSubcategoryBody(
+                  location: location,
+                  category: category,
+                  subcategory: subcategory,
+                );
+              },
+            );
+          }
+          return _ConnectedSubcategoryBody(
+            location: location,
+            category: category,
+            subcategory: subcategory,
           );
         },
       ),
+    );
+  }
+}
+
+class _ConnectedSubcategoryBody extends StatelessWidget {
+  const _ConnectedSubcategoryBody({
+    required this.location,
+    required this.category,
+    required this.subcategory,
+  });
+
+  final CatalogLocationSelection location;
+  final ConnectedCategoryRecord category;
+  final ConnectedSubcategoryRecord subcategory;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _LocationSummaryCard(location: location),
+        const SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            title: Text(subcategory.title),
+            subtitle: Text('${category.title}\n${subcategory.description}'),
+            isThreeLine: true,
+            trailing: _PremiumPill(visibility: subcategory.premiumVisibility),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...subcategory.procedures.map((procedure) {
+          final effectiveVisibility = _effectivePremiumVisibility([
+            category.premiumVisibility,
+            subcategory.premiumVisibility,
+            procedure.premiumVisibility,
+          ]);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Card(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => _openPremiumAwareRoute(
+                  context: context,
+                  visibility: effectiveVisibility,
+                  routeName: AppRoutes.catalogProcedure,
+                  arguments: CatalogProcedureRouteArgs(
+                    categoryId: category.id,
+                    subcategoryId: subcategory.id,
+                    procedureId: procedure.slug,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              procedure.title,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _PremiumPill(visibility: effectiveVisibility),
+                      const SizedBox(height: 10),
+                      Text(
+                        procedure.summary,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
@@ -571,167 +766,217 @@ class ConnectedProcedureDetailScreen extends StatelessWidget {
           if (category == null || subcategory == null || procedure == null) {
             return const Center(child: Text('Procedure not found.'));
           }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _LocationSummaryCard(location: location),
-              const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        procedure.title,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      _PremiumPill(visibility: procedure.premiumVisibility),
-                      const SizedBox(height: 8),
-                      Text('${category.title} / ${subcategory.title}'),
-                      const SizedBox(height: 12),
-                      Text(procedure.summary),
-                      if (procedure.localVariationNote != null) ...[
-                        const SizedBox(height: 12),
-                        Text(procedure.localVariationNote!),
-                      ],
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          FilledButton(
-                            onPressed: () async {
-                              await _saveProcedure(context, procedure);
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Procedure saved with checklist, deadlines, and costs.',
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text('Save this checklist'),
-                          ),
-                          OutlinedButton(
-                            onPressed: () =>
-                                Navigator.pushNamed(context, AppRoutes.costs),
-                            child: const Text('Open cost dashboard'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              _ProcedureSectionCard(
-                title: 'What it is',
-                items: [procedure.description],
-                initiallyExpanded: true,
-              ),
-              _ProcedureSectionCard(
-                title: 'When you need it',
-                items: procedure.whenYouNeedIt.isEmpty
-                    ? (procedure.summary.trim().isEmpty
-                          ? const [
-                              'Check the official office link for the exact cases.',
-                            ]
-                          : [procedure.summary])
-                    : procedure.whenYouNeedIt,
-              ),
-              _ProcedureSectionCard(
-                title: 'Before you send',
-                items: procedure.preparationChecklist,
-              ),
-              _ProcedureSectionCard(title: 'Steps', items: procedure.steps),
-              _ProcedureSectionCard(
-                title: 'Documents',
-                items: procedure.documentsRequired,
-              ),
-              _ProcedureSectionCard(title: 'Cost', items: procedure.costs),
-              _ProcedureSectionCard(
-                title: 'Timeline',
-                items: procedure.timelines,
-              ),
-              _ProcedureSectionCard(
-                title: 'Warnings',
-                items: procedure.warnings,
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Official channels',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      ...procedure.channels.map((item) => Text('• $item')),
-                      if (procedure.officialLinks.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        ...procedure.officialLinks.map(
-                          (item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: ExternalValueRow(
-                              label: ufficioLocalizedValue(
-                                item.label,
-                                context.l10n.languageCode,
-                                fallback: item.type,
-                              ),
-                              value: item.url,
-                              kind: ExternalValueKind.website,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Official contacts',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      if (procedure.officialContacts.isEmpty)
-                        const Text(
-                          'No local contact saved yet. Check the official office link before sending documents.',
-                        )
-                      else
-                        ...procedure.officialContacts.map(
-                          (item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: ExternalValueRow(
-                              label: ufficioLocalizedValue(
-                                item.label,
-                                context.l10n.languageCode,
-                                fallback: item.type,
-                              ),
-                              value: item.value,
-                              kind: _contactKind(item),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          final effectiveVisibility = _effectivePremiumVisibility([
+            category.premiumVisibility,
+            subcategory.premiumVisibility,
+            procedure.premiumVisibility,
+          ]);
+          if (effectiveVisibility == UfficioPremiumVisibility.premiumOnly) {
+            return FutureBuilder<bool>(
+              future: _canOpenPremiumContent(context, effectiveVisibility),
+              builder: (context, accessSnapshot) {
+                if (accessSnapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (accessSnapshot.data != true) {
+                  return _PremiumLockedView(
+                    title: procedure.title,
+                    description: procedure.summary,
+                    visibility: effectiveVisibility,
+                  );
+                }
+                return _ConnectedProcedureDetailBody(
+                  location: location,
+                  category: category,
+                  subcategory: subcategory,
+                  procedure: procedure,
+                  onSaveProcedure: () => _saveProcedure(context, procedure),
+                );
+              },
+            );
+          }
+          return _ConnectedProcedureDetailBody(
+            location: location,
+            category: category,
+            subcategory: subcategory,
+            procedure: procedure,
+            onSaveProcedure: () => _saveProcedure(context, procedure),
           );
         },
       ),
+    );
+  }
+}
+
+class _ConnectedProcedureDetailBody extends StatelessWidget {
+  const _ConnectedProcedureDetailBody({
+    required this.location,
+    required this.category,
+    required this.subcategory,
+    required this.procedure,
+    required this.onSaveProcedure,
+  });
+
+  final CatalogLocationSelection location;
+  final ConnectedCategoryRecord category;
+  final ConnectedSubcategoryRecord subcategory;
+  final ConnectedProcedureRecord procedure;
+  final Future<void> Function() onSaveProcedure;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _LocationSummaryCard(location: location),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  procedure.title,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                _PremiumPill(visibility: procedure.premiumVisibility),
+                const SizedBox(height: 8),
+                Text('${category.title} / ${subcategory.title}'),
+                const SizedBox(height: 12),
+                Text(procedure.summary),
+                if (procedure.localVariationNote != null) ...[
+                  const SizedBox(height: 12),
+                  Text(procedure.localVariationNote!),
+                ],
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton(
+                      onPressed: () async {
+                        await onSaveProcedure();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Procedure saved with checklist, deadlines, and costs.',
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Save this checklist'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRoutes.costs),
+                      child: const Text('Open cost dashboard'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _ProcedureSectionCard(
+          title: 'What it is',
+          items: [procedure.description],
+          initiallyExpanded: true,
+        ),
+        _ProcedureSectionCard(
+          title: 'When you need it',
+          items: procedure.whenYouNeedIt.isEmpty
+              ? (procedure.summary.trim().isEmpty
+                    ? const [
+                        'Check the official office link for the exact cases.',
+                      ]
+                    : [procedure.summary])
+              : procedure.whenYouNeedIt,
+        ),
+        _ProcedureSectionCard(
+          title: 'Before you send',
+          items: procedure.preparationChecklist,
+        ),
+        _ProcedureSectionCard(title: 'Steps', items: procedure.steps),
+        _ProcedureSectionCard(
+          title: 'Documents',
+          items: procedure.documentsRequired,
+        ),
+        _ProcedureSectionCard(title: 'Cost', items: procedure.costs),
+        _ProcedureSectionCard(title: 'Timeline', items: procedure.timelines),
+        _ProcedureSectionCard(title: 'Warnings', items: procedure.warnings),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Official channels',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                ...procedure.channels.map((item) => Text('• $item')),
+                if (procedure.officialLinks.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  ...procedure.officialLinks.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: ExternalValueRow(
+                        label: ufficioLocalizedValue(
+                          item.label,
+                          context.l10n.languageCode,
+                          fallback: item.type,
+                        ),
+                        value: item.url,
+                        kind: ExternalValueKind.website,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Official contacts',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                if (procedure.officialContacts.isEmpty)
+                  const Text(
+                    'No local contact saved yet. Check the official office link before sending documents.',
+                  )
+                else
+                  ...procedure.officialContacts.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: ExternalValueRow(
+                        label: ufficioLocalizedValue(
+                          item.label,
+                          context.l10n.languageCode,
+                          fallback: item.type,
+                        ),
+                        value: item.value,
+                        kind: _contactKind(item),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -805,6 +1050,7 @@ class _ConnectedProblemIntakeScreenState
         await scope.connectedUserDataRepository.saveCostItem(cost);
       }
     }
+    await scope.notificationService.syncScheduledNotifications();
     if (!mounted) return;
     setState(() => _saving = false);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -912,9 +1158,10 @@ class _ConnectedProblemIntakeScreenState
                             const Icon(Icons.chevron_right),
                           ],
                         ),
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.catalogProcedure,
+                        onTap: () => _openPremiumAwareRoute(
+                          context: context,
+                          visibility: item.premiumVisibility,
+                          routeName: AppRoutes.catalogProcedure,
                           arguments: CatalogProcedureRouteArgs(
                             categoryId: item.categoryId,
                             subcategoryId: item.subcategoryId,
@@ -999,6 +1246,7 @@ class _ConnectedSituationScanScreenState
         await scope.connectedUserDataRepository.saveCostItem(cost);
       }
     }
+    await scope.notificationService.syncScheduledNotifications();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -1221,36 +1469,39 @@ class _ConnectedChecklistScreenState extends State<ConnectedChecklistScreen> {
                       leading: Checkbox(
                         value: item.status == ConnectedChecklistStatus.done,
                         onChanged: (checked) async {
-                          await AppScope.of(
-                            context,
-                          ).connectedUserDataRepository.saveChecklistItem(
-                            item.copyWith(
-                              status: checked == true
-                                  ? ConnectedChecklistStatus.done
-                                  : ConnectedChecklistStatus.todo,
-                            ),
-                          );
+                          final scope = AppScope.of(context);
+                          await scope.connectedUserDataRepository
+                              .saveChecklistItem(
+                                item.copyWith(
+                                  status: checked == true
+                                      ? ConnectedChecklistStatus.done
+                                      : ConnectedChecklistStatus.todo,
+                                ),
+                              );
+                          await scope.notificationService
+                              .syncScheduledNotifications();
                           await _reload();
                         },
                       ),
                       trailing: PopupMenuButton<String>(
                         onSelected: (value) async {
+                          final scope = AppScope.of(context);
                           if (value == 'delete') {
-                            await AppScope.of(context)
-                                .connectedUserDataRepository
+                            await scope.connectedUserDataRepository
                                 .deleteChecklistItem(item.id);
                           } else {
-                            await AppScope.of(
-                              context,
-                            ).connectedUserDataRepository.saveChecklistItem(
-                              item.copyWith(
-                                status: ConnectedChecklistStatus.values
-                                    .firstWhere(
-                                      (status) => status.name == value,
-                                    ),
-                              ),
-                            );
+                            await scope.connectedUserDataRepository
+                                .saveChecklistItem(
+                                  item.copyWith(
+                                    status: ConnectedChecklistStatus.values
+                                        .firstWhere(
+                                          (status) => status.name == value,
+                                        ),
+                                  ),
+                                );
                           }
+                          await scope.notificationService
+                              .syncScheduledNotifications();
                           await _reload();
                         },
                         itemBuilder: (context) => const [
@@ -1311,10 +1562,12 @@ class _ConnectedDeadlinesScreenState extends State<ConnectedDeadlinesScreen> {
       appBar: AppBar(title: Text(context.l10n.t('deadlines_short'))),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final repository = AppScope.of(context).connectedUserDataRepository;
+          final scope = AppScope.of(context);
+          final repository = scope.connectedUserDataRepository;
           final created = await _showDeadlineSheet(context);
           if (created == null) return;
           await repository.saveDeadline(created);
+          await scope.notificationService.syncScheduledNotifications();
           await _reload();
         },
         child: const Icon(Icons.add_alert_outlined),
@@ -1349,36 +1602,37 @@ class _ConnectedDeadlinesScreenState extends State<ConnectedDeadlinesScreen> {
                       isThreeLine: true,
                       trailing: PopupMenuButton<String>(
                         onSelected: (value) async {
+                          final scope = AppScope.of(context);
                           if (value == 'delete') {
-                            await AppScope.of(context)
-                                .connectedUserDataRepository
+                            await scope.connectedUserDataRepository
                                 .deleteDeadline(item.id);
                           } else {
-                            await AppScope.of(
-                              context,
-                            ).connectedUserDataRepository.saveDeadline(
-                              DeadlineRecord(
-                                id: item.id,
-                                userId: item.userId,
-                                title: item.title,
-                                description: item.description,
-                                dueDate: item.dueDate,
-                                sourceType: item.sourceType,
-                                sourceProcedureId: item.sourceProcedureId,
-                                categorySlug: item.categorySlug,
-                                procedureSlug: item.procedureSlug,
-                                status: ConnectedDeadlineStatus.values
-                                    .firstWhere(
-                                      (status) => status.name == value,
-                                    ),
-                                reminderEnabled: item.reminderEnabled,
-                                reminderOffsetDays: item.reminderOffsetDays,
-                                officialLink: item.officialLink,
-                                createdAt: item.createdAt,
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
+                            await scope.connectedUserDataRepository
+                                .saveDeadline(
+                                  DeadlineRecord(
+                                    id: item.id,
+                                    userId: item.userId,
+                                    title: item.title,
+                                    description: item.description,
+                                    dueDate: item.dueDate,
+                                    sourceType: item.sourceType,
+                                    sourceProcedureId: item.sourceProcedureId,
+                                    categorySlug: item.categorySlug,
+                                    procedureSlug: item.procedureSlug,
+                                    status: ConnectedDeadlineStatus.values
+                                        .firstWhere(
+                                          (status) => status.name == value,
+                                        ),
+                                    reminderEnabled: item.reminderEnabled,
+                                    reminderOffsetDays: item.reminderOffsetDays,
+                                    officialLink: item.officialLink,
+                                    createdAt: item.createdAt,
+                                    updatedAt: DateTime.now(),
+                                  ),
+                                );
                           }
+                          await scope.notificationService
+                              .syncScheduledNotifications();
                           await _reload();
                         },
                         itemBuilder: (context) => const [
@@ -1544,6 +1798,10 @@ class _ConnectedProfileFolderScreenState
                           : 'Free'),
                 subtitle: 'Public procedures stay available in both plans.',
               ),
+              const SizedBox(height: 12),
+              const AppMonetizationEntryTile(),
+              const SizedBox(height: 12),
+              const FreeUserBannerAdCard(screen: 'profile_folder'),
             ],
           );
         },
@@ -1586,10 +1844,12 @@ class _ConnectedCostDashboardScreenState
       appBar: AppBar(title: Text(context.l10n.t('cost_dashboard'))),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final repository = AppScope.of(context).connectedUserDataRepository;
+          final scope = AppScope.of(context);
+          final repository = scope.connectedUserDataRepository;
           final created = await _showCostItemSheet(context);
           if (created == null) return;
           await repository.saveCostItem(created);
+          await scope.notificationService.syncScheduledNotifications();
           await _reload();
         },
         child: const Icon(Icons.add_chart_outlined),
@@ -1645,9 +1905,11 @@ class _ConnectedCostDashboardScreenState
                       isThreeLine: item.notes != null && item.notes!.isNotEmpty,
                       trailing: IconButton(
                         onPressed: () async {
-                          await AppScope.of(
-                            context,
-                          ).connectedUserDataRepository.deleteCostItem(item.id);
+                          final scope = AppScope.of(context);
+                          await scope.connectedUserDataRepository
+                              .deleteCostItem(item.id);
+                          await scope.notificationService
+                              .syncScheduledNotifications();
                           await _reload();
                         },
                         icon: const Icon(Icons.delete_outline),

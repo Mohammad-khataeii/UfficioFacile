@@ -551,3 +551,22 @@ export async function getSettingsData(supabase: any) {
     premiumConfig: premiumConfig.data ?? [],
   };
 }
+
+export async function getPromoCodeOverview(supabase: any) {
+  const [codes, redemptions] = await Promise.all([
+    safeSelectRows(supabase, "ufficio_promo_codes", (query) =>
+      query.order("updated_at", { ascending: false }).limit(250),
+    ),
+    safeSelectRows(supabase, "ufficio_promo_redemptions", (query) =>
+      query.order("created_at", { ascending: false }).limit(250),
+    ),
+  ]);
+
+  return {
+    codes: codes.data,
+    redemptions: redemptions.data,
+    warnings: [codes.warning, redemptions.warning].filter(
+      (warning): warning is string => Boolean(warning),
+    ),
+  };
+}

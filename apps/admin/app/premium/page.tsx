@@ -111,6 +111,9 @@ export default async function PremiumPage() {
           <Link prefetch={false} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" href="/premium/events">
             View events
           </Link>
+          <Link prefetch={false} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" href="/premium/promos">
+            Promo codes
+          </Link>
         </div>
 
         <section className="grid gap-6 xl:grid-cols-2">

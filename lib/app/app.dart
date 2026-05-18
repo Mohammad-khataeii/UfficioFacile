@@ -20,6 +20,7 @@ import '../features/italy_admin_copilot/presentation/screens/connected_product_s
 import '../features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_screens.dart';
 import '../features/italy_admin_copilot/presentation/screens/life_admin_phase5_screens.dart';
+import '../features/italy_admin_copilot/presentation/screens/notification_and_monetization_screens.dart';
 
 class LifeAdminApp extends StatefulWidget {
   const LifeAdminApp({super.key});
@@ -58,6 +59,12 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
     _runDeferredLoad('cms', scope.cmsContentController.load);
     _runDeferredLoad('entitlement', () async {
       await scope.entitlementService.getCurrentEntitlement();
+    });
+    _runDeferredLoad('notifications', () async {
+      await scope.notificationService.syncScheduledNotifications();
+    });
+    _runDeferredLoad('ads', () async {
+      await scope.adsService.initialize();
     });
   }
 
@@ -321,6 +328,14 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     return MaterialPageRoute(
                       builder: (_) => const AccountScreen(),
                     );
+                  case AppRoutes.notifications:
+                    return MaterialPageRoute(
+                      builder: (_) => const NotificationCenterScreen(),
+                    );
+                  case AppRoutes.promoCodes:
+                    return MaterialPageRoute(
+                      builder: (_) => const PromoCodesScreen(),
+                    );
                   case AppRoutes.changePassword:
                     return MaterialPageRoute(
                       builder: (_) => const AuthGate(
@@ -421,7 +436,7 @@ class _EntryRouter extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([controller, authController]),
       builder: (context, _) {
-        final path = Uri.base.path;
+        final path = _deepLinkPath(Uri.base);
         if (path == AppRoutes.confirmEmail) {
           return const EmailConfirmationSuccessScreen();
         }
@@ -449,4 +464,14 @@ class _EntryRouter extends StatelessWidget {
       },
     );
   }
+}
+
+String _deepLinkPath(Uri uri) {
+  if (uri.path.isNotEmpty && uri.path != '/') {
+    return uri.path;
+  }
+  if (uri.scheme == 'ufficiofacile' && uri.host == 'auth') {
+    return '/auth${uri.path}';
+  }
+  return uri.path;
 }

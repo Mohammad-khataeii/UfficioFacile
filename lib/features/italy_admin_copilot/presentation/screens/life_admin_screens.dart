@@ -62,6 +62,7 @@ import '../../domain/ufficio_city.dart';
 import '../widgets/cms_interactive_tools.dart';
 import 'catalog_screens.dart';
 import 'life_admin_phase5_screens.dart';
+import 'notification_and_monetization_screens.dart';
 
 class ProcedureRouteArgs {
   const ProcedureRouteArgs(this.procedure);
@@ -604,6 +605,22 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                           icon: const Icon(Icons.inventory_outlined),
                           label: Text(context.l10n.t('proof_folder')),
                         ),
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.notifications,
+                          ),
+                          icon: const Icon(Icons.notifications_outlined),
+                          label: const Text('Notifications'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.promoCodes,
+                          ),
+                          icon: const Icon(Icons.local_offer_outlined),
+                          label: const Text('Promo codes'),
+                        ),
                       ],
                     ),
                   ],
@@ -628,6 +645,13 @@ class _LifeAdminHomeScreenState extends State<LifeAdminHomeScreen> {
                         .toList(),
                   ),
                 ),
+              const SizedBox(height: 16),
+              const _SectionCard(
+                title: 'Notifications and codes',
+                child: AppMonetizationEntryTile(),
+              ),
+              const SizedBox(height: 16),
+              const FreeUserBannerAdCard(screen: 'home'),
               const SizedBox(height: 16),
               _SectionCard(
                 title: 'Selected city',
@@ -3784,21 +3808,49 @@ Future<void> _openCatalogProcedureFromSlugs(
         procedure,
       );
       if (!context.mounted) return;
-      if (!access.allowed) {
+      final citySlug = UfficioCityRegistry.normalizeSlug(
+        scope.profileController.profile.selectedCityPackId,
+      );
+      final catalogResult = await scope.ufficioCatalogRepository
+          .loadCatalogResult(citySlug: citySlug);
+      if (!context.mounted) return;
+      final category = catalogResult.catalog?.findCategory(categorySlug);
+      final subcategory = catalogResult.catalog?.findSubcategory(
+        categorySlug,
+        subcategorySlug ?? procedureSlug,
+      );
+      final lockedByParent =
+          procedure.isPremiumOnly ||
+          (subcategory?.isPremiumOnly ?? false) ||
+          (category?.isPremiumOnly ?? false);
+      if (!access.allowed || lockedByParent) {
+        final featureLabel = _localizedCatalogText(
+          context,
+          procedure.title,
+          fallback: procedure.id,
+        );
+        final teaser = _localizedCatalogText(
+          context,
+          procedure.premiumTeaser.isNotEmpty
+              ? procedure.premiumTeaser
+              : procedure.shortDescription,
+        );
+        final decision = !access.allowed
+            ? access
+            : const EntitlementDecision(
+                allowed: false,
+                isPremiumFeature: true,
+                reason: 'This guide is part of UfficioFacile Premium.',
+                upgradeTitle: 'Premium feature',
+                upgradeMessage:
+                    'This guide is part of UfficioFacile Premium. You can still browse free guides, or choose a plan to unlock deeper checklists, templates, and private support.',
+                recommendedPlan: UfficioPlan.premiumMonthly,
+              );
         await showPremiumPaywallSheet(
           context,
-          decision: access,
-          featureLabel: _localizedCatalogText(
-            context,
-            procedure.title,
-            fallback: procedure.id,
-          ),
-          teaser: _localizedCatalogText(
-            context,
-            procedure.premiumTeaser.isNotEmpty
-                ? procedure.premiumTeaser
-                : procedure.shortDescription,
-          ),
+          decision: decision,
+          featureLabel: featureLabel,
+          teaser: teaser,
         );
         return;
       }
@@ -8904,7 +8956,9 @@ class _AdminPremiumScreenState extends State<AdminPremiumScreen> {
                 title: const Text('Show premium badges'),
               ),
               const SizedBox(height: 12),
-              Text('Current plan: ${entitlement.plan.name}'),
+              Text(
+                'Current plan: ${entitlement.plan.toString().split('.').last}',
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,

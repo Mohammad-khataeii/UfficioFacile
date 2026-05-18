@@ -205,7 +205,7 @@
           "id": "ssn_asl_access",
           "categoryId": "health_asl",
           "sortOrder": 10,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "SSN and ASL access",
@@ -2513,7 +2513,7 @@
           "id": "asl_problems",
           "categoryId": "health_asl",
           "sortOrder": 60,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "ASL problems and rejected requests",
@@ -2876,7 +2876,7 @@
           "id": "student_insurance",
           "categoryId": "health_asl",
           "sortOrder": 70,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Student insurance",
@@ -5156,7 +5156,7 @@
           "id": "student_rent",
           "categoryId": "housing_rent",
           "sortOrder": 110,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Student rent problems",
@@ -11485,7 +11485,7 @@
           "id": "wrong_bill_refunds",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 80,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Wrong bill and refunds",
@@ -11943,7 +11943,7 @@
           "id": "contract_not_requested",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 110,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": false,
           "title": {
             "en": "Contract not requested",
@@ -12087,7 +12087,7 @@
           "id": "complaints_conciliaweb",
           "categoryId": "telecom_internet_mobile",
           "sortOrder": 120,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Complaints and ConciliaWeb",
@@ -15310,7 +15310,7 @@
           "id": "naspi_unemployment",
           "categoryId": "work_inps_patronato",
           "sortOrder": 20,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "NASpI and unemployment",
@@ -15980,7 +15980,7 @@
           "id": "work_documents_employer",
           "categoryId": "work_inps_patronato",
           "sortOrder": 50,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Work documents and employer problems",
@@ -18692,7 +18692,7 @@
           "id": "edisu_scholarships_housing",
           "categoryId": "university_student",
           "sortOrder": 60,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "EDISU scholarships and housing",
@@ -20059,7 +20059,7 @@
           "id": "student_tickets_formal_requests",
           "categoryId": "university_student",
           "sortOrder": 130,
-          "isPremiumOnly": false,
+          "isPremiumOnly": true,
           "hasPremiumContent": true,
           "title": {
             "en": "Tickets, emails, and rejected requests",

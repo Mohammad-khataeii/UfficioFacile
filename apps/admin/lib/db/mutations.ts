@@ -15,6 +15,7 @@ import {
   adminUserSchema,
   categorySchema,
   entitlementSchema,
+  promoCodeSchema,
   procedureSchema,
 } from "@/lib/validation/schemas";
 
@@ -101,6 +102,15 @@ function serializeSupabaseError(error: any) {
       error?.details == null ? null : String(error.details),
     hint: error?.hint == null ? null : String(error.hint),
   };
+}
+
+function parseOptionalDate(value: string | undefined) {
+  if (!value || !value.trim()) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("Invalid date value.");
+  }
+  return parsed.toISOString();
 }
 
 function actionResultQuery(result: CmsActionResult) {
@@ -981,6 +991,64 @@ export async function updatePublicConfig(
     afterValue: payload,
   });
   revalidatePath("/settings");
+}
+
+export async function upsertPromoCode(formData: FormData) {
+  const admin = await requireAdmin("premium.manage");
+  const parsed = promoCodeSchema.parse({
+    id: String(formData.get("id") ?? ""),
+    code: String(formData.get("code") ?? ""),
+    title: String(formData.get("title") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    planKey: String(formData.get("planKey") ?? "premium_monthly"),
+    durationDays: formData.get("durationDays"),
+    maxRedemptions:
+      String(formData.get("maxRedemptions") ?? "").trim() === ""
+        ? undefined
+        : formData.get("maxRedemptions"),
+    startsAt: String(formData.get("startsAt") ?? ""),
+    endsAt: String(formData.get("endsAt") ?? ""),
+    assignedUserId: String(formData.get("assignedUserId") ?? ""),
+    isActive: formData.get("isActive") === "on",
+  });
+
+  const payload = {
+    id: parsed.id || undefined,
+    code: parsed.code.toUpperCase(),
+    title: parsed.title,
+    description: parsed.description?.trim() || null,
+    plan_key: parsed.planKey,
+    duration_days: parsed.durationDays,
+    max_redemptions: parsed.maxRedemptions ?? null,
+    starts_at: parseOptionalDate(parsed.startsAt),
+    ends_at: parseOptionalDate(parsed.endsAt),
+    assigned_user_id: parsed.assignedUserId || null,
+    is_active: parsed.isActive,
+  };
+
+  const targetId = parsed.id || payload.code;
+  const { data: before } = await admin.supabase
+    .from("ufficio_promo_codes")
+    .select("*")
+    .or(parsed.id ? `id.eq.${parsed.id}` : `code.eq.${payload.code}`)
+    .maybeSingle();
+  const { data, error } = await admin.supabase
+    .from("ufficio_promo_codes")
+    .upsert(payload)
+    .select("*")
+    .single();
+  if (error) throw error;
+
+  await logAdminAction({
+    action: before ? "promo.code.updated" : "promo.code.created",
+    targetTable: "ufficio_promo_codes",
+    targetId: String(data?.id ?? targetId),
+    beforeValue: before ?? {},
+    afterValue: payload,
+  });
+
+  revalidatePath("/premium");
+  revalidatePath("/premium/promos");
 }
 
 export async function upsertCatalogRow(formData: FormData) {

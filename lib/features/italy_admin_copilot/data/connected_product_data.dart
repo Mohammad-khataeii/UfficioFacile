@@ -766,7 +766,11 @@ class ConnectedCatalogService {
                 normalizedQuery: normalizedQuery,
               ),
               score: score,
-              premiumVisibility: procedure.premiumVisibility,
+              premiumVisibility: _mostRestrictiveVisibility([
+                category.premiumVisibility,
+                subcategory.premiumVisibility,
+                procedure.premiumVisibility,
+              ]),
               locationLabel: location.city.trim().isNotEmpty
                   ? location.city.trim()
                   : (location.region.trim().isNotEmpty
@@ -1251,6 +1255,21 @@ class ConnectedCatalogService {
 
   UfficioPremiumVisibility _premiumForProcedure(UfficioProcedure procedure) {
     if (procedure.isPremiumOnly) return UfficioPremiumVisibility.premiumOnly;
+    return UfficioPremiumVisibility.free;
+  }
+
+  UfficioPremiumVisibility _mostRestrictiveVisibility(
+    List<UfficioPremiumVisibility> values,
+  ) {
+    if (values.contains(UfficioPremiumVisibility.premiumOnly)) {
+      return UfficioPremiumVisibility.premiumOnly;
+    }
+    if (values.contains(UfficioPremiumVisibility.premiumPreview)) {
+      return UfficioPremiumVisibility.premiumPreview;
+    }
+    if (values.contains(UfficioPremiumVisibility.hidden)) {
+      return UfficioPremiumVisibility.hidden;
+    }
     return UfficioPremiumVisibility.free;
   }
 

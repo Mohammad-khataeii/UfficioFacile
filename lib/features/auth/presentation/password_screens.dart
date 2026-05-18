@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/app_localizations.dart';
@@ -5,6 +6,9 @@ import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
 
 String buildEmailConfirmationRedirectUri() {
+  if (!kIsWeb) {
+    return 'ufficiofacile://auth/confirm-email';
+  }
   final scheme = Uri.base.scheme;
   final origin = scheme == 'http' || scheme == 'https' ? Uri.base.origin : '';
   if (origin.isNotEmpty) {
@@ -14,6 +18,9 @@ String buildEmailConfirmationRedirectUri() {
 }
 
 String buildPasswordResetRedirectUri() {
+  if (!kIsWeb) {
+    return 'ufficiofacile://auth/reset-password';
+  }
   final scheme = Uri.base.scheme;
   final origin = scheme == 'http' || scheme == 'https' ? Uri.base.origin : '';
   if (origin.isNotEmpty) {
@@ -67,9 +74,7 @@ class _EmailConfirmationSuccessScreenState
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      context.l10n.t('auth_email_confirmed_body'),
-                    ),
+                    Text(context.l10n.t('auth_email_confirmed_body')),
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: () => Navigator.pushNamedAndRemoveUntil(

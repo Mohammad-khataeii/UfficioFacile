@@ -23,6 +23,7 @@ import '../features/italy_admin_copilot/application/profile_controller.dart';
 import '../features/italy_admin_copilot/application/request_controller.dart';
 import '../features/italy_admin_copilot/application/utility_controller.dart';
 import '../features/italy_admin_copilot/data/generated_pack_quality_service.dart';
+import '../features/italy_admin_copilot/data/ads_service.dart';
 import '../features/italy_admin_copilot/data/bundled_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/connected_product_data.dart';
 import '../features/italy_admin_copilot/data/hybrid_catalog_repository.dart';
@@ -35,6 +36,8 @@ import '../features/italy_admin_copilot/data/local_request_repository.dart';
 import '../features/italy_admin_copilot/data/local_template_override_repository.dart';
 import '../features/italy_admin_copilot/data/life_admin_phase5_services.dart';
 import '../features/italy_admin_copilot/data/premium_service.dart';
+import '../features/italy_admin_copilot/data/promo_code_service.dart';
+import '../features/italy_admin_copilot/data/notification_service.dart';
 import '../features/italy_admin_copilot/data/supabase_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/ufficio_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/ufficio_city_registry.dart';
@@ -195,6 +198,19 @@ class AppScope extends InheritedWidget {
       analytics: analytics,
     );
     productEntitlementsService = EntitlementsService(entitlementService);
+    notificationService = UfficioNotificationService(
+      prefs: prefs,
+      userDataRepository: connectedUserDataRepository,
+      entitlementService: entitlementService,
+    );
+    promoCodeService = UfficioPromoCodeService(
+      client: SupabaseBootstrap.client,
+      entitlementService: entitlementService,
+    );
+    adsService = UfficioAdsService(
+      catalogRepository: catalogRepository,
+      entitlementService: entitlementService,
+    );
     problemRequestsService = ProblemRequestsService(
       hybridProblemRequestsRepository,
       entitlementService,
@@ -214,6 +230,7 @@ class AppScope extends InheritedWidget {
       afterAuthenticated: (user) async {
         await deviceBindingService.enforceForSignedInUser(user);
         await reloadAuthSensitiveState();
+        await notificationService.syncScheduledNotifications();
       },
       afterSignedOut: () async {
         await clearAuthSensitiveState();
@@ -290,6 +307,9 @@ class AppScope extends InheritedWidget {
   late final LocalPrivacyCenterService privacyCenterService;
   late final UfficioPremiumEntitlementService entitlementService;
   late final EntitlementsService productEntitlementsService;
+  late final UfficioNotificationService notificationService;
+  late final UfficioPromoCodeService promoCodeService;
+  late final UfficioAdsService adsService;
   late final ProblemRequestsService problemRequestsService;
   late final ConsultancyService consultancyService;
   late final CostDashboardService costDashboardService;
@@ -334,6 +354,7 @@ class AppScope extends InheritedWidget {
       adminPanelController.load(),
       entitlementService.getCurrentEntitlement(),
     ]);
+    await notificationService.syncScheduledNotifications();
     await updateScreenshotProtection();
   }
 

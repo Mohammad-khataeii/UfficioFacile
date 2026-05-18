@@ -104,3 +104,22 @@ export const procedureSchema = z.object({
   allowSingleUnlock: z.boolean().optional(),
   singleUnlockPriceCents: z.coerce.number().int().optional(),
 });
+
+export const promoCodeSchema = z.object({
+  id: z.string().uuid().optional().or(z.literal("")),
+  code: z.string().trim().min(3).max(64),
+  title: z.string().trim().min(1).max(120),
+  description: z.string().trim().optional(),
+  planKey: z.enum([
+    "premium_monthly",
+    "premium_yearly",
+    "trial",
+    "admin_grant",
+  ]),
+  durationDays: z.coerce.number().int().positive().max(3650),
+  maxRedemptions: z.coerce.number().int().positive().optional(),
+  startsAt: z.string().trim().optional(),
+  endsAt: z.string().trim().optional(),
+  assignedUserId: z.string().uuid().optional().or(z.literal("")),
+  isActive: z.boolean().optional().default(true),
+});

@@ -145,6 +145,16 @@ class BundledCatalogRepository implements CatalogRepository {
   Future<Map<String, dynamic>> getAppPublicConfig() async => const {
     'userAuthRequired': false,
     'publicCatalogMode': 'bundled',
+    'freeUserAds': {
+      'enabled': false,
+      'provider': 'google_mobile_ads',
+      'testMode': false,
+      'screens': ['home', 'profile_folder', 'promo_codes'],
+      'bannerUnitIdAndroid': '',
+      'bannerUnitIdIos': '',
+      'interstitialUnitIdAndroid': '',
+      'interstitialUnitIdIos': '',
+    },
   };
 
   @override

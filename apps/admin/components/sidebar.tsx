@@ -6,6 +6,7 @@ const items = [
   { href: "/content/categories", label: "Categories" },
   { href: "/content/procedures", label: "Procedures" },
   { href: "/premium", label: "Premium" },
+  { href: "/premium/promos", label: "Promo codes" },
   { href: "/users", label: "Users" },
   { href: "/admins", label: "Admins" },
   { href: "/requests/problem", label: "Problem requests" },

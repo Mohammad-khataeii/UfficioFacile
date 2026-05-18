@@ -53,6 +53,8 @@ class AppRoutes {
   static const universityStudent = '/life-admin/university-student';
   static const general = '/life-admin/general';
   static const account = '/life-admin/account';
+  static const notifications = '/life-admin/notifications';
+  static const promoCodes = '/life-admin/promo-codes';
   static const admin = '/life-admin/admin';
   static const adminPremium = '/life-admin/admin/premium';
   static const adminScanner = '/life-admin/admin/scanner';
