@@ -24,6 +24,6 @@ void main() {
     stdout.writeln('Wrote $outputPath');
   }
   stdout.writeln(
-    'Preserved assets/catalog/ufficio_catalog.v1.json as the canonical source.',
+    'Preserved city catalog JSON files in assets/catalog as the canonical source.',
   );
 }

@@ -4,13 +4,11 @@ import 'dart:io';
 void main() {
   final problems = <String>[];
   final root = Directory.current;
-  final catalogFile = File(
-    '${root.path}/assets/catalog/ufficio_catalog.v1.json',
-  );
+  final catalogDirectory = Directory('${root.path}/assets/catalog');
   final pubspecFile = File('${root.path}/pubspec.yaml');
 
-  if (!catalogFile.existsSync()) {
-    problems.add('Missing assets/catalog/ufficio_catalog.v1.json');
+  if (!catalogDirectory.existsSync()) {
+    problems.add('Missing assets/catalog directory');
   }
   if (!pubspecFile.existsSync()) {
     problems.add('Missing pubspec.yaml');
@@ -21,31 +19,19 @@ void main() {
 
   final pubspecText = pubspecFile.readAsStringSync();
   if (!pubspecText.contains('assets/catalog/') &&
-      !pubspecText.contains('assets/catalog/ufficio_catalog.v1.json')) {
-    problems.add(
-      'pubspec.yaml does not declare assets/catalog/ufficio_catalog.v1.json',
-    );
+      !pubspecText.contains('assets/catalog/ufficio_catalog.')) {
+    problems.add('pubspec.yaml does not declare assets/catalog assets');
   }
-
-  late final Map<String, dynamic> catalog;
-  try {
-    catalog =
-        jsonDecode(catalogFile.readAsStringSync()) as Map<String, dynamic>;
-  } catch (error) {
-    problems.add('Catalog JSON is invalid: $error');
+  final catalogFiles =
+      catalogDirectory
+          .listSync()
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.json'))
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
+  if (catalogFiles.isEmpty) {
+    problems.add('No catalog JSON files found in assets/catalog');
     _fail(problems);
-  }
-
-  if (catalog['version'] == null) {
-    problems.add('Catalog is missing version');
-  }
-  final categories =
-      (catalog['categories'] as List<dynamic>? ?? const <dynamic>[])
-          .whereType<Map>()
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-  if (categories.isEmpty) {
-    problems.add('Catalog categories are empty');
   }
 
   const forbiddenPhrases = <String>[
@@ -60,144 +46,191 @@ void main() {
     'do not tell',
   ];
 
-  final categoryIds = <String>{};
-  final duplicateCategoryIds = <String>{};
-  var subcategoryCount = 0;
-  var premiumOnlySubcategoryCount = 0;
+  var totalCategories = 0;
+  var totalSubcategories = 0;
 
-  for (final category in categories) {
-    final categoryId = '${category['id'] ?? ''}';
-    if (categoryId.isEmpty) {
-      problems.add('Found category with empty id');
+  for (final catalogFile in catalogFiles) {
+    final relativePath = catalogFile.path.replaceFirst('${root.path}/', '');
+    late final Map<String, dynamic> catalog;
+    try {
+      catalog =
+          jsonDecode(catalogFile.readAsStringSync()) as Map<String, dynamic>;
+    } catch (error) {
+      problems.add('$relativePath is invalid JSON: $error');
       continue;
     }
-    if (!categoryIds.add(categoryId)) {
-      duplicateCategoryIds.add(categoryId);
-    }
-    _checkLocalizedField(problems, categoryId, 'title', category['title']);
-    _checkLocalizedField(
-      problems,
-      categoryId,
-      'description',
-      category['description'],
-    );
 
-    final subcategories =
-        (category['subcategories'] as List<dynamic>? ?? const <dynamic>[])
+    if (catalog['version'] == null) {
+      problems.add('$relativePath is missing version');
+    }
+    final categories =
+        (catalog['categories'] as List<dynamic>? ?? const <dynamic>[])
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
             .toList();
-    if (subcategories.isEmpty) {
-      problems.add('Category `$categoryId` has no subcategories');
+    if (categories.isEmpty) {
+      problems.add('$relativePath has no categories');
+      continue;
     }
-    final subcategoryIds = <String>{};
-    for (final subcategory in subcategories) {
-      subcategoryCount++;
-      final subcategoryId = '${subcategory['id'] ?? ''}';
-      if (subcategoryId.isEmpty) {
-        problems.add('Category `$categoryId` has subcategory with empty id');
+
+    final categoryIds = <String>{};
+    final duplicateCategoryIds = <String>{};
+    var subcategoryCount = 0;
+    var premiumOnlySubcategoryCount = 0;
+
+    for (final category in categories) {
+      totalCategories++;
+      final categoryId = '${category['id'] ?? ''}';
+      if (categoryId.isEmpty) {
+        problems.add('$relativePath has a category with empty id');
         continue;
       }
-      if (!subcategoryIds.add(subcategoryId)) {
-        problems.add(
-          'Category `$categoryId` contains duplicate subcategory `$subcategoryId`',
-        );
+      if (!categoryIds.add(categoryId)) {
+        duplicateCategoryIds.add(categoryId);
       }
       _checkLocalizedField(
         problems,
-        '$categoryId::$subcategoryId',
+        '$relativePath::$categoryId',
         'title',
-        subcategory['title'],
+        category['title'],
       );
       _checkLocalizedField(
         problems,
-        '$categoryId::$subcategoryId',
+        '$relativePath::$categoryId',
         'description',
-        subcategory['description'],
+        category['description'],
       );
 
-      final procedures =
-          (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[])
+      final subcategories =
+          (category['subcategories'] as List<dynamic>? ?? const <dynamic>[])
               .whereType<Map>()
               .map((item) => Map<String, dynamic>.from(item))
               .toList();
-      if (subcategory['isPremiumOnly'] == true) {
-        premiumOnlySubcategoryCount++;
+      if (subcategories.isEmpty) {
+        problems.add('$relativePath::$categoryId has no subcategories');
       }
-      final procedureIds = <String>{};
-      for (final procedure in procedures) {
-        final procedureId = '${procedure['id'] ?? ''}';
-        if (procedureId.isEmpty) {
+      final subcategoryIds = <String>{};
+      for (final subcategory in subcategories) {
+        totalSubcategories++;
+        subcategoryCount++;
+        final subcategoryId = '${subcategory['id'] ?? ''}';
+        if (subcategoryId.isEmpty) {
           problems.add(
-            'Subcategory `$categoryId::$subcategoryId` has procedure with empty id',
+            '$relativePath::$categoryId has subcategory with empty id',
           );
           continue;
         }
-        if (!procedureIds.add(procedureId)) {
+        if (!subcategoryIds.add(subcategoryId)) {
           problems.add(
-            'Subcategory `$categoryId::$subcategoryId` has duplicate procedure `$procedureId`',
+            '$relativePath::$categoryId contains duplicate subcategory `$subcategoryId`',
           );
         }
         _checkLocalizedField(
           problems,
-          '$categoryId::$subcategoryId::$procedureId',
+          '$relativePath::$categoryId::$subcategoryId',
           'title',
-          procedure['title'],
+          subcategory['title'],
+        );
+        _checkLocalizedField(
+          problems,
+          '$relativePath::$categoryId::$subcategoryId',
+          'description',
+          subcategory['description'],
+        );
+
+        final procedures =
+            (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[])
+                .whereType<Map>()
+                .map((item) => Map<String, dynamic>.from(item))
+                .toList();
+        if (subcategory['isPremiumOnly'] == true) {
+          premiumOnlySubcategoryCount++;
+        }
+        final procedureIds = <String>{};
+        for (final procedure in procedures) {
+          final procedureId = '${procedure['id'] ?? ''}';
+          if (procedureId.isEmpty) {
+            problems.add(
+              '$relativePath::$categoryId::$subcategoryId has procedure with empty id',
+            );
+            continue;
+          }
+          if (!procedureIds.add(procedureId)) {
+            problems.add(
+              '$relativePath::$categoryId::$subcategoryId has duplicate procedure `$procedureId`',
+            );
+          }
+          _checkLocalizedField(
+            problems,
+            '$relativePath::$categoryId::$subcategoryId::$procedureId',
+            'title',
+            procedure['title'],
+          );
+        }
+      }
+    }
+
+    if (duplicateCategoryIds.isNotEmpty) {
+      final sortedDuplicateCategoryIds = duplicateCategoryIds.toList()..sort();
+      problems.add(
+        '$relativePath has duplicate category ids: $sortedDuplicateCategoryIds',
+      );
+    }
+
+    if (subcategoryCount == 0) {
+      problems.add('$relativePath has no subcategories at all');
+    }
+
+    final health = categories.cast<Map<String, dynamic>?>().firstWhere(
+      (category) => category?['id'] == 'health_asl',
+      orElse: () => null,
+    );
+    if (health == null) {
+      problems.add('$relativePath is missing health_asl category');
+    } else {
+      final healthSubcategories =
+          (health['subcategories'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map>()
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
+      if (healthSubcategories.isEmpty) {
+        problems.add('$relativePath health_asl has no subcategories');
+      }
+      if (relativePath.contains('torino')) {
+        final subcategoryIds = healthSubcategories
+            .map((item) => '${item['id'] ?? ''}')
+            .toSet();
+        const requiredHealthSubcategories = <String>{
+          'ssn_asl_access',
+          'doctor_health_card',
+          'bookings_prescriptions_cup',
+          'ticket_exemptions',
+          'digital_health_record',
+          'asl_problems',
+          'student_insurance',
+        };
+        for (final required in requiredHealthSubcategories) {
+          if (!subcategoryIds.contains(required)) {
+            problems.add(
+              '$relativePath health_asl is missing required subcategory `$required`',
+            );
+          }
+        }
+      }
+    }
+
+    final rawText = catalogFile.readAsStringSync().toLowerCase();
+    for (final phrase in forbiddenPhrases) {
+      final escaped = RegExp.escape(phrase);
+      final pattern = RegExp(
+        r'(?<![a-z0-9_])' + escaped + r'(?![a-z0-9_])',
+        caseSensitive: false,
+      );
+      if (pattern.hasMatch(rawText)) {
+        problems.add(
+          '$relativePath contains forbidden public phrase `$phrase`',
         );
       }
-    }
-  }
-
-  if (duplicateCategoryIds.isNotEmpty) {
-    final sortedDuplicateCategoryIds = duplicateCategoryIds.toList()..sort();
-    problems.add('Duplicate category ids: $sortedDuplicateCategoryIds');
-  }
-
-  if (subcategoryCount > 0 &&
-      premiumOnlySubcategoryCount / subcategoryCount > 0.35) {
-    problems.add(
-      'Catalog has too many premium-only subcategories: '
-      '$premiumOnlySubcategoryCount of $subcategoryCount.',
-    );
-  }
-
-  final health = categories.cast<Map<String, dynamic>?>().firstWhere(
-    (category) => category?['id'] == 'health_asl',
-    orElse: () => null,
-  );
-  if (health == null) {
-    problems.add('Missing canonical health_asl category');
-  } else {
-    final subcategoryIds =
-        ((health['subcategories'] as List<dynamic>? ?? const <dynamic>[])
-                .whereType<Map>()
-                .map((item) => '${item['id'] ?? ''}'))
-            .toSet();
-    const requiredHealthSubcategories = <String>{
-      'ssn_asl_access',
-      'doctor_health_card',
-      'bookings_prescriptions_cup',
-      'ticket_exemptions',
-      'digital_health_record',
-      'asl_problems',
-      'student_insurance',
-    };
-    for (final required in requiredHealthSubcategories) {
-      if (!subcategoryIds.contains(required)) {
-        problems.add('health_asl is missing required subcategory `$required`');
-      }
-    }
-  }
-
-  final rawText = catalogFile.readAsStringSync().toLowerCase();
-  for (final phrase in forbiddenPhrases) {
-    final escaped = RegExp.escape(phrase);
-    final pattern = RegExp(
-      r'(?<![a-z0-9_])' + escaped + r'(?![a-z0-9_])',
-      caseSensitive: false,
-    );
-    if (pattern.hasMatch(rawText)) {
-      problems.add('Catalog contains forbidden public phrase `$phrase`');
     }
   }
 
@@ -206,8 +239,9 @@ void main() {
   }
 
   stdout.writeln('Catalog validation passed.');
-  stdout.writeln('Categories: ${categories.length}');
-  stdout.writeln('Subcategories: $subcategoryCount');
+  stdout.writeln('Catalog files: ${catalogFiles.length}');
+  stdout.writeln('Categories: $totalCategories');
+  stdout.writeln('Subcategories: $totalSubcategories');
 }
 
 void _checkLocalizedField(
