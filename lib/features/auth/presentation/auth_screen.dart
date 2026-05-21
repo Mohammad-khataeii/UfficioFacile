@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
-import 'password_screens.dart';
+import 'auth_redirects.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});

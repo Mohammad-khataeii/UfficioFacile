@@ -239,7 +239,16 @@ export async function listAuthUsers(search?: string) {
 export async function getAuthUser(userId: string) {
   const service = createServiceRoleClient();
   const { data, error } = await service.auth.admin.getUserById(userId);
-  if (error) throw error;
+  if (error) {
+    const normalizedMessage = String(error.message ?? "").toLowerCase();
+    if (
+      normalizedMessage.includes("user not found") ||
+      normalizedMessage.includes("not found")
+    ) {
+      return null;
+    }
+    throw error;
+  }
   return data.user;
 }
 

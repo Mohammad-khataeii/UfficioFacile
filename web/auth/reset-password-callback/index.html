@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UfficioFacile - Reset password</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10181c;
+        --card: #182227;
+        --text: #eef4f4;
+        --muted: #b9c8ca;
+        --accent: #84d8f0;
+        --accent-text: #0d2027;
+        --border: #2a3b40;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top, #1a2b31, var(--bg) 55%);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        padding: 24px;
+      }
+
+      .card {
+        width: min(100%, 520px);
+        background: rgba(24, 34, 39, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 30px;
+        line-height: 1.1;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.5;
+      }
+
+      .status {
+        margin: 18px 0 0;
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .button {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .button-primary {
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .button-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Reset your password</h1>
+      <p>
+        We are trying to open UfficioFacile so you can choose a new password.
+        If the app does not open, use the button below.
+      </p>
+      <p class="status" id="status">Opening the app...</p>
+      <div class="actions">
+        <a class="button button-primary" id="open-app" href="#">Open app</a>
+        <a class="button button-secondary" id="reset-web" href="/auth/reset-password"
+          >Open in browser</a
+        >
+      </div>
+    </main>
+    <script>
+      (function () {
+        const statusEl = document.getElementById("status");
+        const openAppEl = document.getElementById("open-app");
+        const resetWebEl = document.getElementById("reset-web");
+
+        const suffix = `${window.location.search || ""}${window.location.hash || ""}`;
+        const appUrl = `ufficiofacile://auth/reset-password${suffix}`;
+        const webResetUrl = `${window.location.origin}/auth/reset-password${suffix}`;
+
+        openAppEl.href = appUrl;
+        resetWebEl.href = webResetUrl;
+
+        const openApp = () => {
+          window.location.href = appUrl;
+        };
+
+        openAppEl.addEventListener("click", function (event) {
+          event.preventDefault();
+          openApp();
+        });
+
+        setTimeout(openApp, 180);
+        setTimeout(function () {
+          statusEl.textContent =
+            "If the app did not open, tap Open app or continue in your browser.";
+        }, 1600);
+      })();
+    </script>
+  </body>
+</html>

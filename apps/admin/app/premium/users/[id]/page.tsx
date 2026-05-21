@@ -36,6 +36,7 @@ export default async function PremiumUserDetailPage({
 
   const warnings = [
     ...bundle.warnings,
+    !authUser ? "This auth account no longer exists. The user was likely deleted." : null,
     premiumEvents.warning,
     auditRows.warning,
   ].filter((warning): warning is string => Boolean(warning));

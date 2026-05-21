@@ -705,6 +705,8 @@ export async function deleteUserAccount(formData: FormData) {
     afterValue: {},
   });
   revalidatePath("/users");
+  revalidatePath("/premium/users");
+  redirect("/users?deleted=1");
 }
 
 function localizedFromFormData(formData: FormData, prefix: string) {
