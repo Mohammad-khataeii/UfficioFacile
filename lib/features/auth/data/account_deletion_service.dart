@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException;
+
 import '../../../app/supabase_bootstrap.dart';
 
 class AccountDeletionResult {
@@ -38,10 +40,36 @@ class AccountDeletionService {
       return const AccountDeletionResult.failure(
         'We could not delete your account right now. Please try again or email support.',
       );
+    } on FunctionException catch (error) {
+      final details = error.details;
+      if (details is Map &&
+          details['error'] is String &&
+          (details['error'] as String).trim().isNotEmpty) {
+        return AccountDeletionResult.failure(details['error'] as String);
+      }
+      if (details is String && details.trim().isNotEmpty) {
+        return AccountDeletionResult.failure(details);
+      }
+      return AccountDeletionResult.failure(
+        _fallbackMessageForStatus(error.status),
+      );
     } catch (_) {
       return const AccountDeletionResult.failure(
         'We could not delete your account right now. Please try again or email support.',
       );
+    }
+  }
+
+  String _fallbackMessageForStatus(int status) {
+    switch (status) {
+      case 401:
+        return 'Sign in again before deleting your account.';
+      case 403:
+        return 'This account cannot be deleted automatically right now. Please email support.';
+      case 503:
+        return 'Account deletion is not configured right now. Please try again later or email support.';
+      default:
+        return 'We could not delete your account right now. Please try again or email support.';
     }
   }
 }

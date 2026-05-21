@@ -22,6 +22,12 @@ function failure(message: string, status = 400) {
   return json({ ok: false, error: message }, status);
 }
 
+type AdminRow = {
+  user_id: string;
+  role: string | null;
+  is_active: boolean | null;
+};
+
 function isIgnorableMissingRelation(error: { code?: string; message?: string } | null) {
   if (!error) return false;
   return error.code === "42P01" ||
@@ -173,19 +179,32 @@ serve(async (request) => {
 
   const { data: adminUser, error: adminLookupError } = await adminClient
     .from("ufficio_admin_users")
-    .select("user_id")
+    .select("user_id, role, is_active")
     .eq("user_id", user.id)
     .eq("is_active", true)
-    .maybeSingle();
+    .maybeSingle<AdminRow>();
   if (adminLookupError && !isIgnorableMissingRelation(adminLookupError)) {
     console.error("delete-account: admin lookup failed", adminLookupError);
     return failure("We could not process your account deletion right now.", 500);
   }
-  if (adminUser != null) {
-    return failure(
-      "This account must be deleted by support. Please email support@ufficiofacile.app.",
-      403,
-    );
+  if (adminUser?.role == "owner") {
+    const ownerCountResponse = await adminClient
+      .from("ufficio_admin_users")
+      .select("user_id", { count: "exact", head: true })
+      .eq("role", "owner")
+      .eq("is_active", true);
+    const ownerCountError = ownerCountResponse.error;
+    if (ownerCountError && !isIgnorableMissingRelation(ownerCountError)) {
+      console.error("delete-account: owner count lookup failed", ownerCountError);
+      return failure("We could not process your account deletion right now.", 500);
+    }
+    const activeOwnerCount = ownerCountResponse.count ?? 0;
+    if (activeOwnerCount <= 1) {
+      return failure(
+        "This owner account must be deleted by support because it is the last active owner. Please email support@ufficiofacile.app.",
+        403,
+      );
+    }
   }
 
   let deleteRequestId: string | null = null;
