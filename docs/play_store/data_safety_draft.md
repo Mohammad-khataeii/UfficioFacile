@@ -23,6 +23,15 @@ This is a practical working draft for the Google Play Data Safety form. It is no
 - AdMob only applies if ads are enabled in the actual production build.
 - The Data Safety form must match the final uploaded build. If the build ships with ads disabled, do not declare ad-related data collection that is not active in that build.
 
+## Recommended Play Console answers for current first release
+
+- Ads: disabled if no production AdMob IDs are passed
+- Payment card information: handled by Stripe, not stored directly by the app
+- Data encrypted in transit: yes, intended for backend communication
+- Users can request deletion: yes
+- Data is not sold
+- Data is processed to provide app functionality, account management, support, payments, and security
+
 ## Security practices
 
 - Network communication is intended to be encrypted in transit.
@@ -40,3 +49,9 @@ This is a practical working draft for the Google Play Data Safety form. It is no
 - Whether any diagnostics or crash-reporting SDK is active in the final production build
 - Whether any analytics beyond current local or privacy-safe settings is active in the final production build
 - Whether ads are enabled in the final uploaded build
+
+## Before submitting, verify final build flags
+
+- If AdMob IDs are included, update Ads and Data Safety answers.
+- If analytics is active in the final build, include analytics-related data handling.
+- If document upload or persistent document storage is active, include file or document data in the final answers.

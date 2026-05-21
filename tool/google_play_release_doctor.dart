@@ -9,6 +9,8 @@ const _requiredPlayDocs = <String>[
   'docs/play_store/account_deletion.md',
   'docs/play_store/android_permissions.md',
   'docs/play_store/local_signing_step_by_step.md',
+  'docs/play_store/play_console_copy.md',
+  'docs/play_store/final_submission_checklist.md',
 ];
 
 const _requiredTools = <String>[
@@ -25,6 +27,11 @@ const _activeAndroidFiles = <String>[
 const _productionDocFiles = <String>[
   'README.md',
   'docs/deployment_production.md',
+];
+
+const _requiredPublicFiles = <String>[
+  'web/privacy/index.html',
+  'web/account-deletion/index.html',
 ];
 
 const _forbiddenWrongAppFlags = <String>[
@@ -62,6 +69,8 @@ void main() {
   final readmeFile = File('README.md');
   final gitignoreFile = File('.gitignore');
   final keyExampleFile = File('android/key.properties.example');
+  final privacyDraftFile = File('docs/play_store/privacy_policy_draft.md');
+  final accountDeletionDocFile = File('docs/play_store/account_deletion.md');
   final readme = readmeFile.existsSync() ? readmeFile.readAsStringSync() : '';
   final gradle = gradleFile.existsSync() ? gradleFile.readAsStringSync() : '';
   final manifest = manifestFile.existsSync()
@@ -76,6 +85,20 @@ void main() {
 
   if (!keyExampleFile.existsSync()) {
     problems.add('Missing android/key.properties.example');
+  }
+
+  for (final path in _requiredPublicFiles) {
+    expectFile(path);
+  }
+  for (final redirectPath in const [
+    'web/delete-account/index.html',
+    'web/ufficcio/privacy/index.html',
+    'web/ufficio/privacy/index.html',
+    'web/life-admin/privacy/index.html',
+  ]) {
+    if (!File(redirectPath).existsSync()) {
+      warnings.add('Missing optional compatibility redirect: $redirectPath');
+    }
   }
 
   for (final path in _activeAndroidFiles) {
@@ -181,8 +204,16 @@ void main() {
   if (!readme.contains('docs/play_store/google_play_release_checklist.md') ||
       !readme.contains('docs/play_store/data_safety_draft.md') ||
       !readme.contains('docs/play_store/privacy_policy_draft.md') ||
-      !readme.contains('docs/play_store/local_signing_step_by_step.md')) {
+      !readme.contains('docs/play_store/local_signing_step_by_step.md') ||
+      !readme.contains('docs/play_store/play_console_copy.md') ||
+      !readme.contains('docs/play_store/final_submission_checklist.md')) {
     problems.add('README is missing required Play Store documentation links');
+  }
+  if (!readme.contains('https://ufficio-facile.vercel.app/privacy') ||
+      !readme.contains('https://ufficio-facile.vercel.app/account-deletion')) {
+    problems.add(
+      'README is missing the public privacy or account deletion URL',
+    );
   }
 
   final storeDocsText = _readFiles(_requiredPlayDocs);
@@ -193,6 +224,24 @@ void main() {
   if (!storeDocsText.contains('Request account deletion')) {
     problems.add(
       'Play Store docs do not mention the account deletion request path',
+    );
+  }
+  final privacyDraft = privacyDraftFile.existsSync()
+      ? privacyDraftFile.readAsStringSync()
+      : '';
+  if (!privacyDraft.contains('https://ufficio-facile.vercel.app/privacy')) {
+    problems.add(
+      'privacy_policy_draft.md must include the public privacy policy URL',
+    );
+  }
+  final accountDeletionDoc = accountDeletionDocFile.existsSync()
+      ? accountDeletionDocFile.readAsStringSync()
+      : '';
+  if (!accountDeletionDoc.contains(
+    'https://ufficio-facile.vercel.app/account-deletion',
+  )) {
+    problems.add(
+      'account_deletion.md must include the public account deletion URL',
     );
   }
 
@@ -299,6 +348,7 @@ void main() {
 
   final changeMeProblems = _scanChangeMeMisuse();
   problems.addAll(changeMeProblems);
+  problems.addAll(_scanDocsForJwtOrLiveAnonKey());
 
   if (problems.isNotEmpty) {
     stderr.writeln('Google Play release doctor failed:');
@@ -360,6 +410,40 @@ List<String> _scanChangeMeMisuse() {
     if (!allowed) {
       hits.add(
         'Unexpected `CHANGE_ME` placeholder outside example/docs allowlist: $path',
+      );
+    }
+  }
+  return hits;
+}
+
+List<String> _scanDocsForJwtOrLiveAnonKey() {
+  final hits = <String>[];
+  final jwtPattern = RegExp(
+    r'eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}',
+  );
+  for (final entity in Directory('docs').listSync(recursive: true)) {
+    if (entity is! File) continue;
+    final path = entity.path;
+    if (!_isTextLikeFile(path)) continue;
+    final text = entity.readAsStringSync();
+    if (jwtPattern.hasMatch(text)) {
+      hits.add('Possible real JWT found in docs: $path');
+    }
+    final anonAssignments = RegExp(
+      r'SUPABASE_ANON_KEY\s*=\s*([^\s`]+)',
+    ).allMatches(text);
+    for (final match in anonAssignments) {
+      final value = match.group(1)?.trim() ?? '';
+      if (value.isEmpty ||
+          value == '...' ||
+          value.contains('<') ||
+          value.contains('CHANGE') ||
+          value.contains('example') ||
+          value.contains('YOUR_')) {
+        continue;
+      }
+      hits.add(
+        'SUPABASE_ANON_KEY example does not look like a placeholder in $path',
       );
     }
   }

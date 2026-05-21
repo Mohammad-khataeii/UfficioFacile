@@ -2,6 +2,68 @@
 
 Last updated: 2026-05-21
 
+## Play Console content and privacy publication pass (2026-05-21)
+
+### What files and pages were added or improved
+
+- Added public privacy page at `/privacy` via `web/privacy/index.html`
+- Added public account deletion page at `/account-deletion` via `web/account-deletion/index.html`
+- Added compatibility redirects for:
+  - `/ufficcio/privacy`
+  - `/ufficio/privacy`
+  - `/life-admin/privacy`
+  - `/delete-account`
+- Added `docs/play_store/play_console_copy.md`
+- Added `docs/play_store/final_submission_checklist.md`
+- Updated privacy, account deletion, store listing, data safety, and deployment docs to point at the public URLs
+- Strengthened the release doctor to verify Play Console copy docs, public-page files, and doc safety checks
+
+### Commands run
+
+- `dart format lib test tool`
+  - Result: passed
+- `flutter pub get`
+  - Result: passed
+- `flutter analyze`
+  - Result: passed
+- `flutter test`
+  - Result: passed
+- `dart run tool/content_doctor.dart`
+  - Result: failed in this environment due to Flutter SDK sandbox path issue
+- `/usr/local/share/flutter/bin/dart run tool/content_doctor.dart`
+  - Result: passed
+- `dart run tool/localization_doctor.dart`
+  - Result: failed in this environment due to Flutter SDK sandbox path issue
+- `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart`
+  - Result: passed
+- `dart run tool/google_play_release_doctor.dart`
+  - Result: failed in this environment due to Flutter SDK sandbox path issue
+- `/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart`
+  - Result: passed, with versionCode warning only
+- `/usr/local/share/flutter/bin/dart run tool/print_google_play_commands.dart`
+  - Result: passed
+
+### What passed
+
+- Public privacy page exists without login
+- Public account deletion page exists without login
+- Play Console copy doc exists
+- Final submission checklist exists
+- README and deployment docs link the Play Console docs and public URLs
+- `flutter analyze` passes
+- `flutter test` passes
+- `tool/google_play_release_doctor.dart` passes
+
+### What remains manual
+
+- Fill Play Console forms
+- Create the reviewer account and password
+- Upload screenshots and graphics
+- Upload the signed AAB
+- Submit internal testing
+- Review the pre-launch report
+- Test Stripe and Supabase from the Play-installed build
+
 ## Internal testing prep follow-up pass (2026-05-21)
 
 ### What was fixed

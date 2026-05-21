@@ -1413,8 +1413,7 @@ class _OfficialLinksDirectoryScreenState
           return ListView(
             padding: const EdgeInsets.all(16),
             children: builtIns.map((item) {
-              final targetUrl =
-                  item.sourceUrl?.trim().isNotEmpty == true
+              final targetUrl = item.sourceUrl?.trim().isNotEmpty == true
                   ? item.sourceUrl!
                   : item.url;
               return Card(

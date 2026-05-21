@@ -190,6 +190,10 @@ See `docs/play_store/reviewer_instructions.md` for App Access prep.
 See `docs/play_store/store_listing_draft.md` for store listing copy.
 See `docs/play_store/account_deletion.md` for the deletion path.
 See `docs/play_store/android_permissions.md` for the Android permission audit.
+See `docs/play_store/play_console_copy.md` for Play Console copy-paste text.
+See `docs/play_store/final_submission_checklist.md` for the final submission checklist.
+Public privacy URL: [https://ufficio-facile.vercel.app/privacy](https://ufficio-facile.vercel.app/privacy)
+Public account deletion URL: [https://ufficio-facile.vercel.app/account-deletion](https://ufficio-facile.vercel.app/account-deletion)
 
 If the Next.js dev cache is corrupted and `.next/routes-manifest.json` is
 missing:

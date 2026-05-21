@@ -2,9 +2,21 @@
 
 This draft is intended to be made publishable after replacing the legal and operator placeholders. It is not legal advice.
 
+Public URL to use in Play Console:
+
+- `https://ufficio-facile.vercel.app/privacy`
+
+Checklist:
+
+- [ ] Published and accessible without login
+- [ ] Same URL entered in Play Console
+- [ ] Contact email works
+- [ ] Account deletion page linked
+- [ ] Data Safety answers match this policy
+
 Effective date placeholder:
 
-- `[INSERT EFFECTIVE DATE]`
+- `2026-05-21` or replace with your final publication date
 
 Controller or operator placeholder:
 
@@ -78,6 +90,10 @@ Where applicable under Italian and EU data-protection law, users may have rights
 Requests can be sent to:
 
 - `support@ufficiofacile.app`
+
+Public account deletion page:
+
+- `https://ufficio-facile.vercel.app/account-deletion`
 
 ## 9. Security
 

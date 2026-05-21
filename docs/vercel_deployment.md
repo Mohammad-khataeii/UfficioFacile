@@ -9,7 +9,7 @@
 7. Add environment variables:
    - `UFFICCIOFACILE_BACKEND_MODE=supabase`
    - `SUPABASE_URL=https://oyqyooxtqfabzsehsbhr.supabase.co`
-   - `SUPABASE_ANON_KEY=your anon/publishable key`
+   - `SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY`
    - `UFFICCIOFACILE_ENABLE_SYNC=true`
    - `UFFICCIOFACILE_ENABLE_ADMIN_DEBUG=false`
    - `UFFICCIOFACILE_ENABLE_BETA_MODE=true`
@@ -35,7 +35,7 @@ Local release build:
 flutter build web --release \
   --dart-define=UFFICCIOFACILE_BACKEND_MODE=supabase \
   --dart-define=SUPABASE_URL=https://oyqyooxtqfabzsehsbhr.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=YOUR_PUBLIC_KEY \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY \
   --dart-define=UFFICCIOFACILE_ENABLE_SYNC=true \
   --dart-define=UFFICCIOFACILE_ENABLE_ADMIN_DEBUG=false \
   --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=true \

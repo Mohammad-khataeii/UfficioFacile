@@ -1,5 +1,9 @@
 # Account deletion support
 
+Public deletion support URL:
+
+- `https://ufficio-facile.vercel.app/account-deletion`
+
 ## Current supported path
 
 UfficioFacile currently supports account deletion requests through an in-app route:
@@ -11,6 +15,19 @@ UfficioFacile currently supports account deletion requests through an in-app rou
 5. Send the generated email request to `support@ufficiofacile.app`.
 
 The app also allows users to clear local app data separately with the `Delete local data` action in the privacy center.
+
+## Data covered by a deletion request
+
+The request is intended to cover the user's account and associated app data where legally possible, including:
+
+- account records
+- profile data
+- saved requests
+- problem descriptions
+- consultancy or support request data
+- synced workflow data related to app usage
+
+Records that may need legal retention can include payment, invoice, tax, fraud-prevention, security, or other legally required records.
 
 ## Important limitation
 

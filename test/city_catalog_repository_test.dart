@@ -30,10 +30,7 @@ void main() {
     test('milano availability follows the bundled asset set', () async {
       final city = await UfficioCityRegistry.resolveCity('milano');
       expect(city.slug, 'milano');
-      expect(
-        city.isAvailable,
-        equals(city.bundledCatalogAsset != null),
-      );
+      expect(city.isAvailable, equals(city.bundledCatalogAsset != null));
     });
   });
 

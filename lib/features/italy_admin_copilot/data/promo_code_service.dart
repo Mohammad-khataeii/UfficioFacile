@@ -113,10 +113,7 @@ class UfficioPromoCodeService {
         AuthException(:final message) when message.trim().isNotEmpty => message,
         _ => 'Could not redeem this code right now.',
       };
-      return PromoRedemptionResult(
-        ok: false,
-        message: message,
-      );
+      return PromoRedemptionResult(ok: false, message: message);
     }
   }
 

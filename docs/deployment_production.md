@@ -229,6 +229,18 @@ The release cannot move forward until these docs are prepared and reviewed:
 - `docs/play_store/account_deletion.md`
 - `docs/play_store/android_permissions.md`
 - `docs/play_store/local_signing_step_by_step.md`
+- `docs/play_store/play_console_copy.md`
+- `docs/play_store/final_submission_checklist.md`
+
+Public URLs for Play Console:
+
+- Privacy policy: [https://ufficio-facile.vercel.app/privacy](https://ufficio-facile.vercel.app/privacy)
+- Account deletion: [https://ufficio-facile.vercel.app/account-deletion](https://ufficio-facile.vercel.app/account-deletion)
+
+These public pages are currently provided as static Flutter web assets from:
+
+- `web/privacy/index.html`
+- `web/account-deletion/index.html`
 
 ## Before upload run this
 

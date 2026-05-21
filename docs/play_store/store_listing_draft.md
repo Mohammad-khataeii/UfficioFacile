@@ -30,6 +30,17 @@ The app focuses on practical guidance, reminders, and organization for Italy-bas
 - Access sign-in protected tools and premium features when enabled
 - Use the app in multiple languages including English and Italian
 
+## What users can do for free
+
+- Browse public categories and guidance
+- Search and organize bureaucracy-related tasks
+- Open account and privacy-related screens
+
+## What premium adds
+
+- Access to premium guidance and locked content
+- Premium-related help and paywall-controlled features where enabled
+
 ## Disclaimer paragraph
 
 UfficioFacile is an informational and organizational tool. It is not a public authority, lawyer, accountant, CAF, patronato, government portal, or substitute for official advice.
@@ -41,8 +52,12 @@ UfficioFacile is an informational and organizational tool. It is not a public au
 
 ## Privacy policy placeholder
 
-- `https://www.ufficiofacile.app/privacy`
-- Before Play submission, publish this exact URL and use the same URL in Play Console.
+- `https://ufficio-facile.vercel.app/privacy`
+- Before Play submission, use this exact same URL in Play Console.
+
+## Account deletion URL
+
+- `https://ufficio-facile.vercel.app/account-deletion`
 
 ## Screenshot checklist
 
@@ -58,3 +73,15 @@ UfficioFacile is an informational and organizational tool. It is not a public au
 - Keep Italian administrative terminology understandable for non-experts.
 - Avoid implying government affiliation.
 - Use screenshots that clearly show guidance, organization, and reminder features rather than official-authority branding.
+
+## Suggested tags or keywords
+
+- Italy bureaucracy
+- administrative guidance
+- reminders
+- documents
+- utilities
+- rent
+- ASL
+- INPS
+- university

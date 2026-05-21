@@ -1175,8 +1175,7 @@ class SupabaseUfficcioEntitlementRepository
           remindersCount: (usageRow?['reminders_used'] as num?)?.toInt() ?? 0,
           documentsCount: (usageRow?['documents_used'] as num?)?.toInt() ?? 0,
           contactsCount: (usageRow?['contacts_used'] as num?)?.toInt() ?? 0,
-          costItemsCount:
-              (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
+          costItemsCount: (usageRow?['cost_items_used'] as num?)?.toInt() ?? 0,
           householdMembersCount:
               (usageRow?['household_members_used'] as num?)?.toInt() ?? 0,
           proofCasesCount:

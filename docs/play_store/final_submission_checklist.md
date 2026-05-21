@@ -1,0 +1,20 @@
+# Final submission checklist
+
+- [ ] Create the Google Play app entry
+- [ ] Upload the signed AAB
+- [ ] Enter the privacy policy URL
+- [ ] Enter the account deletion URL
+- [ ] Complete App access
+- [ ] Complete Ads declaration
+- [ ] Complete Content rating
+- [ ] Complete Target audience and content
+- [ ] Complete Data Safety
+- [ ] Add reviewer account credentials
+- [ ] Add screenshots
+- [ ] Add feature graphic if required
+- [ ] Add support email
+- [ ] Submit the internal testing release
+- [ ] Review the pre-launch report
+- [ ] Fix any crashes, ANRs, policy warnings, or layout issues
+- [ ] Test Stripe and Supabase from the Play-installed build
+- [ ] Only then consider production rollout

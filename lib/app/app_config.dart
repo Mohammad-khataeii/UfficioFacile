@@ -27,7 +27,7 @@ class UfficcioFacileConfig {
   static const appNameValue = 'UfficioFacile';
   static const supportEmail = 'support@ufficiofacile.app';
   static const privacyPolicyUrlPlaceholder =
-      'https://www.ufficiofacile.app/privacy';
+      'https://ufficio-facile.vercel.app/privacy';
 
   static const fromEnv = UfficcioFacileConfig(
     appName: appNameValue,
