@@ -319,10 +319,7 @@ class _LifeAdminAppState extends State<LifeAdminApp> {
                     );
                   case AppRoutes.profile:
                     return MaterialPageRoute(
-                      builder: (_) => const AuthGate(
-                        featureTitle: 'your profile',
-                        child: ConnectedProfileFolderScreen(),
-                      ),
+                      builder: (_) => const ConnectedProfileFolderScreen(),
                     );
                   case AppRoutes.account:
                     return MaterialPageRoute(

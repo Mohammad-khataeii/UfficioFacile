@@ -386,6 +386,15 @@ void main() {
   final accountScreenFile = File(
     'lib/features/auth/presentation/account_screen.dart',
   );
+  final profileScreenFile = File(
+    'lib/features/italy_admin_copilot/presentation/screens/connected_product_screens.dart',
+  );
+  final accountPrivacyPanelFile = File(
+    'lib/features/auth/presentation/account_privacy_panel.dart',
+  );
+  final deleteAccountDialogFile = File(
+    'lib/features/auth/presentation/account_deletion_dialog.dart',
+  );
   if (!privacyCenterFile.existsSync()) {
     problems.add('Missing privacy center implementation file');
   } else {
@@ -397,10 +406,40 @@ void main() {
       );
     }
   }
-  if (!accountScreenFile.existsSync() ||
-      (!accountScreenFile.readAsStringSync().contains('Delete account') &&
-          !accountScreenFile.readAsStringSync().contains('account_delete'))) {
-    problems.add('Account screen is missing a visible delete-account entry');
+  if (!accountScreenFile.existsSync()) {
+    problems.add('Missing account screen implementation file');
+  } else {
+    final accountScreen = accountScreenFile.readAsStringSync();
+    if (!accountScreen.contains('AccountAndPrivacyPanelContainer') &&
+        !accountScreen.contains('account_delete')) {
+      problems.add(
+        'Account screen is missing the shared account/privacy controls',
+      );
+    }
+  }
+  if (!deleteAccountDialogFile.existsSync()) {
+    problems.add('DeleteAccountDialog implementation is missing');
+  }
+  if (!accountPrivacyPanelFile.existsSync()) {
+    problems.add('Missing shared account/privacy panel implementation');
+  } else {
+    final panel = accountPrivacyPanelFile.readAsStringSync();
+    if (!panel.contains('account_privacy_section_title') ||
+        !panel.contains('account_delete_my_account')) {
+      problems.add(
+        'Shared account/privacy panel is missing the account/deletion UI copy',
+      );
+    }
+  }
+  if (!profileScreenFile.existsSync()) {
+    problems.add('Missing connected profile screen implementation file');
+  } else {
+    final profileScreen = profileScreenFile.readAsStringSync();
+    if (!profileScreen.contains('AccountAndPrivacyPanelContainer')) {
+      problems.add(
+        'Profile does not visibly include the shared account/privacy panel',
+      );
+    }
   }
 
   if (!deleteAccountFunctionFile.existsSync()) {

@@ -154,6 +154,25 @@ class AppLocalizations {
       'signed_out': 'Signed out',
       'account_privacy': 'Privacy center',
       'account_delete': 'Delete account',
+      'account_privacy_section_title': 'Account and privacy',
+      'account_privacy_section_subtitle':
+          'Manage sign-in, password, privacy, local data, and account deletion from here.',
+      'account_delete_local_data': 'Delete local data',
+      'account_delete_local_data_subtitle':
+          'Delete local data on this device without deleting your account.',
+      'account_delete_my_account': 'Delete my account',
+      'account_delete_my_account_subtitle':
+          'Permanently delete your account and app data where legally possible.',
+      'account_request_deletion_email': 'Request deletion by email',
+      'account_sign_in_to_delete': 'Sign in to delete your account.',
+      'account_deleted_signed_out':
+          'Your account was deleted and you have been signed out.',
+      'account_deletion_email_fallback':
+          'If self-service deletion is unavailable or fails, email support instead.',
+      'account_local_data_deleted': 'Local data cleared',
+      'account_plan_free': 'Free',
+      'account_plan_premium': 'Premium',
+      'account_plan_one_time_support': 'One-time support',
       'access_denied_title': 'Access denied',
       'access_denied_message':
           'Your account does not have access to this area.',
@@ -440,6 +459,25 @@ class AppLocalizations {
       'signed_out': 'Disconnessione effettuata',
       'account_privacy': 'Centro privacy',
       'account_delete': 'Elimina account',
+      'account_privacy_section_title': 'Account e privacy',
+      'account_privacy_section_subtitle':
+          'Gestisci accesso, password, privacy, dati locali ed eliminazione account da qui.',
+      'account_delete_local_data': 'Elimina dati locali',
+      'account_delete_local_data_subtitle':
+          'Elimina i dati su questo dispositivo senza eliminare l’account.',
+      'account_delete_my_account': 'Elimina il mio account',
+      'account_delete_my_account_subtitle':
+          'Elimina in modo permanente il tuo account e i dati dell’app dove legalmente possibile.',
+      'account_request_deletion_email': 'Richiedi eliminazione via email',
+      'account_sign_in_to_delete': 'Accedi per poter eliminare il tuo account.',
+      'account_deleted_signed_out':
+          'Il tuo account è stato eliminato e sei stato disconnesso.',
+      'account_deletion_email_fallback':
+          'Se l’eliminazione nell’app non è disponibile o fallisce, puoi usare l’email di supporto.',
+      'account_local_data_deleted': 'Dati locali eliminati',
+      'account_plan_free': 'Free',
+      'account_plan_premium': 'Premium',
+      'account_plan_one_time_support': 'Supporto una tantum',
       'access_denied_title': 'Accesso negato',
       'access_denied_message':
           'Il tuo account non ha accesso a questa sezione.',
@@ -730,6 +768,24 @@ class AppLocalizations {
       'account_log_out': 'خروج',
       'account_privacy': 'مرکز حریم خصوصی',
       'account_delete': 'حذف حساب',
+      'account_privacy_section_title': 'حساب و حریم خصوصی',
+      'account_privacy_section_subtitle':
+          'ورود، رمز عبور، حریم خصوصی، داده‌های محلی و حذف حساب را از همین‌جا مدیریت کنید.',
+      'account_delete_local_data': 'حذف داده‌های محلی',
+      'account_delete_local_data_subtitle':
+          'داده‌های این دستگاه را بدون حذف حساب پاک کنید.',
+      'account_delete_my_account': 'حذف حساب من',
+      'account_delete_my_account_subtitle':
+          'حساب و داده‌های برنامه شما در حد امکان قانونی برای همیشه حذف می‌شود.',
+      'account_request_deletion_email': 'درخواست حذف با ایمیل',
+      'account_sign_in_to_delete': 'برای حذف حساب وارد شوید.',
+      'account_deleted_signed_out': 'حساب شما حذف شد و از برنامه خارج شدید.',
+      'account_deletion_email_fallback':
+          'اگر حذف مستقیم در برنامه در دسترس نبود یا شکست خورد، از ایمیل پشتیبانی استفاده کنید.',
+      'account_local_data_deleted': 'داده‌های محلی پاک شد',
+      'account_plan_free': 'رایگان',
+      'account_plan_premium': 'پریمیوم',
+      'account_plan_one_time_support': 'پشتیبانی یک‌باره',
       'access_denied_title': 'دسترسی مجاز نیست',
       'access_denied_message': 'حساب شما به این بخش دسترسی ندارد.',
       'admin_overview': 'نمای کلی',
@@ -1018,6 +1074,26 @@ class AppLocalizations {
       'signed_out': 'Déconnexion effectuée',
       'account_privacy': 'Centre de confidentialité',
       'account_delete': 'Supprimer le compte',
+      'account_privacy_section_title': 'Compte et confidentialité',
+      'account_privacy_section_subtitle':
+          'Gérez la connexion, le mot de passe, la confidentialité, les données locales et la suppression du compte ici.',
+      'account_delete_local_data': 'Supprimer les données locales',
+      'account_delete_local_data_subtitle':
+          'Supprimez les données de cet appareil sans supprimer votre compte.',
+      'account_delete_my_account': 'Supprimer mon compte',
+      'account_delete_my_account_subtitle':
+          'Supprime définitivement votre compte et les données de l’app quand la loi le permet.',
+      'account_request_deletion_email': 'Demander la suppression par email',
+      'account_sign_in_to_delete':
+          'Connectez-vous pour supprimer votre compte.',
+      'account_deleted_signed_out':
+          'Votre compte a été supprimé et vous avez été déconnecté.',
+      'account_deletion_email_fallback':
+          'Si la suppression intégrée est indisponible ou échoue, utilisez l’email du support.',
+      'account_local_data_deleted': 'Données locales supprimées',
+      'account_plan_free': 'Gratuit',
+      'account_plan_premium': 'Premium',
+      'account_plan_one_time_support': 'Support ponctuel',
       'access_denied_title': 'Accès refusé',
       'access_denied_message': 'Votre compte n’a pas accès à cette section.',
       'admin_overview': 'Vue d’ensemble',
@@ -1407,6 +1483,25 @@ class AppLocalizations {
       'account_log_out': 'Cerrar sesión',
       'account_privacy': 'Centro de privacidad',
       'account_delete': 'Eliminar cuenta',
+      'account_privacy_section_title': 'Cuenta y privacidad',
+      'account_privacy_section_subtitle':
+          'Gestiona el acceso, la contraseña, la privacidad, los datos locales y la eliminación de la cuenta desde aquí.',
+      'account_delete_local_data': 'Eliminar datos locales',
+      'account_delete_local_data_subtitle':
+          'Elimina los datos de este dispositivo sin borrar tu cuenta.',
+      'account_delete_my_account': 'Eliminar mi cuenta',
+      'account_delete_my_account_subtitle':
+          'Elimina de forma permanente tu cuenta y los datos de la app cuando sea legalmente posible.',
+      'account_request_deletion_email': 'Solicitar eliminación por correo',
+      'account_sign_in_to_delete': 'Inicia sesión para eliminar tu cuenta.',
+      'account_deleted_signed_out':
+          'Tu cuenta fue eliminada y se cerró la sesión.',
+      'account_deletion_email_fallback':
+          'Si la eliminación dentro de la app no está disponible o falla, usa el correo de soporte.',
+      'account_local_data_deleted': 'Datos locales eliminados',
+      'account_plan_free': 'Gratis',
+      'account_plan_premium': 'Premium',
+      'account_plan_one_time_support': 'Soporte puntual',
       'access_denied_title': 'Acceso denegado',
       'access_denied_message': 'Tu cuenta no tiene acceso a esta área.',
       'admin_overview': 'Resumen',
@@ -1691,6 +1786,24 @@ class AppLocalizations {
       'account_log_out': 'تسجيل الخروج',
       'account_privacy': 'مركز الخصوصية',
       'account_delete': 'حذف الحساب',
+      'account_privacy_section_title': 'الحساب والخصوصية',
+      'account_privacy_section_subtitle':
+          'أدر تسجيل الدخول وكلمة المرور والخصوصية والبيانات المحلية وحذف الحساب من هنا.',
+      'account_delete_local_data': 'حذف البيانات المحلية',
+      'account_delete_local_data_subtitle':
+          'احذف بيانات هذا الجهاز بدون حذف الحساب.',
+      'account_delete_my_account': 'حذف حسابي',
+      'account_delete_my_account_subtitle':
+          'يحذف حسابك وبيانات التطبيق نهائياً حيثما كان ذلك ممكناً قانونياً.',
+      'account_request_deletion_email': 'طلب الحذف عبر البريد الإلكتروني',
+      'account_sign_in_to_delete': 'سجّل الدخول لحذف حسابك.',
+      'account_deleted_signed_out': 'تم حذف حسابك وتم تسجيل خروجك.',
+      'account_deletion_email_fallback':
+          'إذا لم يكن الحذف الذاتي متاحاً أو فشل، استخدم بريد الدعم.',
+      'account_local_data_deleted': 'تم حذف البيانات المحلية',
+      'account_plan_free': 'مجاني',
+      'account_plan_premium': 'Premium',
+      'account_plan_one_time_support': 'دعم لمرة واحدة',
       'access_denied_title': 'تم رفض الوصول',
       'access_denied_message': 'حسابك لا يملك صلاحية الوصول إلى هذه المنطقة.',
       'admin_overview': 'نظرة عامة',

@@ -6,7 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
-import '../../../auth/data/account_deletion_service.dart';
+import '../../../auth/presentation/account_privacy_panel.dart';
 import '../../../auth/presentation/account_deletion_dialog.dart';
 import '../../domain/ufficcio_user_settings.dart';
 
@@ -19,23 +19,6 @@ class PrivacyCenterScreen extends StatefulWidget {
 
 class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
   late Future<UfficcioUserSettings> _settingsFuture;
-
-  Future<void> _openDeletionEmailFallback(BuildContext context) async {
-    final userEmail =
-        AppScope.of(context).authController.user?.email.trim() ?? '';
-    await openAccountDeletionSupportMail(context, userEmail);
-  }
-
-  Future<AccountDeletionResult> _deleteAccountNow(BuildContext context) async {
-    final scope = AppScope.of(context);
-    final result = await scope.accountDeletionService.deleteCurrentAccount();
-    if (!result.ok) {
-      return result;
-    }
-    await scope.privacyCenterService.deleteLocalData();
-    await scope.authController.finalizeDeletedAccountSession();
-    return result;
-  }
 
   @override
   void didChangeDependencies() {
@@ -109,12 +92,7 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () async {
-                    await scope.privacyCenterService.deleteLocalData();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Local data cleared')),
-                      );
-                    }
+                    await clearLocalDataForScope(context, scope);
                   },
                   icon: const Icon(Icons.delete_outline),
                   label: const Text('Delete local data'),
@@ -129,16 +107,19 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                     final deleted = await showDialog<bool>(
                       context: context,
                       builder: (dialogContext) => DeleteAccountDialog(
-                        onDeleteNow: () => _deleteAccountNow(dialogContext),
+                        onDeleteNow: () => deleteCurrentAccountForScope(scope),
                         onEmailFallback: () =>
-                            _openDeletionEmailFallback(dialogContext),
+                            openDeletionEmailFallbackForScope(
+                              dialogContext,
+                              scope,
+                            ),
                       ),
                     );
                     if (deleted == true && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Your account was deleted and you have been signed out.',
+                            context.l10n.t('account_deleted_signed_out'),
                           ),
                         ),
                       );
@@ -158,7 +139,8 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: () => _openDeletionEmailFallback(context),
+                  onPressed: () =>
+                      openDeletionEmailFallbackForScope(context, scope),
                   icon: const Icon(Icons.manage_accounts_outlined),
                   label: const Text('Request deletion by email'),
                 ),

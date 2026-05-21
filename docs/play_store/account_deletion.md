@@ -9,11 +9,13 @@ Public deletion support URL:
 UfficioFacile now provides a self-service account deletion flow inside the app:
 
 1. Open the app.
-2. Open `Account`.
-3. Tap `Privacy center`.
+2. Open `Profile`.
+3. Find the `Account and privacy` section.
 4. Tap `Delete my account`.
 5. Type `DELETE`.
 6. Tap `Delete my account` again to confirm.
+
+Users can also tap `Profile` -> `Account and privacy` -> `Privacy center` if they want to review sync or local-data controls before deleting the account.
 
 If the deletion succeeds:
 
@@ -28,6 +30,7 @@ If in-app deletion is unavailable, blocked, or fails, the user can still request
 
 - Email: `support@ufficiofacile.app`
 - Suggested subject: `UfficioFacile account deletion request`
+- Visible app path: `Profile` -> `Account and privacy` -> `Request deletion by email`
 
 Suggested body:
 

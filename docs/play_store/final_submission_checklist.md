@@ -16,7 +16,8 @@
 - [ ] Add screenshots
 - [ ] Add feature graphic if required
 - [ ] Add support email
-- [ ] Verify in-app account deletion from a test account
+- [ ] Verify `Profile` -> `Account and privacy` -> `Delete my account` from a test account
+- [ ] Verify `Profile` -> `Account and privacy` -> `Request deletion by email`
 - [ ] Submit the internal testing release
 - [ ] Review the pre-launch report
 - [ ] Fix any crashes, ANRs, policy warnings, or layout issues

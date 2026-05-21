@@ -24,7 +24,7 @@ This is a practical working draft for the Google Play Data Safety form. It is no
 
 - Ads: disabled if no production AdMob IDs are passed
 - Payment card information: handled by Stripe, not stored directly by the app
-- Account deletion: users can delete their account in-app through `Account` -> `Privacy center` -> `Delete my account`, with email fallback
+- Account deletion: users can delete their account in-app through `Profile` -> `Account and privacy` -> `Delete my account`, with email fallback from the same section
 - Data encrypted in transit: yes, intended for backend communication
 - Data is not sold
 - Data is processed to provide app functionality, account management, support, payments, deletion, and security

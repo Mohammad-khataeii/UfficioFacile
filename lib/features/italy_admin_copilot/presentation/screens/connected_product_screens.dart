@@ -6,6 +6,7 @@ import '../../../../app/external_actions.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
+import '../../../auth/presentation/account_privacy_panel.dart';
 import '../../data/connected_product_data.dart';
 import '../../data/ufficio_city_registry.dart';
 import '../../domain/ufficio_catalog.dart';
@@ -1719,6 +1720,8 @@ class _ConnectedProfileFolderScreenState
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              const AccountAndPrivacyPanelContainer(),
+              const SizedBox(height: 12),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),

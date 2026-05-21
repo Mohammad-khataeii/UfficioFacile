@@ -70,11 +70,11 @@ Depending on enabled features, data may be processed by:
 
 ## 7. Data retention and deletion
 
-Users can clear local app data inside the app through `Account` -> `Privacy center` -> `Delete local data`.
+Users can clear local app data inside the app through `Profile` -> `Account and privacy` -> `Delete local data`.
 
-Users can delete their account inside the app through `Account` -> `Privacy center` -> `Delete my account`, then confirm by typing `DELETE`.
+Users can delete their account inside the app through `Profile` -> `Account and privacy` -> `Delete my account`, then confirm by typing `DELETE`.
 
-If in-app deletion is unavailable or fails, users can request deletion by email at `support@ufficiofacile.app`.
+If in-app deletion is unavailable or fails, users can request deletion by email through `Profile` -> `Account and privacy` -> `Request deletion by email` or directly at `support@ufficiofacile.app`.
 
 Deletion is intended to cover the account and associated app data where legally possible. Some payment, invoice, fraud-prevention, security, or legally required records may be retained or detached from the deleted account where appropriate.
 

@@ -2,6 +2,59 @@
 
 Last updated: 2026-05-21
 
+## Profile account-and-privacy visibility pass (2026-05-21)
+
+### What was added or upgraded
+
+- Added a shared `Account and privacy` panel in `lib/features/auth/presentation/account_privacy_panel.dart`
+- Added that panel directly to the user-visible `Profile` screen so account management and deletion are no longer hidden behind a separate Account entry
+- Kept `AccountScreen` as a compatibility route, but moved it onto the same shared controls
+- Kept `PrivacyCenterScreen` working and aligned it with the shared deletion helpers
+- Updated localization strings for the new Profile account-and-privacy UI
+- Updated public privacy and account-deletion pages to point to `Profile` -> `Account and privacy`
+- Updated Play Store and deployment docs to use the visible Profile path
+- Strengthened the release doctor to verify deletion is present in a profile-visible implementation, not only in `AccountScreen`
+
+### Manual test focus
+
+1. Launch the app.
+2. Open `Profile`.
+3. Confirm the `Account and privacy` section is visible.
+4. Confirm the signed-in email is shown when authenticated.
+5. Tap `Delete my account`.
+6. Confirm the dialog appears.
+7. Confirm the delete button stays disabled until `DELETE` is typed.
+8. Tap `Request deletion by email` and confirm the mail app fallback opens.
+9. With a test account only, deploy and test the full self-service deletion flow.
+
+### Commands run
+
+- `dart format lib test tool`
+  - Result: passed
+- `flutter pub get`
+  - Result: passed
+- `flutter analyze`
+  - Result: passed
+- `flutter test`
+  - Result: passed
+- `dart run tool/content_doctor.dart`
+  - Result: failed in this environment with `/usr/local/share/flutter/bin/cache/engine.stamp: Operation not permitted`
+- `/usr/local/share/flutter/bin/dart run tool/content_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart`
+  - Result: failed in the sandbox because the native-asset step could not codesign `.dart_tool/lib/objective_c.dylib`
+- `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart` outside sandbox
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart`
+  - Result: passed, with `versionCode` warning and local untracked `android/key.properties` warning only
+
+### What remains manual
+
+- Deploy `delete-account` if not already deployed.
+- Test full self-service deletion only with a fake or disposable account first.
+- Rebuild the Android App Bundle because the user-facing Profile UI changed.
+- Upload the rebuilt AAB to Google Play Internal Testing.
+
 ## Self-service account deletion and privacy upgrade pass (2026-05-21)
 
 ### What was added or upgraded

@@ -117,13 +117,16 @@ The Android release is not ready for production until the live Stripe and Supaba
 1. Create a test user.
 2. Add profile, request, reminder, or connected-tool data to that user.
 3. Open the app and sign in as the test user.
-4. Open `Account` -> `Privacy center`.
-5. Open `Delete my account`.
-6. Type `DELETE`.
-7. Confirm the app signs out and starts safely afterward.
-8. Confirm the Supabase Auth user is removed.
-9. Confirm user-owned profile and request rows are deleted, and retained payment or audit rows are detached or anonymized as expected.
-10. Confirm the email support fallback still opens correctly if the self-service flow fails.
+4. Open `Profile`.
+5. Confirm the `Account and privacy` section is visible and shows the signed-in email.
+6. Open `Delete my account`.
+7. Confirm the destructive action stays disabled until `DELETE` is typed.
+8. Tap `Request deletion by email` and confirm the email fallback opens correctly.
+9. Return to `Profile` -> `Account and privacy` and complete the self-service deletion flow.
+10. Confirm the app signs out and starts safely afterward.
+11. Confirm the Supabase Auth user is removed.
+12. Confirm user-owned profile and request rows are deleted, and retained payment or audit rows are detached or anonymized as expected.
+13. Confirm the email support fallback still opens correctly if the self-service flow fails.
 
 ## Android Google Play deployment
 

@@ -14,9 +14,9 @@ Reviewer steps:
 1. Open the app.
 2. Log in with the reviewer account above, or create an account if reviewer signup is available.
 3. Browse a public category and open a public guidance screen.
-4. Open the profile or account area.
+4. Open `Profile`.
 5. Open the premium screen or paywall area.
-6. Open `Account` -> `Privacy center`.
+6. Confirm the `Account and privacy` section is visible inside `Profile`.
 7. Open `Delete my account` and confirm that the app requires typing `DELETE` before deletion is enabled.
 8. If you should not delete the reviewer account, close the dialog and continue to the account-deletion help page instead.
 9. Open the notifications screen and review the permission flow if shown.

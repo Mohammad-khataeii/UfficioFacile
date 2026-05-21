@@ -12,16 +12,19 @@ This draft is intended for the Google Play App Access section and should be upda
 1. Open UfficioFacile.
 2. Tap `Login` and sign in with the reviewer account above, or create a new account if the reviewer account is unavailable.
 3. Browse a free category from the dashboard and open a public guidance screen.
-4. Open `Account` and then `Privacy center`.
-5. Return to the dashboard and open a protected or profile-related feature that requires sign-in.
-6. Open the premium or paywall screen to review monetization behavior.
-7. If live checkout is unavailable in the review environment, use the fallback note below.
+4. Open `Profile`.
+5. Confirm the `Account and privacy` section is visible.
+6. Open `Privacy center` from that section if you want to inspect the secondary privacy tools.
+7. Open `Delete my account` from the same `Account and privacy` section and verify the `DELETE` confirmation gate.
+8. Return to the dashboard and open a protected or profile-related feature that requires sign-in.
+9. Open the premium or paywall screen to review monetization behavior.
+10. If live checkout is unavailable in the review environment, use the fallback note below.
 
 ## What is free
 
 - Browsing public categories and public guidance
 - Basic account access
-- Privacy center access
+- `Profile` -> `Account and privacy` access
 
 ## What is premium
 
