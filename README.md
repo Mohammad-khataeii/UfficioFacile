@@ -71,6 +71,7 @@ Supabase verification in a linked environment:
 ```bash
 supabase migration list
 supabase db push --dry-run
+supabase functions deploy delete-account
 ```
 
 ## Android Google Play internal testing build
@@ -189,6 +190,7 @@ See `docs/play_store/local_signing_step_by_step.md` for local signing setup.
 See `docs/play_store/reviewer_instructions.md` for App Access prep.
 See `docs/play_store/store_listing_draft.md` for store listing copy.
 See `docs/play_store/account_deletion.md` for the deletion path.
+See `docs/privacy/account_deletion_data_map.md` for the backend deletion scope.
 See `docs/play_store/android_permissions.md` for the Android permission audit.
 See `docs/play_store/play_console_copy.md` for Play Console copy-paste text.
 See `docs/play_store/final_submission_checklist.md` for the final submission checklist.

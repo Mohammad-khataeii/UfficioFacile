@@ -4,35 +4,72 @@ Public deletion support URL:
 
 - `https://ufficio-facile.vercel.app/account-deletion`
 
-## Current supported path
+## In-app self-service deletion
 
-UfficioFacile currently supports account deletion requests through an in-app route:
+UfficioFacile now provides a self-service account deletion flow inside the app:
 
 1. Open the app.
 2. Open `Account`.
 3. Tap `Privacy center`.
-4. Tap `Request account deletion`.
-5. Send the generated email request to `support@ufficiofacile.app`.
+4. Tap `Delete my account`.
+5. Type `DELETE`.
+6. Tap `Delete my account` again to confirm.
 
-The app also allows users to clear local app data separately with the `Delete local data` action in the privacy center.
+If the deletion succeeds:
 
-## Data covered by a deletion request
+- the app calls the authenticated Supabase Edge Function
+- user-owned app data is deleted where legally possible
+- local app data is cleared
+- the user is signed out
 
-The request is intended to cover the user's account and associated app data where legally possible, including:
+## Email fallback
+
+If in-app deletion is unavailable, blocked, or fails, the user can still request deletion by email:
+
+- Email: `support@ufficiofacile.app`
+- Suggested subject: `UfficioFacile account deletion request`
+
+Suggested body:
+
+```text
+Account email:
+Full name:
+Request:
+Please delete my UfficioFacile account and associated app data where legally possible.
+```
+
+## Data covered
+
+The deletion flow is intended to cover the user's account and associated app data where legally possible, including:
 
 - account records
 - profile data
 - saved requests
-- problem descriptions
-- consultancy or support request data
-- synced workflow data related to app usage
+- problem-request data
+- consultancy-request data
+- reminder and workflow data
+- synced app data tied to the account
 
-Records that may need legal retention can include payment, invoice, tax, fraud-prevention, security, or other legally required records.
+## Data that may be retained in limited form
 
-## Important limitation
+Some records may need to be retained, detached from the deleted user where possible, for reasons such as:
 
-This is a support-based deletion request flow, not a client-side self-delete action. That is intentional: the mobile app must not contain elevated credentials or unsafe direct-delete logic such as a Supabase service-role account deletion path.
+- payment reconciliation
+- invoice or tax obligations
+- fraud prevention
+- security review
+- minimal audit trail for account deletion processing
+
+Payment card numbers are handled by Stripe and are not stored directly by the app.
+
+## Security note
+
+The self-service deletion flow is server-side only. The Flutter client does not contain a Supabase service-role key and does not accept arbitrary user IDs for deletion. The Edge Function verifies the authenticated user and deletes the Supabase Auth user last.
 
 ## Play Console note
 
-If account creation is enabled in the submitted build, the published privacy policy and Play Console account deletion disclosures should point to this in-app request flow until a verified self-service deletion flow exists.
+For Google Play disclosures:
+
+- point the account deletion URL to `https://ufficio-facile.vercel.app/account-deletion`
+- describe both the self-service in-app deletion path and the email fallback
+- make sure the privacy policy and Data Safety answers match the final deployed behavior

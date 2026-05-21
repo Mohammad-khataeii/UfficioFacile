@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-21
 
+## Self-service account deletion and privacy upgrade pass (2026-05-21)
+
+### What was added or upgraded
+
+- Added the secure Supabase Edge Function at `supabase/functions/delete-account/index.ts`
+- Added the account-deletion data map at `docs/privacy/account_deletion_data_map.md`
+- Added the Flutter client service for deletion requests in `lib/features/auth/data/account_deletion_service.dart`
+- Added the destructive confirmation dialog with typed `DELETE` confirmation in `lib/features/auth/presentation/account_deletion_dialog.dart`
+- Upgraded the Privacy Center to support:
+  - `Delete my account`
+  - `Request deletion by email`
+- Added a visible delete-account entry in the Account screen
+- Updated the public privacy page and public account deletion page to describe self-service deletion plus the support fallback
+- Updated Play Store privacy, account deletion, Data Safety, store listing, and final submission docs to reflect the new self-service flow
+- Strengthened the release doctor to verify the new function, data-map doc, public pages, config, and UI text
+
+### Commands run
+
+- `dart format lib test tool`
+  - Result: passed
+- `flutter pub get`
+  - Result: passed
+- `flutter analyze`
+  - Result: passed
+- `flutter test`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/content_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart`
+  - Result: passed, with versionCode warning and local untracked key warning only
+
+### What remains manual
+
+- Deploy the `delete-account` function to the real Supabase project
+- Test the deletion flow against the linked Supabase environment
+- Verify that expected profile, request, and connected-data rows are removed
+- Verify that retained payment or audit rows are detached or anonymized as expected
+- Deploy the updated web build so the public privacy and account-deletion URLs stay current
+- Update Play Console with the privacy and account-deletion URLs
+- Test the deletion flow from the Play-installed build
+
 ## Play Console content and privacy publication pass (2026-05-21)
 
 ### What files and pages were added or improved

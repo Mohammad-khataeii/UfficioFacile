@@ -116,7 +116,7 @@
         </p>
         <p>
           Operator or controller placeholder:
-          <strong>[INSERT LEGAL ENTITY OR INDIVIDUAL CONTROLLER NAME]</strong>
+          <strong>Seyedmohammad Khataeipour</strong>
         </p>
 
         <h2>Purpose of the app</h2>
@@ -184,24 +184,32 @@
 
         <h2>Ads</h2>
         <p>
-          The first Google Play internal testing release is expected to have ads
-          disabled unless real production AdMob IDs are configured. If ads are
-          enabled later, Google AdMob may process device or advertising
-          identifiers for ad delivery and anti-fraud purposes.
+          The current intended first Google Play internal-testing release keeps
+          ads disabled unless real production AdMob IDs are configured. If ads
+          are enabled later, the AdMob-related section applies and Play
+          declarations must be updated to match the final build.
         </p>
 
         <h2>Account deletion and local data deletion</h2>
         <p>
-          Users can request account deletion from inside the app through
-          <strong>Account → Privacy Center → Request account deletion</strong>.
-          Users can also email
-          <a href="mailto:support@ufficiofacile.app">support@ufficiofacile.app</a>
-          directly.
+          Users can delete their account inside the app through
+          <strong>Account → Privacy Center → Delete my account</strong>, then
+          confirm by typing <strong>DELETE</strong>.
         </p>
         <p>
-          Local-only device data can be cleared separately in the app through
-          the privacy center. Local data deletion is separate from the
-          support-based account deletion request.
+          If in-app deletion is unavailable or fails, users can still request
+          deletion by email at
+          <a href="mailto:support@ufficiofacile.app">support@ufficiofacile.app</a>.
+        </p>
+        <p>
+          Deletion is intended to cover the account and associated app data
+          where legally possible. Local app data is cleared and the user is
+          signed out after successful self-service deletion.
+        </p>
+        <p>
+          Some payment, invoice, fraud-prevention, security, or legally
+          required records may still be retained or detached from the deleted
+          account where appropriate.
         </p>
         <p>
           More details are available on the
@@ -221,16 +229,16 @@
           Data may be retained as needed to provide the app, support user
           requests, maintain billing or entitlement records, comply with legal
           obligations, or protect the service. Payment, invoice, tax, and other
-          legally required records may need to be retained even after an
-          account-deletion request.
+          legally required records may need to be retained even after account
+          deletion.
         </p>
 
         <h2>Security</h2>
         <p>
           UfficioFacile is intended to use encrypted transport for network
-          communication. Client applications must not contain service-role keys.
-          Account and backend access are expected to follow least-privilege
-          access controls and standard platform protections.
+          communication. Account deletion is performed server-side through an
+          authenticated Supabase Edge Function. Client applications must not
+          contain service-role keys.
         </p>
 
         <div class="actions">
@@ -238,7 +246,7 @@
             >Account deletion help</a
           >
           <a class="button button-secondary" href="/life-admin/auth"
-            >Open app login</a
+            >Open the app</a
           >
         </div>
       </section>

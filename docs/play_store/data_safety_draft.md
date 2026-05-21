@@ -2,56 +2,42 @@
 
 This is a practical working draft for the Google Play Data Safety form. It is not a legal certification. The final Play form must match the exact production build that is uploaded.
 
-| Data type | Collected? | Shared? | Purpose | Required/optional | Retention or deletion note | Code/source evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| Email address | Yes | Shared with Supabase Auth | Account creation, sign-in, password reset | Required for account features | User can request account deletion from `Account` -> `Privacy center` | `lib/features/auth`, `lib/app/supabase_bootstrap.dart` |
-| Name/profile info | Yes, if entered | Shared with Supabase when synced | User profile and autofill | Optional | Included in account data; deletion request is support-based | `lib/features/italy_admin_copilot/data/local_profile_repository.dart`, profile flows |
-| Codice fiscale | Yes, if entered | Shared with Supabase when synced | Administrative profile completion | Optional | Sensitive personal data entered by user; deletion request applies | profile and readiness modules under `lib/features/italy_admin_copilot` |
-| City and language | Yes | Shared with Supabase when synced | Localization and city-aware guidance | Optional | Can also exist locally on device | `lib/features/italy_admin_copilot`, `lib/app/app_localizations.dart` |
-| Saved requests and problem descriptions | Yes | Shared with Supabase when sync/backend features are active | Request tracking and user workflow history | Optional | User can clear local data; account deletion request covers server-held app data where applicable | request repositories and sync modules |
-| Consultancy request messages | Yes, if used | Shared with Supabase when submitted | Premium/support workflow | Optional | Retained as app-support data until deleted per backend policy | `consultancy` flows in `lib/features/italy_admin_copilot` |
-| Payment or entitlement status | Yes | Shared with Stripe and Supabase backend | Premium access control, checkout status, entitlements | Optional, only for premium flows | Stripe handles card details; app should not store card numbers | `lib/features/italy_admin_copilot/data/premium_service.dart`, `supabase/functions` |
-| Device or advertising IDs | Only if ads are enabled in production | Shared with Google AdMob if ads enabled | Ad delivery and anti-fraud | Optional | Must match final ad-enabled or ad-disabled release build | AdMob config in `lib/app/app_config.dart`, `lib/features/italy_admin_copilot/data/ads_service.dart` |
-| Notifications and reminders | Yes, if user enables them | Not expected to be shared beyond required platform delivery | Reminder scheduling and deadline notifications | Optional | User can disable notifications and clear local data | `flutter_local_notifications`, notification services |
-| Diagnostics or logs | Unknown, limited app/runtime logs likely | Unknown | Reliability and debugging | Unknown | Confirm before submission | review current SDK/runtime configuration before Play form |
-| Document metadata or user-entered document details | Yes, if user uses document features | Shared with Supabase when synced | Organizing supporting documents and request readiness | Optional | Local deletion supported; account deletion request covers synced data where applicable | document-related repositories under `lib/features/italy_admin_copilot` |
-
-## Important notes for Play Console
-
-- Stripe handles payment card details. The app and backend should receive payment state and entitlement data, not full card numbers.
-- Supabase stores auth, profile, sync, request, and related app data when backend-backed features are enabled.
-- AdMob only applies if ads are enabled in the actual production build.
-- The Data Safety form must match the final uploaded build. If the build ships with ads disabled, do not declare ad-related data collection that is not active in that build.
+| Play Console data category | Data example in UfficioFacile | Collected? | Shared? | Purpose | Required or optional? | Retention or deletion | Code or module evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Personal info: Email address | Supabase Auth email and account email | Yes | Shared with Supabase Auth | Account creation, sign-in, password reset, account management | Required for account features | User can delete account in-app or use email fallback | `lib/features/auth`, `supabase/functions/delete-account`, `supabase/migrations/20260508170000_fix_premium_profile_runtime_schema.sql` |
+| Personal info: Name | Full name entered in profile | Yes, if entered | Shared with Supabase when synced | Profile completion and autofill | Optional | Deleted with account where legally possible | profile flows and `ufficio_profiles` or `ufficcio_profiles` tables |
+| Personal info: Government ID | Codice fiscale if user enters it | Yes, if entered | Shared with Supabase when synced | Administrative profile completion | Optional | Deleted with account where legally possible | profile flows and profile tables |
+| Personal info: Address or city | City, address, Comune-related profile data | Yes, if entered | Shared with Supabase when synced | Localization, profile completion, city-aware guidance | Optional | Deleted with account where legally possible | profile repositories and guidance modules |
+| App info and performance: User IDs | Supabase user ID, entitlement links, request ownership | Yes | Shared with Supabase and Stripe-linked backend flows | Authentication, entitlements, support workflows, deletion | Required for signed-in features | Auth user deleted in self-service flow; retained payment or audit rows may be detached from the user | auth, premium, and deletion modules |
+| App activity: Saved requests and workflow history | Saved requests, request notes, reminders, generated workflow data | Yes | Shared with Supabase when synced | Request tracking and workflow history | Optional | Deleted with account where legally possible | request repositories, legacy `ufficcio_requests`, related tables |
+| User-generated content | Problem descriptions and saved problem text | Yes, if user submits | Shared with Supabase | Support intake and workflow handling | Optional | Self-service flow deletes owned support rows where possible | `ufficio_problem_requests`, request flows |
+| User-generated content | Consultancy request messages | Yes, if user submits | Shared with Supabase | Premium or support workflow handling | Optional | Self-service flow deletes consultancy rows; limited payment traces may remain detached | `ufficio_consultancy_requests`, `ufficio_consultancy_payments` |
+| Financial info | Payment or entitlement status, Stripe customer or subscription references | Yes | Shared with Stripe and Supabase backend | Premium checkout, entitlement enforcement, billing support | Optional | Event rows may be retained in detached or anonymized form where legally required | `ufficio_user_entitlements`, `ufficio_payment_events`, `ufficio_premium_events`, Stripe functions |
+| Financial info: Payment card details | Card number, CVC, expiry | No, not stored directly by app | Stripe handles directly | Payment processing | Optional | Not stored directly by app | Stripe checkout flow in `supabase/functions/create-checkout-session` |
+| App activity | Checklist items, deadlines, saved procedures, cost items, scans | Yes, if user uses connected tools | Shared with Supabase when synced | Organization, reminders, productivity features | Optional | Deleted with account where legally possible | `connected_product_data.dart`, related `ufficio_*` tables |
+| Photos and files / Documents | Document metadata, file names, storage paths, proof items if used | Yes, if user uses document features | Shared with Supabase when synced | Document organization and proof workflows | Optional | Metadata deleted with account; storage cleanup is attempted where paths exist | legacy `ufficcio_documents`, `ufficcio_proof_items`, connected repositories |
+| App info and performance: Crash logs or diagnostics | Limited reliability or runtime diagnostics if present | Unknown | Unknown | Reliability and debugging | Unknown | Verify final SDK stack before submission | confirm before final Play form |
+| Device or other IDs | Advertising or device identifiers through AdMob | Only if ads are enabled in production | Shared with Google AdMob only when enabled | Ad delivery and anti-fraud | Optional | Must match final released build | `ads_service.dart`, Android manifest placeholder config |
+| App activity / preferences | Notification preferences and reminder settings | Yes, if enabled by user | Normally not shared beyond required platform delivery | Notification scheduling and reminders | Optional | Cleared locally after deletion; synced data deleted where applicable | `notification_service.dart`, deadline and checklist data |
 
 ## Recommended Play Console answers for current first release
 
 - Ads: disabled if no production AdMob IDs are passed
 - Payment card information: handled by Stripe, not stored directly by the app
+- Account deletion: users can delete their account in-app through `Account` -> `Privacy center` -> `Delete my account`, with email fallback
 - Data encrypted in transit: yes, intended for backend communication
-- Users can request deletion: yes
 - Data is not sold
-- Data is processed to provide app functionality, account management, support, payments, and security
-
-## Security practices
-
-- Network communication is intended to be encrypted in transit.
-- Release signing is required for Play uploads.
-- `SUPABASE_SERVICE_ROLE_KEY` must remain server-side only.
+- Data is processed to provide app functionality, account management, support, payments, deletion, and security
 
 ## Account deletion and retention
 
-- Users can clear local app data inside `Account` -> `Privacy center`.
-- Users can request account deletion through `Account` -> `Privacy center` -> `Request account deletion`.
-- If self-service deletion is added later, update both this draft and the Play form.
-
-## Unknowns to resolve before submission
-
-- Whether any diagnostics or crash-reporting SDK is active in the final production build
-- Whether any analytics beyond current local or privacy-safe settings is active in the final production build
-- Whether ads are enabled in the final uploaded build
+- Users can delete their account inside the app and are signed out after success.
+- Users can also use the public account deletion page and email fallback.
+- Some payment, invoice, fraud-prevention, security, or minimal audit records may remain detached from the deleted account where legally required.
 
 ## Before submitting, verify final build flags
 
 - If AdMob IDs are included, update Ads and Data Safety answers.
 - If analytics is active in the final build, include analytics-related data handling.
 - If document upload or persistent document storage is active, include file or document data in the final answers.
+- If account deletion behavior changes, update the privacy policy, account deletion page, and Play Console text together.

@@ -58,6 +58,7 @@ supabase db push --dry-run
 supabase db push
 supabase functions deploy create-checkout-session
 supabase functions deploy stripe-webhook
+supabase functions deploy delete-account
 ```
 
 Required secrets:
@@ -73,12 +74,16 @@ supabase secrets set APP_BASE_URL=...
 Important runtime requirements:
 
 - `create-checkout-session` must remain authenticated.
+- `delete-account` must remain authenticated and must never trust a client-supplied user ID.
 - `stripe-webhook` must remain public and must verify the Stripe signature from the raw request body.
 - `supabase/config.toml` must keep:
 
 ```toml
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = true
 ```
 
 ### Stripe webhook setup
@@ -106,6 +111,19 @@ Run these before any production mobile rollout:
 7. Expired or revoked entitlement blocks premium content again.
 
 The Android release is not ready for production until the live Stripe and Supabase flow has been tested in at least internal testing.
+
+### Manual account deletion test
+
+1. Create a test user.
+2. Add profile, request, reminder, or connected-tool data to that user.
+3. Open the app and sign in as the test user.
+4. Open `Account` -> `Privacy center`.
+5. Open `Delete my account`.
+6. Type `DELETE`.
+7. Confirm the app signs out and starts safely afterward.
+8. Confirm the Supabase Auth user is removed.
+9. Confirm user-owned profile and request rows are deleted, and retained payment or audit rows are detached or anonymized as expected.
+10. Confirm the email support fallback still opens correctly if the self-service flow fails.
 
 ## Android Google Play deployment
 

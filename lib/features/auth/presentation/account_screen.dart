@@ -100,6 +100,16 @@ class AccountScreen extends StatelessWidget {
                           Navigator.pushNamed(context, AppRoutes.privacy),
                       child: Text(context.l10n.t('account_privacy')),
                     ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRoutes.privacy),
+                      icon: const Icon(Icons.delete_forever_outlined),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                      label: Text(context.l10n.t('account_delete')),
+                    ),
                     const SizedBox(height: 16),
                     const Card(child: AppMonetizationEntryTile()),
                   ],

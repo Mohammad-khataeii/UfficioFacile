@@ -11,11 +11,13 @@ const _requiredPlayDocs = <String>[
   'docs/play_store/local_signing_step_by_step.md',
   'docs/play_store/play_console_copy.md',
   'docs/play_store/final_submission_checklist.md',
+  'docs/privacy/account_deletion_data_map.md',
 ];
 
 const _requiredTools = <String>[
   'tool/google_play_release_doctor.dart',
   'tool/print_google_play_commands.dart',
+  'supabase/functions/delete-account/index.ts',
 ];
 
 const _activeAndroidFiles = <String>[
@@ -71,6 +73,12 @@ void main() {
   final keyExampleFile = File('android/key.properties.example');
   final privacyDraftFile = File('docs/play_store/privacy_policy_draft.md');
   final accountDeletionDocFile = File('docs/play_store/account_deletion.md');
+  final deleteAccountFunctionFile = File(
+    'supabase/functions/delete-account/index.ts',
+  );
+  final supabaseConfigFile = File('supabase/config.toml');
+  final privacyPageFile = File('web/privacy/index.html');
+  final accountDeletionPageFile = File('web/account-deletion/index.html');
   final readme = readmeFile.existsSync() ? readmeFile.readAsStringSync() : '';
   final gradle = gradleFile.existsSync() ? gradleFile.readAsStringSync() : '';
   final manifest = manifestFile.existsSync()
@@ -205,6 +213,7 @@ void main() {
       !readme.contains('docs/play_store/data_safety_draft.md') ||
       !readme.contains('docs/play_store/privacy_policy_draft.md') ||
       !readme.contains('docs/play_store/local_signing_step_by_step.md') ||
+      !readme.contains('docs/privacy/account_deletion_data_map.md') ||
       !readme.contains('docs/play_store/play_console_copy.md') ||
       !readme.contains('docs/play_store/final_submission_checklist.md')) {
     problems.add('README is missing required Play Store documentation links');
@@ -221,7 +230,8 @@ void main() {
       !readme.contains('docs/play_store/store_listing_draft.md')) {
     warnings.add('README could link more Play Store drafts directly');
   }
-  if (!storeDocsText.contains('Request account deletion')) {
+  if (!storeDocsText.contains('Request account deletion') &&
+      !storeDocsText.contains('Delete my account')) {
     problems.add(
       'Play Store docs do not mention the account deletion request path',
     );
@@ -243,6 +253,51 @@ void main() {
     problems.add(
       'account_deletion.md must include the public account deletion URL',
     );
+  }
+  if (!accountDeletionDoc.contains('Delete my account') ||
+      !accountDeletionDoc.contains('support@ufficiofacile.app')) {
+    problems.add(
+      'account_deletion.md must mention both self-service deletion and the email fallback',
+    );
+  }
+
+  final privacyPage = privacyPageFile.existsSync()
+      ? privacyPageFile.readAsStringSync()
+      : '';
+  if (!privacyPage.contains('Delete my account') ||
+      !privacyPage.contains('Some payment, invoice') ||
+      !privacyPage.contains('support@ufficiofacile.app')) {
+    problems.add(
+      'web/privacy/index.html must mention in-app deletion, retention, and the support fallback',
+    );
+  }
+  final accountDeletionPage = accountDeletionPageFile.existsSync()
+      ? accountDeletionPageFile.readAsStringSync()
+      : '';
+  if (!accountDeletionPage.contains('Delete my account') ||
+      !accountDeletionPage.contains('DELETE') ||
+      !accountDeletionPage.contains('support@ufficiofacile.app')) {
+    problems.add(
+      'web/account-deletion/index.html must mention self-service deletion and the email fallback',
+    );
+  }
+
+  final supabaseConfig = supabaseConfigFile.existsSync()
+      ? supabaseConfigFile.readAsStringSync()
+      : '';
+  if (!supabaseConfig.contains('[functions.delete-account]') ||
+      !supabaseConfig.contains('verify_jwt = true')) {
+    problems.add(
+      'supabase/config.toml must configure delete-account with verify_jwt = true',
+    );
+  }
+  if (supabaseConfig.contains(
+        '[functions.delete-account]\nverify_jwt = false',
+      ) ||
+      supabaseConfig.contains(
+        '[functions.delete-account]\r\nverify_jwt = false',
+      )) {
+    problems.add('delete-account must not disable verify_jwt');
   }
 
   for (final ignoredPath in const [
@@ -275,7 +330,7 @@ void main() {
     );
   }
 
-  final clientDirs = <String>['lib', 'android'];
+  final clientDirs = <String>['lib', 'android', 'web'];
   for (final dir in clientDirs) {
     final hits = _scanDir(Directory(dir), const [
       'SUPABASE_SERVICE_ROLE_KEY',
@@ -328,17 +383,50 @@ void main() {
   final privacyCenterFile = File(
     'lib/features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart',
   );
+  final accountScreenFile = File(
+    'lib/features/auth/presentation/account_screen.dart',
+  );
   if (!privacyCenterFile.existsSync()) {
     problems.add('Missing privacy center implementation file');
   } else {
     final privacyCenter = privacyCenterFile.readAsStringSync();
-    if (!privacyCenter.contains('Request account deletion') ||
-        !privacyCenter.contains('UfficioFacile account deletion request') ||
-        !privacyCenter.contains('UfficcioFacileConfig.supportEmail')) {
+    if (!privacyCenter.contains('Delete my account') ||
+        !privacyCenter.contains('Request deletion by email')) {
       problems.add(
-        'Privacy center does not clearly implement the support-based account deletion request UI',
+        'Privacy center does not clearly implement self-service deletion and the support fallback',
       );
     }
+  }
+  if (!accountScreenFile.existsSync() ||
+      (!accountScreenFile.readAsStringSync().contains('Delete account') &&
+          !accountScreenFile.readAsStringSync().contains('account_delete'))) {
+    problems.add('Account screen is missing a visible delete-account entry');
+  }
+
+  if (!deleteAccountFunctionFile.existsSync()) {
+    problems.add('Missing delete-account Edge Function');
+  } else {
+    final deleteAccountFunction = deleteAccountFunctionFile.readAsStringSync();
+    if (!deleteAccountFunction.contains("auth.admin.deleteUser")) {
+      problems.add('delete-account function does not delete the auth user');
+    }
+    if (!deleteAccountFunction.contains('Authorization')) {
+      problems.add('delete-account function does not verify the auth header');
+    }
+    if (deleteAccountFunction.contains('verify_jwt = false')) {
+      problems.add(
+        'delete-account function must not document verify_jwt = false',
+      );
+    }
+  }
+
+  final deploymentDoc = File('docs/deployment_production.md').existsSync()
+      ? File('docs/deployment_production.md').readAsStringSync()
+      : '';
+  if (!deploymentDoc.contains('supabase functions deploy delete-account')) {
+    problems.add(
+      'docs/deployment_production.md must mention deploying delete-account',
+    );
   }
 
   final wrongFlagHits = _scanWrongFlagUsage();
@@ -446,6 +534,23 @@ List<String> _scanDocsForJwtOrLiveAnonKey() {
         'SUPABASE_ANON_KEY example does not look like a placeholder in $path',
       );
     }
+    final serviceAssignments = RegExp(
+      r'SUPABASE_SERVICE_ROLE_KEY\s*=\s*([^\s`]+)',
+    ).allMatches(text);
+    for (final match in serviceAssignments) {
+      final value = match.group(1)?.trim() ?? '';
+      if (value.isEmpty ||
+          value == '...' ||
+          value.contains('<') ||
+          value.contains('CHANGE') ||
+          value.contains('example') ||
+          value.contains('YOUR_')) {
+        continue;
+      }
+      hits.add(
+        'SUPABASE_SERVICE_ROLE_KEY example does not look like a placeholder in $path',
+      );
+    }
   }
   return hits;
 }
@@ -509,6 +614,8 @@ bool _isTextLikeFile(String path) {
     '.json',
     '.txt',
     '.toml',
+    '.ts',
+    '.html',
   };
   return allowedExtensions.any(path.endsWith);
 }

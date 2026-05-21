@@ -13,6 +13,7 @@ import '../features/admin_cms/data/cms_repository.dart';
 import '../features/admin_cms/data/local_cms_repository.dart';
 import '../features/admin_cms/data/supabase_cms_repository.dart';
 import '../features/auth/application/auth_controller.dart';
+import '../features/auth/data/account_deletion_service.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/device_binding_service.dart';
 import '../features/auth/data/supabase_auth_repository.dart';
@@ -58,6 +59,7 @@ class AppScope extends InheritedWidget {
         config.isSupabaseEnabled && SupabaseBootstrap.client != null
         ? SupabaseAuthRepository(SupabaseBootstrap.client!)
         : LocalAuthRepository(prefs);
+    accountDeletionService = const AccountDeletionService();
     deviceBindingService = DeviceBindingService(prefs);
     screenshotProtectionService = ScreenshotProtectionService();
     final analytics = LocalAnalyticsService(prefs);
@@ -246,6 +248,7 @@ class AppScope extends InheritedWidget {
   final SupabaseBootstrapResult supabaseBootstrapResult;
 
   late final AuthRepository authRepository;
+  late final AccountDeletionService accountDeletionService;
   late final AuthController authController;
   late final DeviceBindingService deviceBindingService;
   late final ScreenshotProtectionService screenshotProtectionService;
@@ -318,28 +321,7 @@ class AppScope extends InheritedWidget {
   late final DocumentsService documentsService;
 
   Future<void> clearAuthSensitiveState() async {
-    const keysToRemove = <String>[
-      LocalAdminCopilotProfileRepository.profileStorageKey,
-      LocalAdminCopilotRequestRepository.requestsStorageKey,
-      LocalAdminCopilotRequestRepository.draftsStorageKey,
-      'italy_life_admin_documents_v1',
-      'italy_life_admin_contacts_v1',
-      'italy_life_admin_household_members_v1',
-      'italy_life_admin_household_contracts_v1',
-      'italy_life_admin_deadlines_v1',
-      'italy_life_admin_templates_v1',
-      'italy_life_admin_proof_cases_v1',
-      'italy_life_admin_proof_items_v1',
-      'italy_life_admin_before_sending_v1',
-      'italy_life_admin_cost_items_v1',
-      'italy_life_admin_directory_contacts_v1',
-      'italy_life_admin_directory_documents_v1',
-      'italy_life_admin_problem_requests_v1',
-      'italy_life_admin_consultancy_requests_v1',
-      'italy_life_admin_telegram_handoff_v1',
-      LocalUfficcioEntitlementRepository.storageKey,
-    ];
-    for (final key in keysToRemove) {
+    for (final key in LocalPrivacyCenterService.trackedKeys) {
       await _prefs.remove(key);
     }
     profileController.resetLocalState();

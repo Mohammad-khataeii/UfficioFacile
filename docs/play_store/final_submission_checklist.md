@@ -1,5 +1,8 @@
 # Final submission checklist
 
+- [ ] Deploy the public privacy page
+- [ ] Deploy the public account deletion page
+- [ ] Deploy the authenticated `delete-account` Supabase Edge Function
 - [ ] Create the Google Play app entry
 - [ ] Upload the signed AAB
 - [ ] Enter the privacy policy URL
@@ -13,6 +16,7 @@
 - [ ] Add screenshots
 - [ ] Add feature graphic if required
 - [ ] Add support email
+- [ ] Verify in-app account deletion from a test account
 - [ ] Submit the internal testing release
 - [ ] Review the pre-launch report
 - [ ] Fix any crashes, ANRs, policy warnings, or layout issues

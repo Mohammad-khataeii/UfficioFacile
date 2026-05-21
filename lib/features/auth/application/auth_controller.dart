@@ -139,6 +139,22 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<void> finalizeDeletedAccountSession() async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+    try {
+      try {
+        await _repository.signOut();
+      } catch (_) {}
+      user = null;
+      await afterSignedOut?.call();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> updatePassword(String newPassword) async {
     isLoading = true;
     errorMessage = null;

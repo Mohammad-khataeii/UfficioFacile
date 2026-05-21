@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../app/app_config.dart';
-import '../../../../app/external_actions.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
+import '../../../auth/data/account_deletion_service.dart';
+import '../../../auth/presentation/account_deletion_dialog.dart';
 import '../../domain/ufficcio_user_settings.dart';
 
 class PrivacyCenterScreen extends StatefulWidget {
@@ -19,6 +19,23 @@ class PrivacyCenterScreen extends StatefulWidget {
 
 class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
   late Future<UfficcioUserSettings> _settingsFuture;
+
+  Future<void> _openDeletionEmailFallback(BuildContext context) async {
+    final userEmail =
+        AppScope.of(context).authController.user?.email.trim() ?? '';
+    await openAccountDeletionSupportMail(context, userEmail);
+  }
+
+  Future<AccountDeletionResult> _deleteAccountNow(BuildContext context) async {
+    final scope = AppScope.of(context);
+    final result = await scope.accountDeletionService.deleteCurrentAccount();
+    if (!result.ok) {
+      return result;
+    }
+    await scope.privacyCenterService.deleteLocalData();
+    await scope.authController.finalizeDeletedAccountSession();
+    return result;
+  }
 
   @override
   void didChangeDependencies() {
@@ -103,32 +120,51 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                   label: const Text('Delete local data'),
                 ),
                 const SizedBox(height: 12),
-                OutlinedButton.icon(
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                  ),
                   onPressed: () async {
-                    final userEmail =
-                        scope.authController.user?.email.trim() ?? '';
-                    final subject = Uri.encodeComponent(
-                      'UfficioFacile account deletion request',
+                    final deleted = await showDialog<bool>(
+                      context: context,
+                      builder: (dialogContext) => DeleteAccountDialog(
+                        onDeleteNow: () => _deleteAccountNow(dialogContext),
+                        onEmailFallback: () =>
+                            _openDeletionEmailFallback(dialogContext),
+                      ),
                     );
-                    final body = Uri.encodeComponent(
-                      'Account email: ${userEmail.isEmpty ? '<add your account email>' : userEmail}\n'
-                      'Full name: <add your full name>\n'
-                      'Request: Please delete my UfficioFacile account and associated app data where legally possible.\n',
-                    );
-                    await ExternalActionService.open(
-                      context,
-                      'mailto:${UfficcioFacileConfig.supportEmail}?subject=$subject&body=$body',
-                      ExternalValueKind.email,
-                      failureMessage:
-                          'Could not open your email app for the deletion request.',
-                    );
+                    if (deleted == true && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Your account was deleted and you have been signed out.',
+                          ),
+                        ),
+                      );
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.auth,
+                        (route) => false,
+                      );
+                    }
                   },
-                  icon: const Icon(Icons.manage_accounts_outlined),
-                  label: const Text('Request account deletion'),
+                  icon: const Icon(Icons.delete_forever_outlined),
+                  label: const Text('Delete my account'),
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'This sends a support request for account deletion. It does not replace the separate local-data deletion button above.',
+                  'This permanently deletes your account and app data where legally possible. Some payment, invoice, fraud-prevention, security, or legal records may still be retained.',
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => _openDeletionEmailFallback(context),
+                  icon: const Icon(Icons.manage_accounts_outlined),
+                  label: const Text('Request deletion by email'),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'If in-app deletion is unavailable or fails, you can still request deletion by email.',
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(

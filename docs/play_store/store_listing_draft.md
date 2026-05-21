@@ -18,7 +18,7 @@ Italian admin help with guided steps, reminders, and request tracking.
 
 UfficioFacile helps people understand and organize common Italian administrative procedures in one place. Browse structured guidance, track deadlines, save requests, manage supporting details, and access premium assistance features when available.
 
-Whether you are handling housing, utilities, comune-related tasks, student paperwork, INPS-related issues, or general bureaucracy requests, UfficioFacile is designed to make complex steps easier to follow and easier to organize.
+Whether you are handling housing, utilities, Comune-related tasks, student paperwork, INPS-related issues, or general bureaucracy requests, UfficioFacile is designed to make complex steps easier to follow and easier to organize.
 
 The app focuses on practical guidance, reminders, and organization for Italy-based bureaucracy workflows. It is built for people who want clearer next steps, better record-keeping, and a simpler way to track administrative tasks across multiple categories.
 
@@ -27,14 +27,15 @@ The app focuses on practical guidance, reminders, and organization for Italy-bas
 - Browse categorized administrative guidance
 - Save request details and track important next steps
 - Manage reminders, profile information, and supporting workflows
-- Access sign-in protected tools and premium features when enabled
+- Use sign-in protected tools and premium features when enabled
+- Delete your account in-app or use email support fallback
 - Use the app in multiple languages including English and Italian
 
 ## What users can do for free
 
 - Browse public categories and guidance
 - Search and organize bureaucracy-related tasks
-- Open account and privacy-related screens
+- Open account, privacy, and account-deletion screens
 
 ## What premium adds
 
@@ -47,10 +48,10 @@ UfficioFacile is an informational and organizational tool. It is not a public au
 
 ## Contact placeholders
 
-- Support email placeholder: `support@ufficiofacile.app`
+- Support email: `support@ufficiofacile.app`
 - Website: `https://www.ufficiofacile.app`
 
-## Privacy policy placeholder
+## Privacy policy URL
 
 - `https://ufficio-facile.vercel.app/privacy`
 - Before Play submission, use this exact same URL in Play Console.
@@ -61,18 +62,19 @@ UfficioFacile is an informational and organizational tool. It is not a public au
 
 ## Screenshot checklist
 
-- Home/dashboard
-- Category or procedure screen
-- Auth or account screen
-- Premium/paywall screen
-- Privacy center
-- Language switching
+1. Home or problem search
+2. Category list
+3. Procedure detail
+4. Documents or contact guidance
+5. Premium or paywall screen
+6. Privacy center or account deletion screen
+7. Language selector
 
 ## Notes for an Italy-based bureaucracy app
 
 - Keep Italian administrative terminology understandable for non-experts.
 - Avoid implying government affiliation.
-- Use screenshots that clearly show guidance, organization, and reminder features rather than official-authority branding.
+- Use screenshots that clearly show guidance, organization, reminders, and deletion/privacy access rather than official-authority branding.
 
 ## Suggested tags or keywords
 
