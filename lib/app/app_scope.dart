@@ -208,6 +208,7 @@ class AppScope extends InheritedWidget {
       entitlementService: entitlementService,
     );
     adsService = UfficioAdsService(
+      appConfig: config,
       catalogRepository: catalogRepository,
       entitlementService: entitlementService,
     );

@@ -1,65 +1,49 @@
-# Auth Password Recovery
+# Auth password recovery and email confirmation
 
-UfficioFacile now supports:
+UfficioFacile supports:
 
+- sign-up email confirmation
 - forgot password from the login screen
-- reset password from a Supabase recovery link
-- change password from the account/profile area
+- password reset from a recovery link
+- password change from the account area
 
-## How it works
+## Redirect URLs to allow in Supabase
 
-1. From login, open `Forgot password?`
-2. Enter the account email
-3. The app calls Supabase `resetPasswordForEmail`
-4. The reset link sends the user back to the app reset-password route
-5. The user sets a new password
-6. Logged-in users can also open `Change password` from the account/profile area
+Native deep links:
 
-This flow is informational and UI-only on the client side. Supabase Auth remains the source of truth for sessions and password updates.
+- `ufficiofacile://auth/confirm-email`
+- `ufficiofacile://auth/reset-password`
 
-## Required Supabase redirect URLs
+Web callbacks:
 
-Production site URL:
+- `https://ufficio-facile.vercel.app/auth/confirm-email-callback`
+- `https://ufficio-facile.vercel.app/auth/reset-password-callback`
+- `http://localhost:3000/auth/confirm-email-callback`
+- `http://localhost:3000/auth/reset-password-callback`
+- `http://localhost:5173/auth/confirm-email-callback`
+- `http://localhost:5173/auth/reset-password-callback`
 
-- `https://ufficio-facile.vercel.app`
+Use the local port that matches your actual development server.
 
-Redirect URLs to allow in Supabase Auth:
+## Current flow
 
-- `https://ufficio-facile.vercel.app/auth/reset-password`
-- `https://ufficio-facile.vercel.app/auth/callback`
-- `http://localhost:3000/auth/reset-password`
-- `http://localhost:3000/auth/callback`
-- `http://localhost:5173/auth/reset-password`
-- `http://localhost:5173/auth/callback`
+- On mobile and web, the app currently generates web callback URLs for signup confirmation and password reset emails.
+- The Android app also declares native deep links for `ufficiofacile://auth/confirm-email` and `ufficiofacile://auth/reset-password`.
+- Keep both the native deep links and the web callback URLs allowed in Supabase so browser fallback and same-device flows both remain valid.
 
-Use the local port that matches your dev server if it differs.
+## Android deep-link expectations
 
-## Routes
+The Android manifest is configured to accept:
 
-- `/auth/forgot-password`
-- `/auth/reset-password`
-- `/account/change-password`
+- `ufficiofacile://auth/confirm-email`
+- `ufficiofacile://auth/reset-password`
 
-## Local testing
+## Manual test checklist
 
-1. Start the app locally
-2. Open the auth screen
-3. Tap `Forgot password?`
-4. Send a reset email for a test account
-5. Open the Supabase email link
-6. Confirm the app lands on the reset-password screen
-7. Set a new password
-8. Sign in with the new password
-9. Open account/profile and test `Change password`
-
-## Production note
-
-The reset redirect is built from the current web origin when possible. If the app is opened from production, it should resolve to:
-
-- `https://ufficio-facile.vercel.app/auth/reset-password`
-
-## Known limitations
-
-- Payments and billing are separate from password recovery
-- If the local dev origin changes, the matching reset-password URL must also be added in Supabase
-- Deep-link handling is currently routed through the app entry flow and the reset-password path
+1. Sign up from Android.
+2. Open the confirmation email on the same phone.
+3. Confirm the app can complete the confirmation flow.
+4. Trigger password reset from Android.
+5. Open the reset email on the same phone.
+6. Confirm the app lands on the reset-password flow.
+7. Open the web fallback callback URL in a browser and confirm the fallback flow still works.

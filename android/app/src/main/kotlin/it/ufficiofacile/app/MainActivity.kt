@@ -1,4 +1,4 @@
-package com.example.ufficiofacile
+package it.ufficiofacile.app
 
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity

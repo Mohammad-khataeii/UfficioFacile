@@ -291,19 +291,6 @@ class _AuthFormCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (rememberMe != null && onRememberMeChanged != null) ...[
-              const SizedBox(height: 8),
-              CheckboxListTile(
-                value: rememberMe,
-                onChanged: isLoading
-                    ? null
-                    : (value) => onRememberMeChanged!(value ?? false),
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text(context.l10n.t('auth_remember_me')),
-                subtitle: Text(context.l10n.t('auth_remember_me_hint')),
-              ),
-            ],
             if (errorMessage != null && errorMessage!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -323,6 +310,19 @@ class _AuthFormCard extends StatelessWidget {
               OutlinedButton(
                 onPressed: isLoading ? null : onSecondary,
                 child: Text(secondaryLabel!),
+              ),
+            ],
+            if (rememberMe != null && onRememberMeChanged != null) ...[
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                value: rememberMe,
+                onChanged: isLoading
+                    ? null
+                    : (value) => onRememberMeChanged!(value ?? false),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text(context.l10n.t('auth_remember_me')),
+                subtitle: Text(context.l10n.t('auth_remember_me_hint')),
               ),
             ],
           ],

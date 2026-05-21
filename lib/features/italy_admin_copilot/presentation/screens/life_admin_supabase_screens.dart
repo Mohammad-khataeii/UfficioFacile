@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../app/app_config.dart';
+import '../../../../app/external_actions.dart';
 import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
@@ -99,6 +101,30 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                   },
                   icon: const Icon(Icons.delete_outline),
                   label: const Text('Delete local data'),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final userEmail =
+                        scope.authController.user?.email.trim() ?? '';
+                    final subject = Uri.encodeComponent(
+                      'UfficioFacile account deletion request',
+                    );
+                    final body = Uri.encodeComponent(
+                      'Please delete my UfficioFacile account and associated stored data.\n\n'
+                      'Account email: ${userEmail.isEmpty ? '<add your account email>' : userEmail}\n'
+                      'Reason (optional): \n',
+                    );
+                    await ExternalActionService.open(
+                      context,
+                      'mailto:${UfficcioFacileConfig.supportEmail}?subject=$subject&body=$body',
+                      ExternalValueKind.email,
+                      failureMessage:
+                          'Could not open your email app for the deletion request.',
+                    );
+                  },
+                  icon: const Icon(Icons.manage_accounts_outlined),
+                  label: const Text('Request account deletion'),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(

@@ -72,12 +72,79 @@ supabase migration list
 supabase db push --dry-run
 ```
 
-## Production Flutter Build
+## Android Google Play internal testing build
 
 ```bash
-flutter build web \
+/usr/local/share/flutter/bin/flutter build appbundle \
   --release \
-  --dart-define=UFFICCIOFACILE_BACKEND_MODE=supabase \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```
+
+If production ads are enabled, also pass:
+
+```bash
+  --dart-define=UFFICIOFACILE_ADMOB_APP_ID_ANDROID=ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy \
+  --dart-define=UFFICIOFACILE_ADMOB_BANNER_ANDROID=ca-app-pub-xxxxxxxxxxxxxxxx/zzzzzzzzzz \
+  --dart-define=UFFICIOFACILE_ADMOB_INTERSTITIAL_ANDROID=ca-app-pub-xxxxxxxxxxxxxxxx/aaaaaaaaaa
+```
+
+If you are not ready to launch ads, leave those AdMob defines unset. Production builds now disable ads instead of falling back to Google test IDs.
+
+Before building a signed bundle:
+
+1. Create a local `android/key.properties` from `android/key.properties.example`, or export:
+   - `ANDROID_KEYSTORE_PATH`
+   - `ANDROID_KEYSTORE_PASSWORD`
+   - `ANDROID_KEY_ALIAS`
+   - `ANDROID_KEY_PASSWORD`
+2. Generate the upload key locally and keep it out of git:
+
+```bash
+keytool -genkeypair \
+  -v \
+  -keystore /absolute/path/to/upload-keystore.jks \
+  -alias upload \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+
+3. Run the release doctor:
+
+```bash
+/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart
+```
+
+4. Optionally print the Android release config:
+
+```bash
+cd android
+./gradlew printAndroidReleaseInfo
+```
+
+5. Build the `.aab`:
+
+```bash
+/usr/local/share/flutter/bin/flutter build appbundle \
+  --release \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```
+
+You must increment `versionCode` on every Play Console upload. In Flutter, `versionName` is the part before `+` in `pubspec.yaml`, and `versionCode` is the number after `+`.
+
+## Flutter web production build
+
+```bash
+/usr/local/share/flutter/bin/flutter build web \
+  --release \
   --dart-define=UFFICCIOFACILE_FLAVOR=production \
   --dart-define=SUPABASE_URL=... \
   --dart-define=SUPABASE_ANON_KEY=... \
@@ -94,6 +161,9 @@ Production notes:
 See `docs/deployment_production.md` for the full deployment checklist.
 See `docs/production_readiness_audit.md` for the current audit status.
 See `docs/supabase_security_audit.md` for the current RLS/security summary.
+See `docs/play_store/google_play_release_checklist.md` for the Android release gate.
+See `docs/play_store/privacy_policy_draft.md` for the privacy draft.
+See `docs/play_store/data_safety_draft.md` for the Play Data Safety draft.
 
 If the Next.js dev cache is corrupted and `.next/routes-manifest.json` is
 missing:

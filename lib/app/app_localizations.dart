@@ -865,6 +865,12 @@ class AppLocalizations {
       'forgot_password_title': 'رمز عبور را فراموش کرده‌اید؟',
       'forgot_password_intro':
           'ایمیل خود را وارد کنید تا اگر حساب وجود دارد، لینک بازنشانی برای شما ارسال شود.',
+      'auth_email_confirmed_title': 'ایمیل تأیید شد',
+      'auth_email_confirmed_body':
+          'حساب شما تأیید شد. دوباره وارد شوید تا ادامه دهید.',
+      'auth_remember_me': 'مرا به خاطر بسپار',
+      'auth_remember_me_hint':
+          'ایمیل شما را روی این دستگاه نگه می‌داریم تا ورود بعدی سریع‌تر شود.',
       'reset_password_title': 'بازنشانی رمز عبور',
       'reset_password_intro': 'یک رمز عبور جدید برای حساب خود انتخاب کنید.',
       'reset_password_send_link': 'ارسال لینک بازنشانی',
@@ -1149,6 +1155,12 @@ class AppLocalizations {
       'forgot_password_title': 'Mot de passe oublié ?',
       'forgot_password_intro':
           'Entrez votre email et nous enverrons un lien de réinitialisation si le compte existe.',
+      'auth_email_confirmed_title': 'Email confirmé',
+      'auth_email_confirmed_body':
+          'Votre compte est confirmé. Connectez-vous de nouveau pour continuer.',
+      'auth_remember_me': 'Se souvenir de moi',
+      'auth_remember_me_hint':
+          'Conserver votre email sur cet appareil pour accélérer la prochaine connexion.',
       'reset_password_title': 'Réinitialiser le mot de passe',
       'reset_password_intro':
           'Choisissez un nouveau mot de passe pour votre compte.',
@@ -1436,6 +1448,12 @@ class AppLocalizations {
       'forgot_password_title': '¿Olvidaste tu contraseña?',
       'forgot_password_intro':
           'Introduce tu correo y enviaremos un enlace de restablecimiento si la cuenta existe.',
+      'auth_email_confirmed_title': 'Correo confirmado',
+      'auth_email_confirmed_body':
+          'Tu cuenta ya está confirmada. Vuelve a iniciar sesión para continuar.',
+      'auth_remember_me': 'Recuérdame',
+      'auth_remember_me_hint':
+          'Guardar tu correo en este dispositivo para acelerar el próximo acceso.',
       'reset_password_title': 'Restablecer contraseña',
       'reset_password_intro': 'Elige una nueva contraseña para tu cuenta.',
       'reset_password_send_link': 'Enviar enlace de restablecimiento',
@@ -1711,6 +1729,12 @@ class AppLocalizations {
       'forgot_password_title': 'هل نسيت كلمة المرور؟',
       'forgot_password_intro':
           'أدخل بريدك الإلكتروني وسنرسل رابط إعادة تعيين إذا كان الحساب موجوداً.',
+      'auth_email_confirmed_title': 'تم تأكيد البريد الإلكتروني',
+      'auth_email_confirmed_body':
+          'تم تأكيد حسابك. سجّل الدخول مرة أخرى للمتابعة.',
+      'auth_remember_me': 'تذكّرني',
+      'auth_remember_me_hint':
+          'الاحتفاظ ببريدك الإلكتروني على هذا الجهاز لتسريع تسجيل الدخول لاحقاً.',
       'reset_password_title': 'إعادة تعيين كلمة المرور',
       'reset_password_intro': 'اختر كلمة مرور جديدة لحسابك.',
       'reset_password_send_link': 'إرسال رابط إعادة التعيين',

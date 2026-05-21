@@ -1,112 +1,54 @@
 # UfficioFacile mobile ads setup
 
-This app now has a real ad structure for free users.
-
-## What is already implemented
+## Current production-safe behavior
 
 - Free users only: premium users do not see ads.
-- Google Mobile Ads SDK wiring for Android and iOS.
-- Remote ad screen control through `ufficio_app_public_config`.
-- Reusable banner slots in the app on:
-  - `home`
-  - `profile_folder`
-  - `promo_codes`
+- Production builds do not fall back to Google test ad IDs.
+- If real AdMob IDs are not configured, ads are disabled in production.
+- Debug and non-production testing can still use Google test ad IDs only when test mode is explicitly enabled.
 
-## Important before going live
+## Required production values
 
-The native app currently uses Google test app IDs so the SDK can start safely.
-Before publishing, replace them with your real AdMob app IDs.
+Flutter build defines:
 
-Files:
+- `UFFICIOFACILE_ADMOB_APP_ID_ANDROID`
+- `UFFICIOFACILE_ADMOB_BANNER_ANDROID`
+- `UFFICIOFACILE_ADMOB_INTERSTITIAL_ANDROID`
 
-- Android: [/Users/mohammadkhataei/Desktop/UfficioFacile/android/app/src/main/AndroidManifest.xml](/Users/mohammadkhataei/Desktop/UfficioFacile/android/app/src/main/AndroidManifest.xml)
-- iOS: [/Users/mohammadkhataei/Desktop/UfficioFacile/ios/Runner/Info.plist](/Users/mohammadkhataei/Desktop/UfficioFacile/ios/Runner/Info.plist)
+Optional future iOS values:
 
-## 1. Apply for AdMob
+- `UFFICIOFACILE_ADMOB_APP_ID_IOS`
+- `UFFICIOFACILE_ADMOB_BANNER_IOS`
+- `UFFICIOFACILE_ADMOB_INTERSTITIAL_IOS`
 
-1. Create or sign in to your Google AdMob account.
-2. Add the Android and iOS apps.
-3. Create banner ad units for the placements you want.
-4. Keep the app IDs and banner unit IDs ready.
+Optional non-production test flag:
 
-## 2. Replace native app IDs
+- `UFFICIOFACILE_ADMOB_TEST_MODE=true`
 
-Android manifest:
+## Android manifest behavior
 
-- Replace `ca-app-pub-3940256099942544~3347511713`
+The Android manifest now reads the AdMob app ID from the Gradle placeholder `${admobApplicationId}`.
 
-iOS Info.plist:
+- Debug and profile builds use Google’s sample app ID for safe SDK initialization.
+- Release builds require a real production AdMob app ID if ads are being enabled.
+- Leaving the production AdMob values unset disables ads in production instead of showing Google test ads.
 
-- Replace `ca-app-pub-3940256099942544~1458002511`
+## Remote config shape
 
-These are Google test IDs. They must not stay in production if you want real revenue.
-
-## 3. Configure banner unit IDs from admin
-
-Open the admin panel `Config` page and edit `ufficio_app_public_config` key:
-
-- `freeUserAds`
-
-Recommended value shape:
+`ufficio_app_public_config.freeUserAds` can still control screen targeting and the master enable flag:
 
 ```json
 {
   "enabled": true,
   "provider": "google_mobile_ads",
   "testMode": false,
-  "screens": ["home", "profile_folder", "promo_codes"],
-  "bannerUnitIdAndroid": "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx",
-  "bannerUnitIdIos": "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx",
-  "interstitialUnitIdAndroid": "",
-  "interstitialUnitIdIos": ""
+  "screens": ["home", "profile_folder", "promo_codes"]
 }
 ```
 
-## 4. How screen targeting works
+Production unit IDs should come from build-time defines. Do not depend on remote config alone for production ad IDs.
 
-- `enabled`: master switch
-- `provider`: currently `google_mobile_ads`
-- `screens`: where ads may appear
-- `bannerUnitIdAndroid` and `bannerUnitIdIos`: real monetized banner units
+## Play Console declaration
 
-If `enabled` is `false`, no ads are shown.
-
-If the unit ID is empty, the app falls back to Google test units. That is safe for testing, but it does not monetize.
-
-## 5. How to add more ad placements
-
-Widget:
-
-- [notification_and_monetization_screens.dart](/Users/mohammadkhataei/Desktop/UfficioFacile/lib/features/italy_admin_copilot/presentation/screens/notification_and_monetization_screens.dart)
-
-Reusable widget:
-
-- `FreeUserBannerAdCard(screen: 'your_screen_key')`
-
-Steps:
-
-1. Add the widget to the target screen.
-2. Add the same screen key to `freeUserAds.screens`.
-3. Save config in admin.
-
-## 6. Good rollout defaults
-
-- Start with banner only.
-- Keep ads on utility screens, not every screen.
-- Avoid putting ads above the main call to action.
-- Keep premium screens and locked premium content ad-free.
-
-## 7. Troubleshooting
-
-If ads do not show:
-
-1. Check that the user is free, not premium.
-2. Check `freeUserAds.enabled`.
-3. Check the screen key exists in `freeUserAds.screens`.
-4. Check the real banner unit ID for the correct platform.
-5. Confirm the native AdMob app ID was replaced.
-6. Test on a physical device, not only emulator/web.
-
-## 8. Safe production note
-
-The app is set up so ads can be disabled instantly from admin config without shipping a new build.
+- If ads are enabled in the shipped production build, declare that the app contains ads.
+- If ads are disabled in the shipped production build, declare no ads only if the production build truly cannot show ads.

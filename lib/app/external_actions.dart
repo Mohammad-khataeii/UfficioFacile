@@ -23,6 +23,9 @@ class ExternalActionService {
         return _websiteUri(value);
       case ExternalValueKind.email:
       case ExternalValueKind.pec:
+        if (value.startsWith('mailto:')) {
+          return Uri.tryParse(value);
+        }
         return Uri(scheme: 'mailto', path: value);
       case ExternalValueKind.phone:
         final normalized = value.replaceAll(RegExp(r'[^\d+]'), '');

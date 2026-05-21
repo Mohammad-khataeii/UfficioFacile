@@ -14,10 +14,20 @@ class UfficcioFacileConfig {
     required this.betaModeEnabled,
     required this.paywallEnabled,
     required this.analyticsEnabledByDefault,
+    this.admobAppIdAndroid = '',
+    this.admobAppIdIos = '',
+    this.admobBannerAndroid = '',
+    this.admobBannerIos = '',
+    this.admobInterstitialAndroid = '',
+    this.admobInterstitialIos = '',
+    this.admobTestMode = false,
     this.allowLocalFallback = false,
   });
 
   static const appNameValue = 'UfficioFacile';
+  static const supportEmail = 'support@ufficiofacile.app';
+  static const privacyPolicyUrlPlaceholder =
+      'https://www.ufficiofacile.app/privacy';
 
   static const fromEnv = UfficcioFacileConfig(
     appName: appNameValue,
@@ -30,6 +40,13 @@ class UfficcioFacileConfig {
     betaModeEnabled: _betaModeEnabled,
     paywallEnabled: _paywallEnabled,
     analyticsEnabledByDefault: _analyticsEnabled,
+    admobAppIdAndroid: _admobAppIdAndroid,
+    admobAppIdIos: _admobAppIdIos,
+    admobBannerAndroid: _admobBannerAndroid,
+    admobBannerIos: _admobBannerIos,
+    admobInterstitialAndroid: _admobInterstitialAndroid,
+    admobInterstitialIos: _admobInterstitialIos,
+    admobTestMode: _admobTestMode,
     allowLocalFallback: _allowLocalFallback,
   );
 
@@ -43,6 +60,13 @@ class UfficcioFacileConfig {
   final bool betaModeEnabled;
   final bool paywallEnabled;
   final bool analyticsEnabledByDefault;
+  final String admobAppIdAndroid;
+  final String admobAppIdIos;
+  final String admobBannerAndroid;
+  final String admobBannerIos;
+  final String admobInterstitialAndroid;
+  final String admobInterstitialIos;
+  final bool admobTestMode;
   final bool allowLocalFallback;
 
   bool get isProduction => flavor == UfficioFacileFlavor.production;
@@ -67,6 +91,15 @@ class UfficcioFacileConfig {
       backendMode == AppBackendMode.supabase;
 
   bool get canFallbackToLocalMode => false;
+
+  bool get hasProductionAdmobAppIdAndroid =>
+      admobAppIdAndroid.trim().isNotEmpty;
+
+  bool get hasAnyProductionAdUnit =>
+      admobBannerAndroid.trim().isNotEmpty ||
+      admobBannerIos.trim().isNotEmpty ||
+      admobInterstitialAndroid.trim().isNotEmpty ||
+      admobInterstitialIos.trim().isNotEmpty;
 
   static const _backendMode = AppBackendMode.supabase;
 
@@ -107,6 +140,40 @@ class UfficcioFacileConfig {
   static const _analyticsEnabled = bool.fromEnvironment(
     'UFFICCIOFACILE_ENABLE_ANALYTICS',
     defaultValue: true,
+  );
+  static const _admobAppIdAndroid = String.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_APP_ID_ANDROID',
+    defaultValue: String.fromEnvironment(
+      'UFFICCIOFACILE_ADMOB_APP_ID_ANDROID',
+      defaultValue: '',
+    ),
+  );
+  static const _admobAppIdIos = String.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_APP_ID_IOS',
+    defaultValue: String.fromEnvironment(
+      'UFFICCIOFACILE_ADMOB_APP_ID_IOS',
+      defaultValue: '',
+    ),
+  );
+  static const _admobBannerAndroid = String.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_BANNER_ANDROID',
+    defaultValue: '',
+  );
+  static const _admobBannerIos = String.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_BANNER_IOS',
+    defaultValue: '',
+  );
+  static const _admobInterstitialAndroid = String.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_INTERSTITIAL_ANDROID',
+    defaultValue: '',
+  );
+  static const _admobInterstitialIos = String.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_INTERSTITIAL_IOS',
+    defaultValue: '',
+  );
+  static const _admobTestMode = bool.fromEnvironment(
+    'UFFICIOFACILE_ADMOB_TEST_MODE',
+    defaultValue: false,
   );
   static const _allowLocalFallback = bool.fromEnvironment(
     'UFFICCIOFACILE_ALLOW_LOCAL_FALLBACK',

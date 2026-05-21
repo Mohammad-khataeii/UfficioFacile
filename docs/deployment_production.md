@@ -1,11 +1,19 @@
 # Production Deployment
 
-## Flutter web production build
+This document separates the live deployment work by surface:
+
+- Flutter web
+- Next.js admin
+- Supabase
+- Android Google Play release
+
+Do not ship the Android app to production until internal testing, Play pre-launch checks, and live Supabase/Stripe payment validation have all passed.
+
+## Flutter web deployment
 
 ```bash
-flutter build web \
+/usr/local/share/flutter/bin/flutter build web \
   --release \
-  --dart-define=UFFICCIOFACILE_BACKEND_MODE=supabase \
   --dart-define=UFFICCIOFACILE_FLAVOR=production \
   --dart-define=SUPABASE_URL=... \
   --dart-define=SUPABASE_ANON_KEY=... \
@@ -15,19 +23,11 @@ flutter build web \
 
 Notes:
 
-- Production Supabase builds now fail loud if `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing.
-- Do not enable local debug premium or local fallback flags in production.
+- Production Supabase builds fail loudly if `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` out of Flutter builds completely.
+- Do not enable local fallback or local debug premium flags in production.
 
-## Flutter mobile
-
-- Confirm the final iOS bundle identifier before App Store/TestFlight release.
-- Confirm the final Android application ID before Play/internal release.
-- Add Supabase auth redirect URLs for mobile and web callback targets.
-- Add password reset redirect URLs that point to the deployed web/app reset flow.
-- Recheck `url_launcher` and checkout return URLs on iOS and Android after release signing.
-
-## Next.js admin on Vercel
+## Next.js admin deployment
 
 - Root directory: `apps/admin`
 - Install command: `npm install`
@@ -47,9 +47,7 @@ If plan products depend on explicit Stripe prices:
 - populate `stripe_price_id` in `ufficio_plan_products`
 - or provide equivalent admin-managed product metadata before exposing checkout buttons
 
-## Supabase
-
-Install or make the Supabase CLI available first. In this workspace the command was not installed.
+## Supabase deployment
 
 Typical commands:
 
@@ -72,22 +70,21 @@ supabase secrets set STRIPE_WEBHOOK_SECRET=...
 supabase secrets set APP_BASE_URL=...
 ```
 
-Important:
+Important runtime requirements:
 
-- `supabase/config.toml` now requires:
+- `create-checkout-session` must remain authenticated.
+- `stripe-webhook` must remain public and must verify the Stripe signature from the raw request body.
+- `supabase/config.toml` must keep:
 
 ```toml
 [functions.stripe-webhook]
 verify_jwt = false
 ```
 
-- `create-checkout-session` must remain authenticated.
-- `stripe-webhook` must remain public and must verify the Stripe signature from the raw request body.
-
-## Stripe webhook setup
+### Stripe webhook setup
 
 - Endpoint: `https://<project-ref>.functions.supabase.co/stripe-webhook`
-- Configure at minimum:
+- Required events:
   - `checkout.session.completed`
   - `customer.subscription.created`
   - `customer.subscription.updated`
@@ -95,26 +92,139 @@ verify_jwt = false
   - `invoice.payment_succeeded`
   - `invoice.payment_failed`
   - `payment_intent.succeeded`
-- Confirm webhook delivery succeeds before enabling live billing.
-- Confirm duplicate event delivery leaves entitlement state unchanged except for a single logged event row.
 
-## Post-deploy checklist
+### Supabase and Stripe manual production checks
 
-- Admin login works.
-- Owner/admin user exists.
-- `/content` opens.
-- No duplicate React key warnings appear on content pages.
-- Procedure detail opens on `/content/procedures/{categorySlug}/{procedureSlug}`.
-- Category-aware CMS blocks render the correct procedure detail.
-- Flutter signup/login works.
-- Password reset works.
-- Language switching works.
-- Premium checkout opens Stripe Checkout.
-- Stripe webhook updates `ufficio_user_entitlements`.
-- Premium badge stays stable after refresh.
-- Expired or revoked entitlement blocks premium content.
-- Free limits block correctly.
-- Single unlock works only for the exact `category_slug + procedure_slug`.
-- Problem request reaches admin.
-- Consultancy request reaches admin.
-- Run the manual SQL checks from `docs/supabase_security_audit.md`.
+Run these before any production mobile rollout:
+
+1. Login works with Supabase Auth.
+2. Checkout opens from the app.
+3. Stripe payment succeeds.
+4. The webhook is received successfully.
+5. `ufficio_user_entitlements` updates correctly.
+6. Premium content unlock persists after app restart.
+7. Expired or revoked entitlement blocks premium content again.
+
+The Android release is not ready for production until the live Stripe and Supabase flow has been tested in at least internal testing.
+
+## Android Google Play deployment
+
+Final Android package:
+
+- `it.ufficiofacile.app`
+
+Release build prerequisites:
+
+1. Generate an upload keystore locally and do not commit it:
+
+```bash
+keytool -genkeypair \
+  -v \
+  -keystore /absolute/path/to/upload-keystore.jks \
+  -alias upload \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+
+2. Create `android/key.properties` from `android/key.properties.example`, or export:
+   - `ANDROID_KEYSTORE_PATH`
+   - `ANDROID_KEYSTORE_PASSWORD`
+   - `ANDROID_KEY_ALIAS`
+   - `ANDROID_KEY_PASSWORD`
+
+3. Decide whether ads are enabled for the release.
+
+If ads are enabled, provide:
+
+- `UFFICIOFACILE_ADMOB_APP_ID_ANDROID`
+- `UFFICIOFACILE_ADMOB_BANNER_ANDROID`
+- `UFFICIOFACILE_ADMOB_INTERSTITIAL_ANDROID`
+
+If ads are not enabled yet, leave the AdMob production defines unset. Production builds now disable ads instead of using Google test IDs.
+
+### Android internal testing bundle command
+
+```bash
+/usr/local/share/flutter/bin/flutter build appbundle \
+  --release \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICIOFACILE_ENABLE_BETA_MODE=false
+```
+
+If ads are enabled, append:
+
+```bash
+  --dart-define=UFFICIOFACILE_ADMOB_APP_ID_ANDROID=ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy \
+  --dart-define=UFFICIOFACILE_ADMOB_BANNER_ANDROID=ca-app-pub-xxxxxxxxxxxxxxxx/zzzzzzzzzz \
+  --dart-define=UFFICIOFACILE_ADMOB_INTERSTITIAL_ANDROID=ca-app-pub-xxxxxxxxxxxxxxxx/aaaaaaaaaa
+```
+
+### Android release verification
+
+```bash
+/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart
+cd android
+./gradlew printAndroidReleaseInfo
+```
+
+Check the output confirms:
+
+- `applicationId=it.ufficiofacile.app`
+- `namespace=it.ufficiofacile.app`
+- `targetSdk >= 35`
+- `releaseSigningConfigured=true`
+
+### Auth redirect URLs to allow in Supabase
+
+Native deep links:
+
+- `ufficiofacile://auth/confirm-email`
+- `ufficiofacile://auth/reset-password`
+
+Web callback URLs:
+
+- `https://<production-web-domain>/auth/confirm-email-callback`
+- `https://<production-web-domain>/auth/reset-password-callback`
+
+Recommended production web domain today:
+
+- `https://ufficio-facile.vercel.app`
+
+That means the current production callback set is:
+
+- `ufficiofacile://auth/confirm-email`
+- `ufficiofacile://auth/reset-password`
+- `https://ufficio-facile.vercel.app/auth/confirm-email-callback`
+- `https://ufficio-facile.vercel.app/auth/reset-password-callback`
+
+Current flow behavior:
+
+- the mobile app generates web callback URLs for signup confirmation and password reset emails
+- the Android manifest also accepts the native deep links above
+- keep both web and native URLs allowed in Supabase so same-device and fallback browser flows both work
+
+### Android auth redirect manual checks
+
+1. Sign up from the Android app.
+2. Open the confirmation email on the same Android phone.
+3. Confirm the app can complete the email confirmation flow.
+4. Trigger password reset from Android.
+5. Open the reset email on the same Android phone.
+6. Confirm the app can land on the reset-password flow.
+7. Open the fallback web callback URL from a browser and confirm the web flow still works.
+
+### Play Console checklist
+
+The release cannot move forward until these docs are prepared and reviewed:
+
+- `docs/play_store/google_play_release_checklist.md`
+- `docs/play_store/privacy_policy_draft.md`
+- `docs/play_store/data_safety_draft.md`
+- `docs/play_store/reviewer_instructions.md`
+- `docs/play_store/store_listing_draft.md`
+- `docs/play_store/account_deletion.md`
+- `docs/play_store/android_permissions.md`

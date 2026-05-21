@@ -1,6 +1,92 @@
 # Production Readiness Audit
 
-Last updated: 2026-05-14
+Last updated: 2026-05-21
+
+## Android Google Play readiness pass (2026-05-21)
+
+### What was fixed
+
+- Replaced the default Android package identity with `it.ufficiofacile.app`.
+- Moved `MainActivity` into `android/app/src/main/kotlin/it/ufficiofacile/app/`.
+- Updated `android/app/build.gradle.kts` so release signing loads from `android/key.properties` or `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`.
+- Removed release debug signing and made release bundle builds fail loudly when signing is missing.
+- Added `android/key.properties.example` and ignored local keystore material in `.gitignore`.
+- Enforced Play-compliant Android SDK floors in Gradle and added `printAndroidReleaseInfo`.
+- Replaced the hardcoded sample AdMob app ID in the release manifest path with a Gradle placeholder.
+- Added production-safe ad behavior so production builds disable ads unless real AdMob IDs are configured.
+- Added a safe in-app account deletion request route in the privacy center.
+- Added `tool/google_play_release_doctor.dart`.
+- Added Play Store compliance drafts and release docs under `docs/play_store/`.
+- Updated README and deployment docs with Android App Bundle, signing, redirect, and release-check instructions.
+- Documented Supabase and Stripe production prerequisites, redirect URLs, and manual test flows.
+
+### Commands run
+
+From repo root:
+
+- `/usr/local/share/flutter/bin/dart format lib test tool`
+  - Result: passed
+- `/usr/local/share/flutter/bin/flutter pub get`
+  - Result: passed
+- `/usr/local/share/flutter/bin/flutter analyze`
+  - Result: passed
+- `/usr/local/share/flutter/bin/flutter test`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/content_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart`
+  - Result: passed after filling missing auth localization keys
+- `/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/flutter build appbundle --release --dart-define=UFFICCIOFACILE_FLAVOR=production --dart-define=SUPABASE_URL=https://example.supabase.co --dart-define=SUPABASE_ANON_KEY=example-anon-key --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false`
+  - Result: failed as designed because release signing is not configured yet
+
+From `android`:
+
+- `./gradlew printAndroidReleaseInfo`
+  - Result: passed
+  - Output summary:
+    - `applicationId=it.ufficiofacile.app`
+    - `namespace=it.ufficiofacile.app`
+    - `compileSdk=36`
+    - `minSdk=24`
+    - `targetSdk=36`
+    - `versionCode=1`
+    - `versionName=1.0.0`
+    - `releaseSigningConfigured=false`
+    - `releaseAdmobAppIdConfigured=false`
+
+### What passed
+
+- No active Android release file still uses `com.example.ufficiofacile`.
+- Release signing no longer points at the debug signing config.
+- The new Play release doctor passes.
+- Flutter analysis passes.
+- Flutter tests pass.
+- Localization and content doctor scripts pass.
+- The Android manifest deep links now match the documented native auth URLs.
+- The Android release-info task confirms the final package identity and target SDK floor.
+
+### What could not be fully verified here
+
+- A signed `.aab` could not be produced in this environment because no local upload keystore or release signing values were supplied.
+- Play Console declarations, screenshots, privacy policy publishing, content rating, and review access remain manual.
+- Live Supabase and Stripe payment verification was not executed against a production-like deployed backend in this pass.
+
+### Remaining manual Play Console and environment steps
+
+- Generate or provide the upload keystore locally and configure `android/key.properties` or the `ANDROID_KEYSTORE_*` environment variables.
+- Publish the privacy policy URL referenced by the Play listing.
+- Complete the Play Console Data Safety, ads declaration, content rating, target audience/content, and app access sections.
+- Provide a real reviewer account or equivalent reviewer-access instructions.
+- If ads will ship, set real AdMob production IDs and ensure the Play ads declaration matches the build.
+- Run internal testing, review the pre-launch report, and validate real-device behavior.
+- Deploy Supabase functions and confirm live Stripe webhook and entitlement behavior before any production rollout.
+
+### Current status
+
+- Ready for Google Play internal testing only if local signing and environment setup are completed and the signed release bundle is built successfully.
+- Not ready for production rollout until internal testing, Play pre-launch review, and live Supabase/Stripe checks all pass.
 
 ## Admin alignment pass (2026-05-14)
 

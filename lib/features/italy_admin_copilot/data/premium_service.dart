@@ -554,6 +554,12 @@ class UfficioPremiumEntitlementService {
   Future<EntitlementDecision> canAccessCategory(
     UfficioCategory category,
   ) async {
+    if (category.isPremiumOnly) {
+      return _allowedDecision(
+        reason: 'Premium category shell.',
+        isPremiumFeature: true,
+      );
+    }
     return canAccessCatalogPath(category: category);
   }
 
