@@ -152,7 +152,7 @@ If ads are not enabled yet, leave the AdMob production defines unset. Production
   --dart-define=SUPABASE_URL=... \
   --dart-define=SUPABASE_ANON_KEY=... \
   --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
-  --dart-define=UFFICIOFACILE_ENABLE_BETA_MODE=false
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
 ```
 
 If ads are enabled, append:
@@ -228,3 +228,25 @@ The release cannot move forward until these docs are prepared and reviewed:
 - `docs/play_store/store_listing_draft.md`
 - `docs/play_store/account_deletion.md`
 - `docs/play_store/android_permissions.md`
+- `docs/play_store/local_signing_step_by_step.md`
+
+## Before upload run this
+
+```bash
+dart format lib test tool
+flutter pub get
+flutter analyze
+flutter test
+dart run tool/content_doctor.dart
+dart run tool/localization_doctor.dart
+dart run tool/google_play_release_doctor.dart
+dart run tool/print_google_play_commands.dart
+cd android && ./gradlew printAndroidReleaseInfo && cd ..
+/usr/local/share/flutter/bin/flutter build appbundle \
+  --release \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```

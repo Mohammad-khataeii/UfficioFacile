@@ -8,6 +8,12 @@ const _requiredPlayDocs = <String>[
   'docs/play_store/store_listing_draft.md',
   'docs/play_store/account_deletion.md',
   'docs/play_store/android_permissions.md',
+  'docs/play_store/local_signing_step_by_step.md',
+];
+
+const _requiredTools = <String>[
+  'tool/google_play_release_doctor.dart',
+  'tool/print_google_play_commands.dart',
 ];
 
 const _activeAndroidFiles = <String>[
@@ -21,6 +27,21 @@ const _productionDocFiles = <String>[
   'docs/deployment_production.md',
 ];
 
+const _forbiddenWrongAppFlags = <String>[
+  'UFFICIOFACILE_ENABLE_BETA_MODE',
+  'UFFICIOFACILE_ENABLE_PAYWALL',
+  'UFFICIOFACILE_FLAVOR',
+  'UFFICIOFACILE_ALLOW_LOCAL_FALLBACK',
+  'UFFICIOFACILE_ENABLE_ANALYTICS',
+  'UFFICIOFACILE_ENABLE_SYNC',
+  'UFFICIOFACILE_ENABLE_ADMIN_DEBUG',
+];
+
+const _exampleChangeMeAllowlist = <String>[
+  'android/key.properties.example',
+  'docs/play_store/reviewer_instructions.md',
+];
+
 void main() {
   final problems = <String>[];
   final warnings = <String>[];
@@ -31,7 +52,7 @@ void main() {
     }
   }
 
-  for (final path in _requiredPlayDocs) {
+  for (final path in [..._requiredPlayDocs, ..._requiredTools]) {
     expectFile(path);
   }
 
@@ -40,17 +61,8 @@ void main() {
   final pubspecFile = File('pubspec.yaml');
   final readmeFile = File('README.md');
   final gitignoreFile = File('.gitignore');
-
-  if (!gradleFile.existsSync()) {
-    problems.add('Missing android/app/build.gradle.kts');
-  }
-  if (!manifestFile.existsSync()) {
-    problems.add('Missing android/app/src/main/AndroidManifest.xml');
-  }
-  if (!pubspecFile.existsSync()) {
-    problems.add('Missing pubspec.yaml');
-  }
-
+  final keyExampleFile = File('android/key.properties.example');
+  final readme = readmeFile.existsSync() ? readmeFile.readAsStringSync() : '';
   final gradle = gradleFile.existsSync() ? gradleFile.readAsStringSync() : '';
   final manifest = manifestFile.existsSync()
       ? manifestFile.readAsStringSync()
@@ -58,10 +70,13 @@ void main() {
   final pubspec = pubspecFile.existsSync()
       ? pubspecFile.readAsStringSync()
       : '';
-  final readme = readmeFile.existsSync() ? readmeFile.readAsStringSync() : '';
   final gitignore = gitignoreFile.existsSync()
       ? gitignoreFile.readAsStringSync()
       : '';
+
+  if (!keyExampleFile.existsSync()) {
+    problems.add('Missing android/key.properties.example');
+  }
 
   for (final path in _activeAndroidFiles) {
     final file = File(path);
@@ -139,11 +154,18 @@ void main() {
   }
 
   final versionMatch = RegExp(
-    r'^version:\s*([0-9]+\.[0-9]+\.[0-9]+\+[0-9]+)\s*$',
+    r'^version:\s*([0-9]+)\.([0-9]+)\.([0-9]+)\+([0-9]+)\s*$',
     multiLine: true,
   ).firstMatch(pubspec);
   if (versionMatch == null) {
     problems.add('pubspec.yaml version must include versionName+versionCode');
+  } else {
+    final versionCode = int.tryParse(versionMatch.group(4) ?? '') ?? 0;
+    if (versionCode <= 1) {
+      warnings.add(
+        'pubspec versionCode is still $versionCode. Increase it before repeated internal testing uploads.',
+      );
+    }
   }
 
   for (final file in _productionDocFiles) {
@@ -158,8 +180,20 @@ void main() {
 
   if (!readme.contains('docs/play_store/google_play_release_checklist.md') ||
       !readme.contains('docs/play_store/data_safety_draft.md') ||
-      !readme.contains('docs/play_store/privacy_policy_draft.md')) {
+      !readme.contains('docs/play_store/privacy_policy_draft.md') ||
+      !readme.contains('docs/play_store/local_signing_step_by_step.md')) {
     problems.add('README is missing required Play Store documentation links');
+  }
+
+  final storeDocsText = _readFiles(_requiredPlayDocs);
+  if (!readme.contains('docs/play_store/reviewer_instructions.md') ||
+      !readme.contains('docs/play_store/store_listing_draft.md')) {
+    warnings.add('README could link more Play Store drafts directly');
+  }
+  if (!storeDocsText.contains('Request account deletion')) {
+    problems.add(
+      'Play Store docs do not mention the account deletion request path',
+    );
   }
 
   for (final ignoredPath in const [
@@ -173,9 +207,22 @@ void main() {
     }
   }
 
-  if (File('android/key.properties').existsSync()) {
+  final trackedSigningFiles = _gitLsFiles(const [
+    'android/key.properties',
+    '*.jks',
+    '*.keystore',
+    'upload-keystore.jks',
+  ]);
+  if (trackedSigningFiles.isNotEmpty) {
+    problems.add(
+      'Tracked signing artifact(s) found: ${trackedSigningFiles.join(', ')}',
+    );
+  }
+
+  final keyPropertiesExists = File('android/key.properties').existsSync();
+  if (keyPropertiesExists) {
     warnings.add(
-      'android/key.properties exists locally; verify it is untracked before sharing',
+      'android/key.properties exists locally; verify it stays untracked before sharing',
     );
   }
 
@@ -192,14 +239,19 @@ void main() {
     );
   }
 
-  final testIdHits = _scanDir(Directory('lib'), const [
+  final allTextHits = _scanDir(Directory.current, const [
     'ca-app-pub-3940256099942544',
     '6300978111',
     '2934735716',
-  ]).where((hit) => !hit.contains('ads_service.dart')).toList();
-  for (final hit in testIdHits) {
+  ]);
+  for (final hit in allTextHits) {
+    if (hit.contains('ads_service.dart') ||
+        hit.contains('android/app/build.gradle.kts') ||
+        hit.contains('tool/google_play_release_doctor.dart')) {
+      continue;
+    }
     problems.add(
-      'Google test AdMob ID remains outside guarded ads service logic: $hit',
+      'Google test AdMob ID remains outside guarded allowlist: $hit',
     );
   }
 
@@ -224,6 +276,30 @@ void main() {
     }
   }
 
+  final privacyCenterFile = File(
+    'lib/features/italy_admin_copilot/presentation/screens/life_admin_supabase_screens.dart',
+  );
+  if (!privacyCenterFile.existsSync()) {
+    problems.add('Missing privacy center implementation file');
+  } else {
+    final privacyCenter = privacyCenterFile.readAsStringSync();
+    if (!privacyCenter.contains('Request account deletion') ||
+        !privacyCenter.contains('UfficioFacile account deletion request') ||
+        !privacyCenter.contains('UfficcioFacileConfig.supportEmail')) {
+      problems.add(
+        'Privacy center does not clearly implement the support-based account deletion request UI',
+      );
+    }
+  }
+
+  final wrongFlagHits = _scanWrongFlagUsage();
+  if (wrongFlagHits.isNotEmpty) {
+    problems.addAll(wrongFlagHits);
+  }
+
+  final changeMeProblems = _scanChangeMeMisuse();
+  problems.addAll(changeMeProblems);
+
   if (problems.isNotEmpty) {
     stderr.writeln('Google Play release doctor failed:');
     for (final problem in problems) {
@@ -246,6 +322,74 @@ void main() {
       stdout.writeln('- $warning');
     }
   }
+}
+
+List<String> _scanWrongFlagUsage() {
+  final hits = <String>[];
+  for (final entity in Directory.current.listSync(recursive: true)) {
+    if (entity is! File) continue;
+    final path = entity.path;
+    if (!_isTextLikeFile(path)) continue;
+    if (path.contains('/build/') || path.contains('.dart_tool')) continue;
+    if (path.endsWith('tool/google_play_release_doctor.dart')) continue;
+    final text = entity.readAsStringSync();
+    for (final wrongFlag in _forbiddenWrongAppFlags) {
+      if (text.contains(wrongFlag)) {
+        hits.add(
+          'Wrong app-config dart-define prefix found in $path: `$wrongFlag`',
+        );
+      }
+    }
+  }
+  return hits;
+}
+
+List<String> _scanChangeMeMisuse() {
+  final hits = <String>[];
+  for (final entity in Directory.current.listSync(recursive: true)) {
+    if (entity is! File) continue;
+    final path = entity.path;
+    if (!_isTextLikeFile(path)) continue;
+    if (path.contains('/build/') || path.contains('.dart_tool')) continue;
+    final text = entity.readAsStringSync();
+    if (!text.contains('CHANGE_ME')) continue;
+    final allowed =
+        path.contains('/docs/') ||
+        _exampleChangeMeAllowlist.any(path.endsWith) ||
+        path.endsWith('tool/google_play_release_doctor.dart');
+    if (!allowed) {
+      hits.add(
+        'Unexpected `CHANGE_ME` placeholder outside example/docs allowlist: $path',
+      );
+    }
+  }
+  return hits;
+}
+
+String _readFiles(List<String> paths) {
+  final buffer = StringBuffer();
+  for (final path in paths) {
+    final file = File(path);
+    if (!file.existsSync()) continue;
+    buffer.writeln(file.readAsStringSync());
+  }
+  return buffer.toString();
+}
+
+List<String> _gitLsFiles(List<String> patterns) {
+  final result = Process.runSync('git', ['ls-files', ...patterns]);
+  if (result.exitCode != 0) {
+    return const [];
+  }
+  final output = (result.stdout as String).trim();
+  if (output.isEmpty) {
+    return const [];
+  }
+  return output
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
 }
 
 List<String> _scanDir(Directory directory, List<String> needles) {

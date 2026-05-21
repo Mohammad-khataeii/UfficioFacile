@@ -2,6 +2,59 @@
 
 Last updated: 2026-05-21
 
+## Internal testing prep follow-up pass (2026-05-21)
+
+### What was fixed
+
+- Fixed the remaining wrong app-config dart-define typo in the Android deployment docs by keeping the canonical `UFFICCIOFACILE_*` prefix for app config flags.
+- Added `docs/play_store/local_signing_step_by_step.md` with the exact local keystore and `android/key.properties` flow.
+- Added `tool/print_google_play_commands.dart` to print the local signing, doctor, Gradle, and AAB build commands.
+- Strengthened `tool/google_play_release_doctor.dart` to check:
+  - wrong non-AdMob `UFFICIOFACILE_*` app-config flags
+  - Play docs and command-printer presence
+  - tracked signing files
+  - `android/key.properties.example`
+  - account deletion UI evidence
+  - local-signing guide presence
+  - `CHANGE_ME` placeholder misuse
+  - `versionCode` warning if still `1`
+- Verified the in-app account deletion request action remains visible in the Privacy Center and improved the generated email body.
+- Improved Play Store drafts for reviewer instructions, store listing, privacy policy, data safety, Android permissions, and account deletion proof.
+- Added a concise “before upload run this” block to README and deployment docs.
+
+### Commands run
+
+- `dart format lib test tool`
+  - Result: passed
+- `flutter pub get`
+  - Result: passed
+- `flutter analyze`
+  - Result: passed
+- `flutter test`
+  - Result: passed
+- `dart run tool/content_doctor.dart`
+  - Result: passed
+- `dart run tool/localization_doctor.dart`
+  - Result: passed
+- `dart run tool/google_play_release_doctor.dart`
+  - Result: passed, with versionCode warning expected while still at `1.0.0+1`
+- `dart run tool/print_google_play_commands.dart`
+  - Result: passed
+
+### Remaining manual steps
+
+- Create the local upload keystore.
+- Fill local `android/key.properties` or export the release signing environment variables.
+- Build the signed `.aab`.
+- Publish the privacy policy URL and use the exact same URL in Play Console.
+- Complete Play Console Data Safety, ads declaration, content rating, target audience/content, and reviewer access fields.
+- Run Google Play Internal Testing and review the pre-launch report.
+- Verify live Supabase and Stripe behavior before any broader rollout.
+
+### Current status
+
+- Repo is ready for Google Play Internal Testing preparation. Actual upload still requires local signing key, signed AAB, Play Console forms, privacy policy publication, and live Supabase/Stripe verification.
+
 ## Android Google Play readiness pass (2026-05-21)
 
 ### What was fixed

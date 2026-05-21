@@ -111,9 +111,9 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                       'UfficioFacile account deletion request',
                     );
                     final body = Uri.encodeComponent(
-                      'Please delete my UfficioFacile account and associated stored data.\n\n'
                       'Account email: ${userEmail.isEmpty ? '<add your account email>' : userEmail}\n'
-                      'Reason (optional): \n',
+                      'Full name: <add your full name>\n'
+                      'Request: Please delete my UfficioFacile account and associated app data where legally possible.\n',
                     );
                     await ExternalActionService.open(
                       context,
@@ -125,6 +125,10 @@ class _PrivacyCenterScreenState extends State<PrivacyCenterScreen> {
                   },
                   icon: const Icon(Icons.manage_accounts_outlined),
                   label: const Text('Request account deletion'),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'This sends a support request for account deletion. It does not replace the separate local-data deletion button above.',
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(

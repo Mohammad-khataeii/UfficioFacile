@@ -5,9 +5,10 @@
 UfficioFacile currently supports account deletion requests through an in-app route:
 
 1. Open the app.
-2. Open the privacy center.
-3. Tap `Request account deletion`.
-4. Send the generated email request to `support@ufficiofacile.app`.
+2. Open `Account`.
+3. Tap `Privacy center`.
+4. Tap `Request account deletion`.
+5. Send the generated email request to `support@ufficiofacile.app`.
 
 The app also allows users to clear local app data separately with the `Delete local data` action in the privacy center.
 

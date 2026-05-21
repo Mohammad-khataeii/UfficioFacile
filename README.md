@@ -47,6 +47,7 @@ From the repo root:
 
 ```bash
 dart format lib test tool
+flutter pub get
 flutter analyze
 flutter test
 /usr/local/share/flutter/bin/dart run tool/export_cms_seed.dart
@@ -122,8 +123,7 @@ keytool -genkeypair \
 4. Optionally print the Android release config:
 
 ```bash
-cd android
-./gradlew printAndroidReleaseInfo
+cd android && ./gradlew printAndroidReleaseInfo && cd ..
 ```
 
 5. Build the `.aab`:
@@ -139,6 +139,27 @@ cd android
 ```
 
 You must increment `versionCode` on every Play Console upload. In Flutter, `versionName` is the part before `+` in `pubspec.yaml`, and `versionCode` is the number after `+`.
+
+## Before upload run this
+
+```bash
+dart format lib test tool
+flutter pub get
+flutter analyze
+flutter test
+dart run tool/content_doctor.dart
+dart run tool/localization_doctor.dart
+dart run tool/google_play_release_doctor.dart
+dart run tool/print_google_play_commands.dart
+cd android && ./gradlew printAndroidReleaseInfo && cd ..
+/usr/local/share/flutter/bin/flutter build appbundle \
+  --release \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```
 
 ## Flutter web production build
 
@@ -164,6 +185,11 @@ See `docs/supabase_security_audit.md` for the current RLS/security summary.
 See `docs/play_store/google_play_release_checklist.md` for the Android release gate.
 See `docs/play_store/privacy_policy_draft.md` for the privacy draft.
 See `docs/play_store/data_safety_draft.md` for the Play Data Safety draft.
+See `docs/play_store/local_signing_step_by_step.md` for local signing setup.
+See `docs/play_store/reviewer_instructions.md` for App Access prep.
+See `docs/play_store/store_listing_draft.md` for store listing copy.
+See `docs/play_store/account_deletion.md` for the deletion path.
+See `docs/play_store/android_permissions.md` for the Android permission audit.
 
 If the Next.js dev cache is corrupted and `.next/routes-manifest.json` is
 missing:

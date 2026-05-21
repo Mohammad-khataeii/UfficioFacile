@@ -1,90 +1,92 @@
 # Privacy policy draft
 
-This is a product draft for Google Play preparation. It is not legal advice and must be reviewed before publication.
+This draft is intended to be made publishable after replacing the legal and operator placeholders. It is not legal advice.
 
-## App
+Effective date placeholder:
 
-- App name: UfficioFacile
-- Purpose: helping users understand and organize Italian administrative procedures
+- `[INSERT EFFECTIVE DATE]`
 
-## What the app does
+Controller or operator placeholder:
 
-UfficioFacile helps users browse guidance about administrative processes, save requests and reminders, and optionally access premium features related to deeper assistance and workflow organization. The app is informational and organizational in nature. It is not a government office, legal representative, or official public authority.
+- `[INSERT LEGAL ENTITY OR INDIVIDUAL CONTROLLER NAME]`
+- `[INSERT REGISTERED ADDRESS]`
+- Contact email: `support@ufficiofacile.app`
 
-## Account and authentication
+## 1. About UfficioFacile
 
-The app can offer account creation and sign-in through Supabase Auth. When a user creates an account or signs in, the app may process:
+UfficioFacile is an informational and organizational app designed to help users understand and manage Italian administrative procedures. It may provide guidance, reminders, request tracking, account features, and premium functionality.
 
-- email address
-- authentication state
-- account identifiers needed to keep the user signed in
+UfficioFacile is not a public authority, government portal, lawyer, accountant, CAF, patronato, or substitute for official advice.
 
-## User profile and request data
+## 2. Categories of personal data
 
-Depending on how the user uses the app, the app may process:
+Depending on how the app is used, the operator may process:
 
-- name
-- email
-- codice fiscale
-- city or city-related selections
-- preferred language
-- saved requests
-- problem request details
-- consultancy request details
-- uploaded or described document/request information when the relevant feature is used
+- account data such as email address and authentication identifiers
+- profile data such as name, city, preferred language, and codice fiscale if the user enters it
+- request and workflow data such as saved requests, problem descriptions, consultancy requests, reminders, and document-related details entered by the user
+- premium and billing-related status data such as entitlement state, payment status, and subscription metadata
+- technical data needed for app delivery, reliability, notifications, and supported integrations
 
-## Premium and payments
+## 3. Why data is processed
 
-The app may offer premium purchases or paid flows backed by Stripe and Supabase. Payment card details are handled by Stripe. The mobile app and its backend may receive payment status, subscription status, entitlement status, and related transaction metadata, but should not store full card numbers directly.
+Personal data may be processed to:
 
-## Notifications and reminders
+- create and manage user accounts
+- provide app features and save user workflows
+- deliver reminders and notifications
+- operate premium and payment-related features
+- protect the service, diagnose errors, and maintain reliability
+- comply with legal obligations where applicable
 
-The app may send notifications or reminders for deadlines, checklist items, or account-related actions when the user has enabled the relevant features and permissions.
+## 4. Payments
 
-## Ads
+Premium purchases may rely on Stripe and Supabase-backed services. Stripe handles payment card details and payment processing. UfficioFacile should not store full card numbers directly. The app and backend may receive payment state, subscription state, entitlement status, and related transaction metadata.
 
-Production builds disable ads unless real AdMob identifiers are explicitly configured. If ads are enabled in a future production release, the app may use Google AdMob services and related device or app identifiers as part of ad delivery. If ads are disabled in the production build, the Play Console ads declaration and privacy wording must be updated to reflect that state accurately.
+## 5. Ads
 
-## Technical data and diagnostics
+Production builds disable ads unless real AdMob identifiers are explicitly configured. If ads are enabled in a future production build, Google AdMob may process device or advertising identifiers for ad delivery and related anti-fraud purposes. The published privacy policy and Google Play declarations must match the actual production build that is released.
 
-The app may process limited technical information such as:
-
-- app configuration state
-- device/app identifiers exposed by SDKs when required for authentication, notifications, or ads
-- diagnostic or log information needed for reliability and abuse prevention
-
-This draft does not guarantee whether crash reporting or analytics are fully enabled in production. Confirm final SDK behavior before publication.
-
-## Service providers and processors
+## 6. Service providers and processors
 
 Depending on enabled features, data may be processed by:
 
 - Supabase for authentication, database, and server-side functions
-- Stripe for payments and billing
-- Google AdMob, only if production ads are enabled
-- Vercel or related hosting infrastructure for web/admin surfaces if applicable
+- Stripe for checkout, subscriptions, and payment processing
+- Vercel or related hosting infrastructure for web or admin surfaces where applicable
+- Google AdMob only if ads are enabled in the production build
 
-## Data retention and deletion
+## 7. Data retention and deletion
 
-Users can clear local app data from the in-app privacy center. For account deletion, the current supported route is an in-app “Request account deletion” action that opens an email request to `support@ufficiofacile.app`. The deletion workflow and published policy should be updated if self-service account deletion is introduced later.
+Users can clear local app data inside the app through `Account` -> `Privacy center`.
 
-## User rights and contact
+Users can request account deletion through `Account` -> `Privacy center` -> `Request account deletion`, which opens a support email request to `support@ufficiofacile.app`.
 
-Users should be able to contact the operator for:
+The operator should define and publish the final retention policy before release. This draft should be updated with exact retention periods where required.
 
-- access requests
-- deletion requests
-- correction requests
-- privacy questions
+## 8. User rights
 
-Draft contact:
+Where applicable under Italian and EU data-protection law, users may have rights including:
+
+- access
+- rectification
+- deletion
+- restriction
+- objection
+- portability
+
+Requests can be sent to:
 
 - `support@ufficiofacile.app`
 
-## Security
+## 9. Security
 
-The app is intended to use encrypted network transport for live backend communication. Final publication should confirm TLS coverage, access controls, and backend data-handling practices.
+The app is intended to use encrypted network transport for live backend communication. Final publication should confirm technical and organizational measures appropriate to the real production environment.
 
-## Disclaimer
+## 10. International and legal note
 
-UfficioFacile is an informational and organizational tool. It does not replace official government guidance, legal advice, or direct assistance from public offices or licensed professionals.
+This draft uses GDPR-oriented language because the app is intended for Italy and EU-related use cases. It still requires legal review before publication.
+
+## 11. Disclaimer
+
+UfficioFacile provides practical guidance and organizational help only. It does not replace official government guidance, legal advice, tax advice, accounting advice, or professional representation before public offices.
