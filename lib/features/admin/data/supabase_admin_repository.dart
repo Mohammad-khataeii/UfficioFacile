@@ -166,21 +166,32 @@ class SupabaseAdminRepository implements AdminRepository {
       return ConsultancyRequestRecord(
         id: row['id'] as String,
         userId: row['user_id'] as String?,
-        userEmail: row['email'] as String?,
-        fullName: row['email'] as String? ?? '',
-        categoryId: row['category'] as String?,
-        problemType: row['subject'] as String? ?? '',
-        description: row['message'] as String? ?? '',
-        desiredResult: row['admin_notes'] as String? ?? '',
-        city: 'Torino',
-        region: 'Piemonte',
-        documentsAvailable: '',
-        userPlan: row['is_premium_snapshot'] == true ? 'premium' : 'free',
+        userEmail: row['user_email'] as String? ?? row['email'] as String?,
+        fullName:
+            row['full_name'] as String? ??
+            row['user_email'] as String? ??
+            row['email'] as String? ??
+            '',
+        categoryId: row['category_id'] as String? ?? row['category'] as String?,
+        problemType:
+            row['problem_type'] as String? ?? row['subject'] as String? ?? '',
+        description:
+            row['description'] as String? ?? row['message'] as String? ?? '',
+        desiredResult:
+            row['desired_result'] as String? ??
+            row['admin_notes'] as String? ??
+            '',
+        city: row['city'] as String? ?? 'Torino',
+        region: row['region'] as String? ?? 'Piemonte',
+        documentsAvailable: row['documents_available'] as String? ?? '',
+        userPlan:
+            row['user_plan'] as String? ??
+            (row['is_premium_snapshot'] == true ? 'premium' : 'free'),
         paymentStatus: consultancyPaymentStatusFromJson(
           row['payment_status'] as String?,
         ),
         status: consultancyRequestStatusFromJson(row['status'] as String?),
-        sourcePage: 'supabase',
+        sourcePage: row['source_page'] as String? ?? 'supabase',
         createdAt:
             DateTime.tryParse(row['created_at'] as String? ?? '') ??
             DateTime.now(),

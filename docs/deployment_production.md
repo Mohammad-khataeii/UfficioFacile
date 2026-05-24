@@ -258,6 +258,53 @@ Public URLs for Play Console:
 - Privacy policy: [https://ufficio-facile.vercel.app/privacy](https://ufficio-facile.vercel.app/privacy)
 - Account deletion: [https://ufficio-facile.vercel.app/account-deletion](https://ufficio-facile.vercel.app/account-deletion)
 
+## iOS TestFlight / App Store deployment
+
+Final iOS bundle identifier:
+
+- `it.ufficiofacile.app`
+
+Repository-side iOS prerequisites:
+
+1. Keep the URL scheme `ufficiofacile`.
+2. Keep the public privacy URL at [https://ufficio-facile.vercel.app/privacy](https://ufficio-facile.vercel.app/privacy).
+3. Keep the public account deletion URL at [https://ufficio-facile.vercel.app/account-deletion](https://ufficio-facile.vercel.app/account-deletion).
+4. If ads are enabled on iOS, create a local untracked `ios/Flutter/AdMob.local.xcconfig` with:
+
+```xcconfig
+ADMOB_APPLICATION_ID_IOS=ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy
+```
+
+Verification and build commands:
+
+```bash
+/usr/local/share/flutter/bin/dart run tool/apple_release_doctor.dart
+/usr/local/share/flutter/bin/flutter build ipa \
+  --release \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```
+
+Optional iOS ad unit Dart defines:
+
+```bash
+  --dart-define=UFFICIOFACILE_ADMOB_BANNER_IOS=ca-app-pub-xxxxxxxxxxxxxxxx/zzzzzzzzzz \
+  --dart-define=UFFICIOFACILE_ADMOB_INTERSTITIAL_IOS=ca-app-pub-xxxxxxxxxxxxxxxx/aaaaaaaaaa
+```
+
+Manual iOS deletion and deep-link checks:
+
+1. Install the TestFlight or debug build on an iPhone.
+2. Open [https://ufficio-facile.vercel.app/privacy](https://ufficio-facile.vercel.app/privacy) on the same device.
+3. Tap `Open the installed app` and confirm the app opens to `Profile`.
+4. Open `Profile` -> `Account and privacy`.
+5. Confirm `Delete my account` stays disabled until `DELETE` is typed.
+6. Confirm `Request deletion by email` opens Mail.
+7. Confirm sign-in, checkout, reminders, and password reset still work on iOS.
+
 These public pages are currently provided as static Flutter web assets from:
 
 - `web/privacy/index.html`

@@ -21,9 +21,12 @@ export default async function ConsultancyRequestsPage() {
       <DataTable
         headers={["Name", "Topic", "Plan", "Payment", "Status", "Open"]}
         rows={rows.map((row: any) => [
-          row.full_name,
-          row.problem_type || row.category_id || "—",
-          <StatusBadge key="plan" value={row.user_plan} />,
+          row.full_name || row.user_email || row.email || "—",
+          row.problem_type || row.subject || row.category_id || row.category || "—",
+          <StatusBadge
+            key="plan"
+            value={row.user_plan ?? (row.is_premium_snapshot ? "premium" : "free")}
+          />,
           <StatusBadge key="payment" value={row.payment_status} />,
           <StatusBadge key="status" value={row.status} />,
           <Link key="open" href={`/requests/consultancy/${row.id}`}>Open</Link>,

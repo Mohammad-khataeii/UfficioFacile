@@ -290,7 +290,7 @@ const Set<String> problemRequestInsertColumns = <String>{
   'status',
 };
 
-const Set<String> consultancyRequestInsertColumns = <String>{
+const Set<String> consultancyRequestLegacyInsertColumns = <String>{
   'id',
   'user_id',
   'email',
@@ -301,6 +301,26 @@ const Set<String> consultancyRequestInsertColumns = <String>{
   'is_premium_snapshot',
   'payment_status',
   'status',
+};
+
+const Set<String> consultancyRequestRichInsertColumns = <String>{
+  'id',
+  'user_id',
+  'user_email',
+  'full_name',
+  'category_id',
+  'subcategory_id',
+  'problem_type',
+  'description',
+  'desired_result',
+  'city',
+  'region',
+  'documents_available',
+  'attachment_urls',
+  'user_plan',
+  'payment_status',
+  'status',
+  'source_page',
 };
 
 enum UfficioCostItemType { expense, refund, deposit, installment, estimate }
@@ -1090,13 +1110,42 @@ class SupabaseConsultancyRequestsRepository
 
   @override
   Future<ConsultancyRequestRecord> save(ConsultancyRequestRecord item) async {
-    final row = await _client
-        .from('ufficio_consultancy_requests')
-        .upsert(_consultancyRequestToDb(item))
-        .select()
-        .single();
-    return _consultancyRequestFromDb(Map<String, dynamic>.from(row));
+    try {
+      final richRow = await _client
+          .from('ufficio_consultancy_requests')
+          .upsert(toConsultancyRequestRichInsertPayload(item))
+          .select()
+          .single();
+      return _consultancyRequestFromDb(Map<String, dynamic>.from(richRow));
+    } on PostgrestException catch (error) {
+      if (!_shouldFallbackToLegacyConsultancySchema(error)) {
+        rethrow;
+      }
+      final legacyRow = await _client
+          .from('ufficio_consultancy_requests')
+          .upsert(toConsultancyRequestLegacyInsertPayload(item))
+          .select()
+          .single();
+      return _consultancyRequestFromDb(Map<String, dynamic>.from(legacyRow));
+    }
   }
+}
+
+bool _shouldFallbackToLegacyConsultancySchema(PostgrestException error) {
+  final message = '${error.message} ${error.details} ${error.hint}'
+      .toLowerCase();
+  return message.contains('column') ||
+      message.contains('full_name') ||
+      message.contains('user_email') ||
+      message.contains('problem_type') ||
+      message.contains('desired_result') ||
+      message.contains('documents_available') ||
+      message.contains('attachment_urls') ||
+      message.contains('user_plan') ||
+      message.contains('source_page') ||
+      message.contains('is_premium_snapshot') ||
+      message.contains('check constraint') ||
+      message.contains('constraint');
 }
 
 class HybridConsultancyRequestsRepository
@@ -1371,11 +1420,11 @@ ProblemRequestRecord _problemRequestFromDb(Map<String, dynamic> row) =>
       updatedAt: _parseDateTime(row['updated_at']) ?? DateTime.now(),
     );
 
-Map<String, dynamic> _consultancyRequestToDb(ConsultancyRequestRecord item) => {
-  ...toConsultancyRequestInsertPayload(item),
-};
-
 Map<String, dynamic> toConsultancyRequestInsertPayload(
+  ConsultancyRequestRecord item,
+) => toConsultancyRequestLegacyInsertPayload(item);
+
+Map<String, dynamic> toConsultancyRequestLegacyInsertPayload(
   ConsultancyRequestRecord item,
 ) {
   final payload = <String, dynamic>{
@@ -1386,8 +1435,40 @@ Map<String, dynamic> toConsultancyRequestInsertPayload(
     'message': _consultancyMessageValue(item),
     'language_code': 'en',
     'is_premium_snapshot': _isPremiumPlanName(item.userPlan),
-    'payment_status': _consultancyPaymentStatusToDb(item.paymentStatus),
-    'status': _consultancyRequestStatusToDb(item.status),
+    'payment_status': _consultancyPaymentStatusToLegacyDb(item.paymentStatus),
+    'status': _consultancyRequestStatusToLegacyDb(item.status),
+  };
+  final id = _nonEmptyOrNull(item.id);
+  if (id != null) {
+    payload['id'] = id;
+  }
+  payload.removeWhere((key, value) => value == null);
+  return payload;
+}
+
+Map<String, dynamic> toConsultancyRequestRichInsertPayload(
+  ConsultancyRequestRecord item,
+) {
+  final payload = <String, dynamic>{
+    'user_id': _nonEmptyOrNull(item.userId),
+    'user_email': _nonEmptyOrNull(item.userEmail),
+    'full_name':
+        _nonEmptyOrNull(item.fullName) ??
+        _nonEmptyOrNull(item.userEmail) ??
+        'UfficioFacile user',
+    'category_id': _nonEmptyOrNull(item.categoryId),
+    'subcategory_id': _nonEmptyOrNull(item.subcategoryId),
+    'problem_type': _nonEmptyOrNull(item.problemType) ?? '',
+    'description': _consultancyMessageValue(item),
+    'desired_result': _nonEmptyOrNull(item.desiredResult) ?? '',
+    'city': _nonEmptyOrNull(item.city) ?? 'Torino',
+    'region': _nonEmptyOrNull(item.region) ?? 'Piemonte',
+    'documents_available': _nonEmptyOrNull(item.documentsAvailable) ?? '',
+    'attachment_urls': item.attachmentUrls,
+    'user_plan': _consultancyUserPlanToRichDb(item.userPlan),
+    'payment_status': _consultancyPaymentStatusToRichDb(item.paymentStatus),
+    'status': _consultancyRequestStatusToRichDb(item.status),
+    'source_page': _nonEmptyOrNull(item.sourcePage) ?? '',
   };
   final id = _nonEmptyOrNull(item.id);
   if (id != null) {
@@ -1401,15 +1482,15 @@ ConsultancyRequestRecord _consultancyRequestFromDb(Map<String, dynamic> row) =>
     ConsultancyRequestRecord(
       id: row['id'] as String? ?? '',
       userId: row['user_id'] as String?,
-      userEmail: _firstString(row, const ['email', 'user_email']),
+      userEmail: _firstString(row, const ['user_email', 'email']),
       fullName:
           _firstString(row, const ['full_name']) ??
-          _firstString(row, const ['email', 'user_email']) ??
+          _firstString(row, const ['user_email', 'email']) ??
           '',
-      categoryId: _firstString(row, const ['category', 'category_id']),
+      categoryId: _firstString(row, const ['category_id', 'category']),
       subcategoryId: _firstString(row, const ['subcategory_id']),
-      problemType: _firstString(row, const ['subject', 'problem_type']) ?? '',
-      description: _firstString(row, const ['message', 'description']) ?? '',
+      problemType: _firstString(row, const ['problem_type', 'subject']) ?? '',
+      description: _firstString(row, const ['description', 'message']) ?? '',
       desiredResult:
           _firstString(row, const ['desired_result', 'admin_notes']) ?? '',
       city: row['city'] as String? ?? 'Torino',
@@ -1552,7 +1633,7 @@ ProblemRequestStatus _problemRequestStatusFromDb(String? status) {
   };
 }
 
-String _consultancyPaymentStatusToDb(ConsultancyPaymentStatus status) {
+String _consultancyPaymentStatusToLegacyDb(ConsultancyPaymentStatus status) {
   return switch (status) {
     ConsultancyPaymentStatus.freeForPremium => 'not_required',
     ConsultancyPaymentStatus.paymentRequired => 'required',
@@ -1560,6 +1641,17 @@ String _consultancyPaymentStatusToDb(ConsultancyPaymentStatus status) {
     ConsultancyPaymentStatus.paid => 'paid',
     ConsultancyPaymentStatus.failed => 'failed',
     ConsultancyPaymentStatus.notAvailable => 'waived',
+  };
+}
+
+String _consultancyPaymentStatusToRichDb(ConsultancyPaymentStatus status) {
+  return switch (status) {
+    ConsultancyPaymentStatus.freeForPremium => 'freeForPremium',
+    ConsultancyPaymentStatus.paymentRequired => 'paymentRequired',
+    ConsultancyPaymentStatus.waitingPayment => 'waitingPayment',
+    ConsultancyPaymentStatus.paid => 'paid',
+    ConsultancyPaymentStatus.failed => 'failed',
+    ConsultancyPaymentStatus.notAvailable => 'notAvailable',
   };
 }
 
@@ -1571,16 +1663,30 @@ String _consultancyPaymentStatusFromDb(String? status) {
     'paid' => ConsultancyPaymentStatus.paid.name,
     'failed' => ConsultancyPaymentStatus.failed.name,
     'waived' => ConsultancyPaymentStatus.notAvailable.name,
+    'freeForPremium' => ConsultancyPaymentStatus.freeForPremium.name,
+    'paymentRequired' => ConsultancyPaymentStatus.paymentRequired.name,
+    'waitingPayment' => ConsultancyPaymentStatus.waitingPayment.name,
+    'notAvailable' => ConsultancyPaymentStatus.notAvailable.name,
     _ => status ?? ConsultancyPaymentStatus.notAvailable.name,
   };
 }
 
-String _consultancyRequestStatusToDb(ConsultancyRequestStatus status) {
+String _consultancyRequestStatusToLegacyDb(ConsultancyRequestStatus status) {
   return switch (status) {
     ConsultancyRequestStatus.newRequest => 'new',
     ConsultancyRequestStatus.waitingPayment => 'waiting_user',
     ConsultancyRequestStatus.reviewing => 'reviewing',
     ConsultancyRequestStatus.replied => 'answered',
+    ConsultancyRequestStatus.closed => 'closed',
+  };
+}
+
+String _consultancyRequestStatusToRichDb(ConsultancyRequestStatus status) {
+  return switch (status) {
+    ConsultancyRequestStatus.newRequest => 'newRequest',
+    ConsultancyRequestStatus.waitingPayment => 'waitingPayment',
+    ConsultancyRequestStatus.reviewing => 'reviewing',
+    ConsultancyRequestStatus.replied => 'replied',
     ConsultancyRequestStatus.closed => 'closed',
   };
 }
@@ -1592,6 +1698,9 @@ String _consultancyRequestStatusFromDb(String? status) {
     'reviewing' => ConsultancyRequestStatus.reviewing.name,
     'answered' => ConsultancyRequestStatus.replied.name,
     'closed' => ConsultancyRequestStatus.closed.name,
+    'newRequest' => ConsultancyRequestStatus.newRequest.name,
+    'waitingPayment' => ConsultancyRequestStatus.waitingPayment.name,
+    'replied' => ConsultancyRequestStatus.replied.name,
     _ => status ?? ConsultancyRequestStatus.newRequest.name,
   };
 }
@@ -1610,11 +1719,24 @@ bool _isPremiumPlanName(String value) {
 String _consultancyUserPlanFromDb(Map<String, dynamic> row) {
   final explicitPlan = _firstString(row, const ['user_plan']);
   if (explicitPlan != null) {
+    if (explicitPlan == 'pro') {
+      return UfficioPlan.premiumMonthly.name;
+    }
+    if (explicitPlan == 'consultant') {
+      return 'consultant';
+    }
     return explicitPlan;
   }
   return row['is_premium_snapshot'] == true
       ? UfficioPlan.premiumMonthly.name
       : UfficioPlan.free.name;
+}
+
+String _consultancyUserPlanToRichDb(String plan) {
+  if (_isPremiumPlanName(plan)) {
+    return 'pro';
+  }
+  return 'free';
 }
 
 class CostDashboardService {

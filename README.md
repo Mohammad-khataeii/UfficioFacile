@@ -141,6 +141,31 @@ cd android && ./gradlew printAndroidReleaseInfo && cd ..
 
 You must increment `versionCode` on every Play Console upload. In Flutter, `versionName` is the part before `+` in `pubspec.yaml`, and `versionCode` is the number after `+`.
 
+## iOS TestFlight / App Store build
+
+```bash
+/usr/local/share/flutter/bin/flutter build ipa \
+  --release \
+  --dart-define=UFFICCIOFACILE_FLAVOR=production \
+  --dart-define=SUPABASE_URL=... \
+  --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=UFFICCIOFACILE_ENABLE_PAYWALL=true \
+  --dart-define=UFFICCIOFACILE_ENABLE_BETA_MODE=false
+```
+
+If iOS ads are enabled, create a local untracked
+`ios/Flutter/AdMob.local.xcconfig` with:
+
+```xcconfig
+ADMOB_APPLICATION_ID_IOS=ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy
+```
+
+Then run the iOS release doctor:
+
+```bash
+/usr/local/share/flutter/bin/dart run tool/apple_release_doctor.dart
+```
+
 ## Before upload run this
 
 ```bash
@@ -152,6 +177,7 @@ dart run tool/content_doctor.dart
 dart run tool/localization_doctor.dart
 dart run tool/google_play_release_doctor.dart
 dart run tool/print_google_play_commands.dart
+/usr/local/share/flutter/bin/dart run tool/apple_release_doctor.dart
 cd android && ./gradlew printAndroidReleaseInfo && cd ..
 /usr/local/share/flutter/bin/flutter build appbundle \
   --release \
@@ -194,6 +220,7 @@ See `docs/privacy/account_deletion_data_map.md` for the backend deletion scope.
 See `docs/play_store/android_permissions.md` for the Android permission audit.
 See `docs/play_store/play_console_copy.md` for Play Console copy-paste text.
 See `docs/play_store/final_submission_checklist.md` for the final submission checklist.
+See `docs/app_store/ios_release_checklist.md` for the iOS/TestFlight checklist.
 Public privacy URL: [https://ufficio-facile.vercel.app/privacy](https://ufficio-facile.vercel.app/privacy)
 Public account deletion URL: [https://ufficio-facile.vercel.app/account-deletion](https://ufficio-facile.vercel.app/account-deletion)
 

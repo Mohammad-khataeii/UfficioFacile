@@ -53,3 +53,4 @@ android/key.properties
 *.jks
 *.keystore
 upload-keystore.jks
+/ios/Flutter/AdMob.local.xcconfig

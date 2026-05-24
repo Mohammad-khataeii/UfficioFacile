@@ -99,7 +99,7 @@ void main() {
         ),
       );
 
-      expect(payload.keys.toSet(), consultancyRequestInsertColumns);
+      expect(payload.keys.toSet(), consultancyRequestLegacyInsertColumns);
       expect(payload['email'], 'sara@example.com');
       expect(payload['category'], 'taxes');
       expect(payload['subject'], 'Partita IVA setup');
@@ -143,6 +143,56 @@ void main() {
       expect(payload['is_premium_snapshot'], isFalse);
       expect(payload['payment_status'], 'pending');
       expect(payload['status'], 'waiting_user');
+    });
+
+    test('rich payload keeps full consultancy fields for upgraded schema', () {
+      final payload = toConsultancyRequestRichInsertPayload(
+        ConsultancyRequestRecord(
+          id: 'consultancy-3',
+          userId: 'user-3',
+          userEmail: 'mario@example.com',
+          fullName: 'Mario Rossi',
+          categoryId: 'rent',
+          subcategoryId: 'deposit',
+          problemType: 'Deposit dispute',
+          description: 'The landlord is refusing to return the deposit.',
+          desiredResult: 'Recover the deposit with the right documents.',
+          city: 'Roma',
+          region: 'Lazio',
+          documentsAvailable: 'Contract, bank transfer, messages',
+          attachmentUrls: const <String>['https://example.com/rent.pdf'],
+          userPlan: UfficioPlan.premiumMonthly.name,
+          paymentStatus: ConsultancyPaymentStatus.freeForPremium,
+          status: ConsultancyRequestStatus.newRequest,
+          sourcePage: '/life-admin/rent',
+          createdAt: DateTime.utc(2026, 5, 13),
+          updatedAt: DateTime.utc(2026, 5, 13),
+        ),
+      );
+
+      expect(payload.keys.toSet(), consultancyRequestRichInsertColumns);
+      expect(payload['user_email'], 'mario@example.com');
+      expect(payload['full_name'], 'Mario Rossi');
+      expect(payload['category_id'], 'rent');
+      expect(payload['subcategory_id'], 'deposit');
+      expect(payload['problem_type'], 'Deposit dispute');
+      expect(
+        payload['description'],
+        'The landlord is refusing to return the deposit.',
+      );
+      expect(
+        payload['desired_result'],
+        'Recover the deposit with the right documents.',
+      );
+      expect(
+        payload['documents_available'],
+        'Contract, bank transfer, messages',
+      );
+      expect(payload['attachment_urls'], hasLength(1));
+      expect(payload['user_plan'], 'pro');
+      expect(payload['payment_status'], 'freeForPremium');
+      expect(payload['status'], 'newRequest');
+      expect(payload['source_page'], '/life-admin/rent');
     });
   });
 

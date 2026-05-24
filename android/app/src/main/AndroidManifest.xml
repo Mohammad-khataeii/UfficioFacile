@@ -38,6 +38,15 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="ufficiofacile"
+                    android:host="life-admin"
+                    android:pathPrefix="/profile" />
+            </intent-filter>
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="ufficiofacile"
                     android:host="auth"
                     android:pathPrefix="/confirm-email" />
             </intent-filter>

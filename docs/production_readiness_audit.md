@@ -555,3 +555,70 @@ order by count(*) desc;
 - `supabase/migrations/20260512113000_harden_premium_server_truth.sql`
 - `test/service_intelligence_premium_test.dart`
 - `tool/localization_doctor.dart`
+
+## 2026-05-24: Consultancy fix, public deep-link update, icon refresh, and iOS parity pass
+
+### What changed
+
+- Fixed consultancy request compatibility so the Flutter app can save richer fields when the Supabase schema supports them, while still falling back safely to the legacy production schema when required.
+- Updated Flutter admin and Next.js admin consultancy views to display both the newer and legacy consultancy columns, so existing app submissions no longer appear blank in admin tables and detail screens.
+- Updated the public privacy and account-deletion pages to use the installed-app deep link `ufficiofacile://life-admin/profile` instead of broken web-only paths.
+- Replaced Android launcher icons, iOS app icons, and web manifest icons from the supplied `icon.png`.
+- Brought iOS repo identity closer to Android parity:
+  - final iOS bundle identifier is now `it.ufficiofacile.app`
+  - iOS app display name is now `UfficioFacile`
+  - the Google sample iOS AdMob app ID was removed from `Info.plist`
+  - `Info.plist` now uses `$(ADMOB_APPLICATION_ID_IOS)` with a local untracked xcconfig override path
+- Added iOS repo-side release support:
+  - `tool/apple_release_doctor.dart`
+  - `docs/app_store/ios_release_checklist.md`
+  - iOS build and verification guidance in `README.md` and `docs/deployment_production.md`
+
+### Commands run
+
+From repo root:
+
+- `dart format lib test tool`
+  - Result: passed
+- `flutter pub get`
+  - Result: passed
+- `flutter analyze`
+  - Result: passed
+- `flutter test`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/content_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/localization_doctor.dart`
+  - Result: passed
+- `/usr/local/share/flutter/bin/dart run tool/google_play_release_doctor.dart`
+  - Result: passed
+  - Warnings: `pubspec versionCode is still 1`, local `android/key.properties` exists and should remain untracked
+- `/usr/local/share/flutter/bin/dart run tool/apple_release_doctor.dart`
+  - Result: passed
+
+From `apps/admin`:
+
+- `npm run lint`
+  - Result: passed
+- `npm run build`
+  - Result: passed
+
+### Remaining manual steps
+
+- Deploy the updated `delete-account` Edge Function if the live project is not already running the latest version.
+- Test consultancy request submission against the real Supabase project and confirm the admin dashboard shows the expected name, topic, plan, and payment fields for new rows.
+- Deploy the updated Flutter web build so the public privacy and account-deletion pages use the new installed-app deep link.
+- Configure Apple signing and provisioning locally in Xcode for the `Runner` target.
+- If iOS ads are enabled later, create local untracked `ios/Flutter/AdMob.local.xcconfig` with the real iOS AdMob app ID.
+- Build a fresh Android AAB and a fresh iOS IPA because the app icons and public/deep-link-facing behavior changed.
+- Upload the new Android build to Internal Testing and the new iOS build to TestFlight.
+
+### Current status
+
+Repo-side work for this pass is complete and verified. The source tree is ready for:
+
+- a rebuilt Android Internal Testing artifact
+- a rebuilt iOS TestFlight/App Store artifact
+- deployment of the updated public privacy and account-deletion pages
+
+It is still not honest to call the mobile app fully production ready from inside the repository alone, because signing, store submission metadata, TestFlight/App Store Connect steps, Play Console steps, and live Supabase/Stripe verification remain manual.

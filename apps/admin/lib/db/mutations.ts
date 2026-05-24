@@ -549,13 +549,23 @@ export async function updateProblemRequest(formData: FormData) {
 export async function updateConsultancyRequest(formData: FormData) {
   const admin = await requireAdmin("requests.manage");
   const id = String(formData.get("id") ?? "");
+  const schemaMode = String(formData.get("schemaMode") ?? "rich");
   const payload = {
-    status: String(formData.get("status") ?? "newRequest"),
-    payment_status: String(formData.get("paymentStatus") ?? "paymentRequired"),
+    status: String(
+      formData.get("status") ?? (schemaMode === "legacy" ? "new" : "newRequest"),
+    ),
+    payment_status: String(
+      formData.get("paymentStatus") ??
+        (schemaMode === "legacy" ? "required" : "paymentRequired"),
+    ),
     admin_notes: String(formData.get("adminNotes") ?? ""),
-    response_notes: String(formData.get("responseNotes") ?? ""),
-    reviewed_by: admin.userId,
-    reviewed_at: new Date().toISOString(),
+    ...(schemaMode === "rich"
+      ? {
+          response_notes: String(formData.get("responseNotes") ?? ""),
+          reviewed_by: admin.userId,
+          reviewed_at: new Date().toISOString(),
+        }
+      : {}),
   };
 
   const { data: before } = await admin.supabase
