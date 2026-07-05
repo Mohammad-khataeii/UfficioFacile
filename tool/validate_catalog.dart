@@ -36,12 +36,16 @@ void main() {
 
   const forbiddenPhrases = <String>[
     'to help the user',
+    'this page helps',
+    'this section helps',
     'the user should',
     'internal note',
     'placeholder',
     'todo',
+    'do not show',
     'fake data',
     'lorem ipsum',
+    'snake_case',
     'do not route',
     'do not tell',
   ];
@@ -203,11 +207,176 @@ void main() {
           'digital_health_record',
           'asl_problems',
           'student_insurance',
+          'insurance_finder',
         };
         for (final required in requiredHealthSubcategories) {
           if (!subcategoryIds.contains(required)) {
             problems.add(
               '$relativePath health_asl is missing required subcategory `$required`',
+            );
+          }
+        }
+
+        for (final subcategory in healthSubcategories) {
+          final subcategoryId = '${subcategory['id'] ?? ''}';
+          final procedures =
+              (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[])
+                  .whereType<Map>()
+                  .map((item) => Map<String, dynamic>.from(item))
+                  .toList();
+          if (procedures.isEmpty) {
+            problems.add(
+              '$relativePath health_asl::$subcategoryId has no procedures',
+            );
+          }
+          for (final procedure in procedures) {
+            final procedureId = '${procedure['id'] ?? ''}';
+            _validateOfficialLinks(
+              problems,
+              relativePath: relativePath,
+              categoryId: 'health_asl',
+              subcategoryId: subcategoryId,
+              procedureId: procedureId,
+              procedure: procedure,
+            );
+          }
+        }
+      }
+    }
+
+    final housing = categories.cast<Map<String, dynamic>?>().firstWhere(
+      (category) => category?['id'] == 'housing_rent',
+      orElse: () => null,
+    );
+    if (housing == null) {
+      problems.add('$relativePath is missing housing_rent category');
+    } else {
+      final housingSubcategories =
+          (housing['subcategories'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map>()
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
+      if (housingSubcategories.isEmpty) {
+        problems.add('$relativePath housing_rent has no subcategories');
+      }
+      if (relativePath.contains('torino')) {
+        final subcategoryIds = housingSubcategories
+            .map((item) => '${item['id'] ?? ''}')
+            .toSet();
+        const requiredHousingSubcategories = <String>{
+          'understand_rent_contracts_italy',
+          'before_signing',
+          'contract_registration',
+          'change_contract',
+          'end_contract',
+          'deposit_handover',
+          'repairs_maintenance',
+          'expenses_bills',
+          'rent_delay_eviction',
+          'emergency_housing',
+          'student_rent',
+          'tenant_union_support',
+        };
+        for (final required in requiredHousingSubcategories) {
+          if (!subcategoryIds.contains(required)) {
+            problems.add(
+              '$relativePath housing_rent is missing required subcategory `$required`',
+            );
+          }
+        }
+
+        for (final subcategory in housingSubcategories) {
+          final subcategoryId = '${subcategory['id'] ?? ''}';
+          final procedures =
+              (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[])
+                  .whereType<Map>()
+                  .map((item) => Map<String, dynamic>.from(item))
+                  .toList();
+          if (procedures.isEmpty) {
+            problems.add(
+              '$relativePath housing_rent::$subcategoryId has no procedures',
+            );
+          }
+          for (final procedure in procedures) {
+            final procedureId = '${procedure['id'] ?? ''}';
+            _validateOfficialLinks(
+              problems,
+              relativePath: relativePath,
+              categoryId: 'housing_rent',
+              subcategoryId: subcategoryId,
+              procedureId: procedureId,
+              procedure: procedure,
+            );
+          }
+        }
+      }
+    }
+
+    final utilities = categories.cast<Map<String, dynamic>?>().firstWhere(
+      (category) => category?['id'] == 'utilities_electricity_gas',
+      orElse: () => null,
+    );
+    if (utilities == null) {
+      if (relativePath.contains('torino')) {
+        problems.add(
+          '$relativePath is missing utilities_electricity_gas category',
+        );
+      }
+    } else {
+      final utilitySubcategories =
+          (utilities['subcategories'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map>()
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
+      if (utilitySubcategories.isEmpty) {
+        problems.add(
+          '$relativePath utilities_electricity_gas has no subcategories',
+        );
+      }
+      if (relativePath.contains('torino')) {
+        final subcategoryIds = utilitySubcategories
+            .map((item) => '${item['id'] ?? ''}')
+            .toSet();
+        const requiredUtilitySubcategories = <String>{
+          'understand_bill_codes',
+          'move_in_activation',
+          'supplier_distributor_contacts',
+          'compare_switch_offers',
+          'high_wrong_bills',
+          'water_smat_torino',
+          'payments_refunds_bonus',
+          'emergencies_outages',
+          'complaints_conciliation',
+        };
+        for (final required in requiredUtilitySubcategories) {
+          if (!subcategoryIds.contains(required)) {
+            problems.add(
+              '$relativePath utilities_electricity_gas is missing required subcategory `$required`',
+            );
+          }
+        }
+
+        for (final subcategory in utilitySubcategories) {
+          final subcategoryId = '${subcategory['id'] ?? ''}';
+          final procedures =
+              (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[])
+                  .whereType<Map>()
+                  .map((item) => Map<String, dynamic>.from(item))
+                  .toList();
+          if (procedures.isEmpty) {
+            problems.add(
+              '$relativePath utilities_electricity_gas::$subcategoryId has no procedures',
+            );
+          }
+          for (final procedure in procedures) {
+            final procedureId = '${procedure['id'] ?? ''}';
+            _validateOfficialLinks(
+              problems,
+              relativePath: relativePath,
+              categoryId: 'utilities_electricity_gas',
+              subcategoryId: subcategoryId,
+              procedureId: procedureId,
+              procedure: procedure,
             );
           }
         }
@@ -267,6 +436,67 @@ void _checkLocalizedField(
     final text = value[language]?.toString().trim() ?? '';
     if (text.isEmpty) {
       problems.add('$id has empty $field for optional language `$language`');
+    }
+  }
+}
+
+void _validateOfficialLinks(
+  List<String> problems, {
+  required String relativePath,
+  required String categoryId,
+  required String subcategoryId,
+  required String procedureId,
+  required Map<String, dynamic> procedure,
+}) {
+  final officialLinks =
+      (procedure['officialLinks'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+  if (officialLinks.isEmpty) {
+    problems.add(
+      '$relativePath $categoryId::$subcategoryId::$procedureId has no official links',
+    );
+  }
+  for (final officialLink in officialLinks) {
+    _checkLocalizedField(
+      problems,
+      '$relativePath::$subcategoryId::$procedureId::officialLink',
+      'label',
+      officialLink['label'],
+    );
+    final url = '${officialLink['url'] ?? ''}'.trim();
+    if (url.isEmpty) {
+      problems.add(
+        '$relativePath $categoryId::$subcategoryId::$procedureId has an official link with empty url',
+      );
+    } else {
+      final uri = Uri.tryParse(url);
+      if (uri == null ||
+          !uri.hasScheme ||
+          uri.scheme != 'https' ||
+          uri.host.isEmpty ||
+          uri.host.contains('example') ||
+          uri.host.contains('localhost') ||
+          uri.path.trim().isEmpty ||
+          uri.path.trim() == '/') {
+        problems.add(
+          '$relativePath $categoryId::$subcategoryId::$procedureId has invalid official url `$url`',
+        );
+      }
+    }
+    for (final key in const <String>[
+      'owner',
+      'scope',
+      'usedFor',
+      'lastVerifiedAt',
+    ]) {
+      final value = '${officialLink[key] ?? ''}'.trim();
+      if (value.isEmpty) {
+        problems.add(
+          '$relativePath $categoryId::$subcategoryId::$procedureId official link is missing `$key`',
+        );
+      }
     }
   }
 }

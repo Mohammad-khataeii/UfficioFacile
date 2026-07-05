@@ -976,9 +976,11 @@ class UfficioPremiumEntitlementService {
     final now = DateTime.now();
     final start = entitlement.currentPeriodStart;
     if (start == null || start.year != now.year || start.month != now.month) {
+      // Treat the end as the first instant of the next month so the current
+      // month never expires at 00:00 on its last calendar day.
       return entitlement.copyWith(
         currentPeriodStart: DateTime(now.year, now.month),
-        currentPeriodEnd: DateTime(now.year, now.month + 1, 0),
+        currentPeriodEnd: DateTime(now.year, now.month + 1),
         generatedPacksUsedThisMonth: 0,
         problemRequestsUsedThisMonth: 0,
         consultancyRequestsUsedThisMonth: 0,

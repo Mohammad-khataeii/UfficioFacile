@@ -114,19 +114,79 @@ void main() {
     final subcategories = (health['subcategories'] as List<dynamic>)
         .whereType<Map>()
         .toList();
-    expect(subcategories.length, 7);
+    expect(subcategories.length, 8);
 
     final expectedCounts = <String, int>{
       'ssn_asl_access': 4,
-      'doctor_health_card': 4,
-      'bookings_prescriptions_cup': 2,
-      'ticket_exemptions': 2,
-      'digital_health_record': 1,
-      'asl_problems': 2,
-      'student_insurance': 1,
+      'doctor_health_card': 5,
+      'bookings_prescriptions_cup': 4,
+      'ticket_exemptions': 4,
+      'digital_health_record': 4,
+      'asl_problems': 4,
+      'student_insurance': 2,
+      'insurance_finder': 2,
     };
     for (final entry in expectedCounts.entries) {
       final subcategory = subcategories.firstWhere(
+        (item) => item['id'] == entry.key,
+      );
+      final procedures =
+          (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[]);
+      expect(procedures.length, entry.value, reason: entry.key);
+    }
+
+    final housing = runtimeCategories.firstWhere(
+      (item) => item['id'] == 'housing_rent',
+    );
+    final housingSubcategories = (housing['subcategories'] as List<dynamic>)
+        .whereType<Map>()
+        .toList();
+    expect(housingSubcategories.length, 12);
+
+    final expectedHousingCounts = <String, int>{
+      'understand_rent_contracts_italy': 3,
+      'before_signing': 2,
+      'contract_registration': 2,
+      'change_contract': 2,
+      'end_contract': 2,
+      'deposit_handover': 2,
+      'repairs_maintenance': 2,
+      'expenses_bills': 2,
+      'rent_delay_eviction': 3,
+      'emergency_housing': 2,
+      'student_rent': 2,
+      'tenant_union_support': 2,
+    };
+    for (final entry in expectedHousingCounts.entries) {
+      final subcategory = housingSubcategories.firstWhere(
+        (item) => item['id'] == entry.key,
+      );
+      final procedures =
+          (subcategory['procedures'] as List<dynamic>? ?? const <dynamic>[]);
+      expect(procedures.length, entry.value, reason: entry.key);
+    }
+
+    final utilities = runtimeCategories.firstWhere(
+      (item) => item['id'] == 'utilities_electricity_gas',
+    );
+    final utilitySubcategories = (utilities['subcategories'] as List<dynamic>)
+        .whereType<Map>()
+        .toList();
+    expect(utilitySubcategories.length, 9);
+
+    final expectedUtilityCounts = <String, int>{
+      'understand_bill_codes': 3,
+      'move_in_activation': 5,
+      'supplier_distributor_contacts': 2,
+      'compare_switch_offers': 3,
+      'high_wrong_bills': 3,
+      'water_smat_torino': 2,
+      'payments_refunds_bonus': 4,
+      'emergencies_outages': 2,
+      'complaints_conciliation': 2,
+    };
+    for (final entry in expectedUtilityCounts.entries) {
+      final subcategory = utilitySubcategories.firstWhere(
         (item) => item['id'] == entry.key,
       );
       final procedures =

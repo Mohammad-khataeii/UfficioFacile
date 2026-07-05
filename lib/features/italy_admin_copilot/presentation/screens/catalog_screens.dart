@@ -5,6 +5,7 @@ import '../../../../app/app_localizations.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../app/app_scope.dart';
 import '../../data/ufficio_city_registry.dart';
+import '../../domain/insurance_finder.dart';
 import '../../domain/ufficio_city.dart';
 import '../../domain/premium_config.dart';
 import '../../domain/ufficio_catalog.dart';
@@ -595,6 +596,7 @@ class CatalogProcedureScreen extends StatefulWidget {
 }
 
 class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
+  static const _insuranceFinderProcedureId = 'insurance_finder_tool';
   Future<UfficioProcedure?>? _procedureFuture;
   String? _resolvedCitySlug;
   ChangeNotifier? _profileListenable;
@@ -698,6 +700,15 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                     }
                     final access = accessSnapshot.data!;
                     final showLockedPremiumShell = !access.allowed;
+                    if (procedure.id == _insuranceFinderProcedureId) {
+                      return _InsuranceFinderProcedureScreen(
+                        procedure: procedure,
+                        category: category,
+                        subcategory: subcategory,
+                        access: access,
+                        showLockedPremiumShell: showLockedPremiumShell,
+                      );
+                    }
                     return ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
@@ -859,11 +870,10 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                                     fallback: item.url,
                                                   ),
                                                 ),
-                                                subtitle: ExternalValueText(
-                                                  item.url,
-                                                  kind:
-                                                      ExternalValueKind.website,
-                                                ),
+                                                subtitle:
+                                                    _CatalogOfficialLinkSubtitle(
+                                                      link: item,
+                                                    ),
                                               ),
                                             )
                                             .toList(),
@@ -900,6 +910,16 @@ class _CatalogProcedureScreenState extends State<CatalogProcedureScreen> {
                                     )
                                     .toList(),
                               ),
+                            ),
+                          ),
+                        ],
+                        if (!showLockedPremiumShell &&
+                            procedure.relatedProcedures.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _CatalogRelatedProceduresCard(
+                              categoryId: procedure.categoryId,
+                              relatedProcedures: procedure.relatedProcedures,
                             ),
                           ),
                         ],
@@ -1116,6 +1136,614 @@ class _CatalogSectionBody extends StatelessWidget {
       );
     }
     return Text(body);
+  }
+}
+
+class _CatalogOfficialLinkSubtitle extends StatelessWidget {
+  const _CatalogOfficialLinkSubtitle({required this.link});
+
+  final UfficioOfficialLink link;
+
+  @override
+  Widget build(BuildContext context) {
+    final usedFor = ufficioLocalizedValue(
+      link.usedFor,
+      context.l10n.languageCode,
+    ).trim();
+    final meta = <String>[
+      if (link.owner.trim().isNotEmpty) link.owner.trim(),
+      if (link.scope.trim().isNotEmpty) link.scope.trim(),
+      if (link.lastVerifiedAt.trim().isNotEmpty)
+        'Verified ${link.lastVerifiedAt.trim()}',
+    ].join(' · ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ExternalValueText(link.url, kind: ExternalValueKind.website),
+        if (usedFor.isNotEmpty) Text(usedFor),
+        if (meta.isNotEmpty) Text(meta),
+      ],
+    );
+  }
+}
+
+class _CatalogRelatedProceduresCard extends StatelessWidget {
+  const _CatalogRelatedProceduresCard({
+    required this.categoryId,
+    required this.relatedProcedures,
+  });
+
+  final String categoryId;
+  final List<UfficioRelatedProcedure> relatedProcedures;
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = AppScope.of(context);
+    return _CatalogSectionCard(
+      title: 'Related procedures',
+      child: FutureBuilder<UfficioCatalogLoadResult>(
+        future: scope.ufficioCatalogRepository.loadCatalogResult(
+          citySlug: UfficioCityRegistry.normalizeSlug(
+            scope.profileController.profile.selectedCityPackId,
+          ),
+        ),
+        builder: (context, snapshot) {
+          final catalog = snapshot.data?.catalog;
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: relatedProcedures.map((item) {
+              final targetCategoryId = item.categoryId.isNotEmpty
+                  ? item.categoryId
+                  : categoryId;
+              final targetSubcategoryId = item.subcategoryId.isNotEmpty
+                  ? item.subcategoryId
+                  : catalog?.findSubcategoryIdForProcedure(
+                          targetCategoryId,
+                          item.procedureId,
+                        ) ??
+                        '';
+              final label = ufficioLocalizedValue(
+                item.label,
+                context.l10n.languageCode,
+                fallback: item.procedureId,
+              );
+              return OutlinedButton(
+                onPressed: targetSubcategoryId.isEmpty
+                    ? null
+                    : () => Navigator.pushNamed(
+                        context,
+                        AppRoutes.catalogProcedure,
+                        arguments: CatalogProcedureRouteArgs(
+                          categoryId: targetCategoryId,
+                          subcategoryId: targetSubcategoryId,
+                          procedureId: item.procedureId,
+                        ),
+                      ),
+                child: Text(label),
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _InsuranceFinderProcedureScreen extends StatefulWidget {
+  const _InsuranceFinderProcedureScreen({
+    required this.procedure,
+    required this.category,
+    required this.subcategory,
+    required this.access,
+    required this.showLockedPremiumShell,
+  });
+
+  final UfficioProcedure procedure;
+  final UfficioCategory? category;
+  final UfficioSubcategory? subcategory;
+  final EntitlementDecision access;
+  final bool showLockedPremiumShell;
+
+  @override
+  State<_InsuranceFinderProcedureScreen> createState() =>
+      _InsuranceFinderProcedureScreenState();
+}
+
+class _InsuranceFinderProcedureScreenState
+    extends State<_InsuranceFinderProcedureScreen> {
+  String _citizenshipGroup = 'unknown';
+  String _status = 'student';
+  int _durationMonths = 12;
+  bool _needsPermessoSupport = true;
+  bool _needsEmergencyOnly = false;
+  bool _needsGpAccess = false;
+  bool _needsHospitalCoverage = true;
+  bool _needsSpecialistCoverage = true;
+  bool _needsMedicationCoverage = false;
+  bool _alreadyHasSsn = false;
+  bool _hasResidenza = false;
+  bool _hasDomicileInTorino = true;
+  final _ageController = TextEditingController();
+  final _budgetController = TextEditingController();
+  bool _submitting = false;
+  InsuranceSearchResult? _result;
+
+  @override
+  void dispose() {
+    _ageController.dispose();
+    _budgetController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _runSearch() async {
+    final scope = AppScope.of(context);
+    final languageCode = context.l10n.languageCode;
+    final entitlement = await scope.entitlementService.getCurrentEntitlement();
+    final betaMode = await scope.entitlementService.isBetaMode();
+    if (!betaMode && !entitlement.isProLike) {
+      if (!mounted) return;
+      await _showCatalogPremiumPaywall(
+        context,
+        featureLabel: 'Insurance Finder live comparison',
+        teaser: ufficioLocalizedValue(
+          widget.procedure.premiumTeaser,
+          context.l10n.languageCode,
+        ),
+      );
+      return;
+    }
+    setState(() => _submitting = true);
+    final result = await scope.insuranceFinderService.search(
+      InsuranceSearchInput(
+        city: 'Torino',
+        region: 'Piemonte',
+        citizenshipGroup: _citizenshipGroup,
+        status: _status,
+        durationMonths: _durationMonths,
+        needsPermessoSupport: _needsPermessoSupport,
+        needsEmergencyOnly: _needsEmergencyOnly,
+        needsGpAccess: _needsGpAccess,
+        needsHospitalCoverage: _needsHospitalCoverage,
+        needsSpecialistCoverage: _needsSpecialistCoverage,
+        needsMedicationCoverage: _needsMedicationCoverage,
+        languagePreference: languageCode,
+        alreadyHasSsn: _alreadyHasSsn,
+        hasResidenza: _hasResidenza,
+        hasDomicileInTorino: _hasDomicileInTorino,
+        age: int.tryParse(_ageController.text.trim()),
+        budgetMonthly: double.tryParse(_budgetController.text.trim()),
+      ),
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _result = result;
+      _submitting = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final procedure = widget.procedure;
+    final category = widget.category;
+    final subcategory = widget.subcategory;
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _CatalogHeaderCard(
+          title: ufficioLocalizedValue(
+            procedure.title,
+            context.l10n.languageCode,
+            fallback: procedure.id,
+          ),
+          description: ufficioLocalizedValue(
+            procedure.shortDescription,
+            context.l10n.languageCode,
+          ),
+          badge: context.l10n.t(
+            ((category?.isPremiumOnly ?? false) ||
+                    (subcategory?.isPremiumOnly ?? false) ||
+                    procedure.isPremiumOnly)
+                ? 'premium_plan_label'
+                : 'free_plan_label',
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Private insurance may not replace SSN/ASL registration for every situation. Check the policy documents and the requirement of your university, Questura, employer, or ASL before buying.',
+            ),
+          ),
+        ),
+        if (widget.showLockedPremiumShell) ...[
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.t('premium_locked_title'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    ufficioLocalizedValue(
+                      procedure.premiumTeaser.isNotEmpty
+                          ? procedure.premiumTeaser
+                          : procedure.shortDescription,
+                      context.l10n.languageCode,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(widget.access.reason),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, AppRoutes.plan),
+                    child: Text(context.l10n.t('upgrade_to_premium')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ] else ...[
+          ...procedure.sections.map(
+            (section) => Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: _CatalogSectionCard(
+                title: ufficioLocalizedValue(
+                  section.title,
+                  context.l10n.languageCode,
+                  fallback: section.key,
+                ),
+                child: _CatalogSectionBody(section: section),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _CatalogSectionCard(
+            title: 'Check if private insurance makes sense for you',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: _status,
+                  decoration: const InputDecoration(labelText: 'Your status'),
+                  items: const [
+                    DropdownMenuItem(value: 'student', child: Text('Student')),
+                    DropdownMenuItem(value: 'worker', child: Text('Worker')),
+                    DropdownMenuItem(
+                      value: 'waitingForSSN',
+                      child: Text('Waiting for SSN'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'noResidenza',
+                      child: Text('No residenza yet'),
+                    ),
+                    DropdownMenuItem(value: 'tourist', child: Text('Tourist')),
+                    DropdownMenuItem(
+                      value: 'family',
+                      child: Text('Family member'),
+                    ),
+                    DropdownMenuItem(value: 'other', child: Text('Other')),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _status = value ?? 'student'),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _citizenshipGroup,
+                  decoration: const InputDecoration(labelText: 'Citizenship'),
+                  items: const [
+                    DropdownMenuItem(value: 'unknown', child: Text('Not sure')),
+                    DropdownMenuItem(value: 'EU', child: Text('EU')),
+                    DropdownMenuItem(value: 'nonEU', child: Text('Non-EU')),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _citizenshipGroup = value ?? 'unknown'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _ageController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Age (optional)',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _budgetController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Monthly budget in EUR (optional)',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int>(
+                  initialValue: _durationMonths,
+                  decoration: const InputDecoration(
+                    labelText: 'Coverage length',
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 3, child: Text('3 months')),
+                    DropdownMenuItem(value: 6, child: Text('6 months')),
+                    DropdownMenuItem(value: 12, child: Text('12 months')),
+                    DropdownMenuItem(value: 24, child: Text('24 months')),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _durationMonths = value ?? 12),
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _needsPermessoSupport,
+                  onChanged: (value) =>
+                      setState(() => _needsPermessoSupport = value),
+                  title: const Text(
+                    'I need it for permesso / admin compliance',
+                  ),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _alreadyHasSsn,
+                  onChanged: (value) => setState(() => _alreadyHasSsn = value),
+                  title: const Text('I already have SSN / ASL registration'),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _hasResidenza,
+                  onChanged: (value) => setState(() => _hasResidenza = value),
+                  title: const Text('I have residenza in Torino'),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _hasDomicileInTorino,
+                  onChanged: (value) =>
+                      setState(() => _hasDomicileInTorino = value),
+                  title: const Text('I am domiciled in Torino'),
+                ),
+                const Divider(),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _needsEmergencyOnly,
+                  onChanged: (value) =>
+                      setState(() => _needsEmergencyOnly = value),
+                  title: const Text('I only need emergency-level coverage'),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _needsGpAccess,
+                  onChanged: (value) => setState(() => _needsGpAccess = value),
+                  title: const Text('I need access similar to a family doctor'),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _needsHospitalCoverage,
+                  onChanged: (value) =>
+                      setState(() => _needsHospitalCoverage = value),
+                  title: const Text('I need hospital coverage'),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _needsSpecialistCoverage,
+                  onChanged: (value) =>
+                      setState(() => _needsSpecialistCoverage = value),
+                  title: const Text('I need specialist visits'),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _needsMedicationCoverage,
+                  onChanged: (value) =>
+                      setState(() => _needsMedicationCoverage = value),
+                  title: const Text('I need medicine coverage'),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: _submitting ? null : _runSearch,
+                  icon: _submitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.search),
+                  label: const Text('Check live offers'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Static guidance is free. Live top-5 comparison is premium and can be unavailable if no verified provider source is configured.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          if (_result != null) ...[
+            const SizedBox(height: 12),
+            _CatalogSectionCard(
+              title: _result!.liveAvailable
+                  ? 'Live comparison results'
+                  : 'Live offers unavailable',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _result!.liveAvailable
+                        ? 'Retrieved ${_result!.retrievedAt.toLocal()}'
+                        : _result!.unavailableReason,
+                  ),
+                  const SizedBox(height: 8),
+                  ..._result!.warnings.map(
+                    (warning) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text('• $warning'),
+                    ),
+                  ),
+                  if (_result!.offers.isEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Text(
+                      'No current verified offers were returned. Use the official provider links below and verify the full policy wording before paying.',
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 12),
+                    ..._result!.offers.map(
+                      (offer) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${offer.providerName} — ${offer.productName}',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(offer.priceText),
+                                const SizedBox(height: 8),
+                                Text(offer.coverageSummary),
+                                if (offer.coverageItems.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  ...offer.coverageItems.map(
+                                    (item) => Text('• $item'),
+                                  ),
+                                ],
+                                if (offer.exclusions.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Main exclusions: ${offer.exclusions.join(', ')}',
+                                  ),
+                                ],
+                                const SizedBox(height: 8),
+                                Text('Best for: ${offer.suitableFor}'),
+                                Text('Avoid if: ${offer.notSuitableFor}'),
+                                Text(
+                                  'Admin usefulness: ${offer.adminUsefulness}',
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    if (offer.buyUrl.trim().isNotEmpty)
+                                      OutlinedButton(
+                                        onPressed: () =>
+                                            ExternalActionService.open(
+                                              context,
+                                              offer.buyUrl,
+                                              ExternalValueKind.website,
+                                            ),
+                                        child: const Text('Buy / apply'),
+                                      ),
+                                    if (offer.policyUrl.trim().isNotEmpty)
+                                      OutlinedButton(
+                                        onPressed: () =>
+                                            ExternalActionService.open(
+                                              context,
+                                              offer.policyUrl,
+                                              ExternalValueKind.website,
+                                            ),
+                                        child: const Text('Policy details'),
+                                      ),
+                                    if (offer.sourceUrl.trim().isNotEmpty)
+                                      TextButton(
+                                        onPressed: () =>
+                                            ExternalActionService.open(
+                                              context,
+                                              offer.sourceUrl,
+                                              ExternalValueKind.website,
+                                            ),
+                                        child: const Text('Source'),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (procedure.officialLinks.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _CatalogSectionCard(
+              title: context.l10n.t('official_links'),
+              child: Column(
+                children: procedure.officialLinks
+                    .where((item) => item.url.trim().isNotEmpty)
+                    .map(
+                      (item) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        onTap: () => ExternalActionService.open(
+                          context,
+                          item.url,
+                          ExternalValueKind.website,
+                        ),
+                        title: Text(
+                          ufficioLocalizedValue(
+                            item.label,
+                            context.l10n.languageCode,
+                            fallback: item.url,
+                          ),
+                        ),
+                        subtitle: _CatalogOfficialLinkSubtitle(link: item),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+          if (procedure.contacts.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _CatalogSectionCard(
+              title: context.l10n.t('contacts_directory'),
+              child: Column(
+                children: procedure.contacts
+                    .map(
+                      (item) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          ufficioLocalizedValue(
+                            item.label,
+                            context.l10n.languageCode,
+                            fallback: item.value,
+                          ),
+                        ),
+                        subtitle: ExternalValueText(
+                          item.value,
+                          kind: ExternalValueKind.auto,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+          if (procedure.relatedProcedures.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _CatalogRelatedProceduresCard(
+              categoryId: procedure.categoryId,
+              relatedProcedures: procedure.relatedProcedures,
+            ),
+          ],
+        ],
+      ],
+    );
   }
 }
 

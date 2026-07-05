@@ -335,6 +335,7 @@ class UfficioProcedure {
     required this.contacts,
     required this.warnings,
     required this.premiumTeaser,
+    this.relatedProcedures = const <UfficioRelatedProcedure>[],
   });
 
   final String id;
@@ -351,6 +352,7 @@ class UfficioProcedure {
   final List<UfficioContact> contacts;
   final UfficioLocalizedText warnings;
   final UfficioLocalizedText premiumTeaser;
+  final List<UfficioRelatedProcedure> relatedProcedures;
 
   bool get hasPremiumContent =>
       isPremiumOnly || sections.any((item) => item.isPremiumOnly);
@@ -407,6 +409,15 @@ class UfficioProcedure {
       premiumTeaser: ufficioLocalizedTextFromJson(
         json['premiumTeaser'] ?? json['premium_teaser'],
       ),
+      relatedProcedures:
+          (json['relatedProcedures'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map>()
+              .map(
+                (item) => UfficioRelatedProcedure.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList(),
     );
   }
 
@@ -425,6 +436,9 @@ class UfficioProcedure {
     'contacts': contacts.map((item) => item.toJson()).toList(),
     'warnings': warnings,
     'premiumTeaser': premiumTeaser,
+    'relatedProcedures': relatedProcedures
+        .map((item) => item.toJson())
+        .toList(),
   };
 }
 
@@ -483,23 +497,43 @@ class UfficioOfficialLink {
     required this.label,
     required this.url,
     required this.type,
+    this.owner = '',
+    this.scope = '',
+    this.usedFor = const <String, String>{},
+    this.lastVerifiedAt = '',
   });
 
   final UfficioLocalizedText label;
   final String url;
   final String type;
+  final String owner;
+  final String scope;
+  final UfficioLocalizedText usedFor;
+  final String lastVerifiedAt;
 
-  factory UfficioOfficialLink.fromJson(Map<String, dynamic> json) =>
-      UfficioOfficialLink(
-        label: ufficioLocalizedTextFromJson(json['label']),
-        url: json['url']?.toString() ?? '',
-        type: json['type']?.toString() ?? 'official',
-      );
+  factory UfficioOfficialLink.fromJson(
+    Map<String, dynamic> json,
+  ) => UfficioOfficialLink(
+    label: ufficioLocalizedTextFromJson(json['label']),
+    url: json['url']?.toString() ?? '',
+    type: json['type']?.toString() ?? 'official',
+    owner: json['owner']?.toString() ?? json['sourceOwner']?.toString() ?? '',
+    scope: json['scope']?.toString() ?? '',
+    usedFor: ufficioLocalizedTextFromJson(json['usedFor'] ?? json['used_for']),
+    lastVerifiedAt:
+        json['lastVerifiedAt']?.toString() ??
+        json['last_verified_at']?.toString() ??
+        '',
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'label': label,
     'url': url,
     'type': type,
+    'owner': owner,
+    'scope': scope,
+    'usedFor': usedFor,
+    'lastVerifiedAt': lastVerifiedAt,
   };
 }
 
@@ -528,5 +562,43 @@ class UfficioContact {
     'value': value,
     'type': type,
     'notes': notes,
+  };
+}
+
+class UfficioRelatedProcedure {
+  const UfficioRelatedProcedure({
+    required this.procedureId,
+    required this.label,
+    this.categoryId = '',
+    this.subcategoryId = '',
+  });
+
+  final String procedureId;
+  final UfficioLocalizedText label;
+  final String categoryId;
+  final String subcategoryId;
+
+  factory UfficioRelatedProcedure.fromJson(Map<String, dynamic> json) =>
+      UfficioRelatedProcedure(
+        procedureId:
+            json['procedureId']?.toString() ??
+            json['procedure_id']?.toString() ??
+            '',
+        label: ufficioLocalizedTextFromJson(json['label']),
+        categoryId:
+            json['categoryId']?.toString() ??
+            json['category_id']?.toString() ??
+            '',
+        subcategoryId:
+            json['subcategoryId']?.toString() ??
+            json['subcategory_id']?.toString() ??
+            '',
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'procedureId': procedureId,
+    'label': label,
+    'categoryId': categoryId,
+    'subcategoryId': subcategoryId,
   };
 }

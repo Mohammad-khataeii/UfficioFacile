@@ -28,6 +28,7 @@ import '../features/italy_admin_copilot/data/ads_service.dart';
 import '../features/italy_admin_copilot/data/bundled_catalog_repository.dart';
 import '../features/italy_admin_copilot/data/connected_product_data.dart';
 import '../features/italy_admin_copilot/data/hybrid_catalog_repository.dart';
+import '../features/italy_admin_copilot/data/insurance_finder_service.dart';
 import '../features/italy_admin_copilot/data/local_admin_config_repository.dart';
 import '../features/italy_admin_copilot/data/local_analytics_service.dart';
 import '../features/italy_admin_copilot/data/local_draft_repository.dart';
@@ -113,6 +114,7 @@ class AppScope extends InheritedWidget {
     telegramHandoffService = TelegramHandoffService();
     officialLinksDirectoryService = OfficialLinksDirectoryService();
     localizationInspectorService = LocalizationInspectorService();
+    insuranceFinderService = InsuranceFinderService(config: config);
     authFacade = UfficcioAuthFacade(config);
     adminRepository =
         config.isSupabaseEnabled && SupabaseBootstrap.client != null
@@ -292,6 +294,7 @@ class AppScope extends InheritedWidget {
   late final TelegramHandoffService telegramHandoffService;
   late final OfficialLinksDirectoryService officialLinksDirectoryService;
   late final LocalizationInspectorService localizationInspectorService;
+  late final InsuranceFinderService insuranceFinderService;
   late final BundledCatalogRepository bundledCatalogRepository;
   late final HybridCatalogRepository catalogRepository;
   late final UfficioCatalogRepository ufficioCatalogRepository;

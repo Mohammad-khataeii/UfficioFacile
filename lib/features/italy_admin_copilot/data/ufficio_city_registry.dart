@@ -63,7 +63,7 @@ class UfficioCityRegistry {
     final slug = normalizeSlug(raw);
     final primary = cityCatalogAssetPath(slug);
     if (slug == 'torino') {
-      return <String>[primary, legacyTorinoCatalogAsset];
+      return <String>[legacyTorinoCatalogAsset, primary];
     }
     return <String>[primary];
   }

@@ -10,15 +10,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('city registry', () {
-    test('torino prefers city-specific asset and keeps legacy fallback', () {
-      expect(
-        UfficioCityRegistry.bundledAssetCandidates('torino'),
-        const <String>[
-          'assets/catalog/ufficio_catalog.torino.v1.json',
-          'assets/catalog/ufficio_catalog.v1.json',
-        ],
-      );
-    });
+    test(
+      'torino points to the legacy catalog first and keeps the city file as fallback',
+      () {
+        expect(
+          UfficioCityRegistry.bundledAssetCandidates('torino'),
+          const <String>[
+            'assets/catalog/ufficio_catalog.v1.json',
+            'assets/catalog/ufficio_catalog.torino.v1.json',
+          ],
+        );
+      },
+    );
 
     test('milano never falls back to torino asset', () {
       expect(
@@ -69,18 +72,12 @@ void main() {
       selectedCitySlugLoader: () async => 'torino',
     );
 
-    test('torino loads the existing bundled catalog', () async {
+    test('torino loads the legacy bundled catalog first', () async {
       final result = await repository.loadCatalogResult(citySlug: 'torino');
       expect(result.isSuccess, isTrue);
       expect(result.catalog, isNotNull);
       expect(result.catalog!.categories, isNotEmpty);
-      expect(
-        result.assetPath,
-        anyOf(
-          'assets/catalog/ufficio_catalog.torino.v1.json',
-          'assets/catalog/ufficio_catalog.v1.json',
-        ),
-      );
+      expect(result.assetPath, 'assets/catalog/ufficio_catalog.v1.json');
     });
 
     test('milano never falls back to torino data', () async {

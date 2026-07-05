@@ -257,11 +257,13 @@ Map<String, dynamic> _canonicalProcedureToCmsSeedJson({
         'which_bonus_to_check' => 'bonus_finder',
         'loan_comparison' => 'loan_comparison',
         'loan_comparison_checklist' => 'loan_comparison',
+        'insurance_finder_tool' => 'insurance_finder',
         _ => null,
       } ??
       switch (canonicalSubcategoryId) {
         'bonus_finder' => 'bonus_finder',
         'compare_loans_safely' => 'loan_comparison',
+        'insurance_finder' => 'insurance_finder',
         _ => null,
       };
 

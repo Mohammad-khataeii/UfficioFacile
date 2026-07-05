@@ -7,6 +7,11 @@ void main() {
   group('UfficioCatalog parsing', () {
     test('parses category, subcategory, and procedure structure', () {
       final catalog = UfficioCatalog.fromJson(_sampleCatalogJson);
+      final procedure = catalog.findProcedure(
+        'health_asl',
+        'doctor_health_card',
+        'change_doctor',
+      )!;
 
       expect(catalog.version, 1);
       expect(catalog.categories, hasLength(1));
@@ -15,13 +20,16 @@ void main() {
         catalog.findSubcategory('health_asl', 'doctor_health_card'),
         isNotNull,
       );
+      expect(procedure, isNotNull);
+      expect(procedure.officialLinks.single.owner, 'ASL Citta di Torino');
+      expect(procedure.officialLinks.single.scope, 'Torino');
       expect(
-        catalog.findProcedure(
-          'health_asl',
-          'doctor_health_card',
-          'change_doctor',
-        ),
-        isNotNull,
+        resolveLocalizedText(procedure.officialLinks.single.usedFor, 'en'),
+        'Doctor choice',
+      );
+      expect(
+        procedure.relatedProcedures.single.procedureId,
+        'register_with_ssn',
       );
     });
 
@@ -119,8 +127,32 @@ const _sampleCatalogJson = <String, dynamic>{
                   'isPremiumOnly': true,
                 },
               ],
-              'officialLinks': <Map<String, dynamic>>[],
+              'officialLinks': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'label': <String, String>{
+                    'en': 'ASL Torino doctor choice',
+                    'it': 'ASL Torino scelta medico',
+                  },
+                  'url': 'https://www.aslcittaditorino.it/doctor-choice',
+                  'type': 'official',
+                  'owner': 'ASL Citta di Torino',
+                  'scope': 'Torino',
+                  'usedFor': 'Doctor choice',
+                  'lastVerifiedAt': '2026-05-25',
+                },
+              ],
               'contacts': <Map<String, dynamic>>[],
+              'relatedProcedures': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'title': <String, String>{
+                    'en': 'Register with SSN',
+                    'it': 'Iscriviti al SSN',
+                  },
+                  'categoryId': 'health_asl',
+                  'subcategoryId': 'ssn_asl_access',
+                  'procedureId': 'register_with_ssn',
+                },
+              ],
               'warnings': <String, String>{
                 'en':
                     'Always verify the official portal before sending documents.',

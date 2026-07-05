@@ -50,27 +50,23 @@ void main() {
         expect(procedure, isNotNull);
         final sections = procedure!.sections;
         expect(
+          sections.where((section) => section.title['en'] == 'Use this when'),
+          hasLength(1),
+        );
+        expect(
           sections.where(
-            (section) => section.title['en'] == 'What STP and ENI mean',
+            (section) => section.title['en'] == 'Bring these documents',
           ),
           hasLength(1),
         );
         expect(
           sections.where(
-            (section) => section.title['en'] == 'Care normally covered',
+            (section) => section.title['en'] == 'What this route can cover',
           ),
           hasLength(1),
         );
         expect(
-          sections.where(
-            (section) => section.title['en'] == 'Step-by-step in Torino',
-          ),
-          hasLength(1),
-        );
-        expect(
-          sections.where(
-            (section) => section.title['en'] == 'Where to go in Torino',
-          ),
+          sections.where((section) => section.title['en'] == 'Common mistake'),
           hasLength(1),
         );
 
@@ -93,21 +89,19 @@ void main() {
         expect(procedure, isNotNull);
         final sections = procedure!.sections;
         expect(
-          sections.where((section) => section.title['en'] == 'What it is'),
-          hasLength(1),
-        );
-        expect(
-          sections.where((section) => section.title['en'] == 'Legal limit'),
-          hasLength(1),
-        );
-        expect(
-          sections.where((section) => section.title['en'] == 'Proof to keep'),
+          sections.where(
+            (section) => section.title['en'] == 'Before you leave',
+          ),
           hasLength(1),
         );
         expect(
           sections.where(
-            (section) => section.title['en'] == 'How to request it',
+            (section) => section.title['en'] == 'If the landlord delays',
           ),
+          hasLength(1),
+        );
+        expect(
+          sections.where((section) => section.title['en'] == 'Premium help'),
           hasLength(1),
         );
 
@@ -116,5 +110,29 @@ void main() {
         expect(procedure.contacts, isNotEmpty);
       },
     );
+
+    test('repository keeps Torino utilities sections once', () async {
+      final procedure = await _repository().loadProcedureDetail(
+        categoryId: 'utilities_electricity_gas',
+        subcategoryId: 'high_wrong_bills',
+        procedureId: 'wrong_water_bill_or_hidden_leak',
+      );
+
+      expect(procedure, isNotNull);
+      final sections = procedure!.sections;
+      expect(
+        sections.where((section) => section.title['en'] == 'Do this fast'),
+        hasLength(1),
+      );
+      expect(
+        sections.where((section) => section.title['en'] == 'Important limit'),
+        hasLength(1),
+      );
+
+      final fingerprints = sections.map(_sectionFingerprint).toList();
+      expect(fingerprints.toSet().length, fingerprints.length);
+      expect(procedure.officialLinks, isNotEmpty);
+      expect(procedure.contacts, isNotEmpty);
+    });
   });
 }
