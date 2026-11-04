@@ -22,5 +22,11 @@
   "contentRating": "PEGI 3 / ESRB Everyone; In-App Purchases",
   "healthDeclaration": "Healthcare services and management",
   "financialDeclaration": "Other; Rewards, points, frequent flier miles and other incentives",
-  "reviewStatus": "Checking Publishing overview"
+  "reviewStatus": "Saved; Send app for review is disabled until the remaining closed-test setup is completed",
+  "remainingClosedTestSteps": [
+    "Select testers",
+    "Preview and confirm draft release",
+    "Send app for review",
+    "At least 12 testers opted in for 14 continuous days"
+  ]
 }

@@ -15,7 +15,7 @@ Updated: 4 November 2026.
 - Financial: **Other** for expense/bill tools and educational guidance; **Rewards, points and other incentives** for Premium referral rewards.
 - Category: **App → Productivity**.
 - Contact: **info@artavasystems.com**, **https://www.artavasystems.com**.
-- English and Italian store descriptions, icon, feature graphics and real Android screenshots prepared in this directory.
+- English and Italian store descriptions, icon, feature graphics and two real Android screenshots per language committed to Google Play.
 
 ## Public links
 
@@ -33,6 +33,8 @@ Site source: https://github.com/Mohammad-khataeii/UfficioFacile/tree/main/public
 2. Open **Actioned** to see the saved forms.
 3. Open **Grow users → Store presence → Store listings** to see the English and Italian listings.
 4. Open **Publishing overview** to see whether changes are saved, in review or published.
+
+All requested setup forms are saved. App content says **You’re all caught up**. Changes are **not yet submitted for review**: Google requires the remaining closed-test steps below first.
 
 ## Publish the closed test
 
