@@ -8,5 +8,32 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/privacy",
+      "destination": "https://ufficiofacile-info.vercel.app/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/ufficio/privacy",
+      "destination": "https://ufficiofacile-info.vercel.app/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/ufficcio/privacy",
+      "destination": "https://ufficiofacile-info.vercel.app/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/life-admin/privacy",
+      "destination": "https://ufficiofacile-info.vercel.app/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/account-deletion",
+      "destination": "https://ufficiofacile-info.vercel.app/account-deletion",
+      "permanent": true
+    }
   ]
 }
